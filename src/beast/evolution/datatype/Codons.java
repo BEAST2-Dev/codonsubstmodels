@@ -303,11 +303,7 @@ public class Codons extends DataType.Base {
 	 *		3: non-synonymous transition
 	 *		4: non-synonymous transversion
 	 */
-	public static byte[] constructRateMap(int rateCount,
-                                          int stateCount,
-                                          Codons codonDataType,
-                                          GeneticCode geneticCode)
-	{
+	public static byte[] constructRateMap(int rateCount, int stateCount, Codons codonDataType, GeneticCode geneticCode)	{
 		int u, v, i1, j1, k1, i2, j2, k2;
 		byte rateClass;
 		int[] codon;

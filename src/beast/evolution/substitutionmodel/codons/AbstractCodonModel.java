@@ -46,9 +46,6 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     protected Codons codonDataType;
     protected GeneticCode geneticCode;
 
-    protected int rateCount;
-
-
     @Override
     public void initAndValidate() {
         super.initAndValidate();
@@ -62,8 +59,6 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
         this.codonDataType = (Codons) dataType;
         this.geneticCode = codonDataType.getGeneticCode();
-
-        rateCount = ratesInput.get().getDimension();
 
         constructRateMap();
 
@@ -85,8 +80,6 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 //    }
 
 
-    abstract protected void setupRelativeRates(double[] rates);
-
     /**
      * Construct a map of the rate classes in the rate matrix using the current
      * genetic code. Classes:
@@ -97,6 +90,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
      * 4: non-synonymous transversion
      */
     protected void constructRateMap() {
+        int rateCount = ratesInput.get().getDimension();
         // Refactored into static function, since CodonProductChains need this functionality
         rateMap = Codons.constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
     }
