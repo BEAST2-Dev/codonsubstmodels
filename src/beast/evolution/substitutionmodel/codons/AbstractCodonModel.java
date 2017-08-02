@@ -28,7 +28,7 @@ package beast.evolution.substitutionmodel.codons;
 
 import beast.core.Description;
 import beast.evolution.alignment.Alignment;
-import beast.evolution.datatype.Codons;
+import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.Frequencies;
@@ -43,41 +43,41 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
     protected byte[] rateMap;
 
-    protected Codons codonDataType;
+    protected Codon codonDataType;
     protected GeneticCode geneticCode;
+
+//    public AbstractCodonModel() {
+//        ratesInput.setRule(Input.Validate.OPTIONAL);
+//        try {
+//            ratesInput.setValue(null, this);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            // TODO: handle exception
+//        }
+//    }
 
     @Override
     public void initAndValidate() {
         super.initAndValidate();
 
+//        if (ratesInput.get() != null) {
+//            throw new IllegalArgumentException("The rates attribute should not be used !");
+//        }
+
         Frequencies frequencies = frequenciesInput.get();
         Alignment alignment = frequencies.dataInput.get();
         DataType dataType = alignment.getDataType();
 
-        if (! (dataType instanceof Codons) )
-            throw new IllegalArgumentException("Codons data type is required in the frequencies !");
+        if (! (dataType instanceof Codon) )
+            throw new IllegalArgumentException("Codon data type is required in the frequencies !");
 
-        this.codonDataType = (Codons) dataType;
+        this.codonDataType = (Codon) dataType;
         this.geneticCode = codonDataType.getGeneticCode();
 
         constructRateMap();
 
         updateMatrix = true;
     }
-
-    
-//    public AbstractCodonModel(String name, Codons codonDataType, Frequencies freqModel, EigenSystem eigenSystem) {
-//    	super(name, codonDataType, freqModel, eigenSystem);
-//
-//    	this.codonDataType = codonDataType;
-//        this.geneticCode = codonDataType.getGeneticCode();
-//
-//        rateCount = ratesInput.get().getDimension();
-//
-//        constructRateMap();
-//
-//        updateMatrix = true;
-//    }
 
 
     /**
@@ -92,7 +92,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     protected void constructRateMap() {
         int rateCount = ratesInput.get().getDimension();
         // Refactored into static function, since CodonProductChains need this functionality
-        rateMap = Codons.constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
+        rateMap = Codon.constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
     }
 
 //    public void printRateMap() {

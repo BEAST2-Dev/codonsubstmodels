@@ -30,18 +30,18 @@ import beast.core.Input;
 /**
  * Implements DataType for codons
  * <p/>
- * Codons have tree different representations:
+ * Codon have tree different representations:
  * State numbers - 0-63 + 64, 65 as unknown and gap
  * State chars - the above converted into chars, starting at 'A'
  * and '?' + '-' for unknown and gap
  * Strings or chars of three nucleotide characters
  *
- * Imported from BEAST 1.
+ * Modified from BEAST 1 Codon.
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
  */
-public class Codons extends DataType.Base {
+public class Codon extends DataType.Base {
 
     final public Input<GeneticCode> geneticCodeInput =
             new Input<>("geneticCode", "The rule to define how sequences of nucleotide triplets, " +
@@ -49,21 +49,21 @@ public class Codons extends DataType.Base {
                     GeneticCode.UNIVERSAL, Input.Validate.REQUIRED);
 
 
-    public static final Codons UNIVERSAL = new Codons(GeneticCode.UNIVERSAL);
-    public static final Codons VERTEBRATE_MT = new Codons(GeneticCode.VERTEBRATE_MT);
-    public static final Codons YEAST = new Codons(GeneticCode.YEAST);
-    public static final Codons MOLD_PROTOZOAN_MT = new Codons(GeneticCode.MOLD_PROTOZOAN_MT);
-    public static final Codons MYCOPLASMA = new Codons(GeneticCode.MYCOPLASMA);
-    public static final Codons INVERTEBRATE_MT = new Codons(GeneticCode.INVERTEBRATE_MT);
-    public static final Codons CILIATE = new Codons(GeneticCode.CILIATE);
-    public static final Codons ECHINODERM_MT = new Codons(GeneticCode.ECHINODERM_MT);
-    public static final Codons EUPLOTID_NUC = new Codons(GeneticCode.EUPLOTID_NUC);
-    public static final Codons BACTERIAL = new Codons(GeneticCode.BACTERIAL);
-    public static final Codons ALT_YEAST = new Codons(GeneticCode.ALT_YEAST);
-    public static final Codons ASCIDIAN_MT = new Codons(GeneticCode.ASCIDIAN_MT);
-    public static final Codons FLATWORM_MT = new Codons(GeneticCode.FLATWORM_MT);
-    public static final Codons BLEPHARISMA_NUC = new Codons(GeneticCode.BLEPHARISMA_NUC);
-    public static final Codons NO_STOPS = new Codons(GeneticCode.NO_STOPS);
+    public static final Codon UNIVERSAL = new Codon(GeneticCode.UNIVERSAL);
+    public static final Codon VERTEBRATE_MT = new Codon(GeneticCode.VERTEBRATE_MT);
+    public static final Codon YEAST = new Codon(GeneticCode.YEAST);
+    public static final Codon MOLD_PROTOZOAN_MT = new Codon(GeneticCode.MOLD_PROTOZOAN_MT);
+    public static final Codon MYCOPLASMA = new Codon(GeneticCode.MYCOPLASMA);
+    public static final Codon INVERTEBRATE_MT = new Codon(GeneticCode.INVERTEBRATE_MT);
+    public static final Codon CILIATE = new Codon(GeneticCode.CILIATE);
+    public static final Codon ECHINODERM_MT = new Codon(GeneticCode.ECHINODERM_MT);
+    public static final Codon EUPLOTID_NUC = new Codon(GeneticCode.EUPLOTID_NUC);
+    public static final Codon BACTERIAL = new Codon(GeneticCode.BACTERIAL);
+    public static final Codon ALT_YEAST = new Codon(GeneticCode.ALT_YEAST);
+    public static final Codon ASCIDIAN_MT = new Codon(GeneticCode.ASCIDIAN_MT);
+    public static final Codon FLATWORM_MT = new Codon(GeneticCode.FLATWORM_MT);
+    public static final Codon BLEPHARISMA_NUC = new Codon(GeneticCode.BLEPHARISMA_NUC);
+    public static final Codon NO_STOPS = new Codon(GeneticCode.NO_STOPS);
 
     public static final int UNKNOWN_STATE = 64;
     public static final int GAP_STATE = 65;
@@ -92,15 +92,18 @@ public class Codons extends DataType.Base {
     @Override
     public void initAndValidate() {
         GeneticCode geneticCode = geneticCodeInput.get();
-        new Codons(geneticCode);
+        new Codon(geneticCode);
     }
 
     // only for stateMap
     protected int ambiguousStateCount;
-    /**
-     * constructors
-     */
-    public Codons(GeneticCode geneticCode) {
+
+    // need this constructor to pass Input validation
+    public Codon() {
+        initAndValidate();
+    }
+
+    public Codon(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
         stateCount = 64 - geneticCode.getStopCodonCount();
@@ -199,7 +202,7 @@ public class Codons extends DataType.Base {
      *              return corresponding character
      */
     public final char getChar(int state) {
-        throw new IllegalArgumentException("Codons datatype cannot be expressed as char");
+        throw new IllegalArgumentException("Codon datatype cannot be expressed as char");
     }
 
     /**
@@ -248,7 +251,7 @@ public class Codons extends DataType.Base {
         return geneticCode.isStopCodon(stateMap[state]);
     }
 
-    public static byte[] constructRateMap(Codons codonDataType) {
+    public static byte[] constructRateMap(Codon codonDataType) {
         final int stateCount = codonDataType.getStateCount();
         final int rateCount = (stateCount * (stateCount - 1)) / 2;
         return constructRateMap(rateCount, stateCount, codonDataType, codonDataType.getGeneticCode());
@@ -258,40 +261,40 @@ public class Codons extends DataType.Base {
     /**
      * Parse a text string to return a genetic code
      */
-    public static Codons findByName(String codeStr) {
-        Codons codons = null;
+    public static Codon findByName(String codeStr) {
+        Codon codon = null;
         if (codeStr.equals(GeneticCode.UNIVERSAL.getName())) {
-            codons = Codons.UNIVERSAL;
+            codon = Codon.UNIVERSAL;
         } else if (codeStr.equals(GeneticCode.VERTEBRATE_MT.getName())) {
-            codons = Codons.VERTEBRATE_MT;
+            codon = Codon.VERTEBRATE_MT;
         } else if (codeStr.equals(GeneticCode.YEAST.getName())) {
-            codons = Codons.YEAST;
+            codon = Codon.YEAST;
         } else if (codeStr.equals(GeneticCode.MOLD_PROTOZOAN_MT.getName())) {
-            codons = Codons.MOLD_PROTOZOAN_MT;
+            codon = Codon.MOLD_PROTOZOAN_MT;
         } else if (codeStr.equals(GeneticCode.INVERTEBRATE_MT.getName())) {
-            codons = Codons.INVERTEBRATE_MT;
+            codon = Codon.INVERTEBRATE_MT;
         } else if (codeStr.equals(GeneticCode.CILIATE.getName())) {
-            codons = Codons.CILIATE;
+            codon = Codon.CILIATE;
         } else if (codeStr.equals(GeneticCode.ECHINODERM_MT.getName())) {
-            codons = Codons.ECHINODERM_MT;
+            codon = Codon.ECHINODERM_MT;
         } else if (codeStr.equals(GeneticCode.EUPLOTID_NUC.getName())) {
-            codons = Codons.EUPLOTID_NUC;
+            codon = Codon.EUPLOTID_NUC;
         } else if (codeStr.equals(GeneticCode.BACTERIAL.getName())) {
-            codons = Codons.BACTERIAL;
+            codon = Codon.BACTERIAL;
         } else if (codeStr.equals(GeneticCode.ALT_YEAST.getName())) {
-            codons = Codons.ALT_YEAST;
+            codon = Codon.ALT_YEAST;
         } else if (codeStr.equals(GeneticCode.ASCIDIAN_MT.getName())) {
-            codons = Codons.ASCIDIAN_MT;
+            codon = Codon.ASCIDIAN_MT;
         } else if (codeStr.equals(GeneticCode.FLATWORM_MT.getName())) {
-            codons = Codons.FLATWORM_MT;
+            codon = Codon.FLATWORM_MT;
         } else if (codeStr.equals(GeneticCode.BLEPHARISMA_NUC.getName())) {
-            codons = Codons.BLEPHARISMA_NUC;
+            codon = Codon.BLEPHARISMA_NUC;
         } else if (codeStr.equals(GeneticCode.NO_STOPS.getName())) {
-            codons = Codons.NO_STOPS;
+            codon = Codon.NO_STOPS;
         } else {
             throw new RuntimeException("Unknown genetics code");
         }
-        return codons;
+        return codon;
     }
 
     /**
@@ -303,7 +306,7 @@ public class Codons extends DataType.Base {
 	 *		3: non-synonymous transition
 	 *		4: non-synonymous transversion
 	 */
-	public static byte[] constructRateMap(int rateCount, int stateCount, Codons codonDataType, GeneticCode geneticCode)	{
+	public static byte[] constructRateMap(int rateCount, int stateCount, Codon codonDataType, GeneticCode geneticCode)	{
 		int u, v, i1, j1, k1, i2, j2, k2;
 		byte rateClass;
 		int[] codon;

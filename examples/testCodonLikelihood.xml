@@ -1,6 +1,6 @@
-<beast version='2.0' namespace='beast.evolution.alignment:beast.core:beast.evolution.tree.coalescent:
+<beast version="2.0" namespace="beast.evolution.alignment:beast.core:beast.evolution.tree.coalescent:
                                 beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
-                                beast.evolution.substitutionmodel:beast.evolution.likelihood'>
+                                beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
 	<!-- ntax=6                                                                  -->
     <!--<taxon id="Human_Horai"/>-->
@@ -1101,67 +1101,51 @@
 		</sequence>
 	</data>
 
-    <data data="@alignment" dataType="codon" geneticCode="universal"/>
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="universal" spec="ConvertAlignment"/>
+
+    <tree spec="beast.util.TreeParser" id="tree"
+          newick="((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462, Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768)"
+          IsLabelledNewick="true"/>
+
+    <parameter id="m0.omega" value="1.414"/>
+    <parameter id="m0.kappa" value="1.234567"/>
+    <parameter id="m0.rates" value="1"/>
+    <parameter id="codon.freqs" value="0" dimension="61"/>
+
+    <input spec="beast.evolution.substitutionmodel.codon.M0CodonModel" id="m0">
+        <omega idref="m0.omega"/>
+        <kappa idref="m0.kappa"/>
+        <rates idref="m0.rates"/>
+        <frequencies id="m0.freqs" spec="Frequencies">
+            <data idref="codon.alignment"/>
+            <!--<frequencies idref="codon.freqs"/>-->
+        </frequencies>
+    </input>
+
+    <!-- site model                                                              -->
+    <input spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+        <!--
+            <parameter name="shape" id="shape" value="0.5"/>
+            <parameter name="proportionInvariant" id="propInvar" value="0.2"/>
+        -->
+        <substModel idref="m0"/>
+    </input>
+
+    <input spec="TreeLikelihood" id="treeLikelihood">
+        <input name="data" idref="codon.alignment"/>
+        <input name="tree" idref="tree"/>
+        <input name="siteModel" idref="siteModel"/>
+    </input>
 
 
+    <run spec="DirectSimulator" nSamples="1">
+        <distribution id="likelihood" idref="treeLikelihood"/>
 
-    
-    <newick id="treeML">
-        ((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462, Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768);
-    </newick>
+        <logger>
+            <log idref="tree"/>
+            <log idref="likelihood"/>
+            <log idref="codon.freqs"/>
+        </logger>
+    </run>
 
-	<treeModel id="treeModel1">
-		<tree idref="treeML"/>
-		<rootHeight>
-			<parameter id="treeModel1.rootHeight"/>
-		</rootHeight>
-		<nodeHeights internalNodes="true">
-			<parameter id="treeModel1.internalNodeHeights"/>
-		</nodeHeights>
-		<nodeHeights internalNodes="true" rootNode="true">
-			<parameter id="treeModel1.allInternalNodeHeights"/>
-		</nodeHeights>
-	</treeModel>
-
-
-    <report>
-        Newick Tree: <tree idref="treeML"/>
-    </report>
-
-     <yangCodonModel id="yang" geneticCode="universal">
-        <omega>
-            <parameter id="omega" value="1.414"/>
-        </omega>
-        <kappa>
-            <parameter id="kappa" value="1.234567"/>
-        </kappa>
-        <frequencyModel id="freqmodel" dataType="codon-universal">
-            <alignment idref="codonAlignment"/>
-            <frequencies>
-                <parameter id="codonfrequencies" dimension="61"/>
-            </frequencies>
-        </frequencyModel>
-    </yangCodonModel>
-
-	<siteModel id="siteModel1">
-		<substitutionModel>
-			<yangCodonModel idref="yang"/>
-		</substitutionModel>
-		<mutationRate>
-			<parameter id="siteModel1.mu" value="1.0" lower="0.0"/>
-		</mutationRate>
-	</siteModel>
-
-	<treeLikelihood id="treeLikelihood1">
-		<patterns idref="patterns1"/>
-		<treeModel idref="treeModel1"/>
-		<siteModel idref="siteModel1"/>
-	</treeLikelihood>
-
-	<report>
-		Yang Vertebrates:
-		ln L = <likelihood idref="treeLikelihood1"/>
-		(codonml = -XXXX.XX)
-	</report>
-    
 </beast>

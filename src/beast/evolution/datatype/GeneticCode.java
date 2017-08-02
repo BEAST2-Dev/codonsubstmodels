@@ -29,17 +29,19 @@ package beast.evolution.datatype;
 import beast.core.Description;
 
 /**
- * A set of standard genetic codes. Imported from BEAST 1.
+ * A set of standard genetic codes.
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
+ *
+ * Modified from BEAST 1 GeneticCode.
  */
 @Description("A set of standard genetic codes.")
 public final class GeneticCode {
 
 //	public static final String GENETIC_CODE = "geneticCode";
 	
-	/**
+    /**
 	 * Constants used to refer to the built in code tables
 	 */
 	public static final int UNIVERSAL_ID = 0;
@@ -212,13 +214,13 @@ public final class GeneticCode {
 	 * Returns the char associated with AminoAcid represented by codonState.
 	 * Note that the char is as defined by Aminoacid.java
 	 * @see Aminoacid
-	 * @see Codons
+	 * @see Codon
 	 * @return state for '?' if codon unknown
 	 */
 	public char getAminoAcidChar(int codonState) {
-		if (codonState == Codons.UNKNOWN_STATE)
+		if (codonState == Codon.UNKNOWN_STATE)
 			return Aminoacid.MISSING_CHAR;
-		else if (codonState == Codons.GAP_STATE)
+		else if (codonState == Codon.GAP_STATE)
 			return Aminoacid.GAP_CHAR;
 			
 		return codeTable.charAt(codonState);
@@ -228,13 +230,13 @@ public final class GeneticCode {
 	 * Returns the state associated with AminoAcid represented by codonState.
 	 * Note that the state is the canonical state (generated combinatorially)
 	 * @see Aminoacid
-	 * @see Codons
+	 * @see Codon
 	 * @return '?' if codon unknown
 	 */
 	public int getAminoAcidState(int codonState) {
-		if (codonState == Codons.UNKNOWN_STATE)
+		if (codonState == Codon.UNKNOWN_STATE)
 			return Aminoacid.MISSING_CHAR;
-		else if (codonState == Codons.GAP_STATE)
+		else if (codonState == Codon.GAP_STATE)
 			return Aminoacid.GAP_CHAR;
 			
 		return AMINOACID_STATES[getAminoAcidChar(codonState)];
@@ -245,7 +247,7 @@ public final class GeneticCode {
      * @return whether the codonState is a stop codon
 	 */
 	public boolean isStopCodon(int codonState) {
-		return (getAminoAcidState(codonState) == Codons.STOP_STATE);
+		return (getAminoAcidState(codonState) == Codon.STOP_STATE);
 	}
 
 
@@ -259,7 +261,7 @@ public final class GeneticCode {
 		
 		j = 0;
 		for (i = 0; i < 64; i++) {
-			if (codeTable.charAt(i) == Codons.STOP_CHARACTER) {
+			if (codeTable.charAt(i) == Codon.STOP_CHARACTER) {
 				indices[j] = i;
 				j++;
 			}
@@ -275,7 +277,7 @@ public final class GeneticCode {
 		int i, count = 0;
 		
 		for (i = 0; i < 64; i++) {
-			if (codeTable.charAt(i) == Codons.STOP_CHARACTER)
+			if (codeTable.charAt(i) == Codon.STOP_CHARACTER)
 				count++;
 		}
 		
