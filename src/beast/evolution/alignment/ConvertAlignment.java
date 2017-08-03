@@ -23,125 +23,74 @@
  * Boston, MA  02110-1301  USA
  */
 
-package dr.evolution.alignment;
+package beast.evolution.alignment;
 
-import dr.evolution.datatype.*;
-import dr.evolution.sequence.Sequence;
-import dr.evolution.util.Taxon;
-import java.util.*;
+
+import beast.core.Input;
+import beast.evolution.datatype.*;
 
 /**
  * An alignment class that takes another alignment and converts it on the fly
  * to a different dataType.
+ * Currently only working on nucleotide => codon
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
  *
- * @version $Id: ConvertAlignment.java,v 1.29 2005/05/24 20:25:55 rambaut Exp $
+ * Modified from BEAST 1 WrappedAlignment.
  */
-public class ConvertAlignment extends WrappedAlignment implements dr.util.XHTMLable
-{
+public class WrappedAlignment extends Alignment {
 
-    /**
-     * Constructor.
-     */
-    public ConvertAlignment(DataType dataType) {
-        this(dataType, null, null);
+    final public Input<Alignment> alignmentInput = new Input<>("data",
+            "alignment to convert to new type specified by userDataType", Input.Validate.REQUIRED);
+
+    final public Input<String> geneticCodeInput = new Input<>("geneticCode",
+            "The rule to define how sequences of nucleotide triplets, " +
+                    "called codons, specify which amino acid will be added next during protein synthesis.",
+                    GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID], Input.Validate.REQUIRED);
+
+    protected Alignment alignment;
+    protected GeneticCode geneticCode;
+
+    public WrappedAlignment() {
+        sequenceInput.setRule(Input.Validate.OPTIONAL);
+        dataTypeInput.setRule(Input.Validate.OPTIONAL);
+        siteWeightsInput.setRule(Input.Validate.FORBIDDEN); // ?
     }
 
-    /**
-     * Constructor.
-     */
-    public ConvertAlignment(DataType dataType, CodonTable codonTable) {
-        this(dataType, codonTable, null);
-    }
 
-    /**
-     * Constructor.
-     */
-    public ConvertAlignment(DataType dataType, Alignment alignment) {
-        this(dataType, null, alignment);
-    }
+    @Override
+    public void initAndValidate() {
 
-    /**
-     * Constructor.
-     */
-    public ConvertAlignment(DataType dataType, CodonTable codonTable, Alignment alignment) {
-        super(alignment);
-        setDataType(dataType);
-        setCodonTable(codonTable);
-        setAlignment(alignment);
-    }
+        alignment = alignmentInput.get();
+        DataType originalType = alignment.getDataType();
 
-    /**
-     * Sets the CodonTable of this alignment.
-     */
-    public void setCodonTable(CodonTable codonTable) {
-        this.codonTable = codonTable;
-    }
+        DataType newType = userDataTypeInput.get();
 
-    /**
-     * Sets the contained.
-     */
-    public void setAlignment(Alignment alignment) {
-        if (dataType == null) {
-            dataType = alignment.getDataType();
-        }
-            
-        this.alignment = alignment;
-
-        int newType = dataType.getType();
-        int originalType = alignment.getDataType().getType();
-
-      //TODO: this logic does not work for pibuss
-        if (originalType == DataType.NUCLEOTIDES) {
-        	
-            if (newType != DataType.CODONS && newType != DataType.AMINO_ACIDS) {
-                throw new RuntimeException("Incompatible alignment DataType for ConversionAlignment");
-            }
-            
-        } else if (originalType == DataType.CODONS) {
-        	
-            if (!(newType == DataType.AMINO_ACIDS || newType == DataType.NUCLEOTIDES)) {
-
-                System.err.println("originalType = " + originalType);
-                System.err.println("newType = " + newType);
-                throw new RuntimeException("Incompatible alignment DataType for ConversionAlignment");
-            }
-            
+        //TODO generalise
+        if (newType != null && newType instanceof Codon && originalType instanceof Nucleotide) {
+            m_dataType = newType;
         } else {
-        	
-            throw new RuntimeException("Incompatible alignment DataType for ConversionAlignment");
-            
-        }//END: original type check
+            throw new UnsupportedOperationException("Currently only working on nucleotide => codon !");
+        }
+
+        this.geneticCode = GeneticCode.findByName(geneticCodeInput.get());
+
+        calcPatterns();
+        setupAscertainment();
     }
 
-    /**
-     * Sets the dataType of this alignment. This can be different from
-     * the dataTypes of the contained alignment - they will be translated
-     * as required.
-     */
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
-    }
-
-    /**
-     * @return the DataType of this siteList
-     */
-    public DataType getDataType() {
-        return dataType;
-    }
 
     /**
      * @return number of sites
      */
     public int getSiteCount() {
-        if (alignment == null) throw new RuntimeException("ConvertAlignment has no alignment");
+        if (alignment == null) throw new RuntimeException("WrappedAlignment has no alignment");
 
-        int originalType = alignment.getDataType().getType();
+        DataType originalType = alignment.getDataType();
         int count = alignment.getSiteCount();
 
-        if (originalType == DataType.NUCLEOTIDES) {
+        if (originalType instanceof Nucleotide) {
             count /= 3;
         }
 
@@ -152,78 +101,38 @@ public class ConvertAlignment extends WrappedAlignment implements dr.util.XHTMLa
      * @return the sequence state at (taxon, site)
      */
     public int getState(int taxonIndex, int siteIndex) {
-        if (alignment == null) throw new RuntimeException("ConvertAlignment has no alignment");
+        if (alignment == null) throw new RuntimeException("WrappedAlignment has no alignment");
 
-        int newType = dataType.getType();
-        int originalType = alignment.getDataType().getType();
+        DataType originalType = alignment.getDataType();
+        DataType newType = getDataType();
 
         int state = 0;
 
-        if (originalType == DataType.NUCLEOTIDES) {
+        if (originalType instanceof Nucleotide) {
             int siteIndex3 = siteIndex * 3;
             int state1 = alignment.getState(taxonIndex, siteIndex3);
             int state2 = alignment.getState(taxonIndex, siteIndex3 + 1);
             int state3 = alignment.getState(taxonIndex, siteIndex3 + 2);
 
-            if (newType == DataType.CODONS) {
-                state = ((Codons)dataType).getState(state1, state2, state3);
-            } else { // newType == DataType.AMINO_ACIDS
-                state = codonTable.getAminoAcidState(((Codons)dataType).getCanonicalState(((Codons)dataType).getState(state1, state2, state3)));
+            if (newType instanceof Codon) {
+                state = ((Codon)newType).getState(state1, state2, state3);
+            } else { // newType instanceof Aminoacid
+                state = geneticCode.getAminoAcidState(((Codon)newType).getCanonicalState(((Codon)newType).getState(state1, state2, state3)));
             }
 
-        } else if (originalType == DataType.CODONS) {
-            if (newType == DataType.AMINO_ACIDS) {
-                state = codonTable.getAminoAcidState(alignment.getState(taxonIndex, siteIndex));
-            } else { // newType == DataType.CODONS
-                String string = alignment.getAlignedSequenceString(taxonIndex);
-                state = Nucleotides.INSTANCE.getState(string.charAt(siteIndex));
+        }
+        else if (originalType instanceof Codon) {
+            if (newType instanceof Aminoacid) {
+                state = geneticCode.getAminoAcidState(alignment.getState(taxonIndex, siteIndex));
+            } else { // newType instanceof Codon
+                String string = Alignment.getSequence(alignment, taxonIndex);
+                state = geneticCode.getNucleotideState(string.charAt(siteIndex));
             }
         }
 
         return state;
     }
 
-    public String toXHTML() {
-        String xhtml = "<p><em>Converted Alignment</em> data type = ";
-        xhtml += getDataType().getDescription();
-        xhtml += ", no. taxa = ";
-        xhtml += getTaxonCount();
-        xhtml += ", no. sites = ";
-        xhtml += getSiteCount();
-        xhtml += "</p>";
 
-        xhtml += "<pre>";
 
-        int length, maxLength = 0;
-        for (int i =0; i < getTaxonCount(); i++) {
-            length = getTaxonId(i).length();
-            if (length > maxLength)
-                maxLength = length;
-        }
-
-        int count, state;
-        int type = getDataType().getType();
-
-        for (int i = 0; i < getTaxonCount(); i++) {
-            length = getTaxonId(i).length();
-            xhtml += getTaxonId(i);
-            for (int j = length; j <= maxLength; j++)
-                xhtml += " ";
-
-            count = getSiteCount();
-            for (int j = 0; j < count; j++) {
-                state = getState(i, j);
-                if (type == DataType.CODONS)
-                    xhtml += Codons.UNIVERSAL.getTriplet(state) + " ";
-                else
-                    xhtml += AminoAcids.INSTANCE.getTriplet(state) + " ";
-            }
-            xhtml += "\n";
-        }
-        xhtml += "</pre>";
-        return xhtml;
-    }
-
-    private DataType dataType = null;
-    private CodonTable codonTable = null;
 }
