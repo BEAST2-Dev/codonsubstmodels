@@ -1109,13 +1109,13 @@
 
     <parameter id="m0.omega" value="1.414"/>
     <parameter id="m0.kappa" value="1.234567"/>
-    <parameter id="m0.rates" value="1"/>
-    <parameter id="codon.freqs" value="0" dimension="61"/>
+    <!--<parameter id="m0.rates" value="1"/>-->
+    <!--<parameter id="codon.freqs" value="0" dimension="61"/>-->
 
-    <input spec="beast.evolution.substitutionmodel.codon.M0CodonModel" id="m0">
+    <input spec="beast.evolution.substitutionmodel.codons.M0CodonModel" id="m0">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <rates idref="m0.rates"/>
+        <!--<rates idref="m0.rates"/>-->
         <frequencies id="m0.freqs" spec="Frequencies">
             <data idref="codon.alignment"/>
             <!--<frequencies idref="codon.freqs"/>-->
@@ -1144,7 +1144,6 @@
         <logger>
             <log idref="tree"/>
             <log idref="likelihood"/>
-            <log idref="codon.freqs"/>
         </logger>
     </run>
 

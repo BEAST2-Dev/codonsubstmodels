@@ -39,125 +39,161 @@ import beast.core.Description;
 @Description("A set of standard genetic codes.")
 public final class GeneticCode {
 
-//	public static final String GENETIC_CODE = "geneticCode";
-	
+//    public static final String GENETIC_CODE = "geneticCode";
+    
     /**
-	 * Constants used to refer to the built in code tables
-	 */
-	public static final int UNIVERSAL_ID = 0;
-	public static final int VERTEBRATE_MT_ID = 1;
-	public static final int YEAST_ID = 2;
-	public static final int MOLD_PROTOZOAN_MT_ID = 3;
-	public static final int MYCOPLASMA_ID = 4;
-	public static final int INVERTEBRATE_MT_ID = 5;
-	public static final int CILIATE_ID = 6;
-	public static final int ECHINODERM_MT_ID = 7;
-	public static final int EUPLOTID_NUC_ID = 8;
-	public static final int BACTERIAL_ID = 9;
-	public static final int ALT_YEAST_ID = 10;
-	public static final int ASCIDIAN_MT_ID = 11;
-	public static final int FLATWORM_MT_ID = 12;
-	public static final int BLEPHARISMA_NUC_ID = 13;
-	public static final int NO_STOPS_ID = 14;
+     * Constants used to refer to the built in code tables
+     */
+    public static final int UNIVERSAL_ID = 0;
+    public static final int VERTEBRATE_MT_ID = 1;
+    public static final int YEAST_ID = 2;
+    public static final int MOLD_PROTOZOAN_MT_ID = 3;
+    public static final int MYCOPLASMA_ID = 4;
+    public static final int INVERTEBRATE_MT_ID = 5;
+    public static final int CILIATE_ID = 6;
+    public static final int ECHINODERM_MT_ID = 7;
+    public static final int EUPLOTID_NUC_ID = 8;
+    public static final int BACTERIAL_ID = 9;
+    public static final int ALT_YEAST_ID = 10;
+    public static final int ASCIDIAN_MT_ID = 11;
+    public static final int FLATWORM_MT_ID = 12;
+    public static final int BLEPHARISMA_NUC_ID = 13;
+    public static final int NO_STOPS_ID = 14;
 
-	/**
-	 * Standard genetic code tables from GENBANK
-	 * Nucleotides go A, C, G, T - Note: this is not the order used by the Genbank web site
-	 * With the first codon position most significant (i.e. AAA, AAC, AAG, AAT, ACA, etc.).
-	 */
-	public static final String[] GENETIC_CODE_TABLES = {
-		// Universal
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
-		// Vertebrate Mitochondrial
-		"KNKNTTTT*S*SMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Yeast
-		"KNKNTTTTRSRSMIMIQHQHPPPPRRRRTTTTEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Mold Protozoan Mitochondrial
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Mycoplasma
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Invertebrate Mitochondrial
-		"KNKNTTTTSSSSMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Ciliate
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVQYQYSSSS*CWCLFLF",
-		// Echinoderm Mitochondrial
-		"NNKNTTTTSSSSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Euplotid Nuclear
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSCCWCLFLF",
-		// Bacterial
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
-		// Alternative Yeast
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLSLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
-		// Ascidian Mitochondrial
-		"KNKNTTTTGSGSMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
-		// Flatworm Mitochondrial
-		"NNKNTTTTSSSSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYY*YSSSSWCWCLFLF",
-		// Blepharisma Nuclear
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*YQYSSSS*CWCLFLF",
-		// No stops
-		"KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYQYSSSSWCWCLFLF"
-	};
+    /**
+     * Standard genetic code tables from GENBANK
+     * Nucleotides go A, C, G, T - Note: this is not the order used by the Genbank web site
+     * With the first codon position most significant (i.e. AAA, AAC, AAG, AAT, ACA, etc.).
+     */
+    public static final String[] GENETIC_CODE_TABLES = {
+        // Universal
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
+        // Vertebrate Mitochondrial
+        "KNKNTTTT*S*SMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Yeast
+        "KNKNTTTTRSRSMIMIQHQHPPPPRRRRTTTTEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Mold Protozoan Mitochondrial
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Mycoplasma
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Invertebrate Mitochondrial
+        "KNKNTTTTSSSSMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Ciliate
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVQYQYSSSS*CWCLFLF",
+        // Echinoderm Mitochondrial
+        "NNKNTTTTSSSSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Euplotid Nuclear
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSCCWCLFLF",
+        // Bacterial
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
+        // Alternative Yeast
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLSLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF",
+        // Ascidian Mitochondrial
+        "KNKNTTTTGSGSMIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF",
+        // Flatworm Mitochondrial
+        "NNKNTTTTSSSSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYY*YSSSSWCWCLFLF",
+        // Blepharisma Nuclear
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*YQYSSSS*CWCLFLF",
+        // No stops
+        "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVVYYQYSSSSWCWCLFLF"
+    };
 
-	/**
-	 * Names of the standard genetic code tables from GENBANK
-	 */
-	public static final String[] GENETIC_CODE_NAMES = {
-		"universal", "vertebrateMitochondrial", "yeast", "moldProtozoanMitochondrial",
-		"mycoplasma", "invertebrateMitochondrial", "ciliate", "echinodermMitochondrial",
-		"euplotidNuclear", "bacterial", "alternativeYeast", "ascidianMitochondrial",
-		"flatwormMitochondrial", "blepharismaNuclear", "noStops"
-	};
+    /**
+     * Names of the standard genetic code tables from GENBANK
+     */
+    public static final String[] GENETIC_CODE_NAMES = {
+        "universal", "vertebrateMitochondrial", "yeast", "moldProtozoanMitochondrial",
+        "mycoplasma", "invertebrateMitochondrial", "ciliate", "echinodermMitochondrial",
+        "euplotidNuclear", "bacterial", "alternativeYeast", "ascidianMitochondrial",
+        "flatwormMitochondrial", "blepharismaNuclear", "noStops"
+    };
 
-	/**
-	 * Descriptions of the standard genetic code tables from GENBANK
-	 */
-	public static final String[] GENETIC_CODE_DESCRIPTIONS = {
-		"Universal", "Vertebrate Mitochondrial", "Yeast", "Mold Protozoan Mitochondrial",
-		"Mycoplasma", "Invertebrate Mitochondrial", "Ciliate", "Echinoderm Mitochondrial",
-		"Euplotid Nuclear", "Bacterial", "Alternative Yeast", "Ascidian Mitochondrial",
-		"Flatworm Mitochondrial", "Blepharisma Nuclear", "Test case with no stop codons"
-	};
+    /**
+     * Descriptions of the standard genetic code tables from GENBANK
+     */
+    public static final String[] GENETIC_CODE_DESCRIPTIONS = {
+        "Universal", "Vertebrate Mitochondrial", "Yeast", "Mold Protozoan Mitochondrial",
+        "Mycoplasma", "Invertebrate Mitochondrial", "Ciliate", "Echinoderm Mitochondrial",
+        "Euplotid Nuclear", "Bacterial", "Alternative Yeast", "Ascidian Mitochondrial",
+        "Flatworm Mitochondrial", "Blepharisma Nuclear", "Test case with no stop codons"
+    };
 
-	public static final GeneticCode UNIVERSAL = new GeneticCode(UNIVERSAL_ID);
-	public static final GeneticCode VERTEBRATE_MT = new GeneticCode(VERTEBRATE_MT_ID);
-	public static final GeneticCode YEAST = new GeneticCode(YEAST_ID);
-	public static final GeneticCode MOLD_PROTOZOAN_MT = new GeneticCode(MOLD_PROTOZOAN_MT_ID);
-	public static final GeneticCode MYCOPLASMA = new GeneticCode(MYCOPLASMA_ID);
-	public static final GeneticCode INVERTEBRATE_MT = new GeneticCode(INVERTEBRATE_MT_ID);
-	public static final GeneticCode CILIATE = new GeneticCode(CILIATE_ID);
-	public static final GeneticCode ECHINODERM_MT = new GeneticCode(ECHINODERM_MT_ID);
-	public static final GeneticCode EUPLOTID_NUC = new GeneticCode(EUPLOTID_NUC_ID);
-	public static final GeneticCode BACTERIAL = new GeneticCode(BACTERIAL_ID);
-	public static final GeneticCode ALT_YEAST = new GeneticCode(ALT_YEAST_ID);
-	public static final GeneticCode ASCIDIAN_MT = new GeneticCode(ASCIDIAN_MT_ID);
-	public static final GeneticCode FLATWORM_MT = new GeneticCode(FLATWORM_MT_ID);
-	public static final GeneticCode BLEPHARISMA_NUC = new GeneticCode(BLEPHARISMA_NUC_ID);
-	public static final GeneticCode NO_STOPS = new GeneticCode(NO_STOPS_ID);
+    public static final GeneticCode UNIVERSAL = new GeneticCode(UNIVERSAL_ID);
+    public static final GeneticCode VERTEBRATE_MT = new GeneticCode(VERTEBRATE_MT_ID);
+    public static final GeneticCode YEAST = new GeneticCode(YEAST_ID);
+    public static final GeneticCode MOLD_PROTOZOAN_MT = new GeneticCode(MOLD_PROTOZOAN_MT_ID);
+    public static final GeneticCode MYCOPLASMA = new GeneticCode(MYCOPLASMA_ID);
+    public static final GeneticCode INVERTEBRATE_MT = new GeneticCode(INVERTEBRATE_MT_ID);
+    public static final GeneticCode CILIATE = new GeneticCode(CILIATE_ID);
+    public static final GeneticCode ECHINODERM_MT = new GeneticCode(ECHINODERM_MT_ID);
+    public static final GeneticCode EUPLOTID_NUC = new GeneticCode(EUPLOTID_NUC_ID);
+    public static final GeneticCode BACTERIAL = new GeneticCode(BACTERIAL_ID);
+    public static final GeneticCode ALT_YEAST = new GeneticCode(ALT_YEAST_ID);
+    public static final GeneticCode ASCIDIAN_MT = new GeneticCode(ASCIDIAN_MT_ID);
+    public static final GeneticCode FLATWORM_MT = new GeneticCode(FLATWORM_MT_ID);
+    public static final GeneticCode BLEPHARISMA_NUC = new GeneticCode(BLEPHARISMA_NUC_ID);
+    public static final GeneticCode NO_STOPS = new GeneticCode(NO_STOPS_ID);
 
-//	public static final GeneticCode[] GENETIC_CODES = {
-//		UNIVERSAL, VERTEBRATE_MT, YEAST, MOLD_PROTOZOAN_MT, MYCOPLASMA, INVERTEBRATE_MT,
-//		CILIATE, ECHINODERM_MT, EUPLOTID_NUC, BACTERIAL, ALT_YEAST, ASCIDIAN_MT,
-//		FLATWORM_MT, BLEPHARISMA_NUC, NO_STOPS
-//	};
+//    public static final GeneticCode[] GENETIC_CODES = {
+//        UNIVERSAL, VERTEBRATE_MT, YEAST, MOLD_PROTOZOAN_MT, MYCOPLASMA, INVERTEBRATE_MT,
+//        CILIATE, ECHINODERM_MT, EUPLOTID_NUC, BACTERIAL, ALT_YEAST, ASCIDIAN_MT,
+//        FLATWORM_MT, BLEPHARISMA_NUC, NO_STOPS
+//    };
 
-	public GeneticCode(int geneticCodeId) {
-		this.geneticCodeId = geneticCodeId;
-		codeTable = GENETIC_CODE_TABLES[geneticCodeId];
-	}
-	
-	/**
-	 * Returns the name of the genetic code
-	 */
-	public String getName() {
-		return GENETIC_CODE_NAMES[geneticCodeId];
-	}
-	
-	/**
-	 * Returns the description of the genetic code
-	 */
-	public String getDescription() {
-		return GENETIC_CODE_DESCRIPTIONS[geneticCodeId];
-	}
+    public GeneticCode(int geneticCodeId) {
+        this.geneticCodeId = geneticCodeId;
+        codeTable = GENETIC_CODE_TABLES[geneticCodeId];
+    }
+    
+    /**
+     * Returns the name of the genetic code
+     */
+    public String getName() {
+        return GENETIC_CODE_NAMES[geneticCodeId];
+    }
+    
+    /**
+     * Returns the description of the genetic code
+     */
+    public String getDescription() {
+        return GENETIC_CODE_DESCRIPTIONS[geneticCodeId];
+    }
+
+    public static GeneticCode findByName(String codeStr) {
+        GeneticCode geneticCode = null;
+        if (codeStr.equals(GeneticCode.UNIVERSAL.getName())) {
+            geneticCode = GeneticCode.UNIVERSAL;
+        } else if (codeStr.equals(GeneticCode.VERTEBRATE_MT.getName())) {
+            geneticCode = GeneticCode.VERTEBRATE_MT;
+        } else if (codeStr.equals(GeneticCode.YEAST.getName())) {
+            geneticCode = GeneticCode.YEAST;
+        } else if (codeStr.equals(GeneticCode.MOLD_PROTOZOAN_MT.getName())) {
+            geneticCode = GeneticCode.MOLD_PROTOZOAN_MT;
+        } else if (codeStr.equals(GeneticCode.INVERTEBRATE_MT.getName())) {
+            geneticCode = GeneticCode.INVERTEBRATE_MT;
+        } else if (codeStr.equals(GeneticCode.CILIATE.getName())) {
+            geneticCode = GeneticCode.CILIATE;
+        } else if (codeStr.equals(GeneticCode.ECHINODERM_MT.getName())) {
+            geneticCode = GeneticCode.ECHINODERM_MT;
+        } else if (codeStr.equals(GeneticCode.EUPLOTID_NUC.getName())) {
+            geneticCode = GeneticCode.EUPLOTID_NUC;
+        } else if (codeStr.equals(GeneticCode.BACTERIAL.getName())) {
+            geneticCode = GeneticCode.BACTERIAL;
+        } else if (codeStr.equals(GeneticCode.ALT_YEAST.getName())) {
+            geneticCode = GeneticCode.ALT_YEAST;
+        } else if (codeStr.equals(GeneticCode.ASCIDIAN_MT.getName())) {
+            geneticCode = GeneticCode.ASCIDIAN_MT;
+        } else if (codeStr.equals(GeneticCode.FLATWORM_MT.getName())) {
+            geneticCode = GeneticCode.FLATWORM_MT;
+        } else if (codeStr.equals(GeneticCode.BLEPHARISMA_NUC.getName())) {
+            geneticCode = GeneticCode.BLEPHARISMA_NUC;
+        } else if (codeStr.equals(GeneticCode.NO_STOPS.getName())) {
+            geneticCode = GeneticCode.NO_STOPS;
+        } else {
+            throw new RuntimeException("Unknown genetics code");
+        }
+        return geneticCode;
+    }
 
 
     /**
@@ -166,20 +202,20 @@ public final class GeneticCode {
      * ? and - are mapped to themselves. All other chars are mapped to -.
      */
     public static final int NUCLEOTIDE_STATES[] = {
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,	// 0-15
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,	// 16-31
+            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 0-15
+            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 16-31
             //                                          -
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,	// 32-47
+            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 32-47
             //                                                ?
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,16,	// 48-63
-            //	    A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
-            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,	// 64-79
-            //	 p  q  R  S  T  U  V  W  x  Y  z
-            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17,	// 80-95
-            //	    A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
-            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,	// 96-111
-            //	 p  q  R  S  T  U  V  W  x  Y  z
-            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17		// 112-127
+            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,16,    // 48-63
+            //        A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
+            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,    // 64-79
+            //     p  q  R  S  T  U  V  W  x  Y  z
+            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17,    // 80-95
+            //        A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
+            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,    // 96-111
+            //     p  q  R  S  T  U  V  W  x  Y  z
+            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17        // 112-127
     };
 
     public int getNucleotideState(char c) {
@@ -194,97 +230,97 @@ public final class GeneticCode {
      * All other chars are mapped to -
      */
     public static final int[] AMINOACID_STATES = {
-            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,	// 0-15
-            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,	// 16-31
-            //                                 *        -
-            25,25,25,25,25,25,25,25,25,25,23,25,25,25,25,25,	// 32-47
-            //                                                ?
-            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24,	// 48-63
-            //		A  B  C  D  E  F  G  H  I  j  K  L  M  N  o
-            25, 0,20, 1, 2, 3, 4, 5, 6, 7,24, 8, 9,10,11,24,	// 64-79
-            //	 P  Q  R  S  T  u  V  W  X  Y  Z
-            12,13,14,15,16,24,17,18,22,19,21,25,25,25,25,25,	// 80-95
-            //		A  B  C  D  E  F  G  H  I  j  K  L  M  N  o
-            25, 0,20, 1, 2, 3, 4, 5, 6, 7,24, 8, 9,10,11,24,	// 96-111
-            //	 P  Q  R  S  T  u  V  W  X  Y  Z
-            12,13,14,15,16,24,17,18,22,19,21,25,25,25,25,25		// 112-127
+            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,    // 0-15
+            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,    // 16-31
+    //                                     *        -
+            25,25,25,25,25,25,25,25,25,25,23,25,25,25,25,25,    // 32-47
+    //                                                    ?
+            25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,24,    // 48-63
+    //          A  B  C  D  E  F  G  H  I  j  K  L  M  N  o
+            25, 0,20, 1, 2, 3, 4, 5, 6, 7,24, 8, 9,10,11,24,    // 64-79
+    //       P  Q  R  S  T  u  V  W  X  Y  Z
+            12,13,14,15,16,24,17,18,22,19,21,25,25,25,25,25,    // 80-95
+    //          A  B  C  D  E  F  G  H  I  j  K  L  M  N  o
+            25, 0,20, 1, 2, 3, 4, 5, 6, 7,24, 8, 9,10,11,24,    // 96-111
+    //       P  Q  R  S  T  u  V  W  X  Y  Z
+            12,13,14,15,16,24,17,18,22,19,21,25,25,25,25,25     // 112-127
     };
-	
-	/**
-	 * Returns the char associated with AminoAcid represented by codonState.
-	 * Note that the char is as defined by Aminoacid.java
-	 * @see Aminoacid
-	 * @see Codon
-	 * @return state for '?' if codon unknown
-	 */
-	public char getAminoAcidChar(int codonState) {
-		if (codonState == Codon.UNKNOWN_STATE)
-			return Aminoacid.MISSING_CHAR;
-		else if (codonState == Codon.GAP_STATE)
-			return Aminoacid.GAP_CHAR;
-			
-		return codeTable.charAt(codonState);
-	}
-	
-	/**
-	 * Returns the state associated with AminoAcid represented by codonState.
-	 * Note that the state is the canonical state (generated combinatorially)
-	 * @see Aminoacid
-	 * @see Codon
-	 * @return '?' if codon unknown
-	 */
-	public int getAminoAcidState(int codonState) {
-		if (codonState == Codon.UNKNOWN_STATE)
-			return Aminoacid.MISSING_CHAR;
-		else if (codonState == Codon.GAP_STATE)
-			return Aminoacid.GAP_CHAR;
-			
-		return AMINOACID_STATES[getAminoAcidChar(codonState)];
-	}
+    
+    /**
+     * Returns the char associated with AminoAcid represented by codonState.
+     * Note that the char is as defined by Aminoacid.java
+     * @see Aminoacid
+     * @see Codon
+     * @return state for '?' if codon unknown
+     */
+    public char getAminoAcidChar(int codonState) {
+        if (codonState == Codon.UNKNOWN_STATE)
+            return Aminoacid.MISSING_CHAR;
+        else if (codonState == Codon.GAP_STATE)
+            return Aminoacid.GAP_CHAR;
+            
+        return codeTable.charAt(codonState);
+    }
+    
+    /**
+     * Returns the state associated with AminoAcid represented by codonState.
+     * Note that the state is the canonical state (generated combinatorially)
+     * @see Aminoacid
+     * @see Codon
+     * @return '?' if codon unknown
+     */
+    public int getAminoAcidState(int codonState) {
+        if (codonState == Codon.UNKNOWN_STATE)
+            return Aminoacid.MISSING_CHAR;
+        else if (codonState == Codon.GAP_STATE)
+            return Aminoacid.GAP_CHAR;
+            
+        return AMINOACID_STATES[getAminoAcidChar(codonState)];
+    }
 
-	/**
-	 * Note that the state is the canonical state (generated combinatorially)
+    /**
+     * Note that the state is the canonical state (generated combinatorially)
      * @return whether the codonState is a stop codon
-	 */
-	public boolean isStopCodon(int codonState) {
-		return (getAminoAcidState(codonState) == Codon.STOP_STATE);
-	}
+     */
+    public boolean isStopCodon(int codonState) {
+        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
+    }
 
 
-	/**
-	 * @return the codon states of stop amino acids.
-	 */
-	public int[] getStopCodonIndices() {
-	
-		int i, j, n = getStopCodonCount();
-		int[] indices = new int[n];
-		
-		j = 0;
-		for (i = 0; i < 64; i++) {
-			if (codeTable.charAt(i) == Codon.STOP_CHARACTER) {
-				indices[j] = i;
-				j++;
-			}
-		}
-		
-		return indices;
-	}
+    /**
+     * @return the codon states of stop amino acids.
+     */
+    public int[] getStopCodonIndices() {
+    
+        int i, j, n = getStopCodonCount();
+        int[] indices = new int[n];
+        
+        j = 0;
+        for (i = 0; i < 64; i++) {
+            if (codeTable.charAt(i) == Codon.STOP_CHARACTER) {
+                indices[j] = i;
+                j++;
+            }
+        }
+        
+        return indices;
+    }
 
-	/**
-	 * Returns the number of terminator amino acids.
-	 */
-	public int getStopCodonCount() {
-		int i, count = 0;
-		
-		for (i = 0; i < 64; i++) {
-			if (codeTable.charAt(i) == Codon.STOP_CHARACTER)
-				count++;
-		}
-		
-		return count;
-	}
-	
-	private int geneticCodeId;
-	private String codeTable;
+    /**
+     * Returns the number of terminator amino acids.
+     */
+    public int getStopCodonCount() {
+        int i, count = 0;
+        
+        for (i = 0; i < 64; i++) {
+            if (codeTable.charAt(i) == Codon.STOP_CHARACTER)
+                count++;
+        }
+        
+        return count;
+    }
+    
+    private int geneticCodeId;
+    private String codeTable;
 
 }

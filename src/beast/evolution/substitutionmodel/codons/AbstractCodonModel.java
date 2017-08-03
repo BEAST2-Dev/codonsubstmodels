@@ -27,12 +27,15 @@ package beast.evolution.substitutionmodel.codons;
 
 
 import beast.core.Description;
+import beast.core.Input;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Imported from BEAST 1.
@@ -46,24 +49,18 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     protected Codon codonDataType;
     protected GeneticCode geneticCode;
 
-//    public AbstractCodonModel() {
-//        ratesInput.setRule(Input.Validate.OPTIONAL);
-//        try {
-//            ratesInput.setValue(null, this);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            // TODO: handle exception
-//        }
-//    }
+    public AbstractCodonModel() {
+        ratesInput.setRule(Input.Validate.OPTIONAL);
+        try {
+            ratesInput.setValue(null, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO: handle exception
+        }
+    }
 
     @Override
     public void initAndValidate() {
-        super.initAndValidate();
-
-//        if (ratesInput.get() != null) {
-//            throw new IllegalArgumentException("The rates attribute should not be used !");
-//        }
-
         Frequencies frequencies = frequenciesInput.get();
         Alignment alignment = frequencies.dataInput.get();
         DataType dataType = alignment.getDataType();
@@ -74,9 +71,34 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
         this.codonDataType = (Codon) dataType;
         this.geneticCode = codonDataType.getGeneticCode();
 
-        constructRateMap();
-
+        //====== init states and rates ======
         updateMatrix = true;
+        nrOfStates = frequencies.getFreqs().length;
+
+        // if rates not given, then calculate from nrOfStates
+        if (ratesInput.get() == null) {
+            int rateCount = getRateCount(nrOfStates);
+            ratesInput.setValue(rateCount, this);
+        }
+
+        try {
+            eigenSystem = createEigenSystem();
+        } catch (SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+        //eigenSystem = new DefaultEigenSystem(m_nStates);
+
+        rateMatrix = new double[nrOfStates][nrOfStates];
+        relativeRates = new double[ratesInput.get().getDimension()];
+        storedRelativeRates = new double[ratesInput.get().getDimension()];
+
+        constructRateMap();
+    }
+
+    //TODO move to SubstitutionModel.Base
+    protected int getRateCount(int stateCount) {
+        return ((stateCount - 1) * stateCount) / 2;
     }
 
 
