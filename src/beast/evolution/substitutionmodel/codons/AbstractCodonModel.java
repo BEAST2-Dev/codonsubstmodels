@@ -28,12 +28,12 @@ package beast.evolution.substitutionmodel.codons;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.datatype.Codon;
+import beast.core.parameter.RealParameter;
 import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.GeneticCode;
-import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
+import beast.evolution.alignment.ConvertAlignment;
+import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.GeneticCode;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -44,42 +44,39 @@ import java.lang.reflect.InvocationTargetException;
 @Description("Abstract codon model")
 public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
+    //TODO I only need DataType, how to pass it simply?
+    final public Input<ConvertAlignment> convertAlignmentInput = new Input<>("data",
+            "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
+
     protected byte[] rateMap;
 
     protected Codon codonDataType;
     protected GeneticCode geneticCode;
 
     public AbstractCodonModel() {
-        ratesInput.setRule(Input.Validate.OPTIONAL);
-        try {
-            ratesInput.setValue(null, this);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // TODO: handle exception
-        }
+        ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
     }
 
     @Override
     public void initAndValidate() {
-        Frequencies frequencies = frequenciesInput.get();
-        Alignment alignment = frequencies.dataInput.get();
+        this.frequencies = frequenciesInput.get();
+
+        ConvertAlignment alignment = convertAlignmentInput.get();
         DataType dataType = alignment.getDataType();
 
         if (! (dataType instanceof Codon) )
-            throw new IllegalArgumentException("Codon data type is required in the frequencies !");
-
+            throw new IllegalArgumentException("Codon data type is required !");
         this.codonDataType = (Codon) dataType;
+
         this.geneticCode = codonDataType.getGeneticCode();
 
         //====== init states and rates ======
         updateMatrix = true;
         nrOfStates = frequencies.getFreqs().length;
 
-        // if rates not given, then calculate from nrOfStates
-        if (ratesInput.get() == null) {
-            int rateCount = getRateCount(nrOfStates);
-            ratesInput.setValue(rateCount, this);
-        }
+        int rateCount = getRateCount(nrOfStates);
+        RealParameter rates = new RealParameter(new Double[rateCount]);
+        ratesInput.setValue(rates, this);
 
         try {
             eigenSystem = createEigenSystem();
@@ -98,7 +95,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
     //TODO move to SubstitutionModel.Base
     protected int getRateCount(int stateCount) {
-        return ((stateCount - 1) * stateCount) / 2;
+        return ((stateCount - 1) * stateCount);
     }
 
 

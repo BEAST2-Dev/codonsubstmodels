@@ -26,7 +26,7 @@
 package beast.evolution.datatype;
 
 import beast.core.Input;
-import util.StringUtils;
+import beast.util.StringUtils;
 
 /**
  * Implements DataType for codons

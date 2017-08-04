@@ -1,4 +1,4 @@
-package util;
+package beast.util;
 
 
 public class StringUtils {

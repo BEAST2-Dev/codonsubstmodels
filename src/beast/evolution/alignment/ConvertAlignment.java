@@ -27,8 +27,11 @@ package beast.evolution.alignment;
 
 
 import beast.core.Input;
-import beast.evolution.datatype.*;
+import beast.evolution.datatype.DataType;
+import beast.evolution.datatype.Nucleotide;
 import beast.util.AddOnManager;
+import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.GeneticCode;
 
 import java.util.Arrays;
 import java.util.List;
