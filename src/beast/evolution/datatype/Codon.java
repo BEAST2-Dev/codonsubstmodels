@@ -93,22 +93,23 @@ public class Codon extends DataType.Base {
     @Override
     public void initAndValidate() {
         GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
-        initStats(geneticCode);
+        setGeneticCode(geneticCode);
     }
 
     //TODO move DataType
     protected int ambiguousStateCount;
 
-    // need this constructor to pass Input validation
+    // this constructor used by xml not java
     public Codon() {
         this(GeneticCode.UNIVERSAL);
     }
 
     public Codon(GeneticCode geneticCode) {
-        initStats(geneticCode);
+        setGeneticCode(geneticCode);
     }
 
-    private void initStats(GeneticCode geneticCode) {
+    // offer to change GeneticCode later, especially after default constructor called by ConvertAlignment.initDataType()
+    public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
         stateCount = 64 - geneticCode.getStopCodonCount();
@@ -120,6 +121,7 @@ public class Codon extends DataType.Base {
 
         int j = 0;
         int k = stateCount;
+        // i is CODON_TRIPLETS also codonTable index, and [stateCount, 64] are stop codons state numbers
         for (int i = 0; i < 64; i++) {
             if (!geneticCode.isStopCodon(i)) {
                 mapCodeToStateSet[i] = new int[]{j};
@@ -138,7 +140,7 @@ public class Codon extends DataType.Base {
             mapCodeToStateSet[i] = all;
         }
 
-        // TODO stateMap, reverseMap => mapCodeToStateSet
+        // TODO stateMap, reverseMap => mapCodeToStateSet, where reverseMap mapCodeToStateSet are same
 
         stateMap = new int[ambiguousStateCount];
         reverseMap = new int[ambiguousStateCount];
@@ -266,21 +268,21 @@ public class Codon extends DataType.Base {
         return geneticCode;
     }
 
-    /**
-     * Takes non-canonical state and returns true if it represents stop codon
-     *
-     * @param state
-     * @return true if the given state is a stop codon
-     */
-    public final boolean isStopCodon(int state) {
-        return geneticCode.isStopCodon(stateMap[state]);
-    }
-
-    public static byte[] constructRateMap(Codon codonDataType) {
-        final int stateCount = codonDataType.getStateCount();
-        final int rateCount = (stateCount * (stateCount - 1)) / 2;
-        return constructRateMap(rateCount, stateCount, codonDataType, codonDataType.getGeneticCode());
-    }
+//    /**
+//     * Takes non-canonical state and returns true if it represents stop codon
+//     *
+//     * @param state
+//     * @return true if the given state is a stop codon
+//     */
+//    public final boolean isStopCodon(int state) {
+//        return geneticCode.isStopCodon(stateMap[state]);
+//    }
+//
+//    public static byte[] constructRateMap(Codon codonDataType) {
+//        final int stateCount = codonDataType.getStateCount();
+//        final int rateCount = (stateCount * (stateCount - 1)) / 2;
+//        return constructRateMap(rateCount, stateCount, codonDataType, codonDataType.getGeneticCode());
+//    }
 
 
     /**

@@ -54,10 +54,10 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
     final public Input<String> geneticCodeInput = new Input<>("geneticCode",
             "The rule to define how sequences of nucleotide triplets, " +
                     "called codons, specify which amino acid will be added next during protein synthesis.",
-                    GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID], Input.Validate.REQUIRED);
+                    GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID]);
 
     protected Alignment alignment;
-    protected GeneticCode geneticCode;
+//    protected GeneticCode geneticCode;
 
     public ConvertAlignment() {
         sequenceInput.setRule(Input.Validate.OPTIONAL);
@@ -74,7 +74,6 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
 
         initDataType();
         DataType newType = this.getDataType();
-
         //TODO generalise
         if (newType != null && newType instanceof Codon && originalType instanceof Nucleotide) {
             m_dataType = newType;
@@ -82,7 +81,12 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
             throw new UnsupportedOperationException("Currently only working on nucleotide => codon !");
         }
 
-        this.geneticCode = GeneticCode.findByName(geneticCodeInput.get());
+        // set geneticCode
+        GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
+        GeneticCode geneticCode2 = ((Codon) newType).getGeneticCode();
+        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) { //newType instanceof Codon &&
+            ((Codon) newType).setGeneticCode(geneticCode);
+        }
 
         convertCodonToState(true);
 
@@ -101,6 +105,7 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
     }
 
     //TODO this should move to Alignment
+    // Note: Codon uses default genetic code, need to change it if user specifies in xml
     protected void initDataType() {
         if (types.indexOf(dataTypeInput.get()) < 0) {
             throw new IllegalArgumentException("data type + '" + dataTypeInput.get() + "' cannot be found. " +
@@ -128,14 +133,14 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
         counts.clear();
         try {
             for (Sequence seq : alignment.sequences) {
-                List<Integer> seqStates = seq.getSequence(getDataType());
-                int tripletIndex = findStopCodon(seqStates);
+                List<Integer> codonStates = seq.getSequence(getDataType()); // return mapCodeToStateSet indices i
+                int tripletIndex = findStopCodon(codonStates);
                 if (tripletIndex > -1)
                     throw new RuntimeException(seq.getTaxon() + " sequence contains stop codon at " +
                             (tripletIndex+1) + "th triplets ! \n" +
                             "Please either use codon alignment or provide a correct genetic code.");
 
-                counts.add(seqStates);
+                counts.add(codonStates);
                 if (taxaNames.contains(seq.getTaxon())) {
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
                 }
@@ -161,13 +166,18 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
 
     protected int findStopCodon(List<Integer> seqStates) {
         for (int i = 0; i < seqStates.size(); i++) {
-            int state = seqStates.get(i);
-            if (geneticCode.isStopCodon(state))
+            int codonState = seqStates.get(i);
+            if (getGeneticCode().isStopCodon(codonState))
                 return i;
         }
         return -1;
     }
 
+    public GeneticCode getGeneticCode() {
+        if (m_dataType instanceof Codon)
+            return ((Codon) m_dataType).getGeneticCode();
+        return null;
+    }
 
     /**
      * @return number of sites

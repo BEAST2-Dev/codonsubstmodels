@@ -258,10 +258,10 @@ public final class GeneticCode {
             return Aminoacid.MISSING_CHAR;
         else if (codonState == Codon.GAP_STATE)
             return Aminoacid.GAP_CHAR;
-            
+
         return codeTable.charAt(codonState);
     }
-    
+
     /**
      * Returns the state associated with AminoAcid represented by codonState.
      * Note that the state is the canonical state (generated combinatorially)
@@ -274,18 +274,22 @@ public final class GeneticCode {
             return Aminoacid.MISSING_CHAR;
         else if (codonState == Codon.GAP_STATE)
             return Aminoacid.GAP_CHAR;
-            
+
         return AMINOACID_STATES[getAminoAcidChar(codonState)];
     }
 
-    /**
-     * Note that the state is the canonical state (generated combinatorially)
-     * @return whether the codonState is a stop codon
-     */
-    public boolean isStopCodon(int codonState) {
-        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
-    }
+//    /**
+//     * Note that the state is the canonical state (generated combinatorially)
+//     * @return whether the codonState is a stop codon
+//     */
+//    public boolean isStopCodon(int codonState) {
+//        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
+//    }
 
+
+    public boolean isStopCodon(int codonState) {
+        return (codeTable.charAt(codonState) == Codon.STOP_CHARACTER);
+    }
 
     /**
      * @return the codon states of stop amino acids.

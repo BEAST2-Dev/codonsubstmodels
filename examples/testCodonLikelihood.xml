@@ -1115,7 +1115,7 @@
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <data idref="codon.alignment"/>
-        <frequencies id="m0.freqs" spec="Frequencies" estimate="false">
+        <frequencies id="m0.freqs" spec="Frequencies">
             <data idref="codon.alignment"/>
             <!--<frequencies idref="codon.freqs"/>-->
         </frequencies>
