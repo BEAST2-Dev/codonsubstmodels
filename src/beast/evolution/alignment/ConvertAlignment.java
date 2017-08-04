@@ -84,16 +84,6 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
 
         this.geneticCode = GeneticCode.findByName(geneticCodeInput.get());
 
-
-//        counts = alignment.getCounts();
-//        taxaNames = alignment.taxaNames;
-//        stateCounts = alignment.stateCounts;
-//        if (m_dataType.getStateCount() > 0) {
-//            for (int i = 0; i < stateCounts.size(); i++) {
-//                stateCounts.set(i, m_dataType.getStateCount());
-//            }
-//        }
-
         convertCodonToState(true);
 
         if (alignmentInput.get().siteWeightsInput.get() != null) {
@@ -139,6 +129,12 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
         try {
             for (Sequence seq : alignment.sequences) {
                 List<Integer> seqStates = seq.getSequence(getDataType());
+                int tripletIndex = findStopCodon(seqStates);
+                if (tripletIndex > -1)
+                    throw new RuntimeException(seq.getTaxon() + " sequence contains stop codon at " +
+                            (tripletIndex+1) + "th triplets ! \n" +
+                            "Please either use codon alignment or provide a correct genetic code.");
+
                 counts.add(seqStates);
                 if (taxaNames.contains(seq.getTaxon())) {
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
@@ -162,6 +158,16 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
             throw new RuntimeException(e);
         }
     }
+
+    protected int findStopCodon(List<Integer> seqStates) {
+        for (int i = 0; i < seqStates.size(); i++) {
+            int state = seqStates.get(i);
+            if (geneticCode.isStopCodon(state))
+                return i;
+        }
+        return -1;
+    }
+
 
     /**
      * @return number of sites
