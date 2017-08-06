@@ -1140,7 +1140,8 @@
         <distribution idref="treeLikelihood" />
 
         <logger>
-            <log idref="tree"/>
+            <log idref="m0"/>
+            <!--<log idref="tree"/>-->
             <log idref="treeLikelihood"/>
             <!--<log idref="codon.freqs"/>-->
         </logger>

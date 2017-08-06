@@ -25,11 +25,10 @@
 
 package beast.evolution.substitutionmodel.codons;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Function;
-import beast.core.Input;
+import beast.core.*;
 import beast.core.parameter.RealParameter;
+
+import java.io.PrintStream;
 
 /**
  * Yang model of codon evolution
@@ -41,7 +40,7 @@ import beast.core.parameter.RealParameter;
 @Citation("Nick Goldman and Ziheng Yang. A codon-based model of nucleotide substitution for protein-coding DNA sequences. " +
         "Molecular biology and evolution 11.5 (1994): 725-736.")
 @Description("M0 codon model, also called as GY94, published by Goldman and Yang 1994")
-public class M0CodonModel extends AbstractCodonModel {
+public class M0CodonModel extends AbstractCodonModel implements Loggable {
     final public Input<RealParameter> kappaInput = new Input<>("kappa",
             "kappa parameter for transition-transversion rate ratio", Input.Validate.REQUIRED);
 
@@ -52,7 +51,8 @@ public class M0CodonModel extends AbstractCodonModel {
 //    protected RealParameter kappaParameter;
 //    protected RealParameter omegaParameter;
 
-    protected RealParameter synonymousRateParameter;
+    //TODO if this should move to AbstractCodonModel then make AbstractCodonModel Loggable
+    protected double synonymousRate;
 
     @Override
     public void initAndValidate() {
@@ -72,12 +72,10 @@ public class M0CodonModel extends AbstractCodonModel {
 
         kappaInput.get().setBounds(Math.max(0.0, kappaInput.get().getLower()), kappaInput.get().getUpper());
 
-        synonymousRateParameter = new RealParameter("1.0");
     }
 
-    public void setSynonymousRate(double kappa, double omega) {
-        double synonymousRate = ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
-        synonymousRateParameter.setValue(synonymousRate);
+    public double getSynonymousRate(double kappa, double omega) {
+        return ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
     }
 
     public double getNonSynonymousRate() {
@@ -89,10 +87,9 @@ public class M0CodonModel extends AbstractCodonModel {
         double kappa = kappaInput.get().getValue();
         double omega = omegaInput.get().getValue();
 
-        setSynonymousRate(kappa, omega); //TODO how to log?
+        this.synonymousRate = getSynonymousRate(kappa, omega);
 
-        Function rates = ratesInput.get();
-        for (int i = 0; i < rates.getDimension(); i++) {
+        for (int i = 0; i < rateCount; i++) {
             switch (rateMap[i]) {
                 case 0:
                     relativeRates[i] = 0.0;   // q_ij = 0
@@ -114,4 +111,18 @@ public class M0CodonModel extends AbstractCodonModel {
     }
 
 
+    @Override
+    public void init(PrintStream out) {
+        out.print("synonymousRate" + "\t");
+    }
+
+    @Override
+    public void log(int sample, PrintStream out) {
+        out.print(synonymousRate + "\t");
+    }
+
+    @Override
+    public void close(PrintStream out) {
+// nothing to do
+    }
 }
