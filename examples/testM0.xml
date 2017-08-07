@@ -1180,19 +1180,19 @@
             <tree idref="tree"/>
         </operator>
 
-        <!--<logger logEvery="1000" fileName="test.m0.log">-->
-            <!--<log idref="coalescent"/>-->
-            <!--<log idref="likelihood"/>-->
-            <!--&lt;!&ndash;parameter idref="treeModel.rootHeight"/&ndash;&gt;-->
-            <!--<log idref="popSize"/>-->
-            <!--<log idref="m0"/>-->
-            <!--<log idref="m0.omega"/>-->
-            <!--<log idref="m0.kappa"/>-->
-            <!--<log idref="posterior"/>-->
-        <!--</logger>-->
-        <!--<logger logEvery="1000" fileName="test.m0.trees">-->
-            <!--<log idref="tree"/>-->
-        <!--</logger>-->
+        <logger logEvery="1000" fileName="test.m0.log">
+            <log idref="coalescent"/>
+            <log idref="likelihood"/>
+            <!--parameter idref="treeModel.rootHeight"/-->
+            <log idref="popSize"/>
+            <log idref="m0"/>
+            <log idref="m0.omega"/>
+            <log idref="m0.kappa"/>
+            <log idref="posterior"/>
+        </logger>
+        <logger logEvery="1000" fileName="test.m0.trees">
+            <log idref="tree"/>
+        </logger>
         <logger logEvery="1000">
             <log idref="coalescent"/>
             <log idref="likelihood"/>
