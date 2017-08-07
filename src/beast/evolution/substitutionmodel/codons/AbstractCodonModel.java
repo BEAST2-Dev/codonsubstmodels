@@ -28,7 +28,7 @@ package beast.evolution.substitutionmodel.codons;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.evolution.alignment.ConvertAlignment;
+import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
@@ -45,7 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 @Description("Abstract codon model")
 public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
-    final public Input<ConvertAlignment> convertAlignmentInput = new Input<>("data",
+    final public Input<CodonAlignment> convertAlignmentInput = new Input<>("data",
             "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
 
     protected byte[] rateMap;
@@ -62,7 +62,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     public void initAndValidate() {
         this.frequencies = frequenciesInput.get();
 
-        ConvertAlignment alignment = convertAlignmentInput.get();
+        CodonAlignment alignment = convertAlignmentInput.get();
         DataType dataType = alignment.getDataType();
 
         if (! (dataType instanceof Codon) )

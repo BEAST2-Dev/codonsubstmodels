@@ -37,9 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * An alignment class that takes another alignment and converts it on the fly
- * to a different dataType.
- * Currently only working on nucleotide => codon
+ * An alignment class that takes nucleotide alignment and converts it
+ * to a codon dataType.
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
@@ -47,10 +46,10 @@ import java.util.List;
  *
  * Modified from BEAST 1 ConvertAlignment.
  */
-public class ConvertAlignment extends Alignment { //TODO should have WrappedAlignment between ConvertAlignment and Alignment
+public class CodonAlignment extends Alignment { //TODO should have WrappedAlignment between CodonAlignment and Alignment
 
     final public Input<Alignment> alignmentInput = new Input<>("data",
-            "alignment to convert to new type specified by userDataType", Input.Validate.REQUIRED);
+            "Nucleotide alignment to convert into codon data type specified by dataType", Input.Validate.REQUIRED);
 
     final public Input<String> geneticCodeInput = new Input<>("geneticCode",
             "The rule to define how sequences of nucleotide triplets, " +
@@ -60,7 +59,7 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
     protected Alignment alignment;
 //    protected GeneticCode geneticCode;
 
-    public ConvertAlignment() {
+    public CodonAlignment() {
         sequenceInput.setRule(Input.Validate.OPTIONAL);
         userDataTypeInput.setRule(Input.Validate.FORBIDDEN); // avoid confusion
         siteWeightsInput.setRule(Input.Validate.FORBIDDEN); // ?
@@ -75,7 +74,7 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
 
         initDataType();
         DataType newType = this.getDataType();
-        //TODO generalise
+        // only working for nucleotide => codon
         if (newType != null && newType instanceof Codon && originalType instanceof Nucleotide) {
             m_dataType = newType;
         } else {
@@ -184,7 +183,7 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
      * @return number of sites
      */
     public int getSiteCount() {
-        if (alignment == null) throw new RuntimeException("ConvertAlignment has no alignment");
+        if (alignment == null) throw new RuntimeException("CodonAlignment has no alignment");
 
         DataType originalType = alignment.getDataType();
         int count = alignment.getSiteCount();

@@ -7,7 +7,7 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.core.util.CompoundDistribution;
 import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.ConvertAlignment;
+import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.GenericTreeLikelihood;
 import beast.evolution.operators.DeltaExchangeOperator;
 import beast.evolution.sitemodel.SiteModel;
@@ -39,7 +39,7 @@ public class ConvertAlignmentInputEditor extends BEASTObjectInputEditor {
 
     @Override
     public Class<?> type() {
-        return ConvertAlignment.class;
+        return CodonAlignment.class;
     }
 
     @Override

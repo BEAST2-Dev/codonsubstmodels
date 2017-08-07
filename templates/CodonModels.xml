@@ -1,7 +1,16 @@
 <beast version='2.0'
        namespace='beast.app.beauti:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood'>
 
-       
+
+
+
+
+    <panel spec='BeautiPanelConfig' panelname="Codon Alignment" tiptext="Codon alignment converted from nucleotide alignment"
+           path='distribution/distribution[id="likelihood"]/distribution/data'
+           hasPartitions="CodonAlignment" icon='2220.png.x' forceExpansion='TRUE'
+    />
+    <mergepoint id='aux-codonalignment-panels'/>
+
     <mergewith point='substModelTemplates'>
 
         <!-- convert alignment -->

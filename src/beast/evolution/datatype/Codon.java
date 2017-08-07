@@ -109,7 +109,7 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
-    // offer to change GeneticCode later, especially after default constructor called by ConvertAlignment.initDataType()
+    // offer to change GeneticCode later, especially after default constructor called by CodonAlignment.initDataType()
     public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
