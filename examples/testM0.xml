@@ -1132,7 +1132,7 @@
         <input name='taxa' idref='alignment'/>
     </input>
 
-    <run spec="MCMC" id="mcmc" chainLength="100000"> <!--autoOptimize="true"-->
+    <run spec="MCMC" id="mcmc" chainLength="1000000"> <!--autoOptimize="true"-->
         <!--<state>-->
             <!--<input name='stateNode' idref='m0.omega'/>-->
             <!--<input name='stateNode' idref='m0.kappa'/>-->
@@ -1193,7 +1193,7 @@
         <logger logEvery="1000" fileName="test.m0.trees">
             <log idref="tree"/>
         </logger>
-        <logger logEvery="1000">
+        <logger logEvery="10000">
             <log idref="coalescent"/>
             <log idref="likelihood"/>
             <!--parameter idref="treeModel.rootHeight"/-->
