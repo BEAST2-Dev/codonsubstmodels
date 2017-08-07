@@ -1,6 +1,4 @@
-<beast version="2.0" namespace="beast.evolution.alignment:beast.core:beast.evolution.tree.coalescent:
-                                beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
-                                beast.evolution.substitutionmodel:beast.evolution.likelihood">
+<beast version="2.0" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
     <!-- ntax=6                                                                  -->
     <!--<taxon id="Human_Horai"/>-->
@@ -1121,7 +1119,7 @@
         <substModel idref="m0"/>
     </input>
 
-    <distribution id="treeLikelihood" spec="TreeLikelihood">
+    <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
         <input name="data" idref="codon.alignment"/>
         <input name="tree" idref="tree"/>
         <input name="siteModel" idref="siteModel"/>
@@ -1132,76 +1130,99 @@
         <input name='taxa' idref='alignment'/>
     </input>
 
-    <run spec="MCMC" id="mcmc" chainLength="1000000"> <!--autoOptimize="true"-->
-        <!--<state>-->
-            <!--<input name='stateNode' idref='m0.omega'/>-->
-            <!--<input name='stateNode' idref='m0.kappa'/>-->
-            <!--<input name='stateNode' idref='popSize'/>-->
-            <!--<input name='stateNode' idref='tree'/>-->
-        <!--</state>-->
 
-        <distribution spec="CompoundDistribution" id="posterior">
-            <distribution id="coalescent" spec="Coalescent">
-                <treeIntervals spec='TreeIntervals' id='TreeIntervals'>
-                    <tree idref="tree"/>
-                </treeIntervals>
-                <populationModel spec="ConstantPopulation" id='ConstantPopulation'>
-                    <parameter name="popSize" idref="popSize"/>
-                </populationModel>
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.math.distributions.Normal</map>
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+    <run spec="MCMC" id="mcmc" chainLength="1000000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="5000">
+            <input name='stateNode' idref='m0.omega'/>
+            <input name='stateNode' idref='m0.kappa'/>
+            <input name='stateNode' idref='popSize'/>
+            <input name='stateNode' idref='tree'/>
+        </state>
+
+        <distribution spec="util.CompoundDistribution" id="posterior">
+            <distribution id="prior" spec="util.CompoundDistribution">
+                <distribution id="coalescent" spec="Coalescent">
+                    <populationModel id="ConstantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
+                    <treeIntervals spec='TreeIntervals' id='TreeIntervals' tree="@tree"/>
+                </distribution>
+                <prior id="OmegaPrior" name="distribution" x="@m0.omega">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <parameter id="RealParameter.1" estimate="false" name="M">0.33</parameter>
+                        <parameter id="RealParameter.2" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="KappaPrior" name="distribution" x="@m0.kappa">
+                    <LogNormal id="LogNormalDistributionModel.1" name="distr">
+                        <parameter id="RealParameter.3" estimate="false" name="M">0.18</parameter>
+                        <parameter id="RealParameter.4" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="PopSizePrior" name="distribution" x="@popSize">
+                    <OneOnX id="OneOnX.1" name="distr"/>
+                </prior>
             </distribution>
-            <distribution id='likelihood' idref="treeLikelihood"/>
+            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+                <distribution idref="treeLikelihood"/>
+            </distribution>
         </distribution>
 
-        <operator id='omegaScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
-            <parameter idref="m0.omega"/>
-        </operator>
-        <operator id='kappaScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
-            <parameter idref="m0.kappa"/>
-        </operator>
-        <operator id='popSizeScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
-            <parameter idref="popSize"/>
-        </operator>
-        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" weight="1">
-            <tree idref="tree"/>
-        </operator>
-        <operator spec='Uniform' weight="10">
-            <tree idref="tree"/>
-        </operator>
-        <operator spec='SubtreeSlide' weight="5" gaussian="true" size="1.0">
-            <tree idref="tree"/>
-        </operator>
-        <operator id='narrow' spec='Exchange' isNarrow='true' weight="1">
-            <tree idref="tree"/>
-        </operator>
-        <operator id='wide' spec='Exchange' isNarrow='false' weight="1">
-            <tree idref="tree"/>
-        </operator>
-        <operator spec='WilsonBalding' weight="1">
-            <tree idref="tree"/>
-        </operator>
+        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.1" />
 
-        <logger logEvery="1000" fileName="test.m0.log">
+        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="0.1"/>
+
+        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="3.0"/>
+
+        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>
+
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>
+
+        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
+
+        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" weight="15.0"/>
+
+        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>
+
+        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>
+
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>
+
+        <logger logEvery="1000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
             <log idref="coalescent"/>
             <log idref="likelihood"/>
-            <!--parameter idref="treeModel.rootHeight"/-->
+            <log idref="prior"/>
             <log idref="popSize"/>
-            <log idref="m0"/>
+            <log idref="m0"/> <!--synonymousRate-->
             <log idref="m0.omega"/>
             <log idref="m0.kappa"/>
-            <log idref="posterior"/>
         </logger>
-        <logger logEvery="1000" fileName="test.m0.trees">
-            <log idref="tree"/>
-        </logger>
+
         <logger logEvery="10000">
-            <log idref="coalescent"/>
+            <log idref="posterior"/>
             <log idref="likelihood"/>
-            <!--parameter idref="treeModel.rootHeight"/-->
+            <log idref="prior"/>
             <log idref="popSize"/>
             <log idref="m0"/>
             <log idref="m0.omega"/>
+            <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>
             <log idref="m0.kappa"/>
-            <log idref="posterior"/>
+            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>
+        </logger>
+
+        <logger logEvery="1000" fileName="test.m0.trees" mode="tree">
+            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
         </logger>
     </run>
 

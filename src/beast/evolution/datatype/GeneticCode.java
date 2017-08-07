@@ -33,8 +33,9 @@ import beast.core.Description;
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
+ * @author Walter Xie
  *
- * Modified from BEAST 1 GeneticCode.
+ * Merged and modified from BEAST 1 GeneticCode, AminoAcids, Nucleotides.
  */
 @Description("A set of standard genetic codes.")
 public final class GeneticCode {

@@ -41,6 +41,7 @@ import beast.util.StringUtils;
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
+ * @author Walter Xie
  */
 public class Codon extends DataType.Base {
 
@@ -253,9 +254,9 @@ public class Codon extends DataType.Base {
     public final int[] getTripletStates(int state) {
         int[] triplet = new int[3];
 
-        triplet[0] = geneticCode.getNucleotideState(CODON_TRIPLETS[stateMap[state]].charAt(0));
-        triplet[1] = geneticCode.getNucleotideState(CODON_TRIPLETS[stateMap[state]].charAt(1));
-        triplet[2] = geneticCode.getNucleotideState(CODON_TRIPLETS[stateMap[state]].charAt(2));
+        triplet[0] = geneticCode.getNucleotideState(getTriplet(state).charAt(0));
+        triplet[1] = geneticCode.getNucleotideState(getTriplet(state).charAt(1));
+        triplet[2] = geneticCode.getNucleotideState(getTriplet(state).charAt(2));
 
         return triplet;
     }
@@ -267,22 +268,6 @@ public class Codon extends DataType.Base {
     public GeneticCode getGeneticCode() {
         return geneticCode;
     }
-
-//    /**
-//     * Takes non-canonical state and returns true if it represents stop codon
-//     *
-//     * @param state
-//     * @return true if the given state is a stop codon
-//     */
-//    public final boolean isStopCodon(int state) {
-//        return geneticCode.isStopCodon(stateMap[state]);
-//    }
-//
-//    public static byte[] constructRateMap(Codon codonDataType) {
-//        final int stateCount = codonDataType.getStateCount();
-//        final int rateCount = (stateCount * (stateCount - 1)) / 2;
-//        return constructRateMap(rateCount, stateCount, codonDataType, codonDataType.getGeneticCode());
-//    }
 
 
     /**

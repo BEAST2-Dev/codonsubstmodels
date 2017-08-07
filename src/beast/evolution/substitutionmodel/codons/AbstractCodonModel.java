@@ -37,13 +37,14 @@ import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * Imported from BEAST 1.
+ * Modified from BEAST 1 AbstractCodonModel.
+ *
  * @author Marc A. Suchard
+ * @author Walter Xie
  */
 @Description("Abstract codon model")
 public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
-    //TODO I only need DataType, how to pass it simply?
     final public Input<ConvertAlignment> convertAlignmentInput = new Input<>("data",
             "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
 
@@ -55,12 +56,6 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
     public AbstractCodonModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
-//        try {
-//            ratesInput.setValue(null, this);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            // TODO: handle exception
-//        }
     }
 
     @Override
@@ -96,27 +91,12 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
         relativeRates = new double[rateCount];
         storedRelativeRates = new double[rateCount];
 
-        constructRateMap();
+        rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
     }
 
     //TODO move to SubstitutionModel.Base
     protected int getRateCount(int stateCount) {
         return ((stateCount - 1) * stateCount);
-    }
-
-
-    /**
-     * Construct a map of the rate classes in the rate matrix using the current
-     * genetic code. Classes:
-     * 0: codon changes in more than one codon position (or stop codons)
-     * 1: synonymous transition
-     * 2: synonymous transversion
-     * 3: non-synonymous transition
-     * 4: non-synonymous transversion
-     */
-    protected void constructRateMap() {
-        // Refactored into static function, since CodonProductChains need this functionality
-        rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
     }
 
     /**
@@ -128,7 +108,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
      *		3: non-synonymous transition
      *		4: non-synonymous transversion
      */
-    public byte[] constructRateMap(int rateCount, int stateCount, Codon codonDataType, GeneticCode geneticCode)	{
+    protected byte[] constructRateMap(int rateCount, int stateCount, Codon codonDataType, GeneticCode geneticCode)	{
         int u, v, i1, j1, k1, i2, j2, k2;
         byte rateClass;
         int[] codon;

@@ -43,6 +43,7 @@ import java.util.List;
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
+ * @author Walter Xie
  *
  * Modified from BEAST 1 ConvertAlignment.
  */
@@ -194,59 +195,6 @@ public class ConvertAlignment extends Alignment { //TODO should have WrappedAlig
 
         return count;
     }
-
-
-//    protected void calcPatterns() {
-//        int nrOfTaxa = counts.size();
-//        int nrOfSites = getSiteCount();
-//
-//        DataType baseType = alignmentInput.get().m_dataType;
-//
-//
-//        maxStateCount = 0;
-//        for (int stateCount1 : stateCounts) {
-//            maxStateCount = Math.max(maxStateCount, stateCount1);
-//        }
-//
-//
-//    }
-
-
-    /**
-     * @return the sequence state at (taxon, site)
-     */
-//    public int getState(int taxonIndex, int siteIndex) {
-//        if (alignment == null) throw new RuntimeException("ConvertAlignment has no alignment");
-//
-//        DataType originalType = alignment.getDataType();
-//        DataType newType = getDataType();
-//
-//        int state = 0;
-//
-//        if (originalType instanceof Nucleotide) {
-//            int siteIndex3 = siteIndex * 3;
-//            int state1 = alignment.getState(taxonIndex, siteIndex3);
-//            int state2 = alignment.getState(taxonIndex, siteIndex3 + 1);
-//            int state3 = alignment.getState(taxonIndex, siteIndex3 + 2);
-//
-//            if (newType instanceof Codon) {
-//                state = ((Codon)newType).getState(state1, state2, state3);
-//            } else { // newType instanceof Aminoacid
-//                state = geneticCode.getAminoAcidState(((Codon)newType).getCanonicalState(((Codon)newType).getState(state1, state2, state3)));
-//            }
-//
-//        }
-//        else if (originalType instanceof Codon) {
-//            if (newType instanceof Aminoacid) {
-//                state = geneticCode.getAminoAcidState(alignment.getState(taxonIndex, siteIndex));
-//            } else { // newType instanceof Codon
-//                String string = Alignment.getSequence(alignment, taxonIndex);
-//                state = geneticCode.getNucleotideState(string.charAt(siteIndex));
-//            }
-//        }
-//
-//        return state;
-//    }
 
 
 
