@@ -94,11 +94,13 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
         rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
     }
 
-    //TODO move to SubstitutionModel.Base
+    //TODO move to GeneralSubstitutionModel ?
+    // relativeRates.length = nrOfStates * (nrOfStates - 1) in GeneralSubstitutionModel
     protected int getRateCount(int stateCount) {
-        return ((stateCount - 1) * stateCount);
+        return ((stateCount - 1) * stateCount); // / 2;
     }
 
+    //TODO constructRateMap copied from BEAST1 based on nrOfStates * (nrOfStates - 1) / 2 ?
     /**
      * Construct a map of the rate classes in the rate matrix using the current
      * genetic code. Classes:

@@ -4,127 +4,28 @@
        
     <mergewith point='substModelTemplates'>
 
+        <!-- convert alignment -->
+
+
+
+
         <!-- codon models -->
-
-
 
 <!-- M0-->
 
-        <subtemplate id="Standard_JC" class="substmodels.nucleotide.JC" mainid="Standard_JC.s:$(n)"
-        	 suppressInputs="substmodels.nucleotide.JC.frequencies,
-	        	 substmodels.nucleotide.JC.rates,
-    	    	 substmodels.nucleotide.JC.eigenSystem">
-            <![CDATA[
-        <plugin spec="substmodels.nucleotide.JC" id="Standard_JC.s:$(n)">
-            <parameter id="JCrates.s:$(n)" name="rates" value=" 1.0" lower="0.0" estimate="false"/>
-        </plugin>
+        <!--<subtemplate id="Standard_JC" class="substmodels.nucleotide.JC" mainid="Standard_JC.s:$(n)"-->
+        	 <!--suppressInputs="substmodels.nucleotide.JC.frequencies,-->
+	        	 <!--substmodels.nucleotide.JC.rates,-->
+    	    	 <!--substmodels.nucleotide.JC.eigenSystem">-->
+            <!--<![CDATA[-->
+        <!--<plugin spec="substmodels.nucleotide.JC" id="Standard_JC.s:$(n)">-->
+            <!--<parameter id="JCrates.s:$(n)" name="rates" value=" 1.0" lower="0.0" estimate="false"/>-->
+        <!--</plugin>-->
 
-]]>
-        </subtemplate>
-
-<!-- F81 = model: 000000 unequal frequencies-->
-
-        <subtemplate id="Standard_F81" class="substmodels.nucleotide.JC" mainid="Standard_F81.s:$(n)"
-        	 suppressInputs="substmodels.nucleotide.F81.frequencies,
-	        	 substmodels.nucleotide.F81.rates,
-    	    	 substmodels.nucleotide.F81.eigenSystem">
-            <![CDATA[
-        <plugin spec="substmodels.nucleotide.F81" id="Standard_F81.s:$(n)">
-            <parameter id="F81rates.s:$(n)" name="rates" value=" 1.0" lower="0.0" estimate="false"/>
-            <frequencies id="F81Freqs.s:$(n)" spec="Frequencies">
-                <frequencies id="F81freqParameter.s:$(n)" spec="parameter.RealParameter" dimension="4" value="0.25" lower="0" upper="1"/>
-            </frequencies>
-        </plugin>
-
-        <plugin id="F81FrequenciesExchanger.s:$(n)" spec="DeltaExchangeOperator" delta="0.01" weight="0.1" parameter="@F81freqParameter.s:$(n)"/>
-
-]]>
-
-            <connect srcID="F81freqParameter.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(Standard_F81.s:$(n))"/>
-
-            <connect srcID="F81FrequenciesExchanger.s:$(n)" targetID="mcmc" inputName="operator"
-                     if="inlikelihood(Standard_F81.s:$(n))">
-                Exchange values of frequencies of partition s:$(n)
-            </connect>
-
-            <connect srcID="F81freqParameter.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_F81.s:$(n))"/>
-        </subtemplate>
+<!--]]>-->
+        <!--</subtemplate>-->
 
 
-<!-- HKY = model: 010010 unequal frequencies-->
-
-        <subtemplate id="Standard_HKY" class="substmodels.nucleotide.JC" mainid="Standard_HKY.s:$(n)"
-        	 suppressInputs="substmodels.nucleotide.HKY.frequencies,
-	        	 substmodels.nucleotide.HKY.rates,
-    	    	 substmodels.nucleotide.HKY.eigenSystem">
-            <![CDATA[
-        <substModel spec="substmodels.nucleotide.HKY" id="Standard_HKY.s:$(n)">
-            <parameter id="HKYrates.s:$(n)" name="rates" value=" 1.0 1.0" lower="0.0" estimate="true"/>
-            <frequencies id="HKYFreqs.s:$(n)" spec="Frequencies">
-                <frequencies id="HKYfreqParameter.s:$(n)" spec="parameter.RealParameter" dimension="4" value="0.25" lower="0" upper="1"/>
-            </frequencies>
-        </substModel>
-
-        <operator id="HKYRateDeltaExchanger.s:$(n)" spec="DeltaExchangeOperator" delta="0.1" weight="0.1" parameter="@HKYrates.s:$(n)">
-			<weightvector value=" 4 2" estimate="false" spec="parameter.IntegerParameter"/>
-        </operator>
-        <operator id="HKYFrequenciesExchanger.s:$(n)" spec="DeltaExchangeOperator" delta="0.01" weight="0.1" parameter="@HKYfreqParameter.s:$(n)"/>
-
-]]>
-
-            <connect srcID="HKYrates.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(Standard_HKY.s:$(n))"/>
-            <connect srcID="HKYfreqParameter.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(Standard_HKY.s:$(n))"/>
-
-            <connect srcID="HKYRateDeltaExchanger.s:$(n)" targetID="mcmc" inputName="operator"
-                     if="inlikelihood(Standard_HKY.s:$(n))">Delta exchange rates parameter for HKY model at partition s:$(n)
-            </connect>
-            <connect srcID="HKYFrequenciesExchanger.s:$(n)" targetID="mcmc" inputName="operator"
-                     if="inlikelihood(Standard_HKY.s:$(n))">
-                Exchange values of frequencies of partition s:$(n)
-            </connect>
-
-            <!--connect srcID="HKYrates.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_HKY.s:$(n))"/-->
-            <connect srcID="HKYfreqParameter.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_HKY.s:$(n))"/>
-            <connect srcID="Standard_HKY.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_HKY.s:$(n))"/>
-        </subtemplate>
-
-
-<!-- GTR = model: 012345 unequal frequencies-->
-
-        <subtemplate id="Standard_GTR" class="substmodels.nucleotide.JC" mainid="Standard_GTR.s:$(n)"
-        	 suppressInputs="substmodels.nucleotide.GTR.frequencies,
-	        	 substmodels.nucleotide.GTR.rates,
-    	    	 substmodels.nucleotide.GTR.eigenSystem">
-            <![CDATA[
-        <substModel spec="substmodels.nucleotide.GTR" id="Standard_GTR.s:$(n)">
-            <parameter id="GTRrates.s:$(n)" name="rates" value=" 1.0 1.0 1.0 1.0 1.0 1.0" lower="0.0" estimate="true"/>
-            <frequencies id="GTRFreqs.s:$(n)" spec="Frequencies">
-                <frequencies id="GTRfreqParameter.s:$(n)" spec="parameter.RealParameter" dimension="4" value="0.25" lower="0" upper="1"/>
-            </frequencies>
-        </substModel>
-
-        <operator id="GTRRateDeltaExchanger.s:$(n)" spec="DeltaExchangeOperator" delta="0.1" weight="0.1" parameter="@GTRrates.s:$(n)">
-			<weightvector value=" 1 1 1 1 1 1" estimate="false" spec="parameter.IntegerParameter"/>
-        </operator>
-        <operator id="GTRFrequenciesExchanger.s:$(n)" spec="DeltaExchangeOperator" delta="0.01" weight="0.1" parameter="@GTRfreqParameter.s:$(n)"/>
-
-]]>
-
-            <connect srcID="GTRrates.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(Standard_GTR.s:$(n))"/>
-            <connect srcID="GTRfreqParameter.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(Standard_GTR.s:$(n))"/>
-
-            <connect srcID="GTRRateDeltaExchanger.s:$(n)" targetID="mcmc" inputName="operator"
-                     if="inlikelihood(Standard_GTR.s:$(n))">Delta exchange rates parameter for GTR model at partition s:$(n)
-            </connect>
-            <connect srcID="GTRFrequenciesExchanger.s:$(n)" targetID="mcmc" inputName="operator"
-                     if="inlikelihood(Standard_GTR.s:$(n))">
-                Exchange values of frequencies of partition s:$(n)
-            </connect>
-
-            <!--connect srcID="GTRrates.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_GTR.s:$(n))"/-->
-            <connect srcID="GTRfreqParameter.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_GTR.s:$(n))"/>
-            <connect srcID="Standard_GTR.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(Standard_GTR.s:$(n))"/>
-        </subtemplate>
     </mergewith>
     
     

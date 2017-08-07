@@ -75,6 +75,7 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
 
     }
 
+    // where is the formula?
     public double getSynonymousRate(double kappa, double omega) {
         return ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
     }
