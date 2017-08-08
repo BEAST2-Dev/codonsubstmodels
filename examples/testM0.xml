@@ -1099,7 +1099,7 @@
         </sequence>
     </data>
 
-    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="ConvertAlignment"/>
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
     <parameter id="m0.omega" value="1.414"/>
     <parameter id="m0.kappa" value="1.234567"/>

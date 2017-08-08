@@ -38,8 +38,9 @@ import java.io.PrintStream;
  * @author Marc A. Suchard
  * @author Walter Xie
  */
-@Citation("Goldman N, & Yang Z (1994). A codon-based model of nucleotide substitution for " +
-        "protein-coding DNA sequences. Molecular biology and evolution 11(5), 725-736.")
+@Citation(value= "Goldman N, & Yang Z (1994). A codon-based model of nucleotide substitution for\n" +
+        "protein-coding DNA sequences. Molecular biology and evolution 11(5), 725-736.", year = 2014,
+         DOI = "10.1093/oxfordjournals.molbev.a040153")
 @Description("M0 codon model, also called as GY94, published by Goldman and Yang 1994")
 public class M0CodonModel extends AbstractCodonModel implements Loggable {
     final public Input<RealParameter> kappaInput = new Input<>("kappa",

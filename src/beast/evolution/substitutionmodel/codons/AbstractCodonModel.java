@@ -187,6 +187,48 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     }
 
     @Override
+    protected void setupRelativeRates() {
+        throw new UnsupportedOperationException("setupRelativeRates needs to override in codon models !");
+    }
+
+
+    // TODO these need to refactor to several method in GeneralSubstitutionModel to reuse here
+    @Override
+    protected void setupRateMatrix() {
+        double[] freqs = frequencies.getFreqs();
+
+        int k = 0;
+        // Set the instantaneous rate matrix
+        for (int i = 0; i < nrOfStates; i++) {
+            for (int j = i + 1; j < nrOfStates; j++) {
+                rateMatrix[i][j] = relativeRates[k] * freqs[j];
+                rateMatrix[j][i] = relativeRates[k] * freqs[i];
+                k++;
+            }
+        }
+
+        // set up diagonal
+        for (int i = 0; i < nrOfStates; i++) {
+            double sum = 0.0;
+            for (int j = 0; j < nrOfStates; j++) {
+                if (i != j)
+                    sum += rateMatrix[i][j];
+            }
+            rateMatrix[i][i] = -sum;
+        }
+        // normalise rate matrix to one expected substitution per unit time
+        double subst = 0.0;
+        for (int i = 0; i < nrOfStates; i++)
+            subst += -rateMatrix[i][i] * freqs[i];
+
+        for (int i = 0; i < nrOfStates; i++) {
+            for (int j = 0; j < nrOfStates; j++) {
+                rateMatrix[i][j] = rateMatrix[i][j] / subst;
+            }
+        }
+    }
+
+    @Override
     public boolean canHandleDataType(DataType dataType) {
         return dataType instanceof Codon;
     }
