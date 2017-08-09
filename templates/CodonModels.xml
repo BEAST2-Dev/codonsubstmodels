@@ -9,12 +9,12 @@
 
         <!-- codon models -->
 
-        <subtemplate id="M0" class="beast.evolution.substitutionmodel.codons.M0CodonModel" mainid="M0.s:$(n)"
-                     suppressInputs="beast.evolution.substitutionmodel.codons.M0CodonModel.frequencies,
-	        	 beast.evolution.substitutionmodel.codons.M0CodonModel.rates,
-    	    	 beast.evolution.substitutionmodel.codons.M0CodonModel.eigenSystem">
+        <subtemplate id="M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="codonmodels.M0CodonModel.frequencies,
+	        	 codonmodels.M0CodonModel.rates,
+    	    	 codonmodels.M0CodonModel.eigenSystem">
             <![CDATA[
-        <substModel spec="beast.evolution.substitutionmodel.codons.M0CodonModel" id="M0.s:$(n)">
+        <substModel spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0kappa.s:$(n)" name="kappa" value="1.0"/>
             <frequencies id="M0freqs.s:$(n)" spec="Frequencies">

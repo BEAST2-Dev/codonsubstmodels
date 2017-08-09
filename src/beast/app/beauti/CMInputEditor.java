@@ -15,7 +15,7 @@ public class CMInputEditor extends BEASTObjectInputEditor {
 	
 	@Override
 	public Class<?> type() {
-		return beast.evolution.substitutionmodel.codons.AbstractCodonModel.class;
+		return codonmodels.AbstractCodonModel.class;
 	}
 	
 	@Override

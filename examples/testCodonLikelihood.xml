@@ -1111,7 +1111,7 @@
     <parameter id="m0.kappa" value="1.234567"/>
     <!--<parameter id="codon.freqs" value="0.01639345" dimension="61" lower="0.0" upper="1.0"/>-->
 
-    <input spec="beast.evolution.substitutionmodel.codons.M0CodonModel" id="m0" printRateMap="true">
+    <input spec="codonmodels.M0CodonModel" id="m0" printRateMap="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <data idref="codon.alignment"/>

@@ -23,7 +23,7 @@
  * Boston, MA  02110-1301  USA
  */
 
-package beast.evolution.substitutionmodel.codons;
+package codonmodels;
 
 
 import beast.core.Description;
