@@ -219,8 +219,27 @@ public final class GeneticCode {
             16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17        // 112-127
     };
 
+    /**
+     * This gives NUCLEOTIDE_STATES imported from BEAST 1,
+     * which is different to BEAST 2 Nucleotide states.
+     * Only used by Codon.java
+     * @see Codon#getTripletStates(int)
+     * @param c
+     * @return
+     */
     public int getNucleotideState(char c) {
         return NUCLEOTIDE_STATES[c];
+    }
+
+    /**
+     * This cooperates with BEAST 2 Nucleotide state.
+     * @see Nucleotide#getChar(int)
+     * @param state
+     * @return
+     */
+    public char getNucleotideChar(int state) {
+        Nucleotide nucleotide = new Nucleotide();
+        return nucleotide.getChar(state);
     }
 
     /**
@@ -246,37 +265,42 @@ public final class GeneticCode {
     //       P  Q  R  S  T  u  V  W  X  Y  Z
             12,13,14,15,16,24,17,18,22,19,21,25,25,25,25,25     // 112-127
     };
-    
-    /**
-     * Returns the char associated with AminoAcid represented by codonState.
-     * Note that the char is as defined by Aminoacid.java
-     * @see Aminoacid
-     * @see Codon
-     * @return state for '?' if codon unknown
-     */
-    public char getAminoAcidChar(int codonState) {
-        if (codonState == Codon.UNKNOWN_STATE)
-            return Aminoacid.MISSING_CHAR;
-        else if (codonState == Codon.GAP_STATE)
-            return Aminoacid.GAP_CHAR;
 
-        return codeTable.charAt(codonState);
+    /**
+     * A table to translate state numbers (0-25) into one letter codes.
+     */
+    public static final char[] AMINOACID_CHARS= {
+            'A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R',
+            'S','T','V','W','Y','B','Z','X',
+            Codon.STOP_CHARACTER,DataType.MISSING_CHAR,DataType.GAP_CHAR
+    };
+
+    /**
+     * Get character corresponding to a given state mapping to
+     * {@link #AMINOACID_STATES AMINOACID_STATES}.
+     * @return
+     */
+    public char getAminoAcidChar(int state) {
+        return AMINOACID_CHARS[state];
     }
 
     /**
-     * Returns the state associated with AminoAcid represented by codonState.
-     * Note that the state is the canonical state (generated combinatorially)
-     * @see Aminoacid
-     * @see Codon
+     * Returns the state associated with AminoAcid ({@link #AMINOACID_STATES AMINOACID_STATES})
+     * represented by codonState.
+     * Note: the state is the canonical state (generated combinatoriall),
+     * which is different to BEAST 2 Aminoacid states, and which can be
+     * from {@link Codon#getCanonicalState(int)} getCanonicalState}.
+     *
+     * @see #AMINOACID_STATES
      * @return '?' if codon unknown
      */
-    public int getAminoAcidState(int codonState) {
+    public int getAminoAcidCodonState(int codonState) {
         if (codonState == Codon.UNKNOWN_STATE)
             return Aminoacid.MISSING_CHAR;
         else if (codonState == Codon.GAP_STATE)
             return Aminoacid.GAP_CHAR;
 
-        return AMINOACID_STATES[getAminoAcidChar(codonState)];
+        return AMINOACID_STATES[codeTable.charAt(codonState)];
     }
 
 //    /**
@@ -284,7 +308,7 @@ public final class GeneticCode {
 //     * @return whether the codonState is a stop codon
 //     */
 //    public boolean isStopCodon(int codonState) {
-//        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
+//        return (getAminoAcidCodonState(codonState) == Codon.STOP_STATE);
 //    }
 
 

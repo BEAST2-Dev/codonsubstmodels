@@ -42,11 +42,15 @@ import java.lang.reflect.InvocationTargetException;
  * @author Marc A. Suchard
  * @author Walter Xie
  */
-@Description("Abstract codon model")
+@Description("Abstract codon model to construct an array of rate classes " +
+        "using the current genetic code.")
 public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
     final public Input<CodonAlignment> convertAlignmentInput = new Input<>("data",
             "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
+    final public Input<Boolean> printRateMapInput = new Input<>("printRateMap",
+            "Print the rate classes in the rate matrix using the current genetic code",
+            Boolean.FALSE);
 
     protected byte[] rateMap;
 
@@ -70,6 +74,7 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
         this.codonDataType = (Codon) dataType;
 
         this.geneticCode = codonDataType.getGeneticCode();
+        System.out.println("Genetic code is " + geneticCode.getDescription());
 
         //====== init states and rates ======
         updateMatrix = true;
@@ -77,8 +82,8 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
 
         try {
             eigenSystem = createEigenSystem();
-        } catch (SecurityException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException e) {
+        } catch (SecurityException | ClassNotFoundException | InstantiationException |
+                IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
         //eigenSystem = new DefaultEigenSystem(m_nStates);
@@ -92,98 +97,117 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
         storedRelativeRates = new double[rateCount];
 
         rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
+
+        if (printRateMapInput.get())
+            printRateMap(); // debug
     }
 
     //TODO move to GeneralSubstitutionModel ?
     // relativeRates.length = nrOfStates * (nrOfStates - 1) in GeneralSubstitutionModel
     protected int getRateCount(int stateCount) {
-        return ((stateCount - 1) * stateCount); // / 2;
+        return ((stateCount - 1) * stateCount);
     }
 
-    //TODO constructRateMap copied from BEAST1 based on nrOfStates * (nrOfStates - 1) / 2 ?
     /**
-     * Construct a map of the rate classes in the rate matrix using the current
-     * genetic code. Classes:
+     *
+     * Construct a map of the rate classes in the rate matrix
+     * using the current genetic code. Classes:
      *		0: codon changes in more than one codon position (or stop codons)
      *		1: synonymous transition
      *		2: synonymous transversion
      *		3: non-synonymous transition
      *		4: non-synonymous transversion
+     *
+     * The map is in an array whose length = nrOfStates * (nrOfStates - 1).
+     * @param rateCount  get from {@link #getRateCount(int)} getRateCount}.
+     * @param stateCount  nrOfStates
+     * @param codonDataType  {@link Codon Codon}
+     * @param geneticCode  {@link GeneticCode#GENETIC_CODE_NAMES GENETIC_CODE_NAMES}
+     * @return
      */
     protected byte[] constructRateMap(int rateCount, int stateCount, Codon codonDataType, GeneticCode geneticCode)	{
-        int u, v, i1, j1, k1, i2, j2, k2;
         byte rateClass;
-        int[] codon;
-        int cs1, cs2, aa1, aa2;
-
-        int i = 0;
-
         byte[] rateMap = new byte[rateCount];
 
-        for (u = 0; u < stateCount; u++) {
+        // this needs to match rateMatrix[i][j] <= relativeRates[] in setupRateMatrix()
+        for (int i = 0; i < stateCount; i++) {
 
-            codon = codonDataType.getTripletStates(u);
-            i1 = codon[0];
-            j1 = codon[1];
-            k1 = codon[2];
+            // i1, j1, k1, aa1
+            int[] ids1 = getCodonStatesForRateClass(i, codonDataType, geneticCode);
 
-            cs1 = codonDataType.getState(i1, j1, k1);
-            aa1 = geneticCode.getAminoAcidState(codonDataType.getCanonicalState(cs1));
+            for (int j = 0; j < i; j++) {
+                // i2, j2, k2, aa2
+                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
 
-            for (v = u + 1; v < stateCount; v++) {
+                rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
+                rateMap[i * (stateCount - 1) + j] = rateClass;
 
-                codon = codonDataType.getTripletStates(v);
-                i2 = codon[0];
-                j2 = codon[1];
-                k2 = codon[2];
-
-                cs2 = codonDataType.getState(i2, j2, k2);
-                aa2 = geneticCode.getAminoAcidState(codonDataType.getCanonicalState(cs2));
-
-                rateClass = -1;
-                if (i1 != i2) {
-                    if ( (i1 == 0 && i2 == 2) || (i1 == 2 && i2 == 0) || // A <-> G
-                            (i1 == 1 && i2 == 3) || (i1 == 3 && i2 == 1) ) { // C <-> T
-                        rateClass = 1; // Transition at position 1
-                    } else {
-                        rateClass = 2; // Transversion at position 1
-                    }
-                }
-                if (j1 != j2) {
-                    if (rateClass == -1) {
-                        if ( (j1 == 0 && j2 == 2) || (j1 == 2 && j2 == 0) || // A <-> G
-                                (j1 == 1 && j2 == 3) || (j1 == 3 && j2 == 1) ) { // C <-> T
-                            rateClass = 1; // Transition
-                        } else {
-                            rateClass = 2; // Transversion
-                        }
-                    } else
-                        rateClass = 0; // Codon changes at more than one position
-                }
-                if (k1 != k2) {
-                    if (rateClass == -1) {
-                        if ( (k1 == 0 && k2 == 2) || (k1 == 2 && k2 == 0) || // A <-> G
-                                (k1 == 1 && k2 == 3) || (k1 == 3 && k2 == 1) ) { // C <-> T
-                            rateClass = 1; // Transition
-                        } else {
-                            rateClass = 2; // Transversion
-                        }
-                    } else
-                        rateClass = 0; // Codon changes at more than one position
-                }
-
-                if (rateClass != 0) {
-                    if (aa1 != aa2) {
-                        rateClass += 2; // Is a non-synonymous change
-                    }
-                }
-
-                rateMap[i] = rateClass;
-                i++;
             }
+            for (int j = i + 1; j < stateCount; j++) {
+                // i2, j2, k2, aa2
+                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
 
+                rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
+                rateMap[i * (stateCount - 1) + j - 1] = rateClass;
+            }
         }
+
         return rateMap;
+    }
+
+    // return i1, j1, k1, aa1 given i
+    private int[] getCodonStatesForRateClass(int i, Codon codonDataType, GeneticCode geneticCode) {
+        int i1, j1, k1, cs1, aa1;
+        int[] codon  = codonDataType.getTripletStates(i);
+        i1 = codon[0];
+        j1 = codon[1];
+        k1 = codon[2];
+
+        cs1 = codonDataType.getState(i1, j1, k1);
+        aa1 = geneticCode.getAminoAcidCodonState(codonDataType.getCanonicalState(cs1));
+        return new int[]{i1, j1, k1, aa1};
+    }
+
+    // get rateClass for constructRateMap
+    private byte getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
+        byte rateClass = -1;
+        if (i1 != i2) {
+            if ( (i1 == 0 && i2 == 2) || (i1 == 2 && i2 == 0) || // A <-> G
+                    (i1 == 1 && i2 == 3) || (i1 == 3 && i2 == 1) ) { // C <-> T
+                rateClass = 1; // Transition at position 1
+            } else {
+                rateClass = 2; // Transversion at position 1
+            }
+        }
+        if (j1 != j2) {
+            if (rateClass == -1) {
+                if ( (j1 == 0 && j2 == 2) || (j1 == 2 && j2 == 0) || // A <-> G
+                        (j1 == 1 && j2 == 3) || (j1 == 3 && j2 == 1) ) { // C <-> T
+                    rateClass = 1; // Transition
+                } else {
+                    rateClass = 2; // Transversion
+                }
+            } else
+                rateClass = 0; // Codon changes at more than one position
+        }
+        if (k1 != k2) {
+            if (rateClass == -1) {
+                if ( (k1 == 0 && k2 == 2) || (k1 == 2 && k2 == 0) || // A <-> G
+                        (k1 == 1 && k2 == 3) || (k1 == 3 && k2 == 1) ) { // C <-> T
+                    rateClass = 1; // Transition
+                } else {
+                    rateClass = 2; // Transversion
+                }
+            } else
+                rateClass = 0; // Codon changes at more than one position
+        }
+
+        if (rateClass != 0) {
+            if (aa1 != aa2) {
+                rateClass += 2; // Is a non-synonymous change
+            }
+        }
+        return rateClass;
     }
 
     @Override
@@ -192,148 +216,84 @@ public abstract class AbstractCodonModel extends GeneralSubstitutionModel {
     }
 
 
-    // TODO these need to refactor to several method in GeneralSubstitutionModel to reuse here
-    @Override
-    protected void setupRateMatrix() {
-        double[] freqs = frequencies.getFreqs();
-
-        int k = 0;
-        // Set the instantaneous rate matrix
-        for (int i = 0; i < nrOfStates; i++) {
-            for (int j = i + 1; j < nrOfStates; j++) {
-                rateMatrix[i][j] = relativeRates[k] * freqs[j];
-                rateMatrix[j][i] = relativeRates[k] * freqs[i];
-                k++;
-            }
-        }
-
-        // set up diagonal
-        for (int i = 0; i < nrOfStates; i++) {
-            double sum = 0.0;
-            for (int j = 0; j < nrOfStates; j++) {
-                if (i != j)
-                    sum += rateMatrix[i][j];
-            }
-            rateMatrix[i][i] = -sum;
-        }
-        // normalise rate matrix to one expected substitution per unit time
-        double subst = 0.0;
-        for (int i = 0; i < nrOfStates; i++)
-            subst += -rateMatrix[i][i] * freqs[i];
-
-        for (int i = 0; i < nrOfStates; i++) {
-            for (int j = 0; j < nrOfStates; j++) {
-                rateMatrix[i][j] = rateMatrix[i][j] / subst;
-            }
-        }
-    }
-
     @Override
     public boolean canHandleDataType(DataType dataType) {
         return dataType instanceof Codon;
     }
 
-//    public void printRateMap() {
-//        int u, v, i1, j1, k1, i2, j2, k2;
-//        byte rateClass;
-//        int[] codon;
-//        int cs1, cs2, aa1, aa2;
-//
-//        System.out.print("\t");
-//        for (v = 0; v < stateCount; v++) {
-//            codon = codonDataType.getTripletStates(v);
-//            i2 = codon[0];
-//            j2 = codon[1];
-//            k2 = codon[2];
-//
-//            System.out.print("\t" + Nucleotides.INSTANCE.getChar(i2));
-//            System.out.print(Nucleotides.INSTANCE.getChar(j2));
-//            System.out.print(Nucleotides.INSTANCE.getChar(k2));
-//        }
-//        System.out.println();
-//
-//        System.out.print("\t");
-//        for (v = 0; v < stateCount; v++) {
-//            codon = codonDataType.getTripletStates(v);
-//            i2 = codon[0];
-//            j2 = codon[1];
-//            k2 = codon[2];
-//
-//            cs2 = codonDataType.getState(i2, j2, k2);
-//            aa2 = geneticCode.getAminoAcidState(codonDataType.getCanonicalState(cs2));
-//            System.out.print("\t" + AminoAcids.INSTANCE.getChar(aa2));
-//        }
-//        System.out.println();
-//
-//        for (u = 0; u < stateCount; u++) {
-//
-//            codon = codonDataType.getTripletStates(u);
-//            i1 = codon[0];
-//            j1 = codon[1];
-//            k1 = codon[2];
-//
-//            System.out.print(Nucleotides.INSTANCE.getChar(i1));
-//            System.out.print(Nucleotides.INSTANCE.getChar(j1));
-//            System.out.print(Nucleotides.INSTANCE.getChar(k1));
-//
-//            cs1 = codonDataType.getState(i1, j1, k1);
-//            aa1 = geneticCode.getAminoAcidState(codonDataType.getCanonicalState(cs1));
-//
-//            System.out.print("\t" + AminoAcids.INSTANCE.getChar(aa1));
-//
-//            for (v = 0; v < stateCount; v++) {
-//
-//                codon = codonDataType.getTripletStates(v);
-//                i2 = codon[0];
-//                j2 = codon[1];
-//                k2 = codon[2];
-//
-//                cs2 = codonDataType.getState(i2, j2, k2);
-//                aa2 = geneticCode.getAminoAcidState(codonDataType.getCanonicalState(cs2));
-//
-//                rateClass = -1;
-//                if (i1 != i2) {
-//                    if ((i1 == 0 && i2 == 2) || (i1 == 2 && i2 == 0) || // A <-> G
-//                            (i1 == 1 && i2 == 3) || (i1 == 3 && i2 == 1)) { // C <-> T
-//                        rateClass = 1; // Transition at position 1
-//                    } else {
-//                        rateClass = 2; // Transversion at position 1
-//                    }
-//                }
-//                if (j1 != j2) {
-//                    if (rateClass == -1) {
-//                        if ((j1 == 0 && j2 == 2) || (j1 == 2 && j2 == 0) || // A <-> G
-//                                (j1 == 1 && j2 == 3) || (j1 == 3 && j2 == 1)) { // C <-> T
-//                            rateClass = 1; // Transition
-//                        } else {
-//                            rateClass = 2; // Transversion
-//                        }
-//                    } else
-//                        rateClass = 0; // Codon changes at more than one position
-//                }
-//                if (k1 != k2) {
-//                    if (rateClass == -1) {
-//                        if ((k1 == 0 && k2 == 2) || (k1 == 2 && k2 == 0) || // A <-> G
-//                                (k1 == 1 && k2 == 3) || (k1 == 3 && k2 == 1)) { // C <-> T
-//                            rateClass = 1; // Transition
-//                        } else {
-//                            rateClass = 2; // Transversion
-//                        }
-//                    } else
-//                        rateClass = 0; // Codon changes at more than one position
-//                }
-//
-//                if (rateClass != 0) {
-//                    if (aa1 != aa2) {
-//                        rateClass += 2; // Is a non-synonymous change
-//                    }
-//                }
-//
-//                System.out.print("\t" + rateClass);
-//
-//            }
-//            System.out.println();
-//
-//        }
-//    }
+    /** rateClass:
+     *		0: codon changes in more than one codon position (or stop codons)
+     *		1: synonymous transition
+     *		2: synonymous transversion
+     *		3: non-synonymous transition
+     *		4: non-synonymous transversion
+     */
+    public void printRateMap() {
+        byte rateClass;
+        int stateCount = nrOfStates;
+
+        System.out.println("\n============ rate matrix ============");
+        System.out.println("  0: codon changes in more than one codon position (or stop codons)");
+        System.out.println("  1: synonymous transition");
+        System.out.println("  2: synonymous transversion");
+        System.out.println("  3: non-synonymous transition");
+        System.out.println("  4: non-synonymous transversion");
+        System.out.print("\t");
+        for (int j = 0; j < stateCount; j++) {
+            // i2, j2, k2, aa2
+            int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+
+            System.out.print("\t" + geneticCode.getNucleotideChar(ids2[0]));
+            System.out.print(geneticCode.getNucleotideChar(ids2[1]));
+            System.out.print(geneticCode.getNucleotideChar(ids2[2]));
+        }
+        System.out.println();
+
+        System.out.print("\t");
+        for (int j = 0; j < stateCount; j++) {
+            int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+            System.out.print("\t" + geneticCode.getAminoAcidChar(ids2[3]));
+        }
+        System.out.println();
+
+        for (int i = 0; i < stateCount; i++) {
+
+            // i1, j1, k1, aa1
+            int[] ids1 = getCodonStatesForRateClass(i, codonDataType, geneticCode);
+
+            System.out.print(geneticCode.getNucleotideChar(ids1[0]));
+            System.out.print(geneticCode.getNucleotideChar(ids1[1]));
+            System.out.print(geneticCode.getNucleotideChar(ids1[2]));
+            System.out.print("\t" + geneticCode.getAminoAcidChar(ids1[3]));
+
+            for (int j = 0; j < i; j++) {
+                // i2, j2, k2, aa2
+                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+
+                rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
+                System.out.print("\t" + rateClass);
+
+            }
+            System.out.print("\t.");// i=j
+            for (int j = i + 1; j < stateCount; j++) {
+                // i2, j2, k2, aa2
+                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+
+                rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
+                System.out.print("\t" + rateClass);
+            }
+            System.out.println();
+        }
+
+        System.out.println("\n============ rates in array ============");
+        int col = rateMap.length / (stateCount - 1);
+        for (int i = 0; i < col; i++) {
+            System.out.print("rateMap[" + i * (stateCount - 1) + " - " + (i+1) * (stateCount - 1) + "] = ");
+            for (int j = 0; j < (stateCount - 1); j++) {
+                System.out.print("\t" + rateMap[i * (stateCount - 1) + j]);
+            }
+            System.out.println();
+        }
+    }
+
 }

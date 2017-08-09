@@ -1101,8 +1101,8 @@
 
     <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
-    <parameter id="m0.omega" value="1.414"/>
-    <parameter id="m0.kappa" value="1.234567"/>
+    <parameter id="m0.omega" value="0.7"/>
+    <parameter id="m0.kappa" value="1.5"/>
     <parameter id="popSize" value="1.0"/>
 
     <input spec="beast.evolution.substitutionmodel.codons.M0CodonModel" id="m0">
@@ -1178,9 +1178,9 @@
             </distribution>
         </distribution>
 
-        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.1" />
+        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="1" />
 
-        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="0.1"/>
+        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="1"/>
 
         <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="3.0"/>
 
@@ -1198,7 +1198,7 @@
 
         <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>
 
-        <logger logEvery="1000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <logger logEvery="2000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
             <log idref="coalescent"/>
             <log idref="likelihood"/>
@@ -1221,7 +1221,7 @@
             <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>
         </logger>
 
-        <logger logEvery="1000" fileName="test.m0.trees" mode="tree">
+        <logger logEvery="2000" fileName="test.m0.trees" mode="tree">
             <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
         </logger>
     </run>

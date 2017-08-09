@@ -245,8 +245,12 @@ public class Codon extends DataType.Base {
     }
 
     /**
-     * Get an array of three nucleotide states making this codon state
+     * Get an array of three nucleotide states making this codon state,
+     * where nucleotide states are indexed by
+     * {@link GeneticCode#NUCLEOTIDE_STATES NUCLEOTIDE_STATES}
+     * imported from BEAST 1.
      *
+     * @see GeneticCode#getNucleotideState
      * @param state state
      *              <p/>
      *              return corresponding triplet string
