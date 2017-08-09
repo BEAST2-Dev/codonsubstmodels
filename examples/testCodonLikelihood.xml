@@ -1122,10 +1122,11 @@
     </input>
 
     <!-- site model                                                              -->
-    <input spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+    <input spec="SiteModel" id="siteModel">
         <!--
-            <parameter name="shape" id="shape" value="0.5"/>
-            <parameter name="proportionInvariant" id="propInvar" value="0.2"/>
+            <parameter id="mutationRate" estimate="false" name="mutationRate">1.0</parameter>
+            <parameter id="gammaShape" estimate="false" name="shape">1.0</parameter>
+            <parameter id="proportionInvariant" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
         -->
         <substModel idref="m0"/>
     </input>

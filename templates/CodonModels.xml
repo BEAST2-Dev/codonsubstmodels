@@ -2,37 +2,50 @@
        namespace='beast.app.beauti:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood'>
 
 
+    <!-- codon alignment -->
 
-
-
-    <panel spec='BeautiPanelConfig' panelname="Codon Alignment" tiptext="Codon alignment converted from nucleotide alignment"
-           path='distribution/distribution[id="likelihood"]/distribution/data'
-           hasPartitions="CodonAlignment" icon='2220.png.x' forceExpansion='TRUE'
-    />
-    <mergepoint id='aux-codonalignment-panels'/>
 
     <mergewith point='substModelTemplates'>
 
-        <!-- convert alignment -->
-
-
-
-
         <!-- codon models -->
 
-<!-- M0-->
+        <subtemplate id="M0" class="beast.evolution.substitutionmodel.codons.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="beast.evolution.substitutionmodel.codons.M0CodonModel.frequencies,
+	        	 beast.evolution.substitutionmodel.codons.M0CodonModel.rates,
+    	    	 beast.evolution.substitutionmodel.codons.M0CodonModel.eigenSystem">
+            <![CDATA[
+        <substModel spec="beast.evolution.substitutionmodel.codons.M0CodonModel" id="M0.s:$(n)">
+            <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
+            <parameter id="M0kappa.s:$(n)" name="kappa" value="1.0"/>
+            <frequencies id="M0freqs.s:$(n)" spec="Frequencies">
+                <data idref="codon.alignment"/>
+                </frequencies>
+        </substModel>
 
-        <!--<subtemplate id="Standard_JC" class="substmodels.nucleotide.JC" mainid="Standard_JC.s:$(n)"-->
-        	 <!--suppressInputs="substmodels.nucleotide.JC.frequencies,-->
-	        	 <!--substmodels.nucleotide.JC.rates,-->
-    	    	 <!--substmodels.nucleotide.JC.eigenSystem">-->
-            <!--<![CDATA[-->
-        <!--<plugin spec="substmodels.nucleotide.JC" id="Standard_JC.s:$(n)">-->
-            <!--<parameter id="JCrates.s:$(n)" name="rates" value=" 1.0" lower="0.0" estimate="false"/>-->
-        <!--</plugin>-->
+        <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0omega.s:$(n)"/>
+        <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0kappa.s:$(n)"/>
 
-<!--]]>-->
-        <!--</subtemplate>-->
+        <prior id='OmegaPrior.s:$(n)' x='@M0omega.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+        <prior id='KappaPrior.s:$(n)' x='@M0kappa.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+]]>
+
+            <connect srcID="M0omega.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+
+            <connect srcID="M0omega.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+        </subtemplate>
 
 
     </mergewith>
