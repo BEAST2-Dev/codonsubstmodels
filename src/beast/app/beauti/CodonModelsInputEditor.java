@@ -6,18 +6,18 @@ import beast.core.Input;
 
 import javax.swing.*;
 
-public class CMInputEditor extends BEASTObjectInputEditor {
+public class CodonModelsInputEditor extends BEASTObjectInputEditor {
 	private static final long serialVersionUID = 1L;
 
-	public CMInputEditor(BeautiDoc doc) {
+	public CodonModelsInputEditor(BeautiDoc doc) {
 		super(doc);
 	}
-	
+
 	@Override
 	public Class<?> type() {
 		return codonmodels.AbstractCodonModel.class;
 	}
-	
+
 	@Override
 	public void init(Input<?> input, BEASTInterface beastObject, int itemNr, ExpandOption isExpandOption,
 			boolean addButtons) {

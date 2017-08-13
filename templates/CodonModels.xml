@@ -2,17 +2,16 @@
        namespace='beast.app.beauti:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood'>
 
 
-    <!-- codon alignment -->
 
 
     <mergewith point='substModelTemplates'>
 
         <!-- codon models -->
 
-        <subtemplate id="M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
-                     suppressInputs="codonmodels.M0CodonModel.frequencies,
-	        	 codonmodels.M0CodonModel.rates,
-    	    	 codonmodels.M0CodonModel.eigenSystem">
+        <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="codonmodels.M0CodonModel.frequencies, codonmodels.M0CodonModel.rates,
+                     codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
+                     codonmodels.M0CodonModel.printRateMap">
             <![CDATA[
         <substModel spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
@@ -47,6 +46,17 @@
             <connect srcID="M0.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
         </subtemplate>
 
+
+        <subtemplate id="CodonModel_M1" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="codonmodels.M0CodonModel.frequencies, codonmodels.M0CodonModel.rates,
+                     codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data">
+            <![CDATA[
+        <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
+            <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
+        </plugin>
+]]>
+
+        </subtemplate>
 
     </mergewith>
     

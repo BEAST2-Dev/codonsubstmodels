@@ -28,7 +28,6 @@ package codonmodels;
 
 import beast.core.Description;
 import beast.core.Input;
-import beast.core.Param;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
@@ -61,13 +60,6 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
 
     public AbstractCodonModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
-    }
-
-    public AbstractCodonModel(@Param(name="mode", description="model identifier is a 6 digit number describing which parameters are linked. "
-            + "For instance 010010 = HKY, 012345 = GTR. "
-            + "Order of digits are for rates AC, AG, AT, CG, CT, GT respectively ",
-            defaultValue="000000") String modelID) {
-        this();
     }
 
     @Override

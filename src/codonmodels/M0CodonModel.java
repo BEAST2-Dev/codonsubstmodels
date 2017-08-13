@@ -56,6 +56,10 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
     //TODO if this should move to AbstractCodonModel then make AbstractCodonModel Loggable
     protected double synonymousRate;
 
+    public M0CodonModel() {
+        super();
+    }
+
     @Override
     public void initAndValidate() {
         super.initAndValidate();
