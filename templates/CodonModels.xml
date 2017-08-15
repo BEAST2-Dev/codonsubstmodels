@@ -161,10 +161,10 @@
         />
 		<mergepoint id='aux-panels'/>
 
-		<alignmentProvider id="Convert Alignment" spec='CodonAlignmentProvider' template='@StandardPartitionTemplate'/>
+		<alignmentProvider id="Convert Alignment" spec='CodonAlignmentProvider' template='@CodonPartitionTemplate'/>
 
 
-        <partitiontemplate id='StandardPartitionTemplate' spec='BeautiSubTemplate' class='beast.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>
+        <partitiontemplate id='CodonPartitionTemplate' spec='BeautiSubTemplate' class='beast.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>
 <![CDATA[
             <!-- site model                                                              -->
             <plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>

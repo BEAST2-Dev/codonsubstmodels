@@ -185,7 +185,7 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
 
     protected void addAlignments(BeautiDoc doc, List<BEASTInterface> selectedBEASTObjects) {
         for (BEASTInterface beastObject : selectedBEASTObjects) {
-            if (beastObject instanceof Alignment) {
+            if (beastObject instanceof CodonAlignment) {
                 // ensure ID of alignment is unique
                 int k = 0;
                 String id = beastObject.getID();
@@ -207,7 +207,8 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
                     }
                 }
                 beastObject.setID(id);
-                sortByTaxonName(((Alignment) beastObject).sequenceInput.get());
+                // CodonAlignment wraps alignment
+                sortByTaxonName(((CodonAlignment) beastObject).alignmentInput.get().sequenceInput.get());
                 if (getStartTemplate() != null) {
                     doc.addAlignmentWithSubnet((Alignment) beastObject, getStartTemplate());
                 }
