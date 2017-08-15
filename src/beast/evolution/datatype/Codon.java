@@ -90,6 +90,7 @@ public class Codon extends DataType.Base {
 
     public static final int STOP_STATE = 23;
 
+    public final static String CODON = "codon";
 
     @Override
     public void initAndValidate() {
@@ -167,7 +168,7 @@ public class Codon extends DataType.Base {
 
     @Override
     public String getTypeDescription() {
-        return "codon";
+        return CODON;
     }
 
     //=========== for codons ==========

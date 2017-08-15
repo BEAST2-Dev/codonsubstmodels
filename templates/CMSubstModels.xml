@@ -1,0 +1,60 @@
+<beast version='2.0'
+       namespace='beast.app.beauti:beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood'>
+
+
+    <mergewith point='substModelTemplates'>
+
+        <!-- codon models -->
+
+        <subtemplate id="M1" class="codonmodels.M0CodonModel" mainid="M1.s:$(n)">
+            <![CDATA[
+        <plugin spec="codonmodels.M0CodonModel" id="M1.s:$(n)"/>
+]]>
+        </subtemplate>
+
+
+        <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="codonmodels.M0CodonModel.frequencies, codonmodels.M0CodonModel.rates,
+                     codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
+                     codonmodels.M0CodonModel.printRateMap">
+            <![CDATA[
+        <substModel spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
+            <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
+            <parameter id="M0kappa.s:$(n)" name="kappa" value="1.0"/>
+            <frequencies id="M0freqs.s:$(n)" spec="Frequencies">
+                <data idref="codon.alignment"/>
+                </frequencies>
+        </substModel>
+
+        <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0omega.s:$(n)"/>
+        <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0kappa.s:$(n)"/>
+
+        <prior id='OmegaPrior.s:$(n)' x='@M0omega.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+        <prior id='KappaPrior.s:$(n)' x='@M0kappa.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+]]>
+
+            <connect srcID="M0omega.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+
+            <connect srcID="M0omega.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+        </subtemplate>
+
+
+
+    </mergewith>
+
+
+</beast>
+

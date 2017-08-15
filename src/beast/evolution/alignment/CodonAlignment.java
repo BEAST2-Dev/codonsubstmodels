@@ -27,6 +27,7 @@ package beast.evolution.alignment;
 
 
 import beast.core.Input;
+import beast.core.util.Log;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.Nucleotide;
 import beast.util.AddOnManager;
@@ -63,29 +64,51 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         sequenceInput.setRule(Input.Validate.OPTIONAL);
         userDataTypeInput.setRule(Input.Validate.FORBIDDEN); // avoid confusion
         siteWeightsInput.setRule(Input.Validate.FORBIDDEN); // ?
+        // set default to Codon
+        dataTypeInput.setValue(Codon.CODON, this);
+    }
+
+    public CodonAlignment(Alignment alignment, GeneticCode geneticCode) {
+        this();
+        DataType alignmentType = alignment.getDataType();
+        if (! (alignmentType instanceof Nucleotide) ) {
+            throw new IllegalArgumentException("CodonAlignment currently only support to wrap the nucleotide alignment !");
+        }
+
+        alignmentInput.setValue(alignment, this);
+        geneticCodeInput.setValue(geneticCode.getName(), this);
+
+        if (this.m_dataType == null || !this.m_dataType.getTypeDescription().equals(Codon.CODON)) {
+            DataType oldType = this.m_dataType;
+            this.m_dataType = new Codon(geneticCode);
+            Log.warning.println("Warning: CodonAlignment (" + this.getID() + ") original data type was " +
+                    oldType + ", is corrected to " + this.m_dataType + " - " + geneticCode.getDescription() + " !");
+        }
+//        initAndValidate();
     }
 
 
     @Override
     public void initAndValidate() {
 
-        alignment = alignmentInput.get();
-        DataType originalType = alignment.getDataType();
+        alignment = alignmentInput.get();//Nucleotide
+        DataType alignmentType = alignment.getDataType();
+        GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
 
-        initDataType();
-        DataType newType = this.getDataType();
+        initDataType(); //TODO need improve
+
+        DataType thisType = this.m_dataType;
         // only working for nucleotide => codon
-        if (newType != null && newType instanceof Codon && originalType instanceof Nucleotide) {
-            m_dataType = newType;
+        if (thisType != null && thisType instanceof Codon && alignmentType instanceof Nucleotide) {
+            m_dataType = thisType;
         } else {
-            throw new UnsupportedOperationException("Currently only working on nucleotide => codon !");
+            throw new IllegalArgumentException("CodonAlignment only wraps the nucleotide alignment into codon alignment !");
         }
 
-        // set geneticCode
-        GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
-        GeneticCode geneticCode2 = ((Codon) newType).getGeneticCode();
-        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) { //newType instanceof Codon &&
-            ((Codon) newType).setGeneticCode(geneticCode);
+        // set geneticCode to geneticCodeInput.get() if different
+        GeneticCode geneticCode2 = ((Codon) thisType).getGeneticCode();
+        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) { //thisType instanceof Codon &&
+            ((Codon) m_dataType).setGeneticCode(geneticCode);
         }
 
         convertCodonToState(true);
@@ -136,9 +159,9 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
                 List<Integer> codonStates = seq.getSequence(getDataType()); // return mapCodeToStateSet indices i
                 int tripletIndex = findStopCodon(codonStates);
                 if (tripletIndex > -1)
-                    throw new RuntimeException(seq.getTaxon() + " sequence contains stop codon at " +
+                    Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
                             (tripletIndex+1) + "th triplets ! \n" +
-                            "Please either use codon alignment or provide a correct genetic code.");
+                            "Please either use a codon alignment or the correct genetic code.");
 
                 counts.add(codonStates);
                 if (taxaNames.contains(seq.getTaxon())) {
