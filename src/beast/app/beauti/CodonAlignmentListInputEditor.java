@@ -10,7 +10,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 	public CodonAlignmentListInputEditor(BeautiDoc doc) {
 		super(doc);
 	}
-    
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init(Input<?> input, BEASTInterface beastObject, int itemNr, ExpandOption isExpandOption, boolean addButtons) {

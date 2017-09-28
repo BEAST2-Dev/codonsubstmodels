@@ -6,13 +6,6 @@
 
         <!-- codon models -->
 
-        <subtemplate id="M1" class="codonmodels.M0CodonModel" mainid="M1.s:$(n)">
-            <![CDATA[
-        <plugin spec="codonmodels.M0CodonModel" id="M1.s:$(n)"/>
-]]>
-        </subtemplate>
-
-
         <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
                      suppressInputs="codonmodels.M0CodonModel.frequencies, codonmodels.M0CodonModel.rates,
                      codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
