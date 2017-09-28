@@ -192,7 +192,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
         buttonBox.add(replaceButton);
         buttonBox.add(Box.createHorizontalStrut(STRUT_SIZE));
 
-        
+
 //        splitButton = new JButton("Split");
 //        splitButton.setName("Split");
 //        splitButton.setToolTipText("Split alignment into partitions, for example, codon positions");
@@ -256,7 +256,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 			link(columnNr, rowNr, selected[0]);
 		}
 	}
-	
+
 	/** links partition in row "rowToLink" with partition in "rowToLinkWith" so that
 	 * after linking there is only one partition for context "columnNr", namely that
 	 * of "rowToLinkWith"
@@ -279,7 +279,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		MRCAPriorInputEditor.customConnector(doc);
 	}
 
-	
+
 	private void unlink(int columnNr) {
 		int[] selected = getTableRowSelection();
 		for (int i = 1; i < selected.length; i++) {
@@ -355,7 +355,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 			table.repaint();
 			return;
 		}
-		
+
 		int partitionID = BeautiDoc.ALIGNMENT_PARTITION;
 		switch (columnNr) {
 		case SITEMODEL_COLUMN:
@@ -378,7 +378,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		// tableData[rowNr][NAME_COLUMN]);
 
 		boolean needsRePartition = false;
-		
+
 		PartitionContext oldContext = new PartitionContext(this.likelihoods[rowNr]);
 
 		switch (columnNr) {
@@ -475,7 +475,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 						JOptionPane.showMessageDialog(this, "Could not clone tree model: " + e.getMessage());
 						return;
 					}
-					
+
 					State state = ((MCMC) doc.mcmc.get()).startStateInput.get();
 					List<StateNode> stateNodes = new ArrayList<>();
 					stateNodes.addAll(state.stateNodeInput.get());
@@ -498,7 +498,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 					likelihoods[rowNr].dataInput.get().getID(), likelihoods[rowNr].dataInput.get().getTaxaNames());
 
 			needsRePartition = (this.likelihoods[rowNr].treeInput.get() != tree);
-			Log.warning.println("needsRePartition = " + needsRePartition);			
+			Log.warning.println("needsRePartition = " + needsRePartition);
 			if (needsRePartition) {
 				TreeInterface oldTree = this.likelihoods[rowNr].treeInput.get();
 				List<TreeInterface> tModels = new ArrayList<>();
@@ -568,7 +568,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 			initTableData();
 			setUpComboBoxes();
 		}
-		
+
 		updateStatus();
 	}
 
@@ -674,8 +674,8 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		    	case NAME_COLUMN:
 		    	case GENETIC_CODE_COLUMNS:
                 case CLOCKMODEL_COLUMN:
-	    		case TREE_COLUMN: 
-	    		case SITEMODEL_COLUMN: 
+	    		case TREE_COLUMN:
+	    		case SITEMODEL_COLUMN:
 			        jcomp.setToolTipText("Set " + table.getColumnName(Index_col).toLowerCase() + " for this partition");
 					break;
 	    		case FILE_COLUMN:
@@ -684,7 +684,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 //	    		case TYPE_COLUMN:
 			        jcomp.setToolTipText("Report " + table.getColumnName(Index_col).toLowerCase() + " for this partition");
 					break;
-	    		case USE_AMBIGUITIES_COLUMN: 
+	    		case USE_AMBIGUITIES_COLUMN:
 					jcomp.setToolTipText("<html>Flag whether to use ambiguities.<br>" +
 							"If not set, the treelikelihood will treat ambiguities in the<br>" +
 							"data as unknowns<br>" +
@@ -844,7 +844,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 
 		return scrollPane;
 	} // createListBox
-	
+
 	void setUpComboBoxes() {
 		// set up comboboxes
 		@SuppressWarnings("unchecked")
@@ -894,7 +894,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		col.setPreferredWidth(30);
 		col = table.getColumnModel().getColumn(SITES_COLUMN);
 		col.setPreferredWidth(30);
-		
+
 		col = table.getColumnModel().getColumn(USE_AMBIGUITIES_COLUMN);
 		JCheckBox checkBox = new JCheckBox();
 		checkBox.addActionListener(e -> {
@@ -914,7 +914,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 				} catch (Exception ex) {
 					// TODO: handle exception
 				}
-		
+
 			});
 		col.setCellEditor(new DefaultCellEditor(checkBox));
 		col.setCellRenderer(new MyCheckBoxRenderer());
@@ -1074,9 +1074,9 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		// do the actual deleting
 		for (int i = selected.length - 1; i >= 0; i--) {
 			int rowNr = selected[i];
-			
+
 			// before deleting, unlink site model, clock model and tree
-			
+
 			// check whether any of the models are linked
 			BranchRateModel.Base clockModel = likelihoods[rowNr].branchRateModelInput.get();
 			SiteModelInterface siteModel = likelihoods[rowNr].siteModelInput.get();
@@ -1097,7 +1097,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 				}
 				}
 			}
-			
+
 			try {
 				if (cModels.size() > 0) {
 					// clock model is linked, so we need to unlink
@@ -1109,7 +1109,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 					}
 					updateModel(CLOCKMODEL_COLUMN, rowNr);
 				}
-				
+
 				if (models.size() > 0) {
 					// site model is linked, so we need to unlink
 					if (doc.getPartitionNr((BEASTInterface) siteModel) != rowNr) {
@@ -1120,7 +1120,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 					}
 					updateModel(SITEMODEL_COLUMN, rowNr);
 				}
-				
+
 				if (tModels.size() > 0) {
 					// tree is linked, so we need to unlink
 					if (doc.getPartitionNr((BEASTInterface) tree) != rowNr) {
@@ -1153,7 +1153,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		refreshPanel();
 	} // delItem
 
-	
+
 	void replaceItem() {
 		int [] selected = getTableRowSelection();
 		if (selected.length != 1) {
@@ -1164,7 +1164,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		Alignment alignment = alignments.get(selected[0]);
 		replaceItem(alignment);
 	}
-	
+
 	private void replaceItem(Alignment alignment) {
 		CodonAlignmentProvider provider = new CodonAlignmentProvider();
 		List<BEASTInterface> list = provider.getAlignments(doc);
@@ -1184,8 +1184,8 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		}
 		if (replacement != null) {
 			if (!replacement.getDataType().getClass().getName().equals(alignment.getDataType().getClass().getName())) {
-				JOptionPane.showMessageDialog(null, "Data types do not match, so alignment cannot be replaced: " + 
-						replacement.getID() + " " + replacement.getDataType().getClass().getName() + " != " + 
+				JOptionPane.showMessageDialog(null, "Data types do not match, so alignment cannot be replaced: " +
+						replacement.getID() + " " + replacement.getDataType().getClass().getName() + " != " +
 						alignment.getID() + " " + alignment.getDataType().getClass().getName());
 				return;
 			}
@@ -1213,7 +1213,7 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 			refreshPanel();
 		}
 	} // replaceItem
-	
+
 //	void splitItem() {
 //		int[] selected = getTableRowSelection();
 //		if (selected.length == 0) {
@@ -1302,6 +1302,6 @@ public class CodonAlignmentListInputEditor extends AlignmentListInputEditor {
 		delButton.setEnabled(status);
 		replaceButton.setEnabled(getTableRowSelection().length == 1);
 	}
-	
+
 } // class AlignmentListInputEditor
 
