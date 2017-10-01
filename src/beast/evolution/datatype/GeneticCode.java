@@ -141,6 +141,8 @@ public final class GeneticCode {
 //        FLATWORM_MT, BLEPHARISMA_NUC, NO_STOPS
 //    };
 
+    protected Nucleotide nucleotide = new Nucleotide(); // char <=> state
+
     public GeneticCode(int geneticCodeId) {
         this.geneticCodeId = geneticCodeId;
         codeTable = GENETIC_CODE_TABLES[geneticCodeId];
@@ -198,48 +200,23 @@ public final class GeneticCode {
 
 
     /**
-     * This table maps nucleotide characters into state codes (0-17)
-     * Nucleotides go ACGTURYMWSKBDHVN?-", Other letters are mapped to ?.
-     * ? and - are mapped to themselves. All other chars are mapped to -.
-     */
-    public static final int NUCLEOTIDE_STATES[] = {
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 0-15
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 16-31
-            //                                          -
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,    // 32-47
-            //                                                ?
-            17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,16,    // 48-63
-            //        A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
-            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,    // 64-79
-            //     p  q  R  S  T  U  V  W  x  Y  z
-            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17,    // 80-95
-            //        A  B  C  D  e  f  G  H  i  j  K  l  M  N  o
-            17, 0,11, 1,12,16,16, 2,13,16,16,10,16, 7,15,16,    // 96-111
-            //     p  q  R  S  T  U  V  W  x  Y  z
-            16,16, 5, 9, 3, 3,14, 8,16, 6,16,17,17,17,17,17        // 112-127
-    };
-
-    /**
-     * This gives NUCLEOTIDE_STATES imported from BEAST 1,
-     * which is different to BEAST 2 Nucleotide states.
-     * Only used by Codon.java
-     * @see Codon#getTripletStates(int)
+     * Get Nucleotide states from {@link Nucleotide#codeMap codeMap}.
+     * @see DataType#string2state(String)
      * @param c
      * @return
      */
     public int getNucleotideState(char c) {
-        return NUCLEOTIDE_STATES[c];
+        return nucleotide.string2state(String.valueOf(c)).get(0);
     }
 
     /**
-     * This cooperates with BEAST 2 Nucleotide state.
-     * @see Nucleotide#getChar(int)
+     * Infer char from {@link Nucleotide#codeMap codeMap}.
+     * @see DataType#state2string(int[])
      * @param state
      * @return
      */
     public char getNucleotideChar(int state) {
-        Nucleotide nucleotide = new Nucleotide();
-        return nucleotide.getChar(state);
+        return nucleotide.state2string(new int[]{state}).charAt(0);
     }
 
     /**
