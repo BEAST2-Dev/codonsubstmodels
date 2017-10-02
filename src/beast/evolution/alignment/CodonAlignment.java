@@ -220,6 +220,27 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return count;
     }
 
+    /**
+     * Use {@link Alignment#taxaNames taxaNames} as row indices, and
+     * {@link GeneticCode#GENETIC_CODE_TABLES GENETIC_CODE_TABLES} as column indices.
+     * @return
+     */
+    public int[][] getCodonUsage() {
+        if (taxaNames.size() != counts.size())
+            throw new IllegalArgumentException("taxaNames.size() " + taxaNames.size() + " != counts.size() " + counts.size());
+
+        GeneticCode geneticCode = getGeneticCode();
+        String code = geneticCode.getCodeTable();
+        int[][] usage = new int[taxaNames.size()][code.length()];
+        for (int i = 0; i < counts.size(); i++) {
+            List<Integer> codonStates = counts.get(i);
+            for (int j = 0; j < codonStates.size(); j++) {
+                int state = codonStates.get(j);
+                usage[i][state] += 1;
+            }
+        }
+        return usage;
+    }
 
 
 }

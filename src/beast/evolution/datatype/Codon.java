@@ -98,6 +98,15 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
+    protected GeneticCode geneticCode;
+    /**
+     * stateMap saves the states 0-63, but keeps the states of stop codon in the last.
+     * It is different to states from {@link DataType#string2state(String) string2state}
+     * using codeMap
+     */
+    protected int[] stateMap; //TODO merge stateMap to codeMap
+    protected int[] reverseMap;
+
     //TODO move to DataType
     protected int ambiguousStateCount;
 
@@ -197,8 +206,11 @@ public class Codon extends DataType.Base {
         return stateMap[funnyState];
     }
 
-//    public static final int NUCLEOTIDE_UNKNOWN_STATE = 16;
-    public static final int NUCLEOTIDE_GAP_STATE = 17;
+    /**
+     * index in {@link Nucleotide#codeMap codeMap}
+     */
+    public static final int NUCLEOTIDE_UNKNOWN_STATE = 18; // ?
+    public static final int NUCLEOTIDE_GAP_STATE = 17; // -
 
     /**
      * Get state corresponding to a nucleotide triplet
@@ -236,19 +248,20 @@ public class Codon extends DataType.Base {
 
     /**
      * Get triplet string corresponding to a given state
+     * indexed by {@link Codon#stateMap stateMap}
      *
      * @param state state
      *              <p/>
      *              return corresponding triplet string
      */
     public final String getTriplet(int state) {
-        return CODON_TRIPLETS[stateMap[state]];
+        return CODON_TRIPLETS[stateMap[state]]; // states from stateMap
+//        return state2string(new int[]{state}); // states from codeMap
     }
 
     /**
      * Get an array of three nucleotide states making this codon state,
-     * where nucleotide states are indexed by
-     * {@link Nucleotide#codeMap codeMap}.
+     * where nucleotide states are indexed by {@link Nucleotide#codeMap codeMap}.
      *
      * @see GeneticCode#getNucleotideState
      * @param state state
@@ -313,10 +326,4 @@ public class Codon extends DataType.Base {
 //        return codon;
 //    }
 
-
-    // Private members
-
-    protected GeneticCode geneticCode;
-    protected int[] stateMap;
-    protected int[] reverseMap;
 }

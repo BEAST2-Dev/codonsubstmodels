@@ -147,7 +147,14 @@ public final class GeneticCode {
         this.geneticCodeId = geneticCodeId;
         codeTable = GENETIC_CODE_TABLES[geneticCodeId];
     }
-    
+
+    /**
+     * Returns the genetic code table currently used
+     */
+    public String getCodeTable() {
+        return codeTable;
+    }
+
     /**
      * Returns the name of the genetic code
      */

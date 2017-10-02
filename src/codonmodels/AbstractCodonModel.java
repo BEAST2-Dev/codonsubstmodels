@@ -35,6 +35,7 @@ import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * Modified from BEAST 1 AbstractCodonModel.
@@ -48,8 +49,8 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
 
     final public Input<CodonAlignment> convertAlignmentInput = new Input<>("data",
             "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
-    final public Input<Boolean> printRateMapInput = new Input<>("printRateMap",
-            "Print the rate classes in the rate matrix using the current genetic code",
+    final public Input<Boolean> verboseInput = new Input<>("verbose",
+            "Print the codon usage, the rate classes in the rate matrix, etc.",
             Boolean.FALSE);
 
     protected byte[] rateMap;
@@ -74,7 +75,12 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         this.codonDataType = (Codon) dataType;
 
         this.geneticCode = codonDataType.getGeneticCode();
-        System.out.println("Genetic code is " + geneticCode.getDescription());
+
+        System.out.println("\nGenetic code is " + geneticCode.getDescription());
+        if (verboseInput.get()) {
+            printCodonUsage();
+            printCodonPositionBaseTable();
+        }
 
         //====== init states and rates ======
         updateMatrix = true;
@@ -98,8 +104,9 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
 
         rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
 
-        if (printRateMapInput.get())
+        if (verboseInput.get())
             printRateMap(); // debug
+
     }
 
     //TODO move to GeneralSubstitutionModel ?
@@ -221,6 +228,58 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         return dataType instanceof Codon;
     }
 
+    /**
+     * Codon usage in sequences
+     */
+    protected void printCodonUsage() {
+        CodonAlignment alignment = convertAlignmentInput.get();
+        String codeTable = geneticCode.getCodeTable();
+        List<String> taxaNames = alignment.getTaxaNames();
+        int[][] usage = alignment.getCodonUsage();
+
+        System.out.println("\n============ Codon Usage ============");
+        // header 1st cell to fill in spaces
+        String firstTN = taxaNames.get(0);
+        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
+
+        // header triplets
+        System.out.print(spaceN);
+        for (int j = 0; j < codeTable.length(); j++)
+            System.out.print("\t" + codonDataType.state2string(new int[]{j}));
+        System.out.println();
+
+        // header AminoAcid
+        System.out.print(spaceN);
+        for (int j = 0; j < codeTable.length(); j++)
+            System.out.print("\t" + codeTable.charAt(j));
+        System.out.println();
+
+        // Codon Usage
+        int[] colSums = new int[codeTable.length()];
+        for (int i = 0; i < taxaNames.size(); i++) {
+            System.out.print(taxaNames.get(i));
+
+            for (int j = 0; j < codeTable.length(); j++) {
+                colSums[j] += usage[i][j];
+                System.out.print("\t" + usage[i][j]);
+            }
+            System.out.println();
+        }
+//        System.out.println();
+
+        // overall
+        System.out.print("overall");
+        for (int j = 0; j < codeTable.length(); j++)
+            System.out.print("\t" + colSums[j]);
+        System.out.println();
+    }
+
+
+    protected void printCodonPositionBaseTable() {
+
+    }
+
+
     /** rateClass:
      *		0: codon changes in more than one codon position (or stop codons)
      *		1: synonymous transition
@@ -228,11 +287,11 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
      *		3: non-synonymous transition
      *		4: non-synonymous transversion
      */
-    public void printRateMap() {
+    protected void printRateMap() {
         byte rateClass;
         int stateCount = nrOfStates;
 
-        System.out.println("\n============ rate matrix ============");
+        System.out.println("\n============ Rate Matrix ============");
         System.out.println("  0: codon changes in more than one codon position (or stop codons)");
         System.out.println("  1: synonymous transition");
         System.out.println("  2: synonymous transversion");
@@ -265,7 +324,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
             System.out.print(geneticCode.getNucleotideChar(ids1[1]));
             System.out.print(geneticCode.getNucleotideChar(ids1[2]));
             System.out.print("\t" + geneticCode.getAminoAcidChar(ids1[3]));
-
+            // lower triangle
             for (int j = 0; j < i; j++) {
                 // i2, j2, k2, aa2
                 int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
@@ -275,6 +334,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
 
             }
             System.out.print("\t.");// i=j
+            // upper triangle
             for (int j = i + 1; j < stateCount; j++) {
                 // i2, j2, k2, aa2
                 int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
