@@ -28,12 +28,13 @@ package beast.evolution.alignment;
 
 import beast.core.Input;
 import beast.core.util.Log;
+import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
+import beast.evolution.datatype.GeneticCode;
 import beast.evolution.datatype.Nucleotide;
 import beast.util.AddOnManager;
-import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.GeneticCode;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -242,5 +243,37 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return usage;
     }
 
+    public double[][] getCodonPositionBaseFrequencies(String decimalPattern) {
+        DecimalFormat df = new DecimalFormat(decimalPattern);
+        GeneticCode geneticCode = getGeneticCode();
+        // position x base (3x4) table + overall
+        double[][] freqs = new double[4][4];
+        for (int i = 0; i < counts.size(); i++) {
+            List<Integer> codonStates = counts.get(i);
+            for (int j = 0; j < codonStates.size(); j++) {
+                int state = codonStates.get(j);
+                String triplet = getDataType().state2string(new int[]{state});
+                // position
+                for (int pos = 0; pos < 3; pos++) {
+                    // col index = nucState: A,C,G,T
+                    int nucState = geneticCode.getNucleotideState(triplet.charAt(pos));
+                    freqs[pos][nucState] += 1;
+                }
+            }
+        }
+        // overall
+        for (int col = 0; col < 4; col++) {
+            freqs[3][col] = freqs[0][col] + freqs[1][col] + freqs[2][col];
+        }
+        // compute frequencies
+        for (int row = 0; row < 4; row++) {
+            double rowSum = freqs[row][0];
+            for (int col = 1; col < 4; col++)
+                rowSum += freqs[row][col];
+            for (int col = 0; col < 4; col++)
+                freqs[row][col] = Double.parseDouble(df.format(freqs[row][col] / rowSum));
+        }
+        return freqs;
+    }
 
 }

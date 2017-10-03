@@ -79,7 +79,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         System.out.println("\nGenetic code is " + geneticCode.getDescription());
         if (verboseInput.get()) {
             printCodonUsage();
-            printCodonPositionBaseTable();
+            printCodonPositionBaseFrequencies();
         }
 
         //====== init states and rates ======
@@ -175,7 +175,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         return new int[]{i1, j1, k1, aa1};
     }
 
-    // get rateClass for constructRateMap
+    // get rateClass for constructRateMap, i,j = {A,C,G,T}
     private byte getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
         byte rateClass = -1;
         if (i1 != i2) {
@@ -275,8 +275,33 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
     }
 
 
-    protected void printCodonPositionBaseTable() {
+    protected void printCodonPositionBaseFrequencies() {
+        String[] rowNames = new String[]{"position 1 : ", "position 2 : ", "position 3 : ", "overall : "};
+        String[] colNames = new String[]{"A", "C", "G", "T"};
+        CodonAlignment alignment = convertAlignmentInput.get();
+        double[][] freqs = alignment.getCodonPositionBaseFrequencies("#.#####"); // 5 decimals
 
+        System.out.println("\n============ Codon position * base (3x4) table + overall ============");
+        // header 1st cell to fill in spaces
+        String firstTN = rowNames[0];
+        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
+
+        // header
+        System.out.print(spaceN);
+        for (int j = 0; j < colNames.length; j++)
+            System.out.print("\t" + colNames[j]);
+        System.out.println();
+
+        // freqs
+        for (int i = 0; i < rowNames.length; i++) {
+            System.out.print(rowNames[i]);
+
+            for (int j = 0; j < colNames.length; j++) {
+                System.out.print("\t" + freqs[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 
@@ -345,15 +370,15 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
             System.out.println();
         }
 
-        System.out.println("\n============ rates in array ============");
-        int col = rateMap.length / (stateCount - 1);
-        for (int i = 0; i < col; i++) {
-            System.out.print("rateMap[" + i * (stateCount - 1) + " - " + (i+1) * (stateCount - 1) + "] = ");
-            for (int j = 0; j < (stateCount - 1); j++) {
-                System.out.print("\t" + rateMap[i * (stateCount - 1) + j]);
-            }
-            System.out.println();
-        }
+//        System.out.println("\n============ rates in array ============");
+//        int col = rateMap.length / (stateCount - 1);
+//        for (int i = 0; i < col; i++) {
+//            System.out.print("rateMap[" + i * (stateCount - 1) + " - " + (i+1) * (stateCount - 1) + "] = ");
+//            for (int j = 0; j < (stateCount - 1); j++) {
+//                System.out.print("\t" + rateMap[i * (stateCount - 1) + j]);
+//            }
+//            System.out.println();
+//        }
     }
 
 }

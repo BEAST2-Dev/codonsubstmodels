@@ -1107,8 +1107,8 @@
           newick="((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462, Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768)"
           IsLabelledNewick="true"/>
 
-    <parameter id="m0.omega" value="1.414"/>
-    <parameter id="m0.kappa" value="1.234567"/>
+    <parameter id="m0.omega" value="0.04414"/>
+    <parameter id="m0.kappa" value="20.74961"/>
     <!--<parameter id="codon.freqs" value="0.01639345" dimension="61" lower="0.0" upper="1.0"/>-->
 
     <input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
@@ -1148,7 +1148,10 @@
         </logger>
     </run>
 
-  <!--synonymousRate treeLikelihood-->
-  <!--0.2003    -29651.3427-->
+    <!--synonymousRate treeLikelihood-->
+    <!--0.9198    -33791.3127-->
+
+    <!--codeml -->
+    <!--lnL(ntime:  9  np: 11): -20486.034302-->
 
 </beast>

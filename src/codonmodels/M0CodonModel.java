@@ -80,7 +80,7 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
 
     }
 
-    // where is the formula?
+    // TODO why dS = this ?
     public double getSynonymousRate(double kappa, double omega) {
         return ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
     }
@@ -92,7 +92,7 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
     @Override
     protected void setupRelativeRates() {
         double kappa = kappaInput.get().getValue();
-        double omega = omegaInput.get().getValue();
+        double omega = omegaInput.get().getValue(); // = dN / dS ?
 
         this.synonymousRate = getSynonymousRate(kappa, omega);
 

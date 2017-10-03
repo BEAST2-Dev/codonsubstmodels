@@ -208,6 +208,7 @@ public final class GeneticCode {
 
     /**
      * Get Nucleotide states from {@link Nucleotide#codeMap codeMap}.
+     * <code>codeMap = "ACGTURYMWSKBDHVNX" + GAP_CHAR + MISSING_CHAR</code>
      * @see DataType#string2state(String)
      * @param c
      * @return
