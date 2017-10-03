@@ -243,8 +243,9 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return usage;
     }
 
-    public double[][] getCodonPositionBaseFrequencies(String decimalPattern) {
-        DecimalFormat df = new DecimalFormat(decimalPattern);
+    public double[][] getCodonPositionBaseFrequencies(int decimalPlaces) {
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(decimalPlaces);
         GeneticCode geneticCode = getGeneticCode();
         // position x base (3x4) table + overall
         double[][] freqs = new double[4][4];

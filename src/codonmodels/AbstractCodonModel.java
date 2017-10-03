@@ -28,6 +28,7 @@ package codonmodels;
 
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.util.Log;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
@@ -35,6 +36,7 @@ import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -85,6 +87,9 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         //====== init states and rates ======
         updateMatrix = true;
         nrOfStates = frequencies.getFreqs().length;
+
+        if (verboseInput.get())
+            printCodonFrequencies(frequencies.getFreqs());
 
         try {
             eigenSystem = createEigenSystem();
@@ -228,6 +233,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         return dataType instanceof Codon;
     }
 
+    //============ print ============
     /**
      * Codon usage in sequences
      */
@@ -237,41 +243,41 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         List<String> taxaNames = alignment.getTaxaNames();
         int[][] usage = alignment.getCodonUsage();
 
-        System.out.println("\n============ Codon Usage ============");
+        Log.info.println("\n============ Codon Usage ============");
         // header 1st cell to fill in spaces
         String firstTN = taxaNames.get(0);
         String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
 
         // header triplets
-        System.out.print(spaceN);
+        Log.info.print(spaceN);
         for (int j = 0; j < codeTable.length(); j++)
-            System.out.print("\t" + codonDataType.state2string(new int[]{j}));
-        System.out.println();
+            Log.info.print("\t" + codonDataType.state2string(new int[]{j}));
+        Log.info.println();
 
         // header AminoAcid
-        System.out.print(spaceN);
+        Log.info.print(spaceN);
         for (int j = 0; j < codeTable.length(); j++)
-            System.out.print("\t" + codeTable.charAt(j));
-        System.out.println();
+            Log.info.print("\t" + codeTable.charAt(j));
+        Log.info.println();
 
         // Codon Usage
         int[] colSums = new int[codeTable.length()];
         for (int i = 0; i < taxaNames.size(); i++) {
-            System.out.print(taxaNames.get(i));
+            Log.info.print(taxaNames.get(i));
 
             for (int j = 0; j < codeTable.length(); j++) {
                 colSums[j] += usage[i][j];
-                System.out.print("\t" + usage[i][j]);
+                Log.info.print("\t" + usage[i][j]);
             }
-            System.out.println();
+            Log.info.println();
         }
-//        System.out.println();
+//        Log.info.println();
 
         // overall
-        System.out.print("overall");
+        Log.info.print("overall");
         for (int j = 0; j < codeTable.length(); j++)
-            System.out.print("\t" + colSums[j]);
-        System.out.println();
+            Log.info.print("\t" + colSums[j]);
+        Log.info.println();
     }
 
 
@@ -279,29 +285,44 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         String[] rowNames = new String[]{"position 1 : ", "position 2 : ", "position 3 : ", "overall : "};
         String[] colNames = new String[]{"A", "C", "G", "T"};
         CodonAlignment alignment = convertAlignmentInput.get();
-        double[][] freqs = alignment.getCodonPositionBaseFrequencies("#.#####"); // 5 decimals
+        double[][] freqs = alignment.getCodonPositionBaseFrequencies(5); // 5 decimal places
 
-        System.out.println("\n============ Codon position * base (3x4) table + overall ============");
+        Log.info.println("\n============ Codon position * base (3x4) table + overall ============");
         // header 1st cell to fill in spaces
         String firstTN = rowNames[0];
         String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
 
         // header
-        System.out.print(spaceN);
+        Log.info.print(spaceN);
         for (int j = 0; j < colNames.length; j++)
-            System.out.print("\t" + colNames[j]);
-        System.out.println();
+            Log.info.print("\t" + colNames[j]);
+        Log.info.println();
 
         // freqs
         for (int i = 0; i < rowNames.length; i++) {
-            System.out.print(rowNames[i]);
+            Log.info.print(rowNames[i]);
 
             for (int j = 0; j < colNames.length; j++) {
-                System.out.print("\t" + freqs[i][j]);
+                Log.info.print("\t" + freqs[i][j]);
             }
-            System.out.println();
+            Log.info.println();
         }
-        System.out.println();
+        Log.info.println();
+    }
+
+
+    protected void printCodonFrequencies(double[] frequencies) {
+        Log.info.println("\n============ Codon frequencies (AAA AAC AAG AAT ... TTT) ============");
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(8);
+        for (int i = 0; i < frequencies.length; i++) {
+            if (i % 4 == 0) {
+                Log.info.print("\n" + df.format(frequencies[i]));
+            } else {
+                Log.info.print("\t" + df.format(frequencies[i]));
+            }
+        }
+        Log.info.println();
     }
 
 
@@ -316,68 +337,68 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         byte rateClass;
         int stateCount = nrOfStates;
 
-        System.out.println("\n============ Rate Matrix ============");
-        System.out.println("  0: codon changes in more than one codon position (or stop codons)");
-        System.out.println("  1: synonymous transition");
-        System.out.println("  2: synonymous transversion");
-        System.out.println("  3: non-synonymous transition");
-        System.out.println("  4: non-synonymous transversion");
-        System.out.print("\t");
+        Log.info.println("\n============ Rate Matrix ============");
+        Log.info.println("  0: codon changes in more than one codon position (or stop codons)");
+        Log.info.println("  1: synonymous transition");
+        Log.info.println("  2: synonymous transversion");
+        Log.info.println("  3: non-synonymous transition");
+        Log.info.println("  4: non-synonymous transversion");
+        Log.info.print("\t");
         for (int j = 0; j < stateCount; j++) {
             // i2, j2, k2, aa2
             int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
 
-            System.out.print("\t" + geneticCode.getNucleotideChar(ids2[0]));
-            System.out.print(geneticCode.getNucleotideChar(ids2[1]));
-            System.out.print(geneticCode.getNucleotideChar(ids2[2]));
+            Log.info.print("\t" + geneticCode.getNucleotideChar(ids2[0]));
+            Log.info.print(geneticCode.getNucleotideChar(ids2[1]));
+            Log.info.print(geneticCode.getNucleotideChar(ids2[2]));
         }
-        System.out.println();
+        Log.info.println();
 
-        System.out.print("\t");
+        Log.info.print("\t");
         for (int j = 0; j < stateCount; j++) {
             int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
-            System.out.print("\t" + geneticCode.getAminoAcidChar(ids2[3]));
+            Log.info.print("\t" + geneticCode.getAminoAcidChar(ids2[3]));
         }
-        System.out.println();
+        Log.info.println();
 
         for (int i = 0; i < stateCount; i++) {
 
             // i1, j1, k1, aa1
             int[] ids1 = getCodonStatesForRateClass(i, codonDataType, geneticCode);
 
-            System.out.print(geneticCode.getNucleotideChar(ids1[0]));
-            System.out.print(geneticCode.getNucleotideChar(ids1[1]));
-            System.out.print(geneticCode.getNucleotideChar(ids1[2]));
-            System.out.print("\t" + geneticCode.getAminoAcidChar(ids1[3]));
+            Log.info.print(geneticCode.getNucleotideChar(ids1[0]));
+            Log.info.print(geneticCode.getNucleotideChar(ids1[1]));
+            Log.info.print(geneticCode.getNucleotideChar(ids1[2]));
+            Log.info.print("\t" + geneticCode.getAminoAcidChar(ids1[3]));
             // lower triangle
             for (int j = 0; j < i; j++) {
                 // i2, j2, k2, aa2
                 int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
-                System.out.print("\t" + rateClass);
+                Log.info.print("\t" + rateClass);
 
             }
-            System.out.print("\t.");// i=j
+            Log.info.print("\t.");// i=j
             // upper triangle
             for (int j = i + 1; j < stateCount; j++) {
                 // i2, j2, k2, aa2
                 int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
-                System.out.print("\t" + rateClass);
+                Log.info.print("\t" + rateClass);
             }
-            System.out.println();
+            Log.info.println();
         }
 
-//        System.out.println("\n============ rates in array ============");
+//        Log.info.println("\n============ rates in array ============");
 //        int col = rateMap.length / (stateCount - 1);
 //        for (int i = 0; i < col; i++) {
-//            System.out.print("rateMap[" + i * (stateCount - 1) + " - " + (i+1) * (stateCount - 1) + "] = ");
+//            Log.info.print("rateMap[" + i * (stateCount - 1) + " - " + (i+1) * (stateCount - 1) + "] = ");
 //            for (int j = 0; j < (stateCount - 1); j++) {
-//                System.out.print("\t" + rateMap[i * (stateCount - 1) + j]);
+//                Log.info.print("\t" + rateMap[i * (stateCount - 1) + j]);
 //            }
-//            System.out.println();
+//            Log.info.println();
 //        }
     }
 

@@ -53,7 +53,6 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
 //    protected RealParameter kappaParameter;
 //    protected RealParameter omegaParameter;
 
-    //TODO if this should move to AbstractCodonModel then make AbstractCodonModel Loggable
     protected double synonymousRate;
 
     public M0CodonModel() {
@@ -96,6 +95,7 @@ public class M0CodonModel extends AbstractCodonModel implements Loggable {
 
         this.synonymousRate = getSynonymousRate(kappa, omega);
 
+        // multiply pi in GeneralSubstitutionModel#setupRateMatrix()
         for (int i = 0; i < rateCount; i++) {
             switch (rateMap[i]) {
                 case 0:
