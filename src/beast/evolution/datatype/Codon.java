@@ -104,8 +104,8 @@ public class Codon extends DataType.Base {
      * It is different to states from {@link DataType#string2state(String) string2state}
      * using codeMap
      */
-    protected int[] stateMap; //TODO merge stateMap to codeMap
-    protected int[] reverseMap;
+//    protected int[] stateMap; //TODO merge stateMap to codeMap
+//    protected int[] reverseMap;
 
     //TODO move to DataType
     protected int ambiguousStateCount;
@@ -123,56 +123,68 @@ public class Codon extends DataType.Base {
     public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
-        stateCount = 64 - geneticCode.getStopCodonCount();
+//        stateCount = 64 - geneticCode.getStopCodonCount();
+        stateCount = 64;
         codeLength = 3;
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
 
         ambiguousStateCount = 66;
         mapCodeToStateSet = new int[ambiguousStateCount][];
-
-        int j = 0;
-        int k = stateCount;
-        // i is CODON_TRIPLETS also codonTable index, and [stateCount, 64] are stop codons state numbers
-        for (int i = 0; i < 64; i++) {
-            if (!geneticCode.isStopCodon(i)) {
-                mapCodeToStateSet[i] = new int[]{j};
-                j++;
-            } else {
-                mapCodeToStateSet[i] = new int[]{k};
-                k++;
-            }
-
+        for (int i = 0; i < stateCount; i++) {
+            mapCodeToStateSet[i] = new int[1];
+            mapCodeToStateSet[i][0] = i;
         }
-        int[] all = new int[64];
-        for (int i = 0; i < 64; i++) {
+        int[] all = new int[stateCount];
+        for (int i = 0; i < stateCount; i++) {
             all[i] = i;
         }
-        for (int i = 64; i < ambiguousStateCount; i++) {
-            mapCodeToStateSet[i] = all;
-        }
+        mapCodeToStateSet[64] = all;
+        mapCodeToStateSet[65] = all;
 
-        // TODO stateMap, reverseMap => mapCodeToStateSet, where reverseMap mapCodeToStateSet are same
 
-        stateMap = new int[ambiguousStateCount];
-        reverseMap = new int[ambiguousStateCount];
-
-        j = 0;
-        k = stateCount;
-        for (int i = 0; i < 64; i++) {
-            if (!geneticCode.isStopCodon(i)) {
-                stateMap[j] = i;
-                reverseMap[i] = j;
-                j++;
-            } else {
-                stateMap[k] = i;
-                reverseMap[i] = k;
-                k++;
-            }
-        }
-        for (int i = 64; i < ambiguousStateCount; i++) {
-            stateMap[i] = i;
-            reverseMap[i] = i;
-        }
+//        int j = 0;
+//        int k = 64 - geneticCode.getStopCodonCount();
+//        // i is CODON_TRIPLETS also codonTable index, and [stateCount, 64] are stop codons state numbers
+//        for (int i = 0; i < 64; i++) {
+//            if (!geneticCode.isStopCodon(i)) {
+//                mapCodeToStateSet[i] = new int[]{j};
+//                j++;
+//            } else {
+//                mapCodeToStateSet[i] = new int[]{k};
+//                k++;
+//            }
+//
+//        }
+//        int[] all = new int[64];
+//        for (int i = 0; i < 64; i++) {
+//            all[i] = i;
+//        }
+//        for (int i = 64; i < ambiguousStateCount; i++) {
+//            mapCodeToStateSet[i] = all;
+//        }
+//
+//        // TODO stateMap, reverseMap => mapCodeToStateSet, where reverseMap mapCodeToStateSet are same
+//
+//        stateMap = new int[ambiguousStateCount];
+//        reverseMap = new int[ambiguousStateCount];
+//
+//        j = 0;
+//        k = 64 - geneticCode.getStopCodonCount();
+//        for (int i = 0; i < 64; i++) {
+//            if (!geneticCode.isStopCodon(i)) {
+//                stateMap[j] = i;
+//                reverseMap[i] = j;
+//                j++;
+//            } else {
+//                stateMap[k] = i;
+//                reverseMap[i] = k;
+//                k++;
+//            }
+//        }
+//        for (int i = 64; i < ambiguousStateCount; i++) {
+//            stateMap[i] = i;
+//            reverseMap[i] = i;
+//        }
     }
 
     @Override
@@ -181,31 +193,6 @@ public class Codon extends DataType.Base {
     }
 
     //=========== for codons ==========
-
-    /**
-     * Get state corresponding to a nucleotide triplet
-     *
-     * @param nuc1 the codon triplet as chars
-     * @param nuc2 the codon triplet as chars
-     * @param nuc3 the codon triplet as chars
-     * @return state
-     */
-    public final int getState(char nuc1, char nuc2, char nuc3) {
-        return getState(geneticCode.getNucleotideState(nuc1),
-                geneticCode.getNucleotideState(nuc2),
-                geneticCode.getNucleotideState(nuc3));
-    }
-
-    /**
-     * @return the canonical state (in standard combinatorial order)
-     *         of a funny codon state.
-     */
-    public final int getCanonicalState(int funnyState) {
-        if (funnyState >= stateMap.length)
-            throw new IllegalArgumentException("Invalid state >= length of stateMap ! ");
-        return stateMap[funnyState];
-    }
-
     /**
      * index in {@link Nucleotide#codeMap codeMap}
      */
@@ -215,24 +202,60 @@ public class Codon extends DataType.Base {
     /**
      * Get state corresponding to a nucleotide triplet
      *
-     * @param nuc1 the codon triplet as states
-     * @param nuc2 the codon triplet as states
-     * @param nuc3 the codon triplet as states
+     * @param nuc1 the codon triplet as chars
+     * @param nuc2 the codon triplet as chars
+     * @param nuc3 the codon triplet as chars
      * @return state
      */
-    public final int getState(int nuc1, int nuc2, int nuc3) {
-        if (nuc1 == NUCLEOTIDE_GAP_STATE || nuc2 == NUCLEOTIDE_GAP_STATE ||
-                nuc3 == NUCLEOTIDE_GAP_STATE ) {
+    public final int getCodonState(char nuc1, char nuc2, char nuc3) {
+        char ns1 = geneticCode.getNucleotideChar(nuc1);
+        char ns2 = geneticCode.getNucleotideChar(nuc2);
+        char ns3 = geneticCode.getNucleotideChar(nuc3);
+
+        if (ns1 == NUCLEOTIDE_GAP_STATE || ns2 == NUCLEOTIDE_GAP_STATE ||
+                ns3 == NUCLEOTIDE_GAP_STATE )
             return GAP_STATE;
-        }
-
-        if (isAmbiguousState(nuc1) || isAmbiguousState(nuc2) || isAmbiguousState(nuc3)) {
+        if (isAmbiguousState(ns1) || isAmbiguousState(ns2) || isAmbiguousState(ns3))
             return UNKNOWN_STATE;
-        }
 
-        int canonicalState = (nuc1 * 16) + (nuc2 * 4) + nuc3;
+        int codonState = string2state("" + nuc1 + nuc2 + nuc3).get(0);
 
-        return reverseMap[canonicalState];
+        return codonState;
+    }
+
+    /**
+     * @return the canonical state (in standard combinatorial order)
+     *         of a funny codon state.
+     */
+//    public final int getCanonicalState(int funnyState) {
+//        if (funnyState >= stateMap.length)
+//            throw new IllegalArgumentException("Invalid state >= length of stateMap ! ");
+//        return stateMap[funnyState];
+//    }
+
+    /**
+     * Get codon state corresponding to a nucleotide triplet
+     *
+     * @param ns1 the codon triplet as states
+     * @param ns2 the codon triplet as states
+     * @param ns3 the codon triplet as states
+     * @return state
+     */
+    public final int getCodonState(int ns1, int ns2, int ns3) {
+        if (ns1 == NUCLEOTIDE_GAP_STATE || ns2 == NUCLEOTIDE_GAP_STATE ||
+                ns3 == NUCLEOTIDE_GAP_STATE )
+            return GAP_STATE;
+        if (isAmbiguousState(ns1) || isAmbiguousState(ns2) || isAmbiguousState(ns3))
+            return UNKNOWN_STATE;
+
+//        int canonicalState = (ns1 * 16) + (ns2 * 4) + ns3; // cannot use BEAST1 nice design
+        char nuc1 = geneticCode.getNucleotideChar(ns1);
+        char nuc2 = geneticCode.getNucleotideChar(ns2);
+        char nuc3 = geneticCode.getNucleotideChar(ns3);
+
+        int codonState = string2state("" + nuc1 + nuc2 + nuc3).get(0);
+
+        return codonState;
     }
 
     /**
@@ -248,15 +271,15 @@ public class Codon extends DataType.Base {
 
     /**
      * Get triplet string corresponding to a given state
-     * indexed by {@link Codon#stateMap stateMap}
+     * indexed by {@link Codon#codeMap codeMap}
      *
      * @param state state
      *              <p/>
      *              return corresponding triplet string
      */
     public final String getTriplet(int state) {
-        return CODON_TRIPLETS[stateMap[state]]; // states from stateMap
-//        return state2string(new int[]{state}); // states from codeMap
+//        return CODON_TRIPLETS[stateMap[state]]; // states from stateMap
+        return state2string(new int[]{state}); // states from codeMap
     }
 
     /**

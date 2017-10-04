@@ -272,9 +272,9 @@ public final class GeneticCode {
     /**
      * Returns the state associated with AminoAcid ({@link #AMINOACID_STATES AMINOACID_STATES})
      * represented by codonState.
-     * Note: the state is the canonical state (generated combinatoriall),
+     * Note: the state is the canonical state (generated combinatorially),
      * which is different to BEAST 2 Aminoacid states, and which can be
-     * from {@link Codon#getCanonicalState(int)} getCanonicalState}.
+     * from {@link Codon#getCodonState(int,int,int)} getCodonState}.
      *
      * @see #AMINOACID_STATES
      * @return '?' if codon unknown

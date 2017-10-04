@@ -175,8 +175,8 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         j1 = codon[1];
         k1 = codon[2];
 
-        cs1 = codonDataType.getState(i1, j1, k1);
-        aa1 = geneticCode.getAminoAcidCodonState(codonDataType.getCanonicalState(cs1));
+        cs1 = codonDataType.getCodonState(i1, j1, k1);
+        aa1 = geneticCode.getAminoAcidCodonState(cs1);
         return new int[]{i1, j1, k1, aa1};
     }
 
@@ -316,10 +316,11 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(8);
         for (int i = 0; i < frequencies.length; i++) {
+            int state = codonDataType.getStatesForCode(i)[0];
             if (i % 4 == 0) {
-                Log.info.print("\n" + df.format(frequencies[i]));
+                Log.info.print("\n" + df.format(frequencies[state]));
             } else {
-                Log.info.print("\t" + df.format(frequencies[i]));
+                Log.info.print("\t" + df.format(frequencies[state]));
             }
         }
         Log.info.println();
