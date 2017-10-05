@@ -1109,15 +1109,12 @@
 
     <parameter id="m0.omega" value="0.04414"/>
     <parameter id="m0.kappa" value="20.74961"/>
-    <!--<parameter id="codon.freqs" value="0.01639345" dimension="61" lower="0.0" upper="1.0"/>-->
 
     <input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <data idref="codon.alignment"/>
-        <frequencies id="m0.freqs" spec="Frequencies">
+        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
             <data idref="codon.alignment"/>
-            <!--<frequencies idref="codon.freqs"/>-->
         </frequencies>
     </input>
 

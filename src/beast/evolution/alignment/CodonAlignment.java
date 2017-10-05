@@ -90,10 +90,8 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
 //        initAndValidate();
     }
 
-
     @Override
     public void initAndValidate() {
-
         alignment = alignmentInput.get();//Nucleotide
         DataType alignmentType = alignment.getDataType();
         GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
@@ -114,7 +112,7 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
             ((Codon) m_dataType).setGeneticCode(geneticCode);
         }
 
-        convertCodonToState(true);
+        convertCodonToState();
 
         if (alignmentInput.get().siteWeightsInput.get() != null) {
             String str = alignmentInput.get().siteWeightsInput.get().trim();
@@ -125,9 +123,19 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
             }
         }
 
-
         calcPatterns();
         setupAscertainment();
+
+        Log.info.println("\nGenetic code is " + getGeneticCode().getDescription());
+
+        int[][] usage = getCodonUsage();
+        printCodonUsage(usage);
+
+        printCodonPositionBaseFrequencies();
+
+        double[] freqs = getCodonFrequenciesFromUsage(usage);
+        printCodonFrequencies(freqs);
+        Log.info.println();
     }
 
     //TODO this should move to Alignment
@@ -153,7 +161,7 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         }
     }
 
-    protected void convertCodonToState(boolean log) {
+    protected void convertCodonToState() {
         taxaNames.clear();
         stateCounts.clear();
         counts.clear();
@@ -199,10 +207,15 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return -1;
     }
 
+    @Override
+    public Codon getDataType() {
+        if (!(m_dataType instanceof Codon))
+            throw new UnsupportedOperationException("CodonAlignment only supports Codon data type !");
+        return (Codon) m_dataType;
+    }
+
     public GeneticCode getGeneticCode() {
-        if (m_dataType instanceof Codon)
-            return ((Codon) m_dataType).getGeneticCode();
-        return null;
+        return getDataType().getGeneticCode();
     }
 
     /**
@@ -226,7 +239,7 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
      * {@link GeneticCode#GENETIC_CODE_TABLES GENETIC_CODE_TABLES} as column indices.
      * @return
      */
-    public int[][] getCodonUsage() {
+    protected int[][] getCodonUsage() {
         if (taxaNames.size() != counts.size())
             throw new IllegalArgumentException("taxaNames.size() " + taxaNames.size() + " != counts.size() " + counts.size());
 
@@ -243,9 +256,12 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return usage;
     }
 
-    public double[][] getCodonPositionBaseFrequencies(int decimalPlaces) {
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(decimalPlaces);
+    /**
+     * Codon position * base (3x4) table, plus "overall" in last row.
+     * The base order is "A", "C", "G", "T".
+     * @return
+     */
+    public double[][] getCodonPositionBaseFrequencies() {
         GeneticCode geneticCode = getGeneticCode();
         // position x base (3x4) table + overall
         double[][] freqs = new double[4][4];
@@ -272,9 +288,125 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
             for (int col = 1; col < 4; col++)
                 rowSum += freqs[row][col];
             for (int col = 0; col < 4; col++)
-                freqs[row][col] = Double.parseDouble(df.format(freqs[row][col] / rowSum));
+                freqs[row][col] = freqs[row][col] / rowSum;
         }
         return freqs;
+    }
+
+    protected double[] getCodonFrequenciesFromUsage(int[][] usage) {
+        // usage last row is total
+        double[] freqs = new double[usage[usage.length-1].length];
+        double sum = 0;
+        for(int i=0; i<freqs.length; i++) {
+            freqs[i] = usage[usage.length-1][i];
+            sum += freqs[i];
+        }
+        if (sum == 0)
+            throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
+        for(int i=0; i<freqs.length; i++)
+            freqs[i] = freqs[i] / sum;
+        return freqs;
+    }
+
+    /**
+     * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT)
+     * @return
+     */
+    public double[] getCodonFrequencies() {
+        int[][] usage = getCodonUsage();
+        return getCodonFrequenciesFromUsage(usage);
+    }
+
+    //============ print ============
+
+    /**
+     * Codon usage in sequences
+     */
+    protected void printCodonUsage(int[][] usage) {
+        String codeTable = getGeneticCode().getCodeTable();
+        List<String> taxaNames = getTaxaNames();
+
+        Log.info.println("\n============ Codon Usage ============");
+        // header 1st cell to fill in spaces
+        String firstTN = taxaNames.get(0);
+        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
+
+        // header triplets
+        Log.info.print(spaceN);
+        for (int j = 0; j < codeTable.length(); j++)
+            Log.info.print("\t" + getDataType().state2string(new int[]{j}));
+        Log.info.println();
+
+        // header AminoAcid
+        Log.info.print(spaceN);
+        for (int j = 0; j < codeTable.length(); j++)
+            Log.info.print("\t" + codeTable.charAt(j));
+        Log.info.println();
+
+        // Codon Usage
+        int[] colSums = new int[codeTable.length()];
+        for (int i = 0; i < taxaNames.size(); i++) {
+            Log.info.print(taxaNames.get(i));
+
+            for (int j = 0; j < codeTable.length(); j++) {
+                colSums[j] += usage[i][j];
+                Log.info.print("\t" + usage[i][j]);
+            }
+            Log.info.println();
+        }
+//        Log.info.println();
+
+        // overall
+        Log.info.print("overall");
+        for (int j = 0; j < codeTable.length(); j++)
+            Log.info.print("\t" + colSums[j]);
+        Log.info.println();
+    }
+
+
+    protected void printCodonPositionBaseFrequencies() {
+        String[] rowNames = new String[]{"position 1 : ", "position 2 : ", "position 3 : ", "overall : "};
+        String[] colNames = new String[]{"A", "C", "G", "T"};
+        double[][] freqs = getCodonPositionBaseFrequencies();
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(5);// 5 decimal places
+
+        Log.info.println("\n============ Codon position * base (3x4) table + overall ============");
+        // header 1st cell to fill in spaces
+        String firstTN = rowNames[0];
+        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
+
+        // header
+        Log.info.print(spaceN);
+        for (int j = 0; j < colNames.length; j++)
+            Log.info.print("\t" + colNames[j]);
+        Log.info.println();
+
+        // freqs
+        for (int i = 0; i < rowNames.length; i++) {
+            Log.info.print(rowNames[i]);
+
+            for (int j = 0; j < colNames.length; j++) {
+                Log.info.print("\t" + df.format(freqs[i][j]));
+            }
+            Log.info.println();
+        }
+//        Log.info.println();
+    }
+
+    protected void printCodonFrequencies(double[] frequencies) {
+        Log.info.println("\n============ Codon frequencies from usage (AAA AAC AAG AAT ... TTT) ============");
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(8);
+        for (int i = 0; i < frequencies.length; i++) {
+            int state = getDataType().getStatesForCode(i)[0];
+            if (i % 8 == 0) {
+                Log.info.print("\n" + df.format(frequencies[state]));
+            } else {
+                Log.info.print("\t" + df.format(frequencies[state]));
+            }
+        }
+        Log.info.println();
     }
 
 }

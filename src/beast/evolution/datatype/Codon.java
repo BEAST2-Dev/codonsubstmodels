@@ -102,10 +102,10 @@ public class Codon extends DataType.Base {
     /**
      * stateMap saves the states 0-63, but keeps the states of stop codon in the last.
      * It is different to states from {@link DataType#string2state(String) string2state}
-     * using codeMap
+     * using in codeMap and mapCodeToStateSet
      */
-//    protected int[] stateMap; //TODO merge stateMap to codeMap
-//    protected int[] reverseMap;
+    protected int[] stateMap;
+    protected int[] reverseMap;
 
     //TODO move to DataType
     protected int ambiguousStateCount;
@@ -142,54 +142,38 @@ public class Codon extends DataType.Base {
         mapCodeToStateSet[65] = all;
 
 
-//        int j = 0;
-//        int k = 64 - geneticCode.getStopCodonCount();
-//        // i is CODON_TRIPLETS also codonTable index, and [stateCount, 64] are stop codons state numbers
-//        for (int i = 0; i < 64; i++) {
-//            if (!geneticCode.isStopCodon(i)) {
-//                mapCodeToStateSet[i] = new int[]{j};
-//                j++;
-//            } else {
-//                mapCodeToStateSet[i] = new int[]{k};
-//                k++;
-//            }
-//
-//        }
-//        int[] all = new int[64];
-//        for (int i = 0; i < 64; i++) {
-//            all[i] = i;
-//        }
-//        for (int i = 64; i < ambiguousStateCount; i++) {
-//            mapCodeToStateSet[i] = all;
-//        }
-//
-//        // TODO stateMap, reverseMap => mapCodeToStateSet, where reverseMap mapCodeToStateSet are same
-//
-//        stateMap = new int[ambiguousStateCount];
-//        reverseMap = new int[ambiguousStateCount];
-//
-//        j = 0;
-//        k = 64 - geneticCode.getStopCodonCount();
-//        for (int i = 0; i < 64; i++) {
-//            if (!geneticCode.isStopCodon(i)) {
-//                stateMap[j] = i;
-//                reverseMap[i] = j;
-//                j++;
-//            } else {
-//                stateMap[k] = i;
-//                reverseMap[i] = k;
-//                k++;
-//            }
-//        }
-//        for (int i = 64; i < ambiguousStateCount; i++) {
-//            stateMap[i] = i;
-//            reverseMap[i] = i;
-//        }
+        // stateMap, reverseMap put stop codon in the last, different to codeMap, mapCodeToStateSet
+        stateMap = new int[ambiguousStateCount];
+        reverseMap = new int[ambiguousStateCount];
+
+        int j = 0;
+        int k = 64 - geneticCode.getStopCodonCount();
+        for (int i = 0; i < 64; i++) {
+            if (!geneticCode.isStopCodon(i)) {
+                stateMap[j] = i;
+                reverseMap[i] = j;
+                j++;
+            } else {
+                stateMap[k] = i;
+                reverseMap[i] = k;
+                k++;
+            }
+        }
+        for (int i = 64; i < ambiguousStateCount; i++) {
+            stateMap[i] = i;
+            reverseMap[i] = i;
+        }
     }
 
     @Override
     public String getTypeDescription() {
         return CODON;
+    }
+
+    @Override
+    public int[] getStatesForCode(int state) {
+        //TODO use stateMap ?
+        return super.getStatesForCode(state);
     }
 
     //=========== for codons ==========
@@ -200,7 +184,8 @@ public class Codon extends DataType.Base {
     public static final int NUCLEOTIDE_GAP_STATE = 17; // -
 
     /**
-     * Get state corresponding to a nucleotide triplet
+     * Get state indexed by {@link Codon#codeMap codeMap}
+     * corresponding to a nucleotide triplet
      *
      * @param nuc1 the codon triplet as chars
      * @param nuc2 the codon triplet as chars
@@ -224,17 +209,8 @@ public class Codon extends DataType.Base {
     }
 
     /**
-     * @return the canonical state (in standard combinatorial order)
-     *         of a funny codon state.
-     */
-//    public final int getCanonicalState(int funnyState) {
-//        if (funnyState >= stateMap.length)
-//            throw new IllegalArgumentException("Invalid state >= length of stateMap ! ");
-//        return stateMap[funnyState];
-//    }
-
-    /**
-     * Get codon state corresponding to a nucleotide triplet
+     * Get codon state indexed by {@link Codon#codeMap codeMap}
+     * corresponding to a nucleotide triplet
      *
      * @param ns1 the codon triplet as states
      * @param ns2 the codon triplet as states

@@ -3,6 +3,7 @@ package beast.app.beauti;
 import beast.app.draw.BEASTObjectInputEditor;
 import beast.core.BEASTInterface;
 import beast.core.Input;
+import codonmodels.CodonSubstitutionModel;
 
 import javax.swing.*;
 
@@ -15,7 +16,7 @@ public class CodonModelsInputEditor extends BEASTObjectInputEditor {
 
 	@Override
 	public Class<?> type() {
-		return codonmodels.AbstractCodonModel.class;
+		return CodonSubstitutionModel.class;
 	}
 
 	@Override

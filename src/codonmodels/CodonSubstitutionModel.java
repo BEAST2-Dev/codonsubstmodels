@@ -33,11 +33,12 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
+import beast.evolution.substitutionmodel.CodonFrequencies;
+import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
-import java.util.List;
 
 /**
  * Modified from BEAST 1 AbstractCodonModel.
@@ -45,12 +46,13 @@ import java.util.List;
  * @author Marc A. Suchard
  * @author Walter Xie
  */
-@Description("Abstract codon model to construct an array of rate classes " +
+@Description("Codon substitution model to construct an array of rate classes " +
         "using the current genetic code.")
-public class AbstractCodonModel extends GeneralSubstitutionModel {
+public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
-    final public Input<CodonAlignment> convertAlignmentInput = new Input<>("data",
-            "Converted alignment to provide codon data type", Input.Validate.REQUIRED);
+//    // replace frequenciesInput
+//    final public Input<CodonFrequencies> codonFrequenciesInput = new Input<>("frequencies",
+//            "codon model equilibrium state frequencies", Input.Validate.REQUIRED);
     final public Input<Boolean> verboseInput = new Input<>("verbose",
             "Print the codon usage, the rate classes in the rate matrix, etc.",
             Boolean.FALSE);
@@ -61,7 +63,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
     protected GeneticCode geneticCode;
     protected int rateCount;
 
-    public AbstractCodonModel() {
+    public CodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
     }
 
@@ -69,7 +71,7 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
     public void initAndValidate() {
         this.frequencies = frequenciesInput.get();
 
-        CodonAlignment alignment = convertAlignmentInput.get();
+        CodonAlignment alignment = getCodonFrequencies().getCodonAlignment();
         DataType dataType = alignment.getDataType();
 
         if (! (dataType instanceof Codon) )
@@ -78,18 +80,13 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
 
         this.geneticCode = codonDataType.getGeneticCode();
 
-        System.out.println("\nGenetic code is " + geneticCode.getDescription());
-        if (verboseInput.get()) {
-            printCodonUsage();
-            printCodonPositionBaseFrequencies();
-        }
-
         //====== init states and rates ======
         updateMatrix = true;
-        nrOfStates = frequencies.getFreqs().length;
+        double[] freqs = frequencies.getFreqs();
+        nrOfStates = freqs.length;
 
         if (verboseInput.get())
-            printCodonFrequencies(frequencies.getFreqs());
+            printCodonFrequencies(freqs);
 
         try {
             eigenSystem = createEigenSystem();
@@ -112,6 +109,13 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
         if (verboseInput.get())
             printRateMap(); // debug
 
+    }
+
+    public CodonFrequencies getCodonFrequencies() {
+        Frequencies frequencies = frequenciesInput.get();
+        if (! (frequencies instanceof CodonFrequencies) )
+            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
+        return (CodonFrequencies) frequencies;
     }
 
     //TODO move to GeneralSubstitutionModel ?
@@ -234,90 +238,14 @@ public class AbstractCodonModel extends GeneralSubstitutionModel {
     }
 
     //============ print ============
-    /**
-     * Codon usage in sequences
-     */
-    protected void printCodonUsage() {
-        CodonAlignment alignment = convertAlignmentInput.get();
-        String codeTable = geneticCode.getCodeTable();
-        List<String> taxaNames = alignment.getTaxaNames();
-        int[][] usage = alignment.getCodonUsage();
-
-        Log.info.println("\n============ Codon Usage ============");
-        // header 1st cell to fill in spaces
-        String firstTN = taxaNames.get(0);
-        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
-
-        // header triplets
-        Log.info.print(spaceN);
-        for (int j = 0; j < codeTable.length(); j++)
-            Log.info.print("\t" + codonDataType.state2string(new int[]{j}));
-        Log.info.println();
-
-        // header AminoAcid
-        Log.info.print(spaceN);
-        for (int j = 0; j < codeTable.length(); j++)
-            Log.info.print("\t" + codeTable.charAt(j));
-        Log.info.println();
-
-        // Codon Usage
-        int[] colSums = new int[codeTable.length()];
-        for (int i = 0; i < taxaNames.size(); i++) {
-            Log.info.print(taxaNames.get(i));
-
-            for (int j = 0; j < codeTable.length(); j++) {
-                colSums[j] += usage[i][j];
-                Log.info.print("\t" + usage[i][j]);
-            }
-            Log.info.println();
-        }
-//        Log.info.println();
-
-        // overall
-        Log.info.print("overall");
-        for (int j = 0; j < codeTable.length(); j++)
-            Log.info.print("\t" + colSums[j]);
-        Log.info.println();
-    }
-
-
-    protected void printCodonPositionBaseFrequencies() {
-        String[] rowNames = new String[]{"position 1 : ", "position 2 : ", "position 3 : ", "overall : "};
-        String[] colNames = new String[]{"A", "C", "G", "T"};
-        CodonAlignment alignment = convertAlignmentInput.get();
-        double[][] freqs = alignment.getCodonPositionBaseFrequencies(5); // 5 decimal places
-
-        Log.info.println("\n============ Codon position * base (3x4) table + overall ============");
-        // header 1st cell to fill in spaces
-        String firstTN = rowNames[0];
-        String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
-
-        // header
-        Log.info.print(spaceN);
-        for (int j = 0; j < colNames.length; j++)
-            Log.info.print("\t" + colNames[j]);
-        Log.info.println();
-
-        // freqs
-        for (int i = 0; i < rowNames.length; i++) {
-            Log.info.print(rowNames[i]);
-
-            for (int j = 0; j < colNames.length; j++) {
-                Log.info.print("\t" + freqs[i][j]);
-            }
-            Log.info.println();
-        }
-        Log.info.println();
-    }
-
 
     protected void printCodonFrequencies(double[] frequencies) {
-        Log.info.println("\n============ Codon frequencies (AAA AAC AAG AAT ... TTT) ============");
+        Log.info.println("\n============ Codon frequencies passed to CodonSubstitutionModel (AAA AAC AAG AAT ... TTT) ============");
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(8);
         for (int i = 0; i < frequencies.length; i++) {
             int state = codonDataType.getStatesForCode(i)[0];
-            if (i % 4 == 0) {
+            if (i % 8 == 0) {
                 Log.info.print("\n" + df.format(frequencies[state]));
             } else {
                 Log.info.print("\t" + df.format(frequencies[state]));
