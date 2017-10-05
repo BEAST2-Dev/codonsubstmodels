@@ -128,7 +128,7 @@ public class CodonFrequencies extends Frequencies {
                         throw new IllegalArgumentException("Invalid nucleotide state ! " + tripletStates[t]);
                 }
 
-                freqs[i] = nucFreq1[tripletStates[0]] + nucFreq2[tripletStates[1]] + nucFreq3[tripletStates[2]];
+                freqs[i] = nucFreq1[tripletStates[0]] * nucFreq2[tripletStates[1]] * nucFreq3[tripletStates[2]];
                 sum += freqs[i];
             }
         }
