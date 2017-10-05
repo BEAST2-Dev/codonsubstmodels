@@ -133,8 +133,8 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
 
         printCodonPositionBaseFrequencies();
 
-        double[] freqs = getCodonFrequenciesFromUsage(usage);
-        printCodonFrequencies(freqs);
+        double[] freqs = getCodonFrequenciesByUsage(usage);
+        printCodonFrequencies(freqs, "Codon frequencies by usage");
         Log.info.println();
     }
 
@@ -237,15 +237,15 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
     /**
      * Use {@link Alignment#taxaNames taxaNames} as row indices, and
      * {@link GeneticCode#GENETIC_CODE_TABLES GENETIC_CODE_TABLES} as column indices.
-     * @return
+     * @return matrix int[taxaNames.size()][codeTable.length()]
      */
     protected int[][] getCodonUsage() {
         if (taxaNames.size() != counts.size())
             throw new IllegalArgumentException("taxaNames.size() " + taxaNames.size() + " != counts.size() " + counts.size());
 
         GeneticCode geneticCode = getGeneticCode();
-        String code = geneticCode.getCodeTable();
-        int[][] usage = new int[taxaNames.size()][code.length()];
+        String codeTable = geneticCode.getCodeTable();
+        int[][] usage = new int[taxaNames.size()][codeTable.length()];
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
@@ -293,18 +293,20 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
         return freqs;
     }
 
-    protected double[] getCodonFrequenciesFromUsage(int[][] usage) {
-        // usage last row is total
-        double[] freqs = new double[usage[usage.length-1].length];
+    // int[][] usage has no total
+    protected double[] getCodonFrequenciesByUsage(int[][] usage) {
+        double[] freqs = new double[usage[0].length];
         double sum = 0;
-        for(int i=0; i<freqs.length; i++) {
-            freqs[i] = usage[usage.length-1][i];
-            sum += freqs[i];
+        for (int j = 0; j < usage[0].length; j++) {
+            for (int i = 0; i < usage.length; i++) {
+                freqs[j] += usage[i][j];
+                sum += usage[i][j];
+            }
         }
         if (sum == 0)
             throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
-        for(int i=0; i<freqs.length; i++)
-            freqs[i] = freqs[i] / sum;
+        for (int j = 0; j < usage[0].length; j++)
+            freqs[j] = freqs[j] / sum;
         return freqs;
     }
 
@@ -314,7 +316,7 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
      */
     public double[] getCodonFrequencies() {
         int[][] usage = getCodonUsage();
-        return getCodonFrequenciesFromUsage(usage);
+        return getCodonFrequenciesByUsage(usage);
     }
 
     //============ print ============
@@ -394,8 +396,8 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
 //        Log.info.println();
     }
 
-    protected void printCodonFrequencies(double[] frequencies) {
-        Log.info.println("\n============ Codon frequencies from usage (AAA AAC AAG AAT ... TTT) ============");
+    public void printCodonFrequencies(double[] frequencies, String title) {
+        Log.info.println("\n============ " + title + " (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============");
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(8);
         for (int i = 0; i < frequencies.length; i++) {

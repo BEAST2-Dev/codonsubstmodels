@@ -1103,6 +1103,7 @@
 
     <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
+    <!--newick="((Human_Horai: 0.009243, Human_Arnason: 0.006661): 0.180259, (Chimp_Horai: 0.003499, Chimp_Arnason: 0.000857): 0.161618, (Gorilla_Horai: 0.005872, Gorilla_Arnason: 0.003674): 0.271896)"-->
     <tree spec="beast.util.TreeParser" id="tree"
           newick="((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462, Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768)"
           IsLabelledNewick="true"/>

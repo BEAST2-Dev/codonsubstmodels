@@ -38,7 +38,6 @@ import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
 
 /**
  * Modified from BEAST 1 AbstractCodonModel.
@@ -86,7 +85,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         nrOfStates = freqs.length;
 
         if (verboseInput.get())
-            printCodonFrequencies(freqs);
+            alignment.printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
 
         try {
             eigenSystem = createEigenSystem();
@@ -239,20 +238,20 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     //============ print ============
 
-    protected void printCodonFrequencies(double[] frequencies) {
-        Log.info.println("\n============ Codon frequencies passed to CodonSubstitutionModel (AAA AAC AAG AAT ... TTT) ============");
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(8);
-        for (int i = 0; i < frequencies.length; i++) {
-            int state = codonDataType.getStatesForCode(i)[0];
-            if (i % 8 == 0) {
-                Log.info.print("\n" + df.format(frequencies[state]));
-            } else {
-                Log.info.print("\t" + df.format(frequencies[state]));
-            }
-        }
-        Log.info.println();
-    }
+//    protected void printCodonFrequencies(double[] frequencies) {
+//        Log.info.println("\n============ Codon frequencies passed to CodonSubstitutionModel (AAA AAC AAG AAT ... TTT) ============");
+//        DecimalFormat df = new DecimalFormat("#");
+//        df.setMaximumFractionDigits(8);
+//        for (int i = 0; i < frequencies.length; i++) {
+//            int state = codonDataType.getStatesForCode(i)[0];
+//            if (i % 8 == 0) {
+//                Log.info.print("\n" + df.format(frequencies[state]));
+//            } else {
+//                Log.info.print("\t" + df.format(frequencies[state]));
+//            }
+//        }
+//        Log.info.println();
+//    }
 
 
     /** rateClass:
