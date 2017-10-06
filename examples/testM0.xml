@@ -1108,8 +1108,7 @@
     <input spec="codonmodels.M0CodonModel" id="m0">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <data idref="codon.alignment"/>
-        <frequencies id="m0.freqs" spec="Frequencies">
+        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
             <data idref="codon.alignment"/>
         </frequencies>
     </input>

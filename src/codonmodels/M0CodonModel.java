@@ -25,10 +25,10 @@
 
 package codonmodels;
 
-import beast.core.*;
+import beast.core.Citation;
+import beast.core.Description;
+import beast.core.Input;
 import beast.core.parameter.RealParameter;
-
-import java.io.PrintStream;
 
 /**
  * Yang model of codon evolution
@@ -42,7 +42,7 @@ import java.io.PrintStream;
         "protein-coding DNA sequences. Molecular biology and evolution 11(5), 725-736.", year = 2014,
          DOI = "10.1093/oxfordjournals.molbev.a040153")
 @Description("M0 codon model, also called as GY94, published by Goldman and Yang 1994")
-public class M0CodonModel extends CodonSubstitutionModel implements Loggable {
+public class M0CodonModel extends CodonSubstitutionModel {//implements Loggable {
     final public Input<RealParameter> kappaInput = new Input<>("kappa",
             "kappa parameter for transition-transversion rate ratio", Input.Validate.REQUIRED);
 
@@ -53,7 +53,7 @@ public class M0CodonModel extends CodonSubstitutionModel implements Loggable {
 //    protected RealParameter kappaParameter;
 //    protected RealParameter omegaParameter;
 
-    protected double synonymousRate;
+//    protected double synonymousRate; //TODO not here
 
     public M0CodonModel() {
         super();
@@ -79,11 +79,12 @@ public class M0CodonModel extends CodonSubstitutionModel implements Loggable {
 
     }
 
-    // TODO why dS = this ?
+    // TODO wrong
     public double getSynonymousRate(double kappa, double omega) {
         return ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
     }
 
+    // TODO wrong
     public double getNonSynonymousRate() {
         return 0;
     }
@@ -91,9 +92,9 @@ public class M0CodonModel extends CodonSubstitutionModel implements Loggable {
     @Override
     protected void setupRelativeRates() {
         double kappa = kappaInput.get().getValue();
-        double omega = omegaInput.get().getValue(); // = dN / dS ?
+        double omega = omegaInput.get().getValue();
 
-        this.synonymousRate = getSynonymousRate(kappa, omega);
+//        this.synonymousRate = getSynonymousRate(kappa, omega);//not here
 
         // multiply pi in GeneralSubstitutionModel#setupRateMatrix()
         for (int i = 0; i < rateCount; i++) {
@@ -118,18 +119,18 @@ public class M0CodonModel extends CodonSubstitutionModel implements Loggable {
     }
 
 
-    @Override
-    public void init(PrintStream out) {
-        out.print("synonymousRate" + "\t");
-    }
-
-    @Override
-    public void log(int sample, PrintStream out) {
-        out.print(synonymousRate + "\t");
-    }
-
-    @Override
-    public void close(PrintStream out) {
+//    @Override
+//    public void init(PrintStream out) {
+//        out.print("synonymousRate" + "\t");
+//    }
+//
+//    @Override
+//    public void log(int sample, PrintStream out) {
+//        out.print(synonymousRate + "\t");
+//    }
+//
+//    @Override
+//    public void close(PrintStream out) {
 // nothing to do
-    }
+//    }
 }
