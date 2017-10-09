@@ -59,6 +59,7 @@ which formula to use to calculate _q<sub>ij</sub>_.
 The [codeml](http://abacus.gene.ucl.ac.uk/software/paml.html) results 
 (available at [here](./codeml)) are used to compare with
 the tree likelihood from this package given the same input. 
+The BEAST 2 xml is also [available](./examples/testCodonLikelihood.xml).
 
 | Frequencies  | Omega  | Kappa | Codeml  | BEAST 2 codon model |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
