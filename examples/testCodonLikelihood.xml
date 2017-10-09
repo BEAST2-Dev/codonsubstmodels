@@ -1103,19 +1103,20 @@
 
     <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
+    <!--maximum likelihood tree from codeml -->
     <tree spec="beast.util.TreeParser" id="tree"
-          newick="((Human_Horai: 0.008563, Human_Arnason: 0.008563): 0.333004, (Chimp_Horai: 0.000123,
-    Chimp_Arnason: 0.000123): 0.341444, (Gorilla_Horai: 0.004713, Gorilla_Arnason: 0.004713): 0.336854);"
+          newick="((Human_Horai: 0.008331, Human_Arnason: 0.008331): 0.288289, (Chimp_Horai: 0.002268,
+    Chimp_Arnason: 0.002268): 0.294352, (Gorilla_Horai: 0.004605, Gorilla_Arnason: 0.004605): 0.292015);"
           IsLabelledNewick="true"/>
 
-    <parameter id="m0.omega" value="0.04625"/>
-    <parameter id="m0.kappa" value="25.28743"/>
+    <parameter id="m0.omega" value="0.04484"/>
+    <parameter id="m0.kappa" value="20.41545"/>
 
     <input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <!--equal, F1X4, F3X4 (default), F6n-->
-        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F6n">
+        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
             <data idref="codon.alignment"/>
         </frequencies>
     </input>
