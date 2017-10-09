@@ -1103,29 +1103,25 @@
 
     <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
-    <!--newick="((Human_Horai: 0.009243, Human_Arnason: 0.006661): 0.180259, (Chimp_Horai: 0.003499, Chimp_Arnason: 0.000857): 0.161618, (Gorilla_Horai: 0.005872, Gorilla_Arnason: 0.003674): 0.271896)"-->
     <tree spec="beast.util.TreeParser" id="tree"
-          newick="((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462, Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768)"
+          newick="((Human_Horai: 0.008563, Human_Arnason: 0.008563): 0.333004, (Chimp_Horai: 0.000123,
+    Chimp_Arnason: 0.000123): 0.341444, (Gorilla_Horai: 0.004713, Gorilla_Arnason: 0.004713): 0.336854);"
           IsLabelledNewick="true"/>
 
-    <parameter id="m0.omega" value="0.04414"/>
-    <parameter id="m0.kappa" value="20.74961"/>
+    <parameter id="m0.omega" value="0.04625"/>
+    <parameter id="m0.kappa" value="25.28743"/>
 
     <input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
+        <!--equal, F1X4, F3X4 (default), F6n-->
+        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F6n">
             <data idref="codon.alignment"/>
         </frequencies>
     </input>
 
     <!-- site model                                                              -->
     <input spec="SiteModel" id="siteModel">
-        <!--
-            <parameter id="mutationRate" estimate="false" name="mutationRate">1.0</parameter>
-            <parameter id="gammaShape" estimate="false" name="shape">1.0</parameter>
-            <parameter id="proportionInvariant" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
-        -->
         <substModel idref="m0"/>
     </input>
 
@@ -1139,17 +1135,44 @@
         <distribution idref="treeLikelihood" />
 
         <logger>
-            <log idref="m0"/>
+            <!--<log idref="m0"/>-->
             <!--<log idref="tree"/>-->
             <log idref="treeLikelihood"/>
-            <!--<log idref="codon.freqs"/>-->
+            <!--<log idref="m0.freqs"/>-->
         </logger>
     </run>
 
-    <!--synonymousRate treeLikelihood-->
-    <!--0.9198    -33791.3127-->
+    <!--codeml : runmode = 0, seqtype = 1, clock = 1, model = 0, NSsites = 0, icode = 1, ...-->
+    <!--codeml treefile="((Human_Horai: 0.008514, Human_Arnason: 0.008514): 0.175775, (Chimp_Horai: 0.002462,
+    Chimp_Arnason: 0.002462): 0.181828, (Gorilla_Horai: 0.004522, Gorilla_Arnason: 0.004522): 0.179768)"-->
 
-    <!--codeml -->
-    <!--lnL(ntime:  9  np: 11): -20486.034302-->
+    <!--equal frequencies: -21859.555067      +0.000000-->
+    <!--"((Human_Horai: 0.008185, Human_Arnason: 0.008185): 0.199981, (Chimp_Horai: 0.002306,
+    Chimp_Arnason: 0.002306): 0.205860, (Gorilla_Horai: 0.004404, Gorilla_Arnason: 0.004404): 0.203762);"-->
+    <!--kappa (ts/tv) = 12.79493    omega (dN/dS) =  0.09921-->
+
+    <!--F1x4: -21200.265498      +0.000000-->
+    <!--"((Human_Horai: 0.009178, Human_Arnason: 0.009178): 0.260371, (Chimp_Horai: 0.002551,
+    Chimp_Arnason: 0.002551): 0.266998, (Gorilla_Horai: 0.005014, Gorilla_Arnason: 0.005014): 0.264535);"-->
+    <!--kappa (ts/tv) = 15.30702    omega (dN/dS) =  0.07105-->
+
+
+    <!--F3x4: -20523.690325      +0.000000-->
+    <!--"((Human_Horai: 0.008331, Human_Arnason: 0.008331): 0.288289, (Chimp_Horai: 0.002268,
+    Chimp_Arnason: 0.002268): 0.294352, (Gorilla_Horai: 0.004605, Gorilla_Arnason: 0.004605): 0.292015);"-->
+    <!--kappa (ts/tv) = 20.41545    omega (dN/dS) =  0.04484-->
+
+    <!--codon table: -20141.869495      +0.000000-->
+    <!--"((Human_Horai: 0.008563, Human_Arnason: 0.008563): 0.333004, (Chimp_Horai: 0.000123,
+    Chimp_Arnason: 0.000123): 0.341444, (Gorilla_Horai: 0.004713, Gorilla_Arnason: 0.004713): 0.336854);"-->
+    <!--kappa (ts/tv) = 25.28743    omega (dN/dS) =  0.04625-->
+
+
+    <!--BEAST 2 : use the corresponding tree, kappa and omega-->
+
+    <!--equal frequencies log likelihood = -21859.555067828274-->
+    <!--F1x4 log likelihood = -21200.265498185152-->
+    <!--F3x4 log likelihood = -20523.6903268066-->
+    <!--codon table log likelihood = -20141.896988667882-->
 
 </beast>

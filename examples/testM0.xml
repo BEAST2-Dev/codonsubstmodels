@@ -1213,7 +1213,7 @@
             <log idref="likelihood"/>
             <log idref="prior"/>
             <log idref="popSize"/>
-            <log idref="m0"/>
+            <!--<log idref="m0"/>-->
             <log idref="m0.omega"/>
             <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>
             <log idref="m0.kappa"/>
