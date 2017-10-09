@@ -5,10 +5,13 @@ the estimation of measures of the selective forces
 acting on proteins 
 ([Kosiol et. al. 2000](https://academic.oup.com/mbe/article-abstract/24/7/1464/986344)). 
 
-The current implementation is M0, also called as GY94, first published by 
+The available implementation is only M0 currently, 
+also called as GY94, first published by 
 [Goldman & Yang 1994](https://academic.oup.com/mbe/article-abstract/11/5/725/1008711), 
 and late designated to be one of the M-series (M0-M13) proposed by 
 [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short)
+
+![M series](./figures/MSeriesFull.png)
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
@@ -33,7 +36,7 @@ The attribute _geneticCode_ includes "universal", "vertebrateMitochondrial",
 "alternativeYeast", "ascidianMitochondrial", "flatwormMitochondrial", 
 "blepharismaNuclear", "noStops".
 
-The xml to use M0 looks like:
+The xml to use __M0__ looks like:
 
 ```xml
 <parameter id="m0.omega" value="0.04484"/>
@@ -57,10 +60,13 @@ which formula to use to calculate _q<sub>ij</sub>_.
 ## Testing
 
 The [codeml](http://abacus.gene.ucl.ac.uk/software/paml.html) results 
-(available at [here](./codeml)) are used to compare with
+(available [here](./codeml)) are used to compare with
 the tree likelihood from this package given the same input. 
-The BEAST 2 xml is also [available](./examples/testCodonLikelihood.xml).
 
+The BEAST 2 xml to test tree likelihood is also available 
+[here](./examples/testCodonLikelihood.xml).
+
+Table: tree likelihood using M0 
 | Frequencies  | Omega  | Kappa | Codeml  | BEAST 2 codon model |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | equal  | 0.09921  | 12.79493  | -21859.555067  | -21859.555067828274  |
