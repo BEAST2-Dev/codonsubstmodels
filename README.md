@@ -67,6 +67,7 @@ The BEAST 2 xml to test tree likelihood is also available
 [here](./examples/testCodonLikelihood.xml).
 
 Table: tree likelihood using M0 
+
 | Frequencies  | Omega  | Kappa | Codeml  | BEAST 2 codon model |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | equal  | 0.09921  | 12.79493  | -21859.555067  | -21859.555067828274  |
