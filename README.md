@@ -11,7 +11,7 @@ also called as GY94, first published by
 and late designated to be one of the M-series (M0-M13) proposed by 
 [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short)
 
-![M series](./figures/MSeriesFull.png)
+<img src="./figures/MSeriesFull.png" width="750" alt="M series">
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
