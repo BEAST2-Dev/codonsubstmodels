@@ -49,9 +49,6 @@ import java.lang.reflect.InvocationTargetException;
         "using the current genetic code.")
 public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
-//    // replace frequenciesInput
-//    final public Input<CodonFrequencies> codonFrequenciesInput = new Input<>("frequencies",
-//            "codon model equilibrium state frequencies", Input.Validate.REQUIRED);
     final public Input<Boolean> verboseInput = new Input<>("verbose",
             "Print the codon usage, the rate classes in the rate matrix, etc.",
             Boolean.FALSE);
@@ -237,22 +234,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     //============ print ============
-
-//    protected void printCodonFrequencies(double[] frequencies) {
-//        Log.info.println("\n============ Codon frequencies passed to CodonSubstitutionModel (AAA AAC AAG AAT ... TTT) ============");
-//        DecimalFormat df = new DecimalFormat("#");
-//        df.setMaximumFractionDigits(8);
-//        for (int i = 0; i < frequencies.length; i++) {
-//            int state = codonDataType.getStatesForCode(i)[0];
-//            if (i % 8 == 0) {
-//                Log.info.print("\n" + df.format(frequencies[state]));
-//            } else {
-//                Log.info.print("\t" + df.format(frequencies[state]));
-//            }
-//        }
-//        Log.info.println();
-//    }
-
 
     /** rateClass:
      *		0: codon changes in more than one codon position (or stop codons)

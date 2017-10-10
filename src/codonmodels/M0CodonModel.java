@@ -50,11 +50,6 @@ public class M0CodonModel extends CodonSubstitutionModel {//implements Loggable 
             "omega parameter to represent the nonsynonymous-synonymous rate ratio", Input.Validate.REQUIRED);
 
 
-//    protected RealParameter kappaParameter;
-//    protected RealParameter omegaParameter;
-
-//    protected double synonymousRate; //TODO not here
-
     public M0CodonModel() {
         super();
     }

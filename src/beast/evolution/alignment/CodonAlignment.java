@@ -48,7 +48,7 @@ import java.util.List;
  *
  * Modified from BEAST 1 ConvertAlignment.
  */
-public class CodonAlignment extends Alignment { //TODO should have WrappedAlignment between CodonAlignment and Alignment
+public class CodonAlignment extends Alignment {
 
     final public Input<Alignment> alignmentInput = new Input<>("data",
             "Nucleotide alignment to convert into codon data type specified by dataType", Input.Validate.REQUIRED);
@@ -179,11 +179,10 @@ public class CodonAlignment extends Alignment { //TODO should have WrappedAlignm
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
                 }
                 taxaNames.add(seq.getTaxon());
-                //TODO tipLikelihoods ?
-//                tipLikelihoods.add(seq.getLikelihoods());
-//                // if seq.isUncertain() == false then the above line adds 'null'
-//                // to the list, indicating that this particular sequence has no tip likelihood information
-//                usingTipLikelihoods |= (seq.getLikelihoods() != null);
+                tipLikelihoods.add(seq.getLikelihoods()); //TODO need test
+                // if seq.isUncertain() == false then the above line adds 'null'
+                // to the list, indicating that this particular sequence has no tip likelihood information
+                usingTipLikelihoods |= (seq.getLikelihoods() != null);
 
                 stateCounts.add(getDataType().getStateCount());
 
