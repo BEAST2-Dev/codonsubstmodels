@@ -15,7 +15,7 @@ and late designated to be one of the M-series (M0-M13) proposed by
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
-<img src="./figures/q.png" width="400" alt="Substitution rate from codon i to codon j">
+<img src="./figures/q.png" width="500" alt="Substitution rate from codon i to codon j">
 
 The above two figures are copied from [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short).
 
