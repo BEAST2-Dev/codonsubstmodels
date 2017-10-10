@@ -71,8 +71,8 @@ public class CodonAlignment extends Alignment {
 
     public CodonAlignment(Alignment alignment, GeneticCode geneticCode) {
         this();
-        if (alignment.getID() != null)
-            this.setID("CA." + alignment.getID());
+//        if (alignment.getID() != null)
+//            this.setID("CA." + alignment.getID());
         DataType alignmentType = alignment.getDataType();
         if (! (alignmentType instanceof Nucleotide) ) {
             throw new IllegalArgumentException("CodonAlignment currently only support to wrap the nucleotide alignment !");

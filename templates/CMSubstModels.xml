@@ -12,25 +12,25 @@
                      codonmodels.M0CodonModel.printRateMap">
             <![CDATA[
         <substModel spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
-            <parameter id="M0omega.s:$(n)" name="omega" value="1.0"/>
-            <parameter id="M0kappa.s:$(n)" name="kappa" value="1.0"/>
-            <frequencies id="M0freqs.s:$(n)" spec="Frequencies">
-                <data idref="codon.alignment"/>
-                </frequencies>
+            <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
+            <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
+            <frequencies id="M0freqs.s:$(n)" spec="CodonFrequencies" pi="F3X4">
+                <data idref="$(n)"/>
+            </frequencies>
         </substModel>
 
-        <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0omega.s:$(n)"/>
-        <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0kappa.s:$(n)"/>
+        <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.omega.s:$(n)"/>
+        <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.kappa.s:$(n)"/>
 
-        <prior id='OmegaPrior.s:$(n)' x='@M0omega.s:$(n)'>
+        <prior id='OmegaPrior.s:$(n)' x='@M0.omega.s:$(n)'>
             <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
-                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='M' value="3.0" estimate='false'/>
                 <parameter name='S' value="1.25" estimate='false'/>
             </distr>
 		</prior>
-        <prior id='KappaPrior.s:$(n)' x='@M0kappa.s:$(n)'>
+        <prior id='KappaPrior.s:$(n)' x='@M0.kappa.s:$(n)'>
             <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
-                <parameter name='M' value="1.0" estimate='false'/>
+                <parameter name='M' value="-3.0" estimate='false'/>
                 <parameter name='S' value="1.25" estimate='false'/>
             </distr>
 		</prior>
@@ -41,7 +41,6 @@
 
             <connect srcID="M0omega.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
             <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
-            <connect srcID="M0.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
         </subtemplate>
 
 
