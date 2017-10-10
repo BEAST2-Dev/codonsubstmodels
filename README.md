@@ -52,7 +52,7 @@ The xml to use __M0__ looks like:
 </input>
 ```
 
-The type of equilibrium codon frequencies _π<sub>j</sub>_; consists of 
+The type of equilibrium codon frequencies _π<sub>j</sub>_ consists of 
 "equal", "F1X4", "F3X4", and "F6n" 
 ([Yang 2006](https://www.amazon.com/Computational-Molecular-Evolution-Oxford-Ecology/dp/0198567022/ref=ed_oe_p/102-1394520-6676140)). 
 Setting `verbose="true"` will print the rate category matrix determining 
