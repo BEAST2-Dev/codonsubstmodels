@@ -76,7 +76,7 @@ Table 1: tree likelihood using M0
 | F3X4  | 0.04484  | 20.41545  | -20523.690325  | -20523.6903268066  |
 | F60  | 0.04625  | 25.28743  | -20141.869495  | -20141.896988667882  |
 
-The small difference between two likelihoods are caused by rounding error. 
-As you can see, their differences are slightly increasing when the number of free parameters 
-describing codon frequencies is increasing.   
+The small differences between two likelihoods are caused by rounding error. 
+As you can see, their differences are slightly increased when the number of free parameters 
+describing codon frequencies is increased.   
 
