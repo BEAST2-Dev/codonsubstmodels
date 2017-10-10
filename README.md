@@ -15,7 +15,7 @@ and late designated to be one of the M-series (M0-M13) proposed by
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
-![Substitution rate from codon i to codon j](./figures/codon-q.png)
+![Substitution rate from codon i to codon j](./figures/codon-q.png =100x)
 
 
 ## XML example
@@ -66,7 +66,7 @@ the tree likelihood from this package given the same input.
 The BEAST 2 xml to test tree likelihood is also available 
 [here](./examples/testCodonLikelihood.xml).
 
-Table: tree likelihood using M0 
+Table 1: tree likelihood using M0 
 
 | Frequencies  | Omega  | Kappa | Codeml  | BEAST 2 codon model |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
