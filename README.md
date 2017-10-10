@@ -15,8 +15,7 @@ and late designated to be one of the M-series (M0-M13) proposed by
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
-![Substitution rate from codon i to codon j](./figures/codon-q.png =100x)
-
+<img src="./figures/codon-q.png" width="400" alt="Substitution rate from codon i to codon j">
 
 ## XML example
 
