@@ -9,13 +9,15 @@ The available implementation is only M0 currently,
 also called as GY94, first published by 
 [Goldman & Yang 1994](https://academic.oup.com/mbe/article-abstract/11/5/725/1008711), 
 and late designated to be one of the M-series (M0-M13) proposed by 
-[Yang et al. 2000](http://www.genetics.org/content/155/1/431.short)
+[Yang et al. 2000](http://www.genetics.org/content/155/1/431.short).
 
 <img src="./figures/MSeriesFull.png" width="750" alt="M series">
 
 The relative instantaneous substitution rate _q<sub>ij</sub>_ from codon _i_ to codon _j_ 
 can be calculated as:
-<img src="./figures/codon-q.png" width="400" alt="Substitution rate from codon i to codon j">
+<img src="./figures/q.png" width="400" alt="Substitution rate from codon i to codon j">
+
+The above two figures are copied from [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short).
 
 ## XML example
 
@@ -73,3 +75,8 @@ Table 1: tree likelihood using M0
 | F1X4  | 0.07105  | 15.30702  | -21200.265498  | -21200.265498185152  |
 | F3X4  | 0.04484  | 20.41545  | -20523.690325  | -20523.6903268066  |
 | F60  | 0.04625  | 25.28743  | -20141.869495  | -20141.896988667882  |
+
+The small difference between two likelihoods are caused by rounding error. 
+As you can see, their differences are slightly increasing when the number of free parameters 
+describing codon frequencies is increasing.   
+
