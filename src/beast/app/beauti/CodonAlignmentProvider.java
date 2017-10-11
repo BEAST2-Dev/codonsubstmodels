@@ -5,8 +5,10 @@ import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.alignment.Alignment;
+import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.GeneticCode;
 import beast.util.XMLParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -73,23 +75,18 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
      * return new alignment, return null if not successful
      * **/
 //    protected List<BEASTInterface> getAlignments(BeautiDoc doc) {
-//        if (importers == null) {
-//            initImporters();
-//        }
-//        Set<String> extensions = new HashSet<>();
-//        for (AlignmentImporter importer : importers) {
-//            for (String extension : importer.getFileExtensions()) {
-//                extensions.add(extension);
+//        List<BEASTInterface> newList = new ArrayList<>();
+//        for (BEASTInterface bi : super.getAlignments(doc)) {
+//            if (bi instanceof Alignment) {
+//                CodonAlignment codonAlignment = new CodonAlignment((Alignment) bi, GeneticCode.UNIVERSAL);
+//                newList.add(codonAlignment);
+//            } else {
+//                newList.add(bi);
 //            }
 //        }
-//        File [] files = beast.app.util.Utils.getLoadFiles("Load Alignment File",
-//                new File(Beauti.g_sDir), "Alignment files", extensions.toArray(new String[]{}));
-//        if (files != null && files.length > 0) {
-//            return getAlignments(doc, files);
-//        }
-//        return null;
+//        return newList;
 //    }
-//
+
 //    /**
 //     * return new alignment given files
 //     * @param doc
@@ -97,75 +94,16 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
 //     * @return
 //     */
 //    public List<BEASTInterface> getAlignments(BeautiDoc doc, File[] files) {
-//        if (files == null) {
-//            // merge "+ button" and "drag drop" function
-//            return getAlignments(doc);
-//        }
-//        if (importers == null) {
-//            initImporters();
-//        }
-//        List<BEASTInterface> selectedBEASTObjects = new ArrayList<>();
-//        List<MRCAPrior> calibrations = new ArrayList<>();
-//        for (File file : files) {
-//            // create list of importers that can handle the file
-//            List<AlignmentImporter> availableImporters = new ArrayList<>();
-//            for (AlignmentImporter importer : importers) {
-//                if (importer.canHandleFile(file)) {
-//                    availableImporters.add(importer);
-//                }
-//            }
-//
-//            if (availableImporters.size() > 0) {
-//                AlignmentImporter importer = availableImporters.get(0);
-//                if (availableImporters.size() > 1) {
-//                    // let user choose an importer
-//                    List<String> descriptions = new ArrayList<>();
-//                    for (AlignmentImporter i : availableImporters) {
-//                        descriptions.add(((BEASTInterface)i).getDescription());
-//                    }
-//                    String option = (String)JOptionPane.showInputDialog(null, "Which importer is appropriate", "Option",
-//                            JOptionPane.WARNING_MESSAGE, null, descriptions.toArray(), descriptions.get(0));
-//                    if (option == null) {
-//                        return selectedBEASTObjects;
-//                    }
-//                    int i = descriptions.indexOf(option);
-//                    importer = availableImporters.get(i);
-//                }
-//
-//                // get a fresh instance
-//                //try {
-//                //	importer = importer.getClass().newInstance();
-//                //} catch (InstantiationException | IllegalAccessException e) {
-//                //	// TODO Auto-generated catch block
-//                //	e.printStackTrace();
-//                //}
-//                List<BEASTInterface> list = importer.loadFile(file);
-//
-//                List<BEASTInterface> newList = new ArrayList<>();
-//                for (BEASTInterface bi : list) {
-//                    if (bi instanceof Alignment) {
-//                        CodonAlignment codonAlignment = new CodonAlignment((Alignment) bi, GeneticCode.UNIVERSAL);
-//                        newList.add(codonAlignment);
-//                    } else {
-//                        newList.add(bi);
-//                    }
-//                }
-//
-//                selectedBEASTObjects.addAll(newList);
+//        List<BEASTInterface> newList = new ArrayList<>();
+//        for (BEASTInterface bi : super.getAlignments(doc, files)) {
+//            if (bi instanceof Alignment) {
+//                CodonAlignment codonAlignment = new CodonAlignment((Alignment) bi, GeneticCode.UNIVERSAL);
+//                newList.add(codonAlignment);
 //            } else {
-//                JOptionPane.showMessageDialog(null,
-//                        "Unsupported sequence file.",
-//                        "Error", JOptionPane.ERROR_MESSAGE);
+//                newList.add(bi);
 //            }
-//
 //        }
-//        addAlignments(doc, selectedBEASTObjects);
-//        if (calibrations != null) {
-//            selectedBEASTObjects.addAll(calibrations);
-//        }
-//        // doc.addMRCAPriors(calibrations);
-//
-//        return selectedBEASTObjects;
+//        return newList;
 //    }
 
 //    /** this allows subclasses of BeautiAlignmentProvider to be called with pre-defined arguments
@@ -178,38 +116,40 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
 //        return selectedBEASTObjects;
 //    }
 
-//    protected void addAlignments(BeautiDoc doc, List<BEASTInterface> selectedBEASTObjects) {
-//        for (BEASTInterface beastObject : selectedBEASTObjects) {
-//            if (beastObject instanceof CodonAlignment) {
-//                // ensure ID of alignment is unique
-//                int k = 0;
-//                String id = beastObject.getID();
-//                boolean found = true;
-//                while (doc.pluginmap.containsKey(id) && found) {
-//                    found = false;
-//                    for (Alignment data : doc.alignments) {
-//                        if (data.getID().equals(beastObject.getID())) {
-//                            found = true;
-//                            break;
-//                        }
-//                    }
-//                    if (found) {
-//                        k++;
-//                        id = beastObject.getID() + k;
-//                    } else {
-//                        BEASTInterface oldData = doc.pluginmap.get(beastObject.getID());
-//                        replaceItem(doc, oldData, beastObject);
-//                    }
-//                }
-//                beastObject.setID(id);
-//                // CodonAlignment wraps alignment
-//                sortByTaxonName(((CodonAlignment) beastObject).alignmentInput.get().sequenceInput.get());
-//                if (getStartTemplate() != null) {
-//                    doc.addAlignmentWithSubnet((Alignment) beastObject, getStartTemplate());
-//                }
-//            }
-//        }
-//    }
+    protected void addAlignments(BeautiDoc doc, List<BEASTInterface> selectedBEASTObjects) {
+        for (BEASTInterface beastObject : selectedBEASTObjects) {
+            if (beastObject instanceof Alignment &&
+                    ((Alignment) beastObject).getDataType().getTypeDescription()=="nucleotide") {
+                // ensure ID of alignment is unique
+                int k = 0;
+                String id = beastObject.getID();
+                boolean found = true;
+                while (doc.pluginmap.containsKey(id) && found) {
+                    found = false;
+                    for (Alignment data : doc.alignments) {
+                        if (data.getID().equals(beastObject.getID())) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        k++;
+                        id = beastObject.getID() + k;
+                    } else {
+                        BEASTInterface oldData = doc.pluginmap.get(beastObject.getID());
+                        replaceItem(doc, oldData, beastObject);
+                    }
+                }
+                beastObject.setID(id);
+                // CodonAlignment wraps alignment
+                CodonAlignment codonAlignment = new CodonAlignment((Alignment) beastObject, GeneticCode.UNIVERSAL);
+                sortByTaxonName(((Alignment) beastObject).sequenceInput.get());
+                if (getStartTemplate() != null) {
+                    doc.addAlignmentWithSubnet(codonAlignment, getStartTemplate());
+                }
+            }
+        }
+    }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void replaceItem(BeautiDoc doc, BEASTInterface oldData, BEASTInterface newData) {
