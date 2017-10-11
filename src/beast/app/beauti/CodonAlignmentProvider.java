@@ -6,19 +6,8 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.alignment.Sequence;
-import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
-import beast.util.XMLParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.swing.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -172,23 +161,23 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
         }
     }
 
-    /** provide GUI for manipulating the alignment **/
-    void editAlignment(Alignment alignment, BeautiDoc doc) {
-        try {
-            AlignmentViewer viewer = new AlignmentViewer(alignment);
-            viewer.showInDialog();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Something went wrong viewing the alignment: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+//    /** provide GUI for manipulating the alignment **/
+//    void editAlignment(Alignment alignment, BeautiDoc doc) {
+//        try {
+//            AlignmentViewer viewer = new AlignmentViewer(alignment);
+//            viewer.showInDialog();
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(null, "Something went wrong viewing the alignment: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
     /** check validity of the alignment,
      * return null if there are no problens,
      * return message string if something is fishy **/
-    String validateAlignment() {
-        return null;
-    }
+//    String validateAlignment() {
+//        return null;
+//    }
 
 //    /** return template to apply to this new alignment.
 //     * By default, the partition template of the current beauti template is returned **/
@@ -203,96 +192,96 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
 //        );
 //    }
 
-    static public BEASTInterface getXMLData(File file) {
-        String xml = "";
-        try {
-            // parse as BEAST 2 xml fragment
-            XMLParser parser = new XMLParser();
-            BufferedReader fin = new BufferedReader(new FileReader(file));
-            while (fin.ready()) {
-                xml += fin.readLine() + "\n";
-            }
-            fin.close();
-            BEASTInterface runnable = parser.parseBareFragment(xml, false);
-            BEASTInterface alignment = getAlignment(runnable);
-            alignment.initAndValidate();
-            return alignment;
-        } catch (Exception ex) {
-            // attempt to parse as BEAST 1 xml
-            try {
-                String ID = file.getName();
-                ID = ID.substring(0, ID.lastIndexOf('.')).replaceAll("\\..*", "");
-                BEASTInterface alignment = parseBeast1XML(ID, xml);
-                if (alignment != null) {
-                    alignment.setID(file.getName().substring(0, file.getName().length() - 4).replaceAll("\\..*", ""));
-                }
-                return alignment;
-            } catch (Exception ex2) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, "Loading of " + file.getName() + " failed: " + ex.getMessage()
-                        + "\n" + ex2.getMessage());
-            }
-            return null;
-        }
-    }
-
-
-    private static BEASTInterface parseBeast1XML(String ID, String xml) throws SAXException, IOException, ParserConfigurationException  {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
-        doc.normalize();
-
-        NodeList alignments = doc.getElementsByTagName("alignment");
-        Alignment alignment = new Alignment();
-        alignment.dataTypeInput.setValue("nucleotide", alignment);
-
-        // parse first alignment
-        org.w3c.dom.Node node = alignments.item(0);
-
-        String dataTypeName = node.getAttributes().getNamedItem("dataType").getNodeValue();
-        int totalCount = 4;
-        if (dataTypeName == null) {
-            alignment.dataTypeInput.setValue("integer", alignment);
-        } else if (dataTypeName.toLowerCase().equals("dna") || dataTypeName.toLowerCase().equals("nucleotide")) {
-            alignment.dataTypeInput.setValue("nucleotide", alignment);
-            totalCount = 4;
-        } else if (dataTypeName.toLowerCase().equals("aminoacid") || dataTypeName.toLowerCase().equals("protein")) {
-            alignment.dataTypeInput.setValue("aminoacid", alignment);
-            totalCount = 20;
-
-        } else if (dataTypeName.toLowerCase().equals(Codon.CODON)) {
-            alignment.dataTypeInput.setValue(Codon.CODON, alignment);
-            totalCount = 64;
-
-        } else {
-            alignment.dataTypeInput.setValue("integer", alignment);
-        }
-
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            org.w3c.dom.Node child = children.item(i);
-            if (child.getNodeName().equals("sequence")) {
-                Sequence sequence = new Sequence();
-                // find the taxon
-                String taxon = "";
-                NodeList sequenceChildren = child.getChildNodes();
-                for (int j = 0; j < sequenceChildren.getLength(); j++) {
-                    org.w3c.dom.Node child2 = sequenceChildren.item(j);
-                    if (child2.getNodeName().equals("taxon")) {
-                        taxon = child2.getAttributes().getNamedItem("idref").getNodeValue();
-                    }
-                }
-                String data = child.getTextContent();
-                sequence.initByName("totalcount", totalCount, "taxon", taxon, "value", data);
-                sequence.setID("seq_" + taxon);
-                alignment.sequenceInput.setValue(sequence, alignment);
-
-            }
-        }
-        alignment.setID(ID);
-        alignment.initAndValidate();
-        return alignment;
-    } // parseBeast1XML
+//    static public BEASTInterface getXMLData(File file) {
+//        String xml = "";
+//        try {
+//            // parse as BEAST 2 xml fragment
+//            XMLParser parser = new XMLParser();
+//            BufferedReader fin = new BufferedReader(new FileReader(file));
+//            while (fin.ready()) {
+//                xml += fin.readLine() + "\n";
+//            }
+//            fin.close();
+//            BEASTInterface runnable = parser.parseBareFragment(xml, false);
+//            BEASTInterface alignment = getAlignment(runnable);
+//            alignment.initAndValidate();
+//            return alignment;
+//        } catch (Exception ex) {
+//            // attempt to parse as BEAST 1 xml
+//            try {
+//                String ID = file.getName();
+//                ID = ID.substring(0, ID.lastIndexOf('.')).replaceAll("\\..*", "");
+//                BEASTInterface alignment = parseBeast1XML(ID, xml);
+//                if (alignment != null) {
+//                    alignment.setID(file.getName().substring(0, file.getName().length() - 4).replaceAll("\\..*", ""));
+//                }
+//                return alignment;
+//            } catch (Exception ex2) {
+//                ex.printStackTrace();
+//                JOptionPane.showMessageDialog(null, "Loading of " + file.getName() + " failed: " + ex.getMessage()
+//                        + "\n" + ex2.getMessage());
+//            }
+//            return null;
+//        }
+//    }
+//
+//
+//    private static BEASTInterface parseBeast1XML(String ID, String xml) throws SAXException, IOException, ParserConfigurationException  {
+//        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//        Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+//        doc.normalize();
+//
+//        NodeList alignments = doc.getElementsByTagName("alignment");
+//        Alignment alignment = new Alignment();
+//        alignment.dataTypeInput.setValue("nucleotide", alignment);
+//
+//        // parse first alignment
+//        org.w3c.dom.Node node = alignments.item(0);
+//
+//        String dataTypeName = node.getAttributes().getNamedItem("dataType").getNodeValue();
+//        int totalCount = 4;
+//        if (dataTypeName == null) {
+//            alignment.dataTypeInput.setValue("integer", alignment);
+//        } else if (dataTypeName.toLowerCase().equals("dna") || dataTypeName.toLowerCase().equals("nucleotide")) {
+//            alignment.dataTypeInput.setValue("nucleotide", alignment);
+//            totalCount = 4;
+//        } else if (dataTypeName.toLowerCase().equals("aminoacid") || dataTypeName.toLowerCase().equals("protein")) {
+//            alignment.dataTypeInput.setValue("aminoacid", alignment);
+//            totalCount = 20;
+//
+//        } else if (dataTypeName.toLowerCase().equals(Codon.CODON)) {
+//            alignment.dataTypeInput.setValue(Codon.CODON, alignment);
+//            totalCount = 64;
+//
+//        } else {
+//            alignment.dataTypeInput.setValue("integer", alignment);
+//        }
+//
+//        NodeList children = node.getChildNodes();
+//        for (int i = 0; i < children.getLength(); i++) {
+//            org.w3c.dom.Node child = children.item(i);
+//            if (child.getNodeName().equals("sequence")) {
+//                Sequence sequence = new Sequence();
+//                // find the taxon
+//                String taxon = "";
+//                NodeList sequenceChildren = child.getChildNodes();
+//                for (int j = 0; j < sequenceChildren.getLength(); j++) {
+//                    org.w3c.dom.Node child2 = sequenceChildren.item(j);
+//                    if (child2.getNodeName().equals("taxon")) {
+//                        taxon = child2.getAttributes().getNamedItem("idref").getNodeValue();
+//                    }
+//                }
+//                String data = child.getTextContent();
+//                sequence.initByName("totalcount", totalCount, "taxon", taxon, "value", data);
+//                sequence.setID("seq_" + taxon);
+//                alignment.sequenceInput.setValue(sequence, alignment);
+//
+//            }
+//        }
+//        alignment.setID(ID);
+//        alignment.initAndValidate();
+//        return alignment;
+//    } // parseBeast1XML
 
 
 //    static BEASTInterface getAlignment(BEASTInterface beastObject) throws IllegalArgumentException, IllegalAccessException {

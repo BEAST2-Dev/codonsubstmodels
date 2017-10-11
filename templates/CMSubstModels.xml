@@ -15,13 +15,13 @@
                      codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
                      codonmodels.M0CodonModel.printRateMap">
             <![CDATA[
-        <substModel spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
+        <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
             <frequencies id="M0freqs.s:$(n)" spec="CodonFrequencies" pi="F3X4">
                 <data idref="$(n)"/>
             </frequencies>
-        </substModel>
+        </plugin>
 
         <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.omega.s:$(n)"/>
         <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.kappa.s:$(n)"/>
