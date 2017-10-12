@@ -140,26 +140,26 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void replaceItem(BeautiDoc doc, BEASTInterface oldData, BEASTInterface newData) {
-        doc.pluginmap.remove(newData.getID());
-        Set<BEASTInterface> outputs = new LinkedHashSet<>();
-        outputs.addAll(oldData.getOutputs());
-        for (BEASTInterface o : outputs) {
-            for ( Input i : o.listInputs()) {
-                if (i.get() == oldData) {
-                    i.setValue(newData, o);
-                } else if (i.get() != null && i.get() instanceof List) {
-                    List list = (List) i.get();
-                    int index = list.indexOf(oldData);
-                    if (index >= 0) {
-                        list.set(index, newData);
-                        newData.getOutputs().add(o);
-                    }
-                }
-            }
-        }
-    }
+//    @SuppressWarnings({ "rawtypes", "unchecked" })
+//    private void replaceItem(BeautiDoc doc, BEASTInterface oldData, BEASTInterface newData) {
+//        doc.pluginmap.remove(newData.getID());
+//        Set<BEASTInterface> outputs = new LinkedHashSet<>();
+//        outputs.addAll(oldData.getOutputs());
+//        for (BEASTInterface o : outputs) {
+//            for ( Input i : o.listInputs()) {
+//                if (i.get() == oldData) {
+//                    i.setValue(newData, o);
+//                } else if (i.get() != null && i.get() instanceof List) {
+//                    List list = (List) i.get();
+//                    int index = list.indexOf(oldData);
+//                    if (index >= 0) {
+//                        list.set(index, newData);
+//                        newData.getOutputs().add(o);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
 //    /** provide GUI for manipulating the alignment **/
 //    void editAlignment(Alignment alignment, BeautiDoc doc) {

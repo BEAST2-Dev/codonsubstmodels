@@ -67,9 +67,22 @@
 	        beast.util.ClusterTree.estimate,
 	        beast.util.ClusterTree.nodetype,
 	        beast.util.ClusterTree.distance,
-	        codonmodels.M0CodonModel.kappa,
-	        codonmodels.M0CodonModel.omega,
-	        codonmodels.M0CodonModel.frequencies,
+	        beast.evolution.substitutionmodel.WAG.rates,
+	        beast.evolution.substitutionmodel.WAG.frequencies,
+	        beast.evolution.substitutionmodel.JTT.rates,
+	        beast.evolution.substitutionmodel.JTT.frequencies,
+	        beast.evolution.substitutionmodel.Blosum62.rates,
+	        beast.evolution.substitutionmodel.Blosum62.frequencies,
+	        beast.evolution.substitutionmodel.Dayhoff.rates,
+	        beast.evolution.substitutionmodel.Dayhoff.frequencies,
+	        beast.evolution.substitutionmodel.CPREV.rates,
+	        beast.evolution.substitutionmodel.CPREV.frequencies,
+	        beast.evolution.substitutionmodel.MTREV.rates,
+	        beast.evolution.substitutionmodel.MTREV.frequencies,
+	        beast.evolution.substitutionmodel.GTR.rates,
+	        beast.evolution.substitutionmodel.JukesCantor.frequencies,
+            codonmodels.M0CodonModel.rates,
+            codonmodels.M0CodonModel.frequencies,
             beast.math.distributions.Prior.x,
             beast.math.distributions.MRCAPrior.tree,
             beast.math.distributions.MRCAPrior.monophyletic,
@@ -99,12 +112,12 @@
         />
 		<mergepoint id='aux-partitions-panels'/>
 
-		<!--<panel spec='BeautiPanelConfig' panelname="Tip Dates" tiptext="Allows to specify data that a taxon was sampled"-->
-            <!--path='tree'-->
-            <!--hasPartitions="Tree" icon='2.png.x' forceExpansion='TRUE'-->
-            <!--isVisible='true'-->
-        <!--/>-->
-		<!--<mergepoint id='aux-tipdates-panels'/>-->
+		<panel spec='BeautiPanelConfig' panelname="Tip Dates" tiptext="Allows to specify data that a taxon was sampled"
+            path='tree'
+            hasPartitions="Tree" icon='2.png.x' forceExpansion='TRUE'
+            isVisible='true'
+        />
+		<mergepoint id='aux-tipdates-panels'/>
 
 		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model" tiptext="Site model and codon substitution model specifications"
             path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
@@ -156,9 +169,9 @@
             <!-- site model                                                              -->
             <plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>
                 <!--substModel will be automatically detected /-->
-                <!--<proportionInvariant spec='parameter.RealParameter' id='proportionInvariant.s:$(n)' value='0.0' lower='0' upper='1' estimate='false'/>-->
-                <!--<mutationRate        spec='parameter.RealParameter' id='mutationRate.s:$(n)' value='1.0'        estimate='false'/>-->
-                <!--<shape               spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0'         estimate='false'/>-->
+                <proportionInvariant spec='parameter.RealParameter' id='proportionInvariant.s:$(n)' value='0.0' lower='0' upper='1' estimate='false'/>
+                <mutationRate        spec='parameter.RealParameter' id='mutationRate.s:$(n)' value='1.0'        estimate='false'/>
+                <shape               spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0'         estimate='false'/>
             </plugin>
 
             <plugin spec='ThreadedTreeLikelihood' id="treeLikelihood.$(n)">
