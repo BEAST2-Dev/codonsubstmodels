@@ -11,7 +11,7 @@
         <!-- codon models -->
 
         <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
-                     suppressInputs="codonmodels.M0CodonModel.frequencies, codonmodels.M0CodonModel.rates,
+                     suppressInputs="codonmodels.M0CodonModel.rates,
                      codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
                      codonmodels.M0CodonModel.printRateMap">
             <![CDATA[
