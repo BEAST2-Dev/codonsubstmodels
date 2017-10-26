@@ -33,7 +33,6 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
-import beast.evolution.substitutionmodel.CodonFrequencies;
 import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 

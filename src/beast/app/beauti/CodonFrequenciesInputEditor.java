@@ -1,18 +1,19 @@
 package beast.app.beauti;
 
 
+import beast.app.draw.BEASTObjectInputEditor;
 import beast.core.BEASTInterface;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.substitutionmodel.CodonFrequencies;
+import codonmodels.CodonFrequencies;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 
-public class CodonFrequenciesInputEditor extends FrequenciesInputEditor {
+public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
     RealParameter freqsParameter;
     Alignment alignment;
 

@@ -18,7 +18,7 @@
         <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
-            <frequencies id="M0freqs.s:$(n)" spec="CodonFrequencies" pi="F3X4">
+            <frequencies id="M0freqs.s:$(n)" spec="codonmodels.CodonFrequencies" pi="F3X4">
                 <data idref="$(n)"/>
             </frequencies>
         </plugin>
@@ -47,6 +47,11 @@
             <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
         </subtemplate>
 
+        <subtemplate id='JC69' class='codonmodels.M0CodonModel' mainid='JC69.s:$(n)'>
+            <![CDATA[
+        <plugin spec='codonmodels.M0CodonModel' id='JC69.s:$(n)'/>
+]]>
+        </subtemplate>
 
 
     </mergewith>

@@ -1,5 +1,5 @@
 
-package beast.evolution.substitutionmodel;
+package codonmodels;
 
 import beast.core.Citation;
 import beast.core.Description;
@@ -10,6 +10,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
+import beast.evolution.substitutionmodel.Frequencies;
 import beast.util.StringUtils;
 
 import java.util.Arrays;
@@ -23,6 +24,8 @@ public class CodonFrequencies extends Frequencies {
             "including equal, F1X4, F3X4 (default), and F6n", "F3X4");
 
     public CodonFrequencies() {
+//        estimateInput.setRule(Input.Validate.FORBIDDEN);
+        frequenciesInput.setRule(Input.Validate.OPTIONAL);
         dataInput.setRule(Input.Validate.REQUIRED); // only use internally
     }
 
