@@ -1108,7 +1108,7 @@
     <input spec="codonmodels.M0CodonModel" id="m0">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
+        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
             <data idref="codon.alignment"/>
         </frequencies>
     </input>
@@ -1203,7 +1203,7 @@
             <log idref="likelihood"/>
             <log idref="prior"/>
             <log idref="popSize"/>
-            <log idref="m0"/> <!--synonymousRate-->
+            <!--<log idref="m0"/> &lt;!&ndash;synonymousRate&ndash;&gt;-->
             <log idref="m0.omega"/>
             <log idref="m0.kappa"/>
         </logger>
