@@ -24,4 +24,14 @@ public class StringUtils {
         return numbersNew;
     }
 
+    public static double[] roundDoubleArrays(double[] numbers, int decimal) {
+        double[] numbersNew = new double[numbers.length];
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(decimal);
+        for(int i = 0; i < numbers.length; i++ ){
+            numbersNew[i] = Double.valueOf(df.format(numbers[i]));
+        }
+        return numbersNew;
+    }
+
 }

@@ -4,7 +4,6 @@ package codonmodels;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
-import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
@@ -24,69 +23,83 @@ public class CodonFrequencies extends Frequencies {
             "including equal, F1X4, F3X4 (default), and F6n", "F3X4");
 
     public CodonFrequencies() {
+        estimateInput.setValue(false, this);
 //        estimateInput.setRule(Input.Validate.FORBIDDEN);
-        frequenciesInput.setRule(Input.Validate.OPTIONAL);
-        dataInput.setRule(Input.Validate.REQUIRED); // only use internally
+//        frequenciesInput.setRule(Input.Validate.OPTIONAL);
+//        dataInput.setRule(Input.Validate.REQUIRED); // only use internally
     }
 
     @Override
     public void initAndValidate() {
-        estimateInput.setValue(false, this);
-
-        CodonAlignment codonAlignment = getCodonAlignment();
-        Codon codonDataType = getDataType(codonAlignment);
-        int codonStateCount = codonDataType.getStateCount();
-        Log.info.println("Codon alignment " + codonAlignment.getID() + " : number of states = " + codonStateCount);
-
-        int[] indices = codonAlignment.getGeneticCode().getStopCodonIndices();
-        if (indices.length >= codonStateCount || indices.length == 0)
-            throw new IllegalArgumentException("Invalid stop codon indices length " + indices.length);
-
-        double[] freqs;
-        if ("equal".equals(piInput.get())) {
-            freqs = new double[codonStateCount];
-            double equalFreq =  1.0 / (double) (codonStateCount - indices.length);
-            Arrays.fill(freqs, equalFreq);
-            // replace to 0 for stop codon
-            for (int id : indices)
-                freqs[id] = 0.0;
-
-        } else if ("F1X4".equals(piInput.get())) {
-
-            double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
-            freqs = estimateFrequencies(freqsCPB[3], freqsCPB[3], freqsCPB[3], codonDataType);
-
-        } else if ("F3X4".equals(piInput.get())) {
-
-            double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
-            freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
-
-        } else if ("F6n".equals(piInput.get())) {
-            freqs = codonAlignment.getCodonFrequencies();
-
-        } else {
-            throw new IllegalArgumentException("Invalid input of pi = " + piInput.get());
-        }
-        // convert double[] to Double[]
-        if (freqs.length != codonStateCount)
-            throw new IllegalArgumentException("Invalid codon frequencies, dimension " +
-                    freqs.length + " != " + codonStateCount);
-        Double[] values = new Double[codonStateCount];
-        for (int i = 0; i < freqs.length; i++)
-            values[i] = freqs[i];
-
-        Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
-        Log.info.println("Initial values to CodonFrequencies = " +
-                Arrays.toString(StringUtils.roundDoubleArrays(values, 5)));
-
-        RealParameter frequencies = new RealParameter(values);
-        frequencies.lowerValueInput.setValue(0.0, frequencies);
-        frequencies.upperValueInput.setValue(1.0, frequencies);
-        frequenciesInput.setValue(frequencies, this);
-
         super.initAndValidate();
 
         Log.info.println("Set frequencies dimension = " + getFreqs().length);
+    }
+
+    @Override
+    protected void update() {
+        if (frequenciesInput.get() != null) {
+
+            // if user specified, parse frequencies from space delimited string
+            freqs = new double[frequenciesInput.get().getDimension()];
+
+            for (int i = 0; i < freqs.length; i++) {
+                freqs[i] = frequenciesInput.get().getValue(i);
+            }
+
+        } else {
+            CodonAlignment codonAlignment = getCodonAlignment();
+            Codon codonDataType = getDataType(codonAlignment);
+            int codonStateCount = codonDataType.getStateCount();
+            Log.info.println("Codon alignment " + codonAlignment.getID() + " : number of states = " + codonStateCount);
+
+            int[] indices = codonAlignment.getGeneticCode().getStopCodonIndices();
+            if (indices.length >= codonStateCount || indices.length == 0)
+                throw new IllegalArgumentException("Invalid stop codon indices length " + indices.length);
+
+//        double[] freqs;
+            if ("equal".equals(piInput.get())) {
+                freqs = new double[codonStateCount];
+                double equalFreq = 1.0 / (double) (codonStateCount - indices.length);
+                Arrays.fill(freqs, equalFreq);
+                // replace to 0 for stop codon
+                for (int id : indices)
+                    freqs[id] = 0.0;
+
+            } else if ("F1X4".equals(piInput.get())) {
+
+                double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
+                freqs = estimateFrequencies(freqsCPB[3], freqsCPB[3], freqsCPB[3], codonDataType);
+
+            } else if ("F3X4".equals(piInput.get())) {
+
+                double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
+                freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
+
+            } else if ("F6n".equals(piInput.get())) {
+                freqs = codonAlignment.getCodonFrequencies();
+
+            } else {
+                throw new IllegalArgumentException("Invalid input of pi = " + piInput.get());
+            }
+            // convert double[] to Double[]
+            if (freqs.length != codonStateCount)
+                throw new IllegalArgumentException("Invalid codon frequencies, dimension " +
+                        freqs.length + " != " + codonStateCount);
+//        Double[] values = new Double[codonStateCount];
+//        for (int i = 0; i < freqs.length; i++)
+//            values[i] = freqs[i];
+
+            Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
+            Log.info.println("Initial values to CodonFrequencies = " +
+                    Arrays.toString(StringUtils.roundDoubleArrays(freqs, 5)));
+
+//        RealParameter frequencies = new RealParameter(values);
+//        frequencies.lowerValueInput.setValue(0.0, frequencies);
+//        frequencies.upperValueInput.setValue(1.0, frequencies);
+//        frequenciesInput.setValue(frequencies, this);
+        }
+        needsUpdate = false;
     }
 
     // F1X4 (nucFreq1==nucFreq2=nucFreq3) or F3X4, nuc order: A,C,G,T

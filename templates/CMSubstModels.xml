@@ -18,7 +18,7 @@
         <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
-            <frequencies id="M0freqs.s:$(n)" spec="codonmodels.CodonFrequencies">
+            <frequencies id="F3X4Freqs.s:$(n)" spec="codonmodels.CodonFrequencies">
                 <data idref="$(n)"/>
             </frequencies>
         </plugin>
@@ -55,7 +55,7 @@
         <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
-            <frequencies id="M0freqs.s:$(n)" spec="codonmodels.CodonFrequencies" pi="F3X4">
+            <frequencies id="codonFreqs.s:$(n)" spec="codonmodels.CodonFrequencies" pi="F3X4">
                 <data idref="$(n)"/>
             </frequencies>
         </plugin>
@@ -84,6 +84,39 @@
             <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
         </subtemplate>
 
+
+        <!-- frequency models -->
+        <subtemplate id='F3X4' class='codonmodels.CodonFrequencies' mainid='F3X4Freqs.s:$(n)'
+                     suppressInputs="codonmodels.CodonFrequencies.estimate,
+                     codonmodels.CodonFrequencies.frequencies">
+            <![CDATA[
+            <frequencies id='F3X4Freqs.s:$(n)' spec='codonmodels.CodonFrequencies' data='@$(n)' pi="F3X4"/>
+]]>
+        </subtemplate>
+
+        <subtemplate id='F1X4' class='codonmodels.CodonFrequencies' mainid='F1X4Freqs.s:$(n)'
+                     suppressInputs="codonmodels.CodonFrequencies.estimate,
+                     codonmodels.CodonFrequencies.frequencies">
+            <![CDATA[
+            <frequencies id='F1X4Freqs.s:$(n)' spec='codonmodels.CodonFrequencies' data='@$(n)' pi="F1X4"/>
+]]>
+        </subtemplate>
+
+        <subtemplate id='equal' class='codonmodels.CodonFrequencies' mainid='equalFreqs.s:$(n)'
+                     suppressInputs="codonmodels.CodonFrequencies.estimate,
+                     codonmodels.CodonFrequencies.frequencies">
+            <![CDATA[
+            <frequencies id='equalFreqs.s:$(n)' spec='codonmodels.CodonFrequencies' data='@$(n)' pi="equal"/>
+]]>
+        </subtemplate>
+
+        <subtemplate id='F6n' class='codonmodels.CodonFrequencies' mainid='F6nFreqs.s:$(n)'
+                     suppressInputs="codonmodels.CodonFrequencies.estimate,
+                     codonmodels.CodonFrequencies.frequencies">
+            <![CDATA[
+            <frequencies id='F6nFreqs.s:$(n)' spec='codonmodels.CodonFrequencies' data='@$(n)' pi="F6n"/>
+]]>
+        </subtemplate>
 
     </mergewith>
 

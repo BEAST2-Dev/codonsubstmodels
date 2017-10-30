@@ -4,6 +4,8 @@ package beast.app.beauti;
 import beast.app.draw.BEASTObjectInputEditor;
 import beast.core.BEASTInterface;
 import beast.core.Input;
+import beast.core.parameter.RealParameter;
+import beast.evolution.alignment.CodonAlignment;
 import codonmodels.CodonFrequencies;
 
 import javax.swing.*;
@@ -11,8 +13,8 @@ import java.util.Arrays;
 
 
 public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
-//    RealParameter freqsParameter;
-//    CodonAlignment alignment;
+    RealParameter freqsParameter;
+    CodonAlignment alignment;
 
     private static final long serialVersionUID = 1L;
 //    boolean useDefaultBehavior;
@@ -42,17 +44,20 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
         JComboBox<String> comboBox = new JComboBox<>(freqsString);
         String pi = freqs.piInput.get();
         int idx = Arrays.asList(freqsString).indexOf(pi);
-        if (idx >= 0) {
+        if (idx > 0) {
             comboBox.setSelectedIndex(idx);
         } else {
             comboBox.setSelectedIndex(0);
         }
-//        alignment = (CodonAlignment) getCandidate(null, freqs);
+        freqsParameter = freqs.frequenciesInput.get();
+        alignment = (CodonAlignment) getCandidate(freqs.dataInput, freqs);
+
         comboBox.addActionListener(e -> {
                 //@SuppressWarnings("unchecked")
                 int selected = comboBox.getSelectedIndex();
                 try {
                     freqs.piInput.setValue(freqsString[selected], freqs);
+                    freqs.frequenciesInput.setValue(freqsParameter, freqs);
                 } catch (Exception e2) {
                     e2.printStackTrace();
                 }
@@ -61,13 +66,13 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
         box.add(comboBox);
     }
 
-//    private BEASTInterface getCandidate(Input<?> input, CodonFrequencies freqs) {
-//        return getDoc().getPartition(freqs);
-////		List<String> candidates = PluginPanel.getAvailablePlugins(input, freqs, null);
-////		String id = candidates.get(0);
-////		BEASTObject beastObject = PluginPanel.g_plugins.get(id);
-////		return beastObject;
-//    }
+    private BEASTInterface getCandidate(Input<?> input, CodonFrequencies freqs) {
+        return getDoc().getPartition(freqs);
+//		List<String> candidates = PluginPanel.getAvailablePlugins(input, freqs, null);
+//		String id = candidates.get(0);
+//		BEASTObject beastObject = PluginPanel.g_plugins.get(id);
+//		return beastObject;
+    }
 
 
     @Override
