@@ -13,7 +13,44 @@
         <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
                      suppressInputs="codonmodels.M0CodonModel.rates,
                      codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
-                     codonmodels.M0CodonModel.printRateMap">
+                     codonmodels.M0CodonModel.printRateMap, codonmodels.M0CodonModel.frequencies">
+            <![CDATA[
+        <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
+            <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
+            <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
+            <frequencies id="M0freqs.s:$(n)" spec="codonmodels.CodonFrequencies">
+                <data idref="$(n)"/>
+            </frequencies>
+        </plugin>
+
+        <plugin id='OmegaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.omega.s:$(n)"/>
+        <plugin id='KappaScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="1" parameter="@M0.kappa.s:$(n)"/>
+
+        <prior id='OmegaPrior.s:$(n)' x='@M0.omega.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="3.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+        <prior id='KappaPrior.s:$(n)' x='@M0.kappa.s:$(n)'>
+            <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
+                <parameter name='M' value="-3.0" estimate='false'/>
+                <parameter name='S' value="1.25" estimate='false'/>
+            </distr>
+		</prior>
+]]>
+
+            <connect srcID="M0omega.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="state" inputName="stateNode" if="inlikelihood(M0.s:$(n))"/>
+
+            <connect srcID="M0omega.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+            <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
+        </subtemplate>
+
+        <subtemplate id="CodonModel_M1" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)"
+                     suppressInputs="codonmodels.M0CodonModel.rates,
+                     codonmodels.M0CodonModel.eigenSystem, codonmodels.M0CodonModel.data,
+                     codonmodels.M0CodonModel.printRateMap, codonmodels.M0CodonModel.frequencies">
             <![CDATA[
         <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
@@ -47,15 +84,8 @@
             <connect srcID="M0kappa.s:$(n)" targetID="tracelog" inputName="log" if="inlikelihood(M0.s:$(n))"/>
         </subtemplate>
 
-        <subtemplate id='JC69' class='codonmodels.M0CodonModel' mainid='JC69.s:$(n)'>
-            <![CDATA[
-        <plugin spec='codonmodels.M0CodonModel' id='JC69.s:$(n)'/>
-]]>
-        </subtemplate>
-
 
     </mergewith>
-
 
 </beast>
 

@@ -22,6 +22,7 @@
     <beauticonfig spec='BeautiConfig'
         inputLabelMap='beast.core.MCMC.operator=Operators,
 	        beast.core.MCMC.logger=Loggers,
+			beast.evolution.sitemodel.SiteModel.mutationRate =Substitution Rate,
 			beast.evolution.speciation.YuleModel.birthDiffRate=Birth Rate'
         inlinePlugins ='beast.core.MCMC.distribution,
             codonmodels.CodonSubstitutionModel,
@@ -81,8 +82,8 @@
 	        beast.evolution.substitutionmodel.MTREV.frequencies,
 	        beast.evolution.substitutionmodel.GTR.rates,
 	        beast.evolution.substitutionmodel.JukesCantor.frequencies,
-	        beast.evolution.substitutionmodel.Frequencies.estimate,
-	        beast.evolution.substitutionmodel.Frequencies.frequencies,
+	        codonmodels.CodonFrequencies.estimate,
+	        codonmodels.CodonFrequencies.frequencies,
             codonmodels.M0CodonModel.rates,
             beast.math.distributions.Prior.x,
             beast.math.distributions.MRCAPrior.tree,
@@ -120,16 +121,16 @@
         />
 		<mergepoint id='aux-tipdates-panels'/>
 
-        <!--<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model"-->
-               <!--tiptext="Site model and codon substitution model specifications"-->
-               <!--path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'-->
-        <!--/>-->
-
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Codon Site Model"
+        <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model"
                tiptext="Site model and codon substitution model specifications"
                path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
-               type='codonmodels.CodonSiteModel'
         />
+
+		<!--<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Codon Site Model"-->
+               <!--tiptext="Site model and codon substitution model specifications"-->
+               <!--path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'-->
+               <!--type='codonmodels.CodonSiteModel'-->
+        <!--/>-->
 		<mergepoint id='aux-sitemodel-panels'/>
 
 		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
@@ -192,7 +193,7 @@
             </plugin>
 
 	        <prior id='ClockPrior.c:$(n)' x='@clockRate.c:$(n)'><distr spec="beast.math.distributions.Uniform" upper='Infinity'/></prior>
-	        <!--<prior id='MutationRatePrior.s:$(n)' x='@mutationRate.s:$(n)'><distr spec="OneOnX"/></prior>-->
+	        <prior id='MutationRatePrior.s:$(n)' x='@mutationRate.s:$(n)'><distr spec="OneOnX"/></prior>
 
             <!-- tree and its properties -->
             <taxonset id='TaxonSet.$(n)' spec='beast.evolution.alignment.TaxonSet' alignment='@$(n)' />
