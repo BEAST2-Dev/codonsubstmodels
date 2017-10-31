@@ -40,7 +40,7 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
     protected void addComboBox(JComponent box, Input<?> input, BEASTInterface beastObject) {
         CodonFrequencies freqs = (CodonFrequencies) input.get();
 
-        String[] freqsString = new String[]{"equal", "F1X4", "F3X4", "F6n"};
+        String[] freqsString = new String[]{"equal", "F1X4", "F3X4", "F60/F61"};
         JComboBox<String> comboBox = new JComboBox<>(freqsString);
         String pi = freqs.piInput.get();
         int idx = Arrays.asList(freqsString).indexOf(pi);

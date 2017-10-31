@@ -15,12 +15,12 @@ import beast.util.StringUtils;
 import java.util.Arrays;
 
 
-@Description("The equilibrium codon frequencies PI, including equal, F1X4, F3X4, and F6n.")
+@Description("The equilibrium codon frequencies PI, including equal, F1X4, F3X4, and F60/F61.")
 @Citation(value="Yang, Z. (2006). Computational molecular evolution. Oxford University Press.", year = 2006)
 public class CodonFrequencies extends Frequencies {
 
     final public Input<String> piInput = new Input<>("pi", "The assumption of equilibrium codon frequencies PI, " +
-            "including equal, F1X4, F3X4 (default), and F6n", "F3X4");
+            "including equal, F1X4, F3X4 (default), and F60/F61", "F3X4");
 
     public CodonFrequencies() {
         estimateInput.setValue(false, this);
@@ -76,7 +76,7 @@ public class CodonFrequencies extends Frequencies {
                 double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
                 freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
 
-            } else if ("F6n".equals(piInput.get())) {
+            } else if ("F60/F61".equals(piInput.get())) {
                 freqs = codonAlignment.getCodonFrequencies();
 
             } else {
