@@ -28,15 +28,6 @@ public class CodonAlignmentViewer extends JPanel {
 
     private int stopCodonSite = -1;
 
-//    /**
-//     * define which character maps to which color *
-//     */
-//    public void setCustomColorMap(Map<Character, Color> colorMap) {
-//        for (char c : m_customColorMap.keySet()) {
-//            m_customColorMap.put(c, colorMap.get(c));
-//        }
-//    }
-
     /**
      * constructor processes alignment and sets up table with first column fixed *
      */
@@ -58,20 +49,6 @@ public class CodonAlignmentViewer extends JPanel {
         // set up column labels
         columnData = new Object[siteCount + 1];
         updateColumnData(headerChar);
-//        for (int i = 1; i < siteCount + 1; i++) {
-//            columnData[i] = "<html>.<br>" + headerChar[i - 1] + "</html>";
-//        }
-//        columnData[0] = "<html><br>taxon name</html>";
-//        columnData[1] = "<html>1<br>" + headerChar[0] + "</html>";
-//        for (int i = 10; i < siteCount; i += 10) {
-//            String s = i + "";
-//            for (int j = 0; j < s.length(); j++) {
-//                if (i+j < columnData.length) {
-//                    columnData[i + j] = "<html>" + s.charAt(j) + "<br>" + headerChar[i - 1] + "</html>";
-//                }
-//            }
-//            columnData[i - 5] = "<html>+<br>" + headerChar[i - 1] + "</html>";
-//        }
 
         // create table in scrollpane with first column fixed
         final TableModel fixedColumnModel = new AbstractTableModel() {
@@ -189,7 +166,7 @@ public class CodonAlignmentViewer extends JPanel {
 
         char[] headerChar = new char[siteCount];
         Object[][] colorMap = setupColorMap();
-//        Object[][] integerColorMap = setupIntegerColorMap();
+
         stopCodonSite = -1;
         try {
             for (int i = 0; i < siteCount; i++) {
@@ -198,38 +175,16 @@ public class CodonAlignmentViewer extends JPanel {
 //                String patternString = dataType.state2string(pattern);
                 String patternString = ((Codon)dataType).state2aminoacid(pattern);
 
-//                if (patternString.contains(",")) {
-//                    // We have a string of comma separated values.
-//                    String[] patternAtTaxon = patternString.split(",");
-//                    headerChar[i] = mostFrequentCharInPattern(patternAtTaxon);
-//                    for (int j = 0; j < taxonCount; j++) {
-//                        try {
-//                            int code = Integer.valueOf(patternAtTaxon[j]);
-//                            if (code + '0' == headerChar[i]) {
-//                                // Prevent Exception when accessing integerColorMap
-//                                code = Math.min(Math.max(code, 0), integerColorMap[0].length - 1);
-//                                tableData[j][i + 1] = integerColorMap[0][code];
-//                            } else {
-//                                code = Math.min(Math.max(code, 0), integerColorMap[0].length - 1);
-//                                tableData[j][i + 1] = integerColorMap[1][code];
-//                            }
-//                        } catch (NumberFormatException e) {
-//                            // State cannot be interpreted as a number.
-//                            // Assume it is a special (ambiguous) character.
-//                            tableData[j][i + 1] = useColor ? ' ' : patternAtTaxon[j];
-//                        }
-//                    }
-//                } else {
-                    headerChar[i] = mostFrequentCharInPattern(patternString);
-                    for (int j = 0; j < taxonCount; j++) {
-                        char c = patternString.charAt(j);
-                        if (c == headerChar[i]) {
-                            tableData[j][i + 1] = colorMap[0][c];
-                        } else {
-                            tableData[j][i + 1] = colorMap[1][c];
-                        }
+                headerChar[i] = mostFrequentCharInPattern(patternString);
+                for (int j = 0; j < taxonCount; j++) {
+                    char c = patternString.charAt(j);
+                    if (c == headerChar[i]) {
+                        tableData[j][i + 1] = colorMap[0][c];
+                    } else {
+                        tableData[j][i + 1] = colorMap[1][c];
                     }
-//                }
+                }
+
                 if (stopCodonSite < 0 && patternString.contains(Character.toString(Codon.STOP_CHARACTER))) {
                     stopCodonSite = i;
                 }
@@ -283,39 +238,6 @@ public class CodonAlignmentViewer extends JPanel {
         }
     }
 
-//    private Object[][] setupIntegerColorMap() {
-//        if (useColor) {
-//            String[][] colorMap = new String[2][256];
-//            for (int i = 0; i < 256; i++) {
-//                int red = ((i & 0x80) >> 7) + ((i & 0x10) >> 4) + ((i & 0x2) << 1);
-//                int green = ((i & 0x40) >> 6) + ((i & 0x08) >> 2) + ((i & 0x4));
-//                int blue = ((i & 0x20) >> 5) + ((i & 0x04) >> 1) + ((i & 0x1) << 2);
-//                int color = (red << 21 + (green << 18)) + (green << 13) + (blue << 10) + (blue << 5) + (red << 2);
-//                colorMap[0][i] = "<html><font color='#" + Integer.toString(color, 16) + "'><b>.</b></html>";
-//                colorMap[1][i] = "<html><font color='#" + Integer.toString(color, 16) + "'><b>" + i + "</font></html>";
-//            }
-//            for (char c : m_customColorMap.keySet()) {
-//                Color color = m_customColorMap.get(c);
-//                colorMap[0][c] = "<html><font color='#" + Integer.toString(color.getRGB(), 16) + "'><b>.</b></html>";
-//                colorMap[1][c] = "<html><font color='#" + Integer.toString(color.getRGB(), 16) + "'><b>" + (int) c + "</font></html>";
-//            }
-//            if (!this.useDots) {
-//                colorMap[0] = colorMap[1];
-//            }
-//            return colorMap;
-//        } else {
-//            String[][] colorMap = new String[2][256];
-//            for (int i = 0; i < 256; i++) {
-//                colorMap[0][i] = ".";
-//                colorMap[1][i] = Integer.toString(i);
-//            }
-//            if (!this.useDots) {
-//                colorMap[0] = colorMap[1];
-//            }
-//            return colorMap;
-//        }
-//    }
-
     private char mostFrequentCharInPattern(String pattern) {
         char[] counts = new char[256];
         for (int i = 0; i < pattern.length(); i++) {
@@ -330,29 +252,6 @@ public class CodonAlignmentViewer extends JPanel {
         }
         return (char) maxIndex;
     }
-
-//    private char mostFrequentCharInPattern(String[] pattern) {
-//        Map<Character, Integer> stateToCount = new HashMap<>();
-//        int maxCount = 0;
-//        char mostFrequentChar = 0;
-//        for (String str : pattern) {
-//            try {
-//                char c = (char) (Integer.parseInt(str) + '0');
-//                if (stateToCount.containsKey(c)) {
-//                    stateToCount.put(c, stateToCount.get(c) + 1);
-//                } else {
-//                    stateToCount.put(c, 1);
-//                }
-//                if (stateToCount.get(c) > maxCount) {
-//                    maxCount = stateToCount.get(c);
-//                    mostFrequentChar = c;
-//                }
-//            } catch (NumberFormatException e) {
-//                // ignore the ambiguous characters
-//            }
-//        }
-//        return mostFrequentChar;
-//    }
 
     public void showInDialog() {
         JDialog dlg = new JDialog();
