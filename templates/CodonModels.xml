@@ -118,16 +118,16 @@
         />
 		<mergepoint id='aux-tipdates-panels'/>
 
-        <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model"
-               tiptext="Site model and codon substitution model specifications"
-               path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
-        />
-
-		<!--<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Codon Site Model"-->
+        <!--<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model"-->
                <!--tiptext="Site model and codon substitution model specifications"-->
                <!--path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'-->
-               <!--type='codonmodels.CodonSiteModel'-->
         <!--/>-->
+
+		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Codon Site Model"
+               tiptext="Site model and codon substitution model specifications"
+               path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
+               type='codonmodels.CodonSiteModel'
+        />
 		<mergepoint id='aux-sitemodel-panels'/>
 
 		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
@@ -173,7 +173,8 @@
         <partitiontemplate id='CodonPartitionTemplate' spec='BeautiSubTemplate' class='beast.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>
 <![CDATA[
             <!-- site model                                                              -->
-            <plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>
+            <!--<plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>-->
+            <plugin spec='codonmodels.CodonSiteModel' id="CodonSiteModel.s:$(n)" gammaCategoryCount='0'>
                 <!--substModel will be automatically detected /-->
                 <proportionInvariant spec='parameter.RealParameter' id='proportionInvariant.s:$(n)' value='0.0' lower='0' upper='1' estimate='false'/>
                 <mutationRate        spec='parameter.RealParameter' id='mutationRate.s:$(n)' value='1.0'        estimate='false'/>
@@ -183,7 +184,7 @@
             <plugin spec='ThreadedTreeLikelihood' id="treeLikelihood.$(n)">
                 <data idref="$(n)"/>
                 <tree idref="Tree.t:$(n)"/>
-                <siteModel idref="SiteModel.s:$(n)"/>
+                <siteModel idref="CodonSiteModel.s:$(n)"/>
                 <branchRateModel spec='StrictClockModel' id='StrictClock.c:$(n)'>
                     <clock.rate id='clockRate.c:$(n)' spec='parameter.RealParameter' value='1.0' estimate='false'/>
                 </branchRateModel>

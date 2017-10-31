@@ -8,6 +8,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.GeneticCode;
 
+import javax.swing.*;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,5 +74,19 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
         }
     }
 
-
+    @Override
+    void editAlignment(Alignment alignment, BeautiDoc doc) {
+        if (alignment instanceof CodonAlignment) {
+            try {
+                CodonAlignmentViewer viewer = new CodonAlignmentViewer((CodonAlignment) alignment);
+                viewer.showInDialog();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,
+                        "Something went wrong viewing the codon alignment: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            super.editAlignment(alignment, doc);
+        }
+    }
 }

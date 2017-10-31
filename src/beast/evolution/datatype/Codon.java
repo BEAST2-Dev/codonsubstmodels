@@ -170,13 +170,7 @@ public class Codon extends DataType.Base {
         return CODON;
     }
 
-    @Override
-    public int[] getStatesForCode(int state) {
-        //TODO use stateMap ?
-        return super.getStatesForCode(state);
-    }
-
-    //=========== for codons ==========
+    //=========== Nucleotide ==========
     /**
      * index in {@link Nucleotide#codeMap codeMap}
      */
@@ -235,17 +229,6 @@ public class Codon extends DataType.Base {
     }
 
     /**
-     * Get character corresponding to a given state
-     *
-     * @param state state
-     *              <p/>
-     *              return corresponding character
-     */
-    public final char getChar(int state) {
-        throw new IllegalArgumentException("Codon datatype cannot be expressed as char");
-    }
-
-    /**
      * Get triplet string corresponding to a given state
      * indexed by {@link Codon#codeMap codeMap}
      *
@@ -277,6 +260,32 @@ public class Codon extends DataType.Base {
         return triplet;
     }
 
+    //=========== Aminoacid ==========
+
+    /**
+     * Aminoacid character of a state
+     * @param state
+     * @return  Aminoacid
+     */
+    @Override
+    public final char getChar(int state) {
+//        throw new IllegalArgumentException("Codon datatype cannot be expressed as char");
+        return geneticCode.getAminoAcid(state);
+    }
+
+    /**
+     * Same function of {@link DataType#state2string(int[])} state2string(int[])},
+     * but return Amino Acid string.
+     * @param states
+     * @return
+     */
+    public String state2aminoacid(int[] states) {
+        StringBuffer buf = new StringBuffer();
+            // produce a comma separated string of integers
+        for (int state : states)
+            buf.append(geneticCode.getAminoAcid(state));
+        return buf.toString();
+    }
 
     /**
      * @return the genetic code
@@ -284,7 +293,6 @@ public class Codon extends DataType.Base {
     public GeneticCode getGeneticCode() {
         return geneticCode;
     }
-
 
     /**
      * Parse a text string to return a genetic code

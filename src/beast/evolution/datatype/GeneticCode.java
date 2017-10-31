@@ -263,6 +263,8 @@ public final class GeneticCode {
     /**
      * Get character corresponding to a given state mapping to
      * {@link #AMINOACID_STATES AMINOACID_STATES}.
+     * @param state the state numbers in {@link #AMINOACID_STATES AMINOACID_STATES},
+     *              which is different to the state in {@link DataType DataType}.
      * @return
      */
     public char getAminoAcidChar(int state) {
@@ -275,17 +277,27 @@ public final class GeneticCode {
      * Note: the state is the canonical state (generated combinatorially),
      * which is different to BEAST 2 Aminoacid states, and which can be
      * from {@link Codon#getCodonState(int,int,int)} getCodonState}.
-     *
+     * @param codonState the state in {@link DataType DataType}
      * @see #AMINOACID_STATES
      * @return '?' if codon unknown
      */
     public int getAminoAcidCodonState(int codonState) {
         if (codonState == Codon.UNKNOWN_STATE)
-            return Aminoacid.MISSING_CHAR;
+            return AMINOACID_STATES[Aminoacid.MISSING_CHAR];
         else if (codonState == Codon.GAP_STATE)
-            return Aminoacid.GAP_CHAR;
+            return AMINOACID_STATES[Aminoacid.GAP_CHAR];
 
         return AMINOACID_STATES[codeTable.charAt(codonState)];
+    }
+
+    /**
+     * Get amino acid corresponding to a given state mapping to
+     * {@link #GENETIC_CODE_TABLES GENETIC_CODE_TABLES}.
+     * @param codonState the state in {@link DataType DataType}
+     * @return
+     */
+    public char getAminoAcid(int codonState) {
+        return codeTable.charAt(codonState);
     }
 
 //    /**

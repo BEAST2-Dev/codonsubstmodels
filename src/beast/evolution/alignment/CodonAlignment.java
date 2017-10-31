@@ -59,7 +59,6 @@ public class CodonAlignment extends Alignment {
                     GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID]);
 
     protected Alignment alignment;
-//    protected GeneticCode geneticCode;
 
     public CodonAlignment() {
         sequenceInput.setRule(Input.Validate.OPTIONAL);
@@ -94,7 +93,6 @@ public class CodonAlignment extends Alignment {
     public void initAndValidate() {
         alignment = alignmentInput.get();//Nucleotide
         DataType alignmentType = alignment.getDataType();
-        GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
 
         initDataType(); //TODO need improve
 
@@ -106,11 +104,9 @@ public class CodonAlignment extends Alignment {
             throw new IllegalArgumentException("CodonAlignment only wraps the nucleotide alignment into codon alignment !");
         }
 
-        // set geneticCode to geneticCodeInput.get() if different
-        GeneticCode geneticCode2 = ((Codon) thisType).getGeneticCode();
-        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) { //thisType instanceof Codon &&
-            ((Codon) m_dataType).setGeneticCode(geneticCode);
-        }
+        // set geneticCode to geneticCodeInput.get() if different to dataType.getGeneticCode()
+        GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
+        setGeneticCode(geneticCode);
 
         convertCodonToState();
 
@@ -215,6 +211,15 @@ public class CodonAlignment extends Alignment {
 
     public GeneticCode getGeneticCode() {
         return getDataType().getGeneticCode();
+    }
+
+    public void setGeneticCode(GeneticCode geneticCode) {
+        GeneticCode geneticCode2 = getGeneticCode();
+        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) {
+            ((Codon) m_dataType).setGeneticCode(geneticCode);
+            geneticCodeInput.setValue(geneticCode.getName(), this);
+            Log.info.println("Change genetic code from " + geneticCode2.getName() + " to " + geneticCode.getName());
+        }
     }
 
     /**
