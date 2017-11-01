@@ -91,9 +91,9 @@
                 Scale M0 kappa parameter of partition s:$(n)
             </connect>
 
-            <connect srcID='M0.omega.s:$(n)' targetID='tracelog' inputName='log'
+            <connect srcID='M0.omega.s:$(n)' targetID='screenlog' inputName='log'
                      if='inlikelihood(M0.omega.s:$(n)) and M0.omega.s:$(n)/estimate=true'/>
-            <connect srcID='M0.kappa.s:$(n)' targetID='tracelog' inputName='log'
+            <connect srcID='M0.kappa.s:$(n)' targetID='screenlog' inputName='log'
                      if='inlikelihood(M0.kappa.s:$(n)) and M0.kappa.s:$(n)/estimate=true'/>
             <connect srcID='M0.omega.s:$(n)' targetID='tracelog' inputName='log'
                      if='inlikelihood(M0.omega.s:$(n)) and M0.omega.s:$(n)/estimate=true'/>
@@ -101,11 +101,11 @@
                      if='inlikelihood(M0.kappa.s:$(n)) and M0.kappa.s:$(n)/estimate=true'/>
 
             <connect srcID='OmegaPrior.s:$(n)' targetID='prior' inputName='distribution'
-                     if='inlikelihood(omega.s:$(n)) and omega.s:$(n)/estimate=true'>
+                     if='inlikelihood(M0.omega.s:$(n)) and M0.omega.s:$(n)/estimate=true'>
                 M0 omega parameter of partition s:$(n)
             </connect>
             <connect srcID='KappaPrior.s:$(n)' targetID='prior' inputName='distribution'
-                     if='inlikelihood(kappa.s:$(n)) and kappa.s:$(n)/estimate=true'>
+                     if='inlikelihood(M0.kappa.s:$(n)) and M0.kappa.s:$(n)/estimate=true'>
                 M0 kappa parameter of partition s:$(n)
             </connect>
 
