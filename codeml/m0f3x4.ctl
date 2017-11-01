@@ -1,6 +1,6 @@
       seqfile = codon.txt * sequence data filename
      treefile = codon.trees      * tree structure file name
-      outfile = m0.txt           * main result file name
+      outfile = m0f3x4.txt           * main result file name
 
         noisy = 9  * 0,1,2,3,9: how much rubbish on the screen
       verbose = 1  * 0: concise; 1: detailed, 2: too much

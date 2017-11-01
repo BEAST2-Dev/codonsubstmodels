@@ -73,12 +73,17 @@ Table 1: tree likelihood using M0
 
 | Frequencies  | Omega  | Kappa | Codeml  | BEAST 2 codon model |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| equal  | 0.09921  | 12.79493  | -21859.555067  | -21859.555067828274  |
-| F1X4  | 0.07105  | 15.30702  | -21200.265498  | -21200.265498185152  |
-| F3X4  | 0.04484  | 20.41545  | -20523.690325  | -20523.6903268066  |
-| F60  | 0.04625  | 25.28743  | -20141.869495  | -20141.896988667882  |
+| equal  | 0.14593  | 10.69924  | -2098.864211  | -2098.8642114431645  |
+| F1X4  | 0.10195  | 13.49811  | -2009.834314  | -2009.8343141884977  |
+| F3X4  | 0.08000  | 15.34858  | -1960.766171  | -1960.7661713238033  |
+| F60  | 0.08327  | 15.54039  | -1915.225157  | -1915.2251567137826  |
 
 The small differences between two likelihoods are caused by rounding error. 
 As you can see, their differences are slightly increased when the number of free parameters 
 describing codon frequencies is increased.   
+
+## Citation
+
+Dong Xie. (2017, November 1). Codon substitution models v1.0.0. Zenodo. 
+http://doi.org/10.5281/zenodo.1039992
 
