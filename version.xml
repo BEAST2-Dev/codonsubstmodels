@@ -1,5 +1,5 @@
 <addon name="CodonModels" version="1.0.0">
-    <depends on="beast2" atleast="2.4.8"/>
+    <depends on="beast2" atleast="2.4.7"/>
 
     <!-- Add other dependencies as necessary. -->
 </addon>
