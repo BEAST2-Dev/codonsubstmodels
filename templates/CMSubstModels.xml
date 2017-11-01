@@ -66,13 +66,13 @@
 
         <prior id='OmegaPrior.s:$(n)' x='@M0.omega.s:$(n)'>
             <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
-                <parameter name='M' value="3.0" estimate='false'/>
+                <parameter name='M' value="-3.0" estimate='false'/>
                 <parameter name='S' value="1.25" estimate='false'/>
             </distr>
 		</prior>
         <prior id='KappaPrior.s:$(n)' x='@M0.kappa.s:$(n)'>
             <distr spec="LogNormalDistributionModel" meanInRealSpace='false'>
-                <parameter name='M' value="-3.0" estimate='false'/>
+                <parameter name='M' value="2" estimate='false'/>
                 <parameter name='S' value="1.25" estimate='false'/>
             </distr>
 		</prior>
