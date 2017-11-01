@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/98828146.svg)](https://zenodo.org/badge/latestdoi/98828146)
+
 # Codon Substitution Models
 
 Models describing evolution at the codon level allow 
