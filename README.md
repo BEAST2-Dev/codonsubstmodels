@@ -1,4 +1,4 @@
-# Codon Models
+# Codon Substitution Models
 
 Models describing evolution at the codon level allow 
 the estimation of measures of the selective forces 
