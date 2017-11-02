@@ -316,7 +316,7 @@ public class CodonAlignmentViewer extends JPanel {
                         "No stop codon", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this,
-                        "Find a stop codon at site " + (stopCodonSite+1) +
+                        "Find a stop codon at triplet " + (stopCodonSite+1) +
                                 ",\nplease choose the correct genetic code or use codon alignment!",
                         "Find stop codon", JOptionPane.ERROR_MESSAGE);
             }

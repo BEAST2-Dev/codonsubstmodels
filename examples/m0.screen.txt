@@ -1,0 +1,180 @@
+
+                   BEAST v2.4.7, 2002-2017
+             Bayesian Evolutionary Analysis Sampling Trees
+                       Designed and developed by
+ Remco Bouckaert, Alexei J. Drummond, Andrew Rambaut & Marc A. Suchard
+                                    
+                     Department of Computer Science
+                         University of Auckland
+                        remco@cs.auckland.ac.nz
+                        alexei@cs.auckland.ac.nz
+                                    
+                   Institute of Evolutionary Biology
+                        University of Edinburgh
+                           a.rambaut@ed.ac.uk
+                                    
+                    David Geffen School of Medicine
+                 University of California, Los Angeles
+                           msuchard@ucla.edu
+                                    
+                      Downloads, Help & Resources:
+                           http://beast2.org/
+                                    
+  Source code distributed under the GNU Lesser General Public License:
+                   http://github.com/CompEvol/beast2
+                                    
+                           BEAST developers:
+   Alex Alekseyenko, Trevor Bedford, Erik Bloomquist, Joseph Heled, 
+ Sebastian Hoehna, Denise Kuehnert, Philippe Lemey, Wai Lok Sibon Li, 
+Gerton Lunter, Sidney Markowitz, Vladimir Minin, Michael Defoin Platel, 
+                 Oliver Pybus, Chieh-Hsi Wu, Walter Xie
+                                    
+                               Thanks to:
+          Roald Forsberg, Beth Shapiro and Korbinian Strimmer
+
+Random number seed: 1509655560753
+
+Chimp_Arnason: 999 4
+Chimp_Horai: 999 4
+Gorilla_Arnason: 999 4
+Gorilla_Horai: 999 4
+Human_Arnason: 999 4
+Human_Horai: 999 4
+Alignment(codon)
+  6 taxa
+  999 sites
+  38 patterns
+
+Change genetic code from universal to vertebrateMitochondrial
+Chimp_Arnason: 333 64
+Chimp_Horai: 333 64
+Gorilla_Arnason: 333 64
+Gorilla_Horai: 333 64
+Human_Arnason: 333 64
+Human_Horai: 333 64
+
+Genetic code is Vertebrate Mitochondrial
+
+============ Codon Usage ============
+              	AAA	AAC	AAG	AAT	ACA	ACC	ACG	ACT	AGA	AGC	AGG	AGT	ATA	ATC	ATG	ATT	CAA	CAC	CAG	CAT	CCA	CCC	CCG	CCT	CGA	CGC	CGG	CGT	CTA	CTC	CTG	CTT	GAA	GAC	GAG	GAT	GCA	GCC	GCG	GCT	GGA	GGC	GGG	GGT	GTA	GTC	GTG	GTT	TAA	TAC	TAG	TAT	TCA	TCC	TCG	TCT	TGA	TGC	TGG	TGT	TTA	TTC	TTG	TTT
+              	K	N	K	N	T	T	T	T	*	S	*	S	M	I	M	I	Q	H	Q	H	P	P	P	P	R	R	R	R	L	L	L	L	E	D	E	D	A	A	A	A	G	G	G	G	V	V	V	V	*	Y	*	Y	S	S	S	S	W	C	W	C	L	F	L	F
+Chimp_Arnason	11	9	1	8	11	18	0	8	0	4	0	0	15	16	2	17	11	9	0	2	7	16	2	2	3	2	0	1	29	10	5	7	2	4	1	0	7	15	0	3	4	6	0	0	5	4	1	2	0	5	0	0	9	3	2	4	6	1	1	0	9	7	0	6
+Chimp_Horai	11	9	1	8	11	18	0	8	0	4	0	0	15	16	2	17	11	9	0	2	7	16	2	2	3	2	0	1	29	10	5	7	2	4	1	0	7	15	0	3	3	6	1	0	5	4	1	2	0	5	0	1	9	3	2	3	6	1	1	0	9	7	0	6
+Gorilla_Arnason	10	13	2	4	13	19	0	9	0	3	0	0	16	19	2	12	8	9	3	1	6	12	1	6	3	3	0	0	25	12	5	8	3	1	1	2	6	18	0	3	3	4	1	2	4	3	1	2	0	4	0	1	12	5	0	1	6	1	1	1	10	8	1	4
+Gorilla_Horai	10	13	2	4	13	19	0	9	0	3	0	0	16	18	2	13	8	9	3	1	7	12	1	6	3	3	0	0	25	12	5	8	3	1	1	2	6	18	0	3	3	4	1	2	4	3	1	2	0	4	0	1	10	5	0	1	7	1	1	1	10	8	1	4
+Human_Arnason	11	15	2	3	11	21	0	6	0	3	0	0	15	22	4	15	10	9	0	0	8	15	0	4	3	4	0	0	27	12	6	7	3	4	0	0	5	15	1	2	4	6	0	0	5	1	1	2	0	4	0	2	10	4	0	4	6	1	1	0	6	7	1	5
+Human_Horai	11	14	2	3	11	19	0	6	0	4	0	0	15	21	4	16	10	9	0	1	8	15	0	4	3	3	0	0	26	12	6	7	3	4	0	0	5	17	1	2	4	6	0	0	5	1	1	2	0	4	0	2	10	4	0	4	6	1	1	0	7	6	1	6
+overall	64	73	10	30	70	114	0	46	0	21	0	0	92	112	16	90	58	54	6	7	43	86	6	24	18	17	0	2	161	68	32	44	16	18	4	4	36	98	2	16	21	32	3	4	28	16	6	12	0	26	0	7	60	24	4	17	37	6	6	2	51	43	4	31
+
+============ Codon position * base (3x4) table + overall ============
+              	A	C	G	T
+position 1 : 	.36937	.31331	.15816	.15916
+position 2 : 	.18869	.32332	.08458	.4034
+position 3 : 	.37788	.4044	.04955	.16817
+overall : 	.31198	.34701	.09743	.24358
+
+============ Codon frequencies by usage (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============
+
+.03203203	.03653654	.00500501	.01501502	.03503504	.05705706	0	.02302302
+0	.01051051	0	0	.04604605	.05605606	.00800801	.04504505
+.02902903	.02702703	.003003	.0035035	.02152152	.04304304	.003003	.01201201
+.00900901	.00850851	0	.001001	.08058058	.03403403	.01601602	.02202202
+.00800801	.00900901	.002002	.002002	.01801802	.04904905	.001001	.00800801
+.01051051	.01601602	.0015015	.002002	.01401401	.00800801	.003003	.00600601
+0	.01301301	0	.0035035	.03003003	.01201201	.002002	.00850851
+.01851852	.003003	.003003	.001001	.02552553	.02152152	.002002	.01551552
+
+Codon alignment ca.codon : number of states = 64
+Use F3X4 equilibrium codon frequencies. 
+Initial values to CodonFrequencies = [0.02704, 0.02894, 0.00355, 0.01204, 0.04634, 0.0496, 0.00608, 0.02062, 0.0, 0.01297, 0.0, 0.0054, 0.05782, 0.06188, 0.00758, 0.02573, 0.02294, 0.02455, 0.00301, 0.01021, 0.03931, 0.04207, 0.00515, 0.01749, 0.01028, 0.01101, 0.00135, 0.00458, 0.04905, 0.05249, 0.00643, 0.02183, 0.01158, 0.01239, 0.00152, 0.00515, 0.01984, 0.02124, 0.0026, 0.00883, 0.00519, 0.00556, 6.8E-4, 0.00231, 0.02476, 0.0265, 0.00325, 0.01102, 0.0, 0.01247, 0.0, 0.00519, 0.01997, 0.02137, 0.00262, 0.00889, 0.00522, 0.00559, 6.8E-4, 0.00232, 0.02491, 0.02666, 0.00327, 0.01109]
+Set frequencies dimension = 64
+  Using BEAGLE version: 2.1.2 resource 0: CPU
+    with instance flags:  PRECISION_DOUBLE COMPUTATION_SYNCH EIGEN_REAL SCALING_MANUAL SCALERS_RAW VECTOR_SSE THREADING_NONE PROCESSOR_CPU FRAMEWORK_CPU
+===============================================================================
+Citations for this model:
+
+Bouckaert RR, Heled J, Kuehnert D, Vaughan TG, Wu C-H, Xie D, Suchard MA,
+  Rambaut A, Drummond AJ (2014) BEAST 2: A software platform for Bayesian
+  evolutionary analysis. PLoS Computational Biology 10(4): e1003537
+
+Goldman N, & Yang Z (1994). A codon-based model of nucleotide substitution for
+protein-coding DNA sequences. Molecular biology and evolution 11(5), 725-736.
+
+Yang, Z. (2006). Computational molecular evolution. Oxford University Press.
+
+===============================================================================
+Start likelihood: -3249.6424383523886 
+         Sample      posterior ESS(posterior)     likelihood          prior M0.omeg_.codon M0.kapp_.codon
+              0     -3249.6424              N     -3238.4590       -11.1834         1.0            2.0    --
+          10000     -1953.5035         2.0        -1956.8774         3.3738         0.0928        11.0718 --
+          20000     -1953.4163         3.0        -1958.5938         5.1775         0.0846        18.2720 --
+          30000     -1951.1125         4.0        -1954.0990         2.9865         0.1047        17.0483 --
+          40000     -1952.0641         5.0        -1955.6599         3.5958         0.0750        10.7848 --
+          50000     -1951.7099         6.0        -1954.9378         3.2278         0.0688        13.9947 --
+          60000     -1949.4512         7.0        -1953.8236         4.3723         0.0706        16.9941 20m8s/Msamples
+          70000     -1955.2614         8.0        -1957.8618         2.6003         0.0820        17.5941 20m5s/Msamples
+          80000     -1949.6088         9.0        -1952.7417         3.1329         0.0944        13.3062 19m48s/Msamples
+          90000     -1952.4119         9.0        -1953.8884         1.4765         0.0587        14.3029 20m3s/Msamples
+         100000     -1949.8248        10.0        -1954.3932         4.5684         0.0636        12.4818 19m56s/Msamples
+         110000     -1961.0776        11.0        -1955.2998        -5.7778         0.0989        17.0025 19m49s/Msamples
+         120000     -1955.0155        12.0        -1956.9735         1.9580         0.0686        25.3613 19m50s/Msamples
+         130000     -1954.9072         9.5        -1956.7827         1.8754         0.0926        26.7360 19m47s/Msamples
+         140000     -1952.5055        10.7        -1954.6292         2.1236         0.0924        18.0620 19m47s/Msamples
+         150000     -1952.6549        11.5        -1955.0620         2.4071         0.1018        21.5200 19m46s/Msamples
+         160000     -1948.5487        12.3        -1952.1239         3.5751         0.0744        15.3170 19m42s/Msamples
+         170000     -1951.6045        12.4        -1954.5204         2.9158         0.0796        16.5393 19m40s/Msamples
+         180000     -1949.4563        11.4        -1952.5300         3.0737         0.0729        18.2055 19m43s/Msamples
+         190000     -1948.4135        10.3        -1952.5985         4.1850         0.0708        15.1594 19m45s/Msamples
+         200000     -1952.1580        10.9        -1956.8801         4.7221         0.0549        16.4723 19m44s/Msamples
+         210000     -1953.9002        12.2        -1957.0392         3.1389         0.1100        14.8898 19m44s/Msamples
+         220000     -1948.9867        13.7        -1952.8807         3.8939         0.0913        16.6259 19m41s/Msamples
+         230000     -1949.7610        13.3        -1954.1222         4.3611         0.0647        18.0807 19m38s/Msamples
+         240000     -1954.1314        14.9        -1956.2817         2.1503         0.0530        17.4601 19m36s/Msamples
+         250000     -1950.4367        15.3        -1952.8769         2.4402         0.0945        15.4475 19m38s/Msamples
+         260000     -1951.4384        15.6        -1953.1356         1.6971         0.0860        18.8849 19m36s/Msamples
+         270000     -1951.6565        16.2        -1954.2268         2.5702         0.0745        17.0102 19m36s/Msamples
+         280000     -1949.6243        17.0        -1953.2078         3.5835         0.0568        14.4143 19m36s/Msamples
+         290000     -1951.7584        16.2        -1956.6249         4.8665         0.0683         9.6127 19m35s/Msamples
+         300000     -1951.9139        16.9        -1954.7873         2.8734         0.1071        12.5934 19m35s/Msamples
+         310000     -1953.4153        18.1        -1957.4719         4.0565         0.0684        10.2889 19m33s/Msamples
+         320000     -1956.3676        20.1        -1958.6564         2.2888         0.0939        13.0174 19m34s/Msamples
+         330000     -1950.6804        22.0        -1954.3335         3.6530         0.0570        14.6671 19m36s/Msamples
+         340000     -1955.0216        21.0        -1957.5306         2.5090         0.0800        14.0424 19m38s/Msamples
+         350000     -1952.0144        21.8        -1955.3691         3.3546         0.0634        11.8491 19m40s/Msamples
+         360000     -1951.3718        23.1        -1953.8606         2.4887         0.0779        19.6844 19m43s/Msamples
+         370000     -1950.0956        24.1        -1954.3991         4.3035         0.0673        12.8631 19m45s/Msamples
+         380000     -1952.9027        24.8        -1955.9586         3.0559         0.0607        21.1071 19m47s/Msamples
+         390000     -1951.1181        24.5        -1953.6770         2.5589         0.0812        22.9190 19m49s/Msamples
+         400000     -1954.1037        26.3        -1958.0860         3.9823         0.0748        15.0215 19m52s/Msamples
+         410000     -1954.1341        27.1        -1955.0937         0.9596         0.0654        23.0614 19m54s/Msamples
+         420000     -1953.8342        26.8        -1957.3345         3.5003         0.0815        15.7520 19m58s/Msamples
+         430000     -1952.0455        27.6        -1953.9818         1.9363         0.0636        19.6388 19m59s/Msamples
+         440000     -1952.6926        28.0        -1956.9326         4.2400         0.0687        13.2647 20m1s/Msamples
+         450000     -1950.0886        29.1        -1953.6426         3.5540         0.0808        14.1092 20m4s/Msamples
+         460000     -1954.2491        30.6        -1957.7515         3.5023         0.0570        12.1970 20m6s/Msamples
+         470000     -1948.5187        31.7        -1952.0671         3.5483         0.0792        13.5817 20m8s/Msamples
+         480000     -1956.6066        34.4        -1959.2273         2.6206         0.0605        13.6655 20m11s/Msamples
+         490000     -1951.0966        34.6        -1956.0068         4.9102         0.0714        11.8892 20m13s/Msamples
+         500000     -1955.0022        33.9        -1957.9707         2.9685         0.0598        13.6534 20m14s/Msamples
+
+Operator                                                       Tuning    #accept    #reject      Pr(m)  Pr(acc|m)
+ScaleOperator(OmegaScaler.s:ca.codon)                          0.3903       1699       4742     0.0130     0.2638 
+ScaleOperator(KappaScaler.s:ca.codon)                          0.3135       1623       4882     0.0130     0.2495 
+ScaleOperator(CoalescentConstantTreeScaler.t:ca.codon)         0.5846       4732      14736     0.0390     0.2431 
+ScaleOperator(CoalescentConstantTreeRootScaler.t:ca.codon)     0.5546       4847      14632     0.0390     0.2488 
+Uniform(CoalescentConstantUniformOperator.t:ca.codon)               -      17693     177270     0.3896     0.0908 
+SubtreeSlide(CoalescentConstantSubtreeSlide.t:ca.codon)        0.1705       7381      89948     0.1948     0.0758 Try decreasing size to about 0.085
+Exchange(CoalescentConstantNarrow.t:ca.codon)                  End likelihood: -1955.0022237084588
+     -          7      97514     0.1948     0.0001 
+Exchange(CoalescentConstantWide.t:ca.codon)                         -          1      19559     0.0390     0.0001 
+WilsonBalding(CoalescentConstantWilsonBalding.t:ca.codon)           -          0      19490     0.0390     0.0000 
+ScaleOperator(PopSizeScaler.t:ca.codon)                        0.2540       6957      12288     0.0390     0.3615 
+
+     Tuning: The value of the operator's tuning parameter, or '-' if the operator can't be optimized.
+    #accept: The total number of times a proposal by this operator has been accepted.
+    #reject: The total number of times a proposal by this operator has been rejected.
+      Pr(m): The probability this operator is chosen in a step of the MCMC (i.e. the normalized weight).
+  Pr(acc|m): The acceptance probability (#accept as a fraction of the total proposals for this operator).
+
+
+Total calculation time: 616.649 seconds
