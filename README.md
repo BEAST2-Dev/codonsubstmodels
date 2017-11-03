@@ -21,6 +21,10 @@ can be calculated as:
 
 The above two figures are copied from [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short).
 
+## Tutorial
+
+The tutorial is available in [wiki](https://github.com/BEAST2-Dev/codonmodels/wiki).
+
 ## XML example
 
 The codon substitution model takes codon alignment as the input, 
