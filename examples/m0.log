@@ -40,7 +40,7 @@
 #                <parameter estimate="false" id="mutationRate.s:ca.codon" name="mutationRate">1.0</parameter>
 #                <parameter estimate="false" id="gammaShape.s:ca.codon" name="shape">1.0</parameter>
 #                <parameter estimate="false" id="proportionInvariant.s:ca.codon" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
-#                <substModel id="M0.s:ca.codon" kappa="@M0.kappa.s:ca.codon" omega="@M0.omega.s:ca.codon" spec="codonmodels.M0CodonModel">
+#                <substModel id="M0.s:ca.codon" kappa="@M0.kappa.s:ca.codon" omega="@M0.omega.s:ca.codon" spec="codonmodels.M0Model">
 #                    <frequencies data="@ca.codon" estimate="false" id="F3X4Freqs.s:ca.codon" spec="codonmodels.CodonFrequencies"/>
 #                </substModel>
 #            </siteModel>

@@ -133,7 +133,7 @@
     <parameter id="m0.kappa" value="2.0"/>
     <parameter id="popSize" value="1.0"/>
 
-    <input spec="codonmodels.M0CodonModel" id="m0">
+    <input spec="codonmodels.M0Model" id="m0">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">

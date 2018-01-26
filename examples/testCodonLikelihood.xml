@@ -140,7 +140,7 @@
     <parameter id="m0.omega" value="0.08000"/>
     <parameter id="m0.kappa" value="15.34858"/>
 
-    <input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
+    <input spec="codonmodels.M0Model" id="m0" verbose="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <!--equal, F1X4, F3X4 (default), F60/F61-->

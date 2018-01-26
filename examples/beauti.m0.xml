@@ -79,7 +79,7 @@ id="codon">
                     <parameter id="mutationRate.s:ca.codon" estimate="false" name="mutationRate">1.0</parameter>
                     <parameter id="gammaShape.s:ca.codon" estimate="false" name="shape">1.0</parameter>
                     <parameter id="proportionInvariant.s:ca.codon" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
-                    <substModel id="M0.s:ca.codon" spec="codonmodels.M0CodonModel" kappa="@M0.kappa.s:ca.codon" omega="@M0.omega.s:ca.codon">
+                    <substModel id="M0.s:ca.codon" spec="codonmodels.M0Model" kappa="@M0.kappa.s:ca.codon" omega="@M0.omega.s:ca.codon">
                         <frequencies id="F3X4Freqs.s:ca.codon" spec="codonmodels.CodonFrequencies" data="@ca.codon" estimate="false"/>
                     </substModel>
                 </siteModel>

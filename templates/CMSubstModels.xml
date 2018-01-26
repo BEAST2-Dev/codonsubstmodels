@@ -51,9 +51,9 @@
 
 
         <!-- codon subst models -->
-        <subtemplate id="CodonModel_M0" class="codonmodels.M0CodonModel" mainid="M0.s:$(n)">
+        <subtemplate id="CodonModel_M0" class="codonmodels.M0Model" mainid="M0.s:$(n)">
             <![CDATA[
-        <plugin spec="codonmodels.M0CodonModel" id="M0.s:$(n)">
+        <plugin spec="codonmodels.M0Model" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
             <frequencies id="F3X4Freqs.s:$(n)" spec="codonmodels.CodonFrequencies">

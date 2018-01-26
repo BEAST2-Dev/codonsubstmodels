@@ -196,7 +196,7 @@
         <mkdir dir="${examples}" />
         <copy todir="${pack}/examples">
             <fileset dir="${examples}" includes="**/*.xml" />
-            <fileset dir="${examples}" includes="**/*.fasta" />
+            <fileset dir="${examples}" includes="**/*.nex" />
         </copy>
 
         <mkdir dir="${templates}" />

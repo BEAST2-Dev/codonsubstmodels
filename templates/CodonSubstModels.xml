@@ -4,7 +4,7 @@
        :beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
        :beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
        :beast.evolution.alignment:beast.evolution.datatype:codonmodels'
-	templateinfo='template for codon models'>
+	templateinfo='template for codon substitution models'>
 
 <map name='connect' reserved='true'>beast.app.beauti.BeautiConnector</map>
 <map name='subtemplate' reserved='true'>beast.app.beauti.BeautiSubTemplate</map>
@@ -82,9 +82,9 @@
 	        beast.evolution.substitutionmodel.MTREV.frequencies,
 	        beast.evolution.substitutionmodel.GTR.rates,
 	        beast.evolution.substitutionmodel.JukesCantor.frequencies,
-	        codonmodels.M0CodonModel.rates,
-	        codonmodels.M0CodonModel.eigenSystem,
-	        codonmodels.M0CodonModel.verbose,
+	        codonmodels.M0Model.rates,
+	        codonmodels.M0Model.eigenSystem,
+	        codonmodels.M0Model.verbose,
             beast.math.distributions.Prior.x,
             beast.math.distributions.MRCAPrior.tree,
             beast.math.distributions.MRCAPrior.monophyletic,

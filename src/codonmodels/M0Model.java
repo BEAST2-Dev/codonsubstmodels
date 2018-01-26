@@ -41,8 +41,8 @@ import beast.core.parameter.RealParameter;
 @Citation(value= "Goldman N, & Yang Z (1994). A codon-based model of nucleotide substitution for\n" +
         "protein-coding DNA sequences. Molecular biology and evolution 11(5), 725-736.", year = 2014,
          DOI = "10.1093/oxfordjournals.molbev.a040153")
-@Description("M0 codon model, also called as GY94, published by Goldman and Yang 1994")
-public class M0CodonModel extends CodonSubstitutionModel {//implements Loggable {
+@Description("M0 codon substitution model, also called as GY94, published by Goldman and Yang 1994")
+public class M0Model extends CodonSubstitutionModel {//implements Loggable {
     final public Input<RealParameter> kappaInput = new Input<>("kappa",
             "kappa parameter for transition-transversion rate ratio", Input.Validate.REQUIRED);
 
@@ -50,7 +50,7 @@ public class M0CodonModel extends CodonSubstitutionModel {//implements Loggable 
             "omega parameter to represent the nonsynonymous-synonymous rate ratio", Input.Validate.REQUIRED);
 
 
-    public M0CodonModel() {
+    public M0Model() {
         super();
     }
 

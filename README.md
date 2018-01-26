@@ -49,7 +49,7 @@ The xml to use __M0__ looks like:
 <parameter id="m0.omega" value="0.04484"/>
 <parameter id="m0.kappa" value="20.41545"/>
 
-<input spec="codonmodels.M0CodonModel" id="m0" verbose="true">
+<input spec="codonmodels.M0Model" id="m0" verbose="true">
     <omega idref="m0.omega"/>
     <kappa idref="m0.kappa"/>
     <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">

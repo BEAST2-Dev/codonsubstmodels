@@ -223,7 +223,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     @Override
     protected void setupRelativeRates() {
-        throw new UnsupportedOperationException("setupRelativeRates needs to override in codon models !");
+        throw new UnsupportedOperationException("setupRelativeRates needs to override in codon subst models !");
     }
 
 
