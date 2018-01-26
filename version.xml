@@ -1,4 +1,4 @@
-<addon name="CodonModels" version="1.0.1">
+<addon name="CodonSubstModels" version="1.0.1">
     <depends on="beast2" atleast="2.4.7"/>
 
     <!-- Add other dependencies as necessary. -->
