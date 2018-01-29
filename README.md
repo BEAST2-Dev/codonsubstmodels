@@ -91,3 +91,6 @@ describing codon frequencies is increased.
 Dong Xie. (2017, November 1). Codon substitution models v1.0.0. Zenodo. 
 http://doi.org/10.5281/zenodo.1039992
 
+## Note
+
+This package is depending on BEAST 2.5.x, which will release on Match 2018.
