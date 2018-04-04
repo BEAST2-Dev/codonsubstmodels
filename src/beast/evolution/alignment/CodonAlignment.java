@@ -28,14 +28,9 @@ package beast.evolution.alignment;
 
 import beast.core.Input;
 import beast.core.util.Log;
-import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.GeneticCode;
-import beast.evolution.datatype.Nucleotide;
-import beast.util.AddOnManager;
+import beast.evolution.datatype.*;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -94,7 +89,8 @@ public class CodonAlignment extends Alignment {
         alignment = alignmentInput.get();//Nucleotide
         DataType alignmentType = alignment.getDataType();
 
-        initDataType(); //TODO need improve
+        // Note: Codon uses default genetic code, need to change it if user specifies in xml
+        initDataType();
 
         DataType thisType = this.m_dataType;
         // only working for nucleotide => codon
@@ -110,6 +106,7 @@ public class CodonAlignment extends Alignment {
 
         convertCodonToState();
 
+        // after convertCodonToState
         if (alignmentInput.get().siteWeightsInput.get() != null) {
             String str = alignmentInput.get().siteWeightsInput.get().trim();
             String [] strs = str.split(",");
@@ -119,8 +116,8 @@ public class CodonAlignment extends Alignment {
             }
         }
 
-        calcPatterns();
-        setupAscertainment();
+        // after checking siteWeightsInput
+        sanityCheckCalcPatternsSetUpAscertainment(true);
 
         Log.info.println("\nGenetic code is " + getGeneticCode().getDescription());
 
@@ -134,36 +131,18 @@ public class CodonAlignment extends Alignment {
         Log.info.println();
     }
 
-    //TODO this should move to Alignment
-    // Note: Codon uses default genetic code, need to change it if user specifies in xml
-    protected void initDataType() {
-        if (types.indexOf(dataTypeInput.get()) < 0) {
-            throw new IllegalArgumentException("data type + '" + dataTypeInput.get() + "' cannot be found. " +
-                    "Choose one of " + Arrays.toString(types.toArray(new String[0])));
-        }
-        // seems to spend forever in there??
-        List<String> dataTypes = AddOnManager.find(beast.evolution.datatype.DataType.class, IMPLEMENTATION_DIR);
-        for (String dataTypeName : dataTypes) {
-            DataType dataType;
-            try {
-                dataType = (DataType) Class.forName(dataTypeName).newInstance();
-                if (dataTypeInput.get().equals(dataType.getTypeDescription())) {
-                    m_dataType = dataType;
-                    break;
-                }
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                throw new IllegalArgumentException(e.getMessage());
-            }
-        }
-    }
-
+    //TODO need improve
+    /**
+     * modified from Alignment private initializeWithSequenceList(List<Sequence>, boolean)
+     */
     protected void convertCodonToState() {
         taxaNames.clear();
         stateCounts.clear();
         counts.clear();
         try {
             for (Sequence seq : alignment.sequences) {
-                List<Integer> codonStates = seq.getSequence(getDataType()); // return mapCodeToStateSet indices i
+                // return mapCodeToStateSet indices i
+                List<Integer> codonStates = seq.getSequence(getDataType());
                 int tripletIndex = findStopCodon(codonStates);
                 if (tripletIndex > -1)
                     Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
@@ -175,7 +154,8 @@ public class CodonAlignment extends Alignment {
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
                 }
                 taxaNames.add(seq.getTaxon());
-                tipLikelihoods.add(seq.getLikelihoods()); //TODO need test
+                //TODO wrong? seq here is Nucleotide sequences not codons
+                tipLikelihoods.add(seq.getLikelihoods());
                 // if seq.isUncertain() == false then the above line adds 'null'
                 // to the list, indicating that this particular sequence has no tip likelihood information
                 usingTipLikelihoods |= (seq.getLikelihoods() != null);
