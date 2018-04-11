@@ -154,11 +154,15 @@ public class CodonAlignment extends Alignment {
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
                 }
                 taxaNames.add(seq.getTaxon());
-                //TODO wrong? seq here is Nucleotide sequences not codons
-                tipLikelihoods.add(seq.getLikelihoods());
-                // if seq.isUncertain() == false then the above line adds 'null'
-                // to the list, indicating that this particular sequence has no tip likelihood information
-                usingTipLikelihoods |= (seq.getLikelihoods() != null);
+
+                if (seq.uncertain)
+                    throw new UnsupportedOperationException("Uncertain sequence is not available in this version !");
+
+                    //TODO how to deal with uncertain? seq here is Nucleotide sequences not codons.
+//                tipLikelihoods.add(seq.getLikelihoods());
+//                // if seq.isUncertain() == false then the above line adds 'null'
+//                // to the list, indicating that this particular sequence has no tip likelihood information
+//                usingTipLikelihoods |= (seq.getLikelihoods() != null);
 
                 stateCounts.add(getDataType().getStateCount());
 
