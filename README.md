@@ -6,7 +6,6 @@ Models describing evolution at the codon level allow
 the estimation of measures of the selective forces 
 acting on proteins 
 ([Kosiol et. al. 2000](https://academic.oup.com/mbe/article-abstract/24/7/1464/986344)). 
-
 The available implementation is only M0 currently, 
 also called as GY94, first published by 
 [Goldman & Yang 1994](https://academic.oup.com/mbe/article-abstract/11/5/725/1008711), 
@@ -20,6 +19,10 @@ can be calculated as:
 <img src="./figures/q.png" width="500" alt="Substitution rate from codon i to codon j">
 
 The above two figures are copied from [Yang et al. 2000](http://www.genetics.org/content/155/1/431.short).
+
+The model implementation in Java was ported from [BEAST 1](https://github.com/beast-dev/beast-mcmc) project.
+The code was modified (including bug-fixing) to fit in [BEAST 2](https://github.com/CompEvol/beast2) 
+and also tested comparing with the [codeml](http://abacus.gene.ucl.ac.uk/software/paml.html) results.   
 
 ## Tutorial
 
@@ -59,7 +62,8 @@ The xml to use __M0__ looks like:
 ```
 
 Note: the tree likelihood has to use the codon alignment not the nucleotide alignment.
-```   
+
+```xml   
 <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
      <data name="data" idref="codon.alignment"/>
      <tree name="tree" idref="tree"/>
@@ -98,9 +102,9 @@ describing codon frequencies is increased.
 
 ## Citation
 
-Dong Xie. (2017, November 1). Codon substitution models v1.0.0. Zenodo. 
+Dong Xie & Remco Bouckaert, (2018, April 12), Codon substitution models v1.1.0, Zenodo, 
 http://doi.org/10.5281/zenodo.1039992
 
 ## Note
 
-This package is depending on BEAST 2.5.x, which will release on Match 2018.
+This package is depending on BEAST 2.5.x.
