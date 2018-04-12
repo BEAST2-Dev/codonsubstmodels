@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/98828146.svg)](https://zenodo.org/badge/latestdoi/98828146)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1217169.svg)](https://doi.org/10.5281/zenodo.1217169)
 
 # Codon Substitution Models
 
@@ -103,7 +103,7 @@ describing codon frequencies is increased.
 ## Citation
 
 Dong Xie & Remco Bouckaert, (2018, April 12), Codon substitution models v1.1.0, Zenodo, 
-http://doi.org/10.5281/zenodo.1039992
+http://doi.org/10.5281/zenodo.1217169
 
 ## Note
 
