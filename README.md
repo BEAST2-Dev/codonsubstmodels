@@ -49,13 +49,23 @@ The xml to use __M0__ looks like:
 <parameter id="m0.omega" value="0.04484"/>
 <parameter id="m0.kappa" value="20.41545"/>
 
-<input spec="codonmodels.M0Model" id="m0" verbose="true">
+<substModel spec="codonmodels.M0Model" id="m0" verbose="true">
     <omega idref="m0.omega"/>
     <kappa idref="m0.kappa"/>
     <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
         <data idref="codon.alignment"/>
     </frequencies>
-</input>
+</substModel>
+```
+
+Note: the tree likelihood has to use the codon alignment not the nucleotide alignment.
+```   
+<distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
+     <data name="data" idref="codon.alignment"/>
+     <tree name="tree" idref="tree"/>
+     <siteModel name="siteModel" idref="siteModel"/>
+     <branchRateModel id="StrictClock.m0" spec="StrictClockModel" clock.rate="@clockRate"/>
+</distribution>
 ```
 
 The type of equilibrium codon frequencies _π<sub>j</sub>_ consists of 

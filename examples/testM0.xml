@@ -132,30 +132,37 @@
     <parameter id="m0.omega" value="1.0"/>
     <parameter id="m0.kappa" value="2.0"/>
     <parameter id="popSize" value="1.0"/>
+    <parameter id="clockRate" name="stateNode">1.0</parameter>
 
-    <input spec="codonmodels.M0Model" id="m0">
+    <substModel spec="codonmodels.M0Model" id="m0">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
             <data idref="codon.alignment"/>
         </frequencies>
-    </input>
+    </substModel>
 
     <!-- site model                                                              -->
-    <input spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+    <siteModel spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+        <!--
+        <parameter id="mutationRate.m0" estimate="false" name="mutationRate">1.0</parameter>
+        <parameter id="gammaShape.m0" estimate="false" name="shape">1.0</parameter>
+        <parameter id="proportionInvariant.m0" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+         -->
         <substModel idref="m0"/>
-    </input>
+    </siteModel>
 
     <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
-        <input name="data" idref="codon.alignment"/>
-        <input name="tree" idref="tree"/>
-        <input name="siteModel" idref="siteModel"/>
+        <data name="data" idref="codon.alignment"/>
+        <tree name="tree" idref="tree"/>
+        <siteModel name="siteModel" idref="siteModel"/>
+        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
     </distribution>
 
-    <input spec='beast.util.ClusterTree' id='tree' clusterType='upgma'>
+    <tree spec='beast.util.ClusterTree' id='tree' clusterType='upgma'>
         <!--<input name='taxa' idref='codon.alignment'/>-->
-        <input name='taxa' idref='alignment'/>
-    </input>
+        <data name='taxa' idref='alignment'/>
+    </tree>
 
 
     <map name="Uniform" >beast.math.distributions.Uniform</map>
@@ -205,11 +212,20 @@
             </distribution>
         </distribution>
 
-        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="1" />
+        <!-- add this if estimating clock rate, for example, tip dates or MRCA analysis.
+        <operator id="StrictClockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.75" weight="1.0"/>
 
-        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="1"/>
+        <operator id="strictClockUpDownOperator" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">
+            <up idref="clockRate"/>
+            <down idref="tree"/>
+        </operator>
+        -->
 
-        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="3.0"/>
+        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.5" />
+
+        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="3"/>
+
+        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="0.5"/>
 
         <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>
 
@@ -217,26 +233,27 @@
 
         <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
 
-        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" weight="15.0"/>
+        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>
 
-        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>
+        <!--<operator id="Narrow" spec="Exchange" tree="@tree" weight="50.0"/>-->
 
-        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>
+        <!--<operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="50.0"/>-->
 
-        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>
+        <!--<operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="50.0"/>-->
 
-        <logger logEvery="5000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <logger logEvery="2000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
-            <log idref="coalescent"/>
             <log idref="likelihood"/>
             <log idref="prior"/>
+            <log idref="coalescent"/>
             <log idref="popSize"/>
             <!--<log idref="m0"/> &lt;!&ndash;synonymousRate&ndash;&gt;-->
             <log idref="m0.omega"/>
             <log idref="m0.kappa"/>
+            <log idref="clockRate"/>
         </logger>
 
-        <logger logEvery="10000">
+        <logger logEvery="50000">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>
