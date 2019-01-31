@@ -141,12 +141,12 @@ public class CodonAlignment extends Alignment {
         counts.clear();
         try {
             for (Sequence seq : alignment.sequences) {
-                // return mapCodeToStateSet indices i
+                // return mapCodeToStateSet indices i, also indices in Codon.CODON_TRIPLETS
                 List<Integer> codonStates = seq.getSequence(getDataType());
-                int tripletIndex = findStopCodon(codonStates);
-                if (tripletIndex > -1)
+                int stopCodon = findStopCodon(codonStates);
+                if (stopCodon > -1)
                     Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
-                            (tripletIndex+1) + "th triplets ! \n" +
+                            (stopCodon+1) + "th triplets ! \n" +
                             "Please either use a codon alignment or the correct genetic code.");
 
                 counts.add(codonStates);

@@ -70,6 +70,8 @@ public class Codon extends DataType.Base {
     public static final int UNKNOWN_STATE = 64;
     public static final int GAP_STATE = 65;
 
+    // define codon triplets states as indices of CODON_TRIPLETS
+    // "???", "---" = indel of amino acid sequence
     public static final String[] CODON_TRIPLETS = {
             "AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT",
             "AGA", "AGC", "AGG", "AGT", "ATA", "ATC", "ATG", "ATT",
@@ -124,7 +126,7 @@ public class Codon extends DataType.Base {
         this.geneticCode = geneticCode;
 
 //        stateCount = 64 - geneticCode.getStopCodonCount();
-        stateCount = 64;
+        stateCount = 64; //0-63 triplets, 64 ???, 65 ---
         codeLength = 3;
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
 
@@ -174,8 +176,8 @@ public class Codon extends DataType.Base {
     /**
      * index in {@link Nucleotide#codeMap codeMap}
      */
-    public static final int NUCLEOTIDE_UNKNOWN_STATE = 18; // ?
-    public static final int NUCLEOTIDE_GAP_STATE = 17; // -
+    public static final int NUC_UNKNOWN_STATE = 18; // ?
+    public static final int NUC_GAP_STATE = 17; // -
 
     /**
      * Get state indexed by {@link Codon#codeMap codeMap}
@@ -191,15 +193,13 @@ public class Codon extends DataType.Base {
         char ns2 = geneticCode.getNucleotideChar(nuc2);
         char ns3 = geneticCode.getNucleotideChar(nuc3);
 
-        if (ns1 == NUCLEOTIDE_GAP_STATE || ns2 == NUCLEOTIDE_GAP_STATE ||
-                ns3 == NUCLEOTIDE_GAP_STATE )
+        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
+                ns3 == NUC_GAP_STATE)
             return GAP_STATE;
-        if (isAmbiguousState(ns1) || isAmbiguousState(ns2) || isAmbiguousState(ns3))
+        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
             return UNKNOWN_STATE;
 
-        int codonState = string2state("" + nuc1 + nuc2 + nuc3).get(0);
-
-        return codonState;
+        return stringToEncoding("" + nuc1 + nuc2 + nuc3).get(0);
     }
 
     /**
@@ -212,10 +212,10 @@ public class Codon extends DataType.Base {
      * @return state
      */
     public final int getCodonState(int ns1, int ns2, int ns3) {
-        if (ns1 == NUCLEOTIDE_GAP_STATE || ns2 == NUCLEOTIDE_GAP_STATE ||
-                ns3 == NUCLEOTIDE_GAP_STATE )
+        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
+                ns3 == NUC_GAP_STATE)
             return GAP_STATE;
-        if (isAmbiguousState(ns1) || isAmbiguousState(ns2) || isAmbiguousState(ns3))
+        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
             return UNKNOWN_STATE;
 
 //        int canonicalState = (ns1 * 16) + (ns2 * 4) + ns3; // cannot use BEAST1 nice design
@@ -223,9 +223,7 @@ public class Codon extends DataType.Base {
         char nuc2 = geneticCode.getNucleotideChar(ns2);
         char nuc3 = geneticCode.getNucleotideChar(ns3);
 
-        int codonState = string2state("" + nuc1 + nuc2 + nuc3).get(0);
-
-        return codonState;
+        return stringToEncoding("" + nuc1 + nuc2 + nuc3).get(0);
     }
 
     /**
@@ -238,7 +236,7 @@ public class Codon extends DataType.Base {
      */
     public final String getTriplet(int state) {
 //        return CODON_TRIPLETS[stateMap[state]]; // states from stateMap
-        return state2string(new int[]{state}); // states from codeMap
+        return encodingToString(new int[]{state}); // states from codeMap
     }
 
     /**
