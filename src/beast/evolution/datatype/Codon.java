@@ -82,7 +82,7 @@ public class Codon extends DataType.Base {
             "GAA", "GAC", "GAG", "GAT", "GCA", "GCC", "GCG", "GCT",
             "GGA", "GGC", "GGG", "GGT", "GTA", "GTC", "GTG", "GTT",
             "TAA", "TAC", "TAG", "TAT", "TCA", "TCC", "TCG", "TCT",
-            "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG", "TTT",
+            "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG", "TTT", // 64 here
             "???", "---"
     };
 
@@ -111,8 +111,9 @@ public class Codon extends DataType.Base {
     protected int[] stateMap;
     protected int[] reverseMap;
 
-    //TODO move to DataType
-    protected int ambiguousStateCount;
+    //total state count including ambiguous states
+    public final int ambiguousStateCount = 66;
+
 
     // this constructor used by xml not java
     public Codon() {
@@ -132,7 +133,6 @@ public class Codon extends DataType.Base {
         codeLength = 3;
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
 
-        ambiguousStateCount = 66;
         mapCodeToStateSet = new int[ambiguousStateCount][];
         for (int i = 0; i < stateCount; i++) {
             mapCodeToStateSet[i] = new int[1];
@@ -178,8 +178,8 @@ public class Codon extends DataType.Base {
     /**
      * index in {@link Nucleotide#codeMap codeMap}
      */
-    public static final int NUC_UNKNOWN_STATE = 18; // ?
     public static final int NUC_GAP_STATE = 17; // -
+    public static final int NUC_MISSING_STATE = 18; // ?
 
     /**
      * Get state indexed by {@link Codon#codeMap codeMap}

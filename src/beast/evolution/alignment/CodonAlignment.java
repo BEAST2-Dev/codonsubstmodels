@@ -139,7 +139,7 @@ public class CodonAlignment extends Alignment {
         taxaNames.clear();
         stateCounts.clear();
         counts.clear();
-        try {
+        try { //TODO treat codons with partial ambiguities (-TA) as missing data
             for (Sequence seq : alignment.sequences) {
                 // return mapCodeToStateSet indices i, also indices in Codon.CODON_TRIPLETS
                 List<Integer> tripletStates = seq.getSequence(getDataType());
@@ -224,16 +224,18 @@ public class CodonAlignment extends Alignment {
 
     /**
      * Use {@link Alignment#taxaNames taxaNames} as row indices, and
-     * {@link GeneticCode#GENETIC_CODE_TABLES GENETIC_CODE_TABLES} as column indices.
-     * @return matrix int[taxaNames.size()][codeTable.length()]
+     * {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} as column indices.
+     * @return matrix int[taxaNames.size()][getDataType().ambiguousStateCount]
      */
     protected int[][] getCodonUsage() {
         if (taxaNames.size() != counts.size())
             throw new IllegalArgumentException("taxaNames.size() " + taxaNames.size() + " != counts.size() " + counts.size());
 
-        GeneticCode geneticCode = getGeneticCode();
-        String codeTable = geneticCode.getCodeTable();
-        int[][] usage = new int[taxaNames.size()][codeTable.length()];
+//        GeneticCode geneticCode = getGeneticCode();
+//        String codeTable = geneticCode.getCodeTable();
+//        int[][] usage = new int[taxaNames.size()][codeTable.length()];
+        // include --- ???
+        int[][] usage = new int[taxaNames.size()][getDataType().ambiguousStateCount];
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
@@ -247,54 +249,91 @@ public class CodonAlignment extends Alignment {
     /**
      * Codon position * base (3x4) table, plus "overall" in last row.
      * The base order is "A", "C", "G", "T".
+     * If any ambiguous, then add 0.25 to each Nucleotide count.
      * @return
      */
     public double[][] getCodonPositionBaseFrequencies() {
         GeneticCode geneticCode = getGeneticCode();
         // position x base (3x4) table + overall
-        double[][] freqs = new double[4][4];
+        int colMax = 4;
+        double[][] freqs = new double[4][colMax];
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
                 int state = codonStates.get(j);
-                String triplet = getDataType().state2string(new int[]{state});
+                String triplet = getDataType().encodingToString(new int[]{state});
                 // position
                 for (int pos = 0; pos < 3; pos++) {
-                    // col index = nucState: A,C,G,T
+                    // col index = nucState: A,C,G,T,-
                     int nucState = geneticCode.getNucleotideState(triplet.charAt(pos));
-                    freqs[pos][nucState] += 1;
+                    // treat any ambiguous as a gap, add 1/4 to each freqs
+                    if (nucState >= 4) {
+                        for (int n = 0; n < 3; n++)
+                            freqs[pos][n] += 0.25;
+                    } else {
+                        freqs[pos][nucState] += 1;
+                    }
                 }
             }
         }
         // overall
-        for (int col = 0; col < 4; col++) {
+        for (int col = 0; col < colMax; col++) {
             freqs[3][col] = freqs[0][col] + freqs[1][col] + freqs[2][col];
         }
         // compute frequencies
         for (int row = 0; row < 4; row++) {
             double rowSum = freqs[row][0];
-            for (int col = 1; col < 4; col++)
+            for (int col = 1; col < colMax; col++)
                 rowSum += freqs[row][col];
-            for (int col = 0; col < 4; col++)
+            for (int col = 0; col < colMax; col++)
                 freqs[row][col] = freqs[row][col] / rowSum;
         }
         return freqs;
     }
 
-    // int[][] usage has no total
+    // int[][] usage has no total, and usage col has 2 ambiguous states count
     protected double[] getCodonFrequenciesByUsage(int[][] usage) {
-        double[] freqs = new double[usage[0].length];
+        int stateMax = getDataType().getStateCount(); // 64
+
+        double ambiguous = 0;
+        for (int j = stateMax; j < usage[0].length; j++) {
+            for (int i = 0; i < usage.length; i++) {
+                ambiguous += usage[i][j];
+            }
+        }
+//        if (ambiguous > 0)
+//            Log.info.println("Find " + ambiguous + " ambiguous states in this alignment.");
+
+        // sum up counts
+        double[] freqs = new double[stateMax];
         double sum = 0;
-        for (int j = 0; j < usage[0].length; j++) {
+        int actualStateCount = 0;
+        for (int j = 0; j < stateMax; j++) {
             for (int i = 0; i < usage.length; i++) {
                 freqs[j] += usage[i][j];
                 sum += usage[i][j];
             }
+            if (freqs[j] > 0)
+                actualStateCount += 1;
         }
         if (sum == 0)
             throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
-        for (int j = 0; j < usage[0].length; j++)
+
+        // equally distribute ambiguous into the count of each of actual state
+        if (ambiguous > 0) {
+            for (int j = 0; j < stateMax; j++) {
+                // freqs[j] == 0 is stop codon
+                if (freqs[j] > 0)
+                    freqs[j] += ambiguous / actualStateCount;
+            }
+            sum += ambiguous;
+        }
+
+        // calculate freqs
+        for (int j = 0; j < stateMax; j++) {
             freqs[j] = freqs[j] / sum;
+        }
+
         return freqs;
     }
 
@@ -313,7 +352,9 @@ public class CodonAlignment extends Alignment {
      * Codon usage in sequences
      */
     protected void printCodonUsage(int[][] usage) {
-        String codeTable = getGeneticCode().getCodeTable();
+//        String codeTable = getGeneticCode().getCodeTable();
+//        int colMax = codeTable.length(); // no - ?
+        int colMax = getDataType().ambiguousStateCount;
         List<String> taxaNames = getTaxaNames();
 
         Log.info.println("\n============ Codon Usage ============");
@@ -323,22 +364,22 @@ public class CodonAlignment extends Alignment {
 
         // header triplets
         Log.info.print(spaceN);
-        for (int j = 0; j < codeTable.length(); j++)
-            Log.info.print("\t" + getDataType().state2string(new int[]{j}));
+        for (int j = 0; j < colMax; j++)
+            Log.info.print("\t" + getDataType().encodingToString(new int[]{j}));
         Log.info.println();
 
         // header AminoAcid
         Log.info.print(spaceN);
-        for (int j = 0; j < codeTable.length(); j++)
-            Log.info.print("\t" + codeTable.charAt(j));
+        for (int j = 0; j < colMax; j++)
+            Log.info.print("\t" + getGeneticCode().getAminoAcid(j));
         Log.info.println();
 
         // Codon Usage
-        int[] colSums = new int[codeTable.length()];
+        int[] colSums = new int[colMax];
         for (int i = 0; i < taxaNames.size(); i++) {
             Log.info.print(taxaNames.get(i));
 
-            for (int j = 0; j < codeTable.length(); j++) {
+            for (int j = 0; j < colMax; j++) {
                 colSums[j] += usage[i][j];
                 Log.info.print("\t" + usage[i][j]);
             }
@@ -348,7 +389,7 @@ public class CodonAlignment extends Alignment {
 
         // overall
         Log.info.print("overall");
-        for (int j = 0; j < codeTable.length(); j++)
+        for (int j = 0; j < colMax; j++)
             Log.info.print("\t" + colSums[j]);
         Log.info.println();
     }

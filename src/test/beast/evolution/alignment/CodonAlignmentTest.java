@@ -28,8 +28,5 @@ public class CodonAlignmentTest {
         }
     }
 
-    @Test
-    public void convertCodonToState() {
 
-    }
 }

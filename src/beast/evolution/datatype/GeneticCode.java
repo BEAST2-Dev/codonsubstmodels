@@ -209,22 +209,22 @@ public final class GeneticCode {
     /**
      * Get Nucleotide states from {@link Nucleotide#codeMap codeMap}.
      * <code>codeMap = "ACGTURYMWSKBDHVNX" + GAP_CHAR + MISSING_CHAR</code>
-     * @see DataType#string2state(String)
+     * @see DataType#stringToEncoding(String)
      * @param c
      * @return
      */
     public int getNucleotideState(char c) {
-        return nucleotide.string2state(String.valueOf(c)).get(0);
+        return nucleotide.stringToEncoding(String.valueOf(c)).get(0);
     }
 
     /**
      * Infer char from {@link Nucleotide#codeMap codeMap}.
-     * @see DataType#state2string(int[])
+     * @see DataType#encodingToString(int[])
      * @param state
      * @return
      */
     public char getNucleotideChar(int state) {
-        return nucleotide.state2string(new int[]{state}).charAt(0);
+        return nucleotide.encodingToString(new int[]{state}).charAt(0);
     }
 
     /**

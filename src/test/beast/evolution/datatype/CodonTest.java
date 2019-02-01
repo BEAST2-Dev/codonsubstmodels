@@ -1,6 +1,8 @@
 package test.beast.evolution.datatype;
 
 import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.DataType;
+import beast.evolution.datatype.Nucleotide;
 import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonTestData;
@@ -17,6 +19,16 @@ public class CodonTest {
     public void setUp() {
         codon = CodonTestData.codonUNIVERSAL;
     }
+
+    @Test
+    public void testNucleotideState() {
+        Nucleotide nuc = new Nucleotide();
+        int gapState = nuc.getCodeMap().indexOf(DataType.GAP_CHAR);
+        assertEquals("Nucleotide gap state : ", gapState, Codon.NUC_GAP_STATE);
+        int missState = nuc.getCodeMap().indexOf(DataType.MISSING_CHAR);
+        assertEquals("Nucleotide ? state : ", missState, Codon.NUC_MISSING_STATE);
+    }
+
 
 
     @Test
