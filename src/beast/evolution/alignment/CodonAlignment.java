@@ -142,14 +142,14 @@ public class CodonAlignment extends Alignment {
         try {
             for (Sequence seq : alignment.sequences) {
                 // return mapCodeToStateSet indices i, also indices in Codon.CODON_TRIPLETS
-                List<Integer> codonStates = seq.getSequence(getDataType());
-                int stopCodon = findStopCodon(codonStates);
+                List<Integer> tripletStates = seq.getSequence(getDataType());
+                int stopCodon = findStopCodon(tripletStates);
                 if (stopCodon > -1)
                     Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
                             (stopCodon+1) + "th triplets ! \n" +
                             "Please either use a codon alignment or the correct genetic code.");
 
-                counts.add(codonStates);
+                counts.add(tripletStates);
                 if (taxaNames.contains(seq.getTaxon())) {
                     throw new RuntimeException("Duplicate taxon found in alignment: " + seq.getTaxon());
                 }

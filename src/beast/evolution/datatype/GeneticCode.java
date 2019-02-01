@@ -263,25 +263,25 @@ public final class GeneticCode {
     /**
      * Get character corresponding to a given state mapping to
      * {@link #AMINOACID_STATES AMINOACID_STATES}.
-     * @param state the state numbers in {@link #AMINOACID_STATES AMINOACID_STATES},
-     *              which is different to the state in {@link DataType DataType}.
+     * @param aaState the state numbers in {@link #AMINOACID_STATES AMINOACID_STATES},
+     *              which is different to the state in {@link Codon Codon}.
      * @return
      */
-    public char getAminoAcidChar(int state) {
-        return AMINOACID_CHARS[state];
+    public char getAminoAcidChar(int aaState) {
+        return AMINOACID_CHARS[aaState];
     }
 
     /**
-     * Returns the state associated with AminoAcid ({@link #AMINOACID_STATES AMINOACID_STATES})
-     * represented by codonState.
+     * Return the Amino Acid state ({@link #AMINOACID_STATES AMINOACID_STATES})
+     * corresponding to a given codon (triplet) state.
      * Note: the state is the canonical state (generated combinatorially),
      * which is different to BEAST 2 Aminoacid states, and which can be
      * from {@link Codon#getCodonState(int,int,int)} getCodonState}.
-     * @param codonState the state in {@link DataType DataType}
+     * @param codonState the state in {@link Codon Codon} triplets
      * @see #AMINOACID_STATES
-     * @return '?' if codon unknown
+     * @return Amino Acid state
      */
-    public int getAminoAcidCodonState(int codonState) {
+    public int getAminoAcidState(int codonState) {
         if (codonState == Codon.UNKNOWN_STATE)
             return AMINOACID_STATES[Aminoacid.MISSING_CHAR];
         else if (codonState == Codon.GAP_STATE)
@@ -291,12 +291,17 @@ public final class GeneticCode {
     }
 
     /**
-     * Get amino acid corresponding to a given state mapping to
-     * {@link #GENETIC_CODE_TABLES GENETIC_CODE_TABLES}.
-     * @param codonState the state in {@link DataType DataType}
-     * @return
+     * Get amino acid corresponding to corresponding to a given codon (triplet) state.
+     * @see #GENETIC_CODE_TABLES
+     * @param codonState the state in {@link Codon Codon} triplets
+     * @return Amino Acid
      */
     public char getAminoAcid(int codonState) {
+        if (codonState == Codon.UNKNOWN_STATE)
+            return Aminoacid.MISSING_CHAR;
+        else if (codonState == Codon.GAP_STATE)
+            return Aminoacid.GAP_CHAR;
+
         return codeTable.charAt(codonState);
     }
 
@@ -305,11 +310,15 @@ public final class GeneticCode {
 //     * @return whether the codonState is a stop codon
 //     */
 //    public boolean isStopCodon(int codonState) {
-//        return (getAminoAcidCodonState(codonState) == Codon.STOP_STATE);
+//        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
 //    }
 
-
+    /**
+     * treat ? and - as not stop-codon
+     */
     public boolean isStopCodon(int codonState) {
+        if (codonState == Codon.UNKNOWN_STATE || codonState == Codon.GAP_STATE)
+            return false;
         return (codeTable.charAt(codonState) == Codon.STOP_CHARACTER);
     }
 

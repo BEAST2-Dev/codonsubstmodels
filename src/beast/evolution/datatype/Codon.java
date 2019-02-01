@@ -26,13 +26,15 @@
 package beast.evolution.datatype;
 
 import beast.core.Input;
+import beast.core.util.Log;
 import beast.util.StringUtils;
 
 /**
- * Implements DataType for codons
+ * Implements DataType for codons,
+ * where codon states are the indices of CODON_TRIPLETS.
  * <p/>
  * Codon have tree different representations:
- * State numbers - 0-63 + 64, 65 as unknown and gap
+ * State numbers (codon states) - 0-63 + 64, 65 as unknown and gap
  * State chars - the above converted into chars, starting at 'A'
  * and '?' + '-' for unknown and gap
  * Strings or chars of three nucleotide characters
@@ -70,7 +72,7 @@ public class Codon extends DataType.Base {
     public static final int UNKNOWN_STATE = 64;
     public static final int GAP_STATE = 65;
 
-    // define codon triplets states as indices of CODON_TRIPLETS
+    // define codon (triplets) states as indices of CODON_TRIPLETS
     // "???", "---" = indel of amino acid sequence
     public static final String[] CODON_TRIPLETS = {
             "AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT",
@@ -235,8 +237,14 @@ public class Codon extends DataType.Base {
      *              return corresponding triplet string
      */
     public final String getTriplet(int state) {
-//        return CODON_TRIPLETS[stateMap[state]]; // states from stateMap
-        return encodingToString(new int[]{state}); // states from codeMap
+        String triplet;
+        try {
+            triplet = encodingToString(new int[]{state}); // states from codeMap
+        } catch (IndexOutOfBoundsException e) {
+            Log.err.println("Invalid triplet state : " + state + ", should be between 0 and 65 !");
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+        return triplet;
     }
 
     /**
@@ -264,15 +272,14 @@ public class Codon extends DataType.Base {
      * Aminoacid character of a state
      * @param state
      * @return  Aminoacid
-     */
-    @Override
+    @Deprecated
     public final char getChar(int state) {
 //        throw new IllegalArgumentException("Codon datatype cannot be expressed as char");
         return geneticCode.getAminoAcid(state);
-    }
+    }*/
 
     /**
-     * Same function of {@link DataType#state2string(int[])} state2string(int[])},
+     * Same function of {@link DataType#encodingToString(int[])} encodingToString(int[])},
      * but return Amino Acid string.
      * @param states
      * @return

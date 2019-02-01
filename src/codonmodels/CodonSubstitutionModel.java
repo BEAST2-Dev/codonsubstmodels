@@ -175,7 +175,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         k1 = codon[2];
 
         cs1 = codonDataType.getCodonState(i1, j1, k1);
-        aa1 = geneticCode.getAminoAcidCodonState(cs1);
+        aa1 = geneticCode.getAminoAcidState(cs1);
         return new int[]{i1, j1, k1, aa1};
     }
 
