@@ -431,7 +431,9 @@ public class CodonAlignment extends Alignment {
         df.setMaximumFractionDigits(8);
         for (int i = 0; i < frequencies.length; i++) {
             int state = getDataType().getStatesForCode(i)[0];
-            if (i % 8 == 0) {
+            if (state >= getDataType().getStateCount()) {
+                Log.info.print("\t0"); // stop codon
+            } else if (i % 8 == 0) {
                 Log.info.print("\n" + df.format(frequencies[state]));
             } else {
                 Log.info.print("\t" + df.format(frequencies[state]));

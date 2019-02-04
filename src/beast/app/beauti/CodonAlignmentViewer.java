@@ -173,7 +173,7 @@ public class CodonAlignmentViewer extends JPanel {
                 int patternIndex_ = m_alignment.getPatternIndex(i);
                 int[] pattern = m_alignment.getPattern(patternIndex_);
 //                String patternString = dataType.state2string(pattern);
-                String patternString = ((Codon)dataType).state2aminoacid(pattern);
+                String patternString = ((Codon)dataType).stateToAminoAcid(pattern);
 
                 headerChar[i] = mostFrequentCharInPattern(patternString);
                 for (int j = 0; j < taxonCount; j++) {

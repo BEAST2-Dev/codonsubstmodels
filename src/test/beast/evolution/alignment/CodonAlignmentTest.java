@@ -15,7 +15,7 @@ public class CodonAlignmentTest {
 
     @Test
     public void testTripletsStates() {
-        Sequence seq1 = CodonTestData.getSeq1();
+        Sequence seq1 = CodonTestData.getSeqCodeMap();
         System.out.println(seq1);
 
         List<Integer> codonStates = seq1.getSequence(CodonTestData.codonUNIVERSAL);

@@ -59,11 +59,11 @@ public class Codon extends DataType.Base {
     // "???", "---" = indel of amino acid sequence
     public static final String[] CODON_TRIPLETS = {
             "AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT",
-            "AGA", "AGC", "AGG", "AGT", "ATA", "ATC", "ATG", "ATT",
+            "AGA", "AGC", "AGG", "AGT", "ATA", "ATC", "ATG", "ATT", // 16
             "CAA", "CAC", "CAG", "CAT", "CCA", "CCC", "CCG", "CCT",
-            "CGA", "CGC", "CGG", "CGT", "CTA", "CTC", "CTG", "CTT",
+            "CGA", "CGC", "CGG", "CGT", "CTA", "CTC", "CTG", "CTT", // 32
             "GAA", "GAC", "GAG", "GAT", "GCA", "GCC", "GCG", "GCT",
-            "GGA", "GGC", "GGG", "GGT", "GTA", "GTC", "GTG", "GTT",
+            "GGA", "GGC", "GGG", "GGT", "GTA", "GTC", "GTG", "GTT", // 48
             "TAA", "TAC", "TAG", "TAT", "TCA", "TCC", "TCG", "TCT",
             "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG", "TTT", // 64 here
             "???", "---"
@@ -249,12 +249,12 @@ public class Codon extends DataType.Base {
         return triplet;
     }
 
-    //=========== Aminoacid ==========
+    //=========== Amino Acid ==========
 
     /**
-     * Aminoacid character of a state
+     * Amino Acid character of a state
      * @param state
-     * @return  Aminoacid
+     * @return  Amino Acid
     @Deprecated
     public final char getChar(int state) {
 //        throw new IllegalArgumentException("Codon datatype cannot be expressed as char");
@@ -267,12 +267,12 @@ public class Codon extends DataType.Base {
      * @param states
      * @return
      */
-    public String state2aminoacid(int[] states) {
-        StringBuffer buf = new StringBuffer();
+    public String stateToAminoAcid(int[] states) {
+        StringBuilder strB = new StringBuilder();
             // produce a comma separated string of integers
         for (int state : states)
-            buf.append(geneticCode.getAminoAcid(state));
-        return buf.toString();
+            strB.append(geneticCode.getAminoAcid(state));
+        return strB.toString();
     }
 
     /**
