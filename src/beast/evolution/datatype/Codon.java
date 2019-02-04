@@ -53,26 +53,9 @@ public class Codon extends DataType.Base {
             GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID], Input.Validate.REQUIRED);
 
 
-//    public static final Codon UNIVERSAL = new Codon(GeneticCode.UNIVERSAL);
-//    public static final Codon VERTEBRATE_MT = new Codon(GeneticCode.VERTEBRATE_MT);
-//    public static final Codon YEAST = new Codon(GeneticCode.YEAST);
-//    public static final Codon MOLD_PROTOZOAN_MT = new Codon(GeneticCode.MOLD_PROTOZOAN_MT);
-//    public static final Codon MYCOPLASMA = new Codon(GeneticCode.MYCOPLASMA);
-//    public static final Codon INVERTEBRATE_MT = new Codon(GeneticCode.INVERTEBRATE_MT);
-//    public static final Codon CILIATE = new Codon(GeneticCode.CILIATE);
-//    public static final Codon ECHINODERM_MT = new Codon(GeneticCode.ECHINODERM_MT);
-//    public static final Codon EUPLOTID_NUC = new Codon(GeneticCode.EUPLOTID_NUC);
-//    public static final Codon BACTERIAL = new Codon(GeneticCode.BACTERIAL);
-//    public static final Codon ALT_YEAST = new Codon(GeneticCode.ALT_YEAST);
-//    public static final Codon ASCIDIAN_MT = new Codon(GeneticCode.ASCIDIAN_MT);
-//    public static final Codon FLATWORM_MT = new Codon(GeneticCode.FLATWORM_MT);
-//    public static final Codon BLEPHARISMA_NUC = new Codon(GeneticCode.BLEPHARISMA_NUC);
-//    public static final Codon NO_STOPS = new Codon(GeneticCode.NO_STOPS);
-
     public static final int UNKNOWN_STATE = 64;
     public static final int GAP_STATE = 65;
 
-    // define codon (triplets) states as indices of CODON_TRIPLETS
     // "???", "---" = indel of amino acid sequence
     public static final String[] CODON_TRIPLETS = {
             "AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT",
@@ -91,9 +74,7 @@ public class Codon extends DataType.Base {
      * situations arising from converting coding DNA to an amino acid sequence.
      */
     public static final char STOP_CHARACTER = '*';
-
     public static final int STOP_STATE = 23;
-
     public final static String CODON = "codon";
 
     @Override
@@ -102,18 +83,22 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
+    // ambiguous are currently only --- and ???
+    public int getStateCountAmbiguous(){
+        return CODON_TRIPLETS.length;
+    }
+
+
     protected GeneticCode geneticCode;
+
     /**
-     * stateMap saves the states 0-63, but keeps the states of stop codon in the last.
-     * It is different to states from {@link DataType#string2state(String) string2state}
-     * using in codeMap and mapCodeToStateSet
+     * indexMap saves the index 0-63, which is the character index from the string of
+     * the currently used genetic code table.
+     * Also same to the triplets index in CODON_TRIPLETS.
+     * It is different to codon states from {@link DataType#string2state(String) string2state}
+     * used in codeMap and mapCodeToStateSet.
      */
-    protected int[] stateMap;
-    protected int[] reverseMap;
-
-    //total state count including ambiguous states
-    public final int ambiguousStateCount = 66;
-
+    protected int[] indexMap;
 
     // this constructor used by xml not java
     public Codon() {
@@ -124,49 +109,47 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
-    // offer to change GeneticCode later, especially after default constructor called by CodonAlignment.initDataType()
+    // offer to change GeneticCode later,
+    // especially after default constructor called by CodonAlignment.initDataType()
     public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
-//        stateCount = 64 - geneticCode.getStopCodonCount();
-        stateCount = 64; //0-63 triplets, 64 ???, 65 ---
+        // number of stop codon
+        int nStopCodon = geneticCode.getStopCodonCount();
+        // triplets
         codeLength = 3;
+        // 64 (no ambiguous) - 3
+        stateCount = geneticCode.getCodeTableLength() - nStopCodon;
+        // use triplets index in CODON_TRIPLETS as codon states
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
+        // Universal: 0-60 triplets, 61 ???, 62 ---, 63-65 *,
+        // 66 (ambiguous are currently only --- and ???)
+        mapCodeToStateSet = new int[getStateCountAmbiguous()][];
 
-        mapCodeToStateSet = new int[ambiguousStateCount][];
-        for (int i = 0; i < stateCount; i++) {
-            mapCodeToStateSet[i] = new int[1];
-            mapCodeToStateSet[i][0] = i;
-        }
-        int[] all = new int[stateCount];
-        for (int i = 0; i < stateCount; i++) {
-            all[i] = i;
-        }
-        mapCodeToStateSet[64] = all;
-        mapCodeToStateSet[65] = all;
-
-
-        // stateMap, reverseMap put stop codon in the last, different to codeMap, mapCodeToStateSet
-        stateMap = new int[ambiguousStateCount];
-        reverseMap = new int[ambiguousStateCount];
-
+        // ambiguous characters are represented by its possible states
+        int[] allStates = new int[stateCount];
         int j = 0;
-        int k = 64 - geneticCode.getStopCodonCount();
-        for (int i = 0; i < 64; i++) {
+        int k = stateCount;
+        // create codeMap from CODON_TRIPLETS but put stop codon in the last
+        for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (!geneticCode.isStopCodon(i)) {
-                stateMap[j] = i;
-                reverseMap[i] = j;
+                mapCodeToStateSet[j] = new int[]{i};
+                allStates[j] = i;
                 j++;
             } else {
-                stateMap[k] = i;
-                reverseMap[i] = k;
+                // put stop codon states in the last, i.e. 63-65
+                mapCodeToStateSet[k] = new int[]{i};
                 k++;
             }
         }
-        for (int i = 64; i < ambiguousStateCount; i++) {
-            stateMap[i] = i;
-            reverseMap[i] = i;
+        // currently only --- and ???
+        for (int i = geneticCode.getCodeTableLength(); i < getStateCountAmbiguous(); i++) {
+            mapCodeToStateSet[i] = allStates;
         }
+
+        assert codeMap.length()/codeLength == getStateCountAmbiguous();
+        assert mapCodeToStateSet.length == getStateCountAmbiguous();
+
     }
 
     @Override
@@ -181,28 +164,28 @@ public class Codon extends DataType.Base {
     public static final int NUC_GAP_STATE = 17; // -
     public static final int NUC_MISSING_STATE = 18; // ?
 
-    /**
-     * Get state indexed by {@link Codon#codeMap codeMap}
-     * corresponding to a nucleotide triplet
-     *
-     * @param nuc1 the codon triplet as chars
-     * @param nuc2 the codon triplet as chars
-     * @param nuc3 the codon triplet as chars
-     * @return state
-     */
-    public final int getCodonState(char nuc1, char nuc2, char nuc3) {
-        char ns1 = geneticCode.getNucleotideChar(nuc1);
-        char ns2 = geneticCode.getNucleotideChar(nuc2);
-        char ns3 = geneticCode.getNucleotideChar(nuc3);
-
-        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
-                ns3 == NUC_GAP_STATE)
-            return GAP_STATE;
-        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
-            return UNKNOWN_STATE;
-
-        return stringToEncoding("" + nuc1 + nuc2 + nuc3).get(0);
-    }
+//    /**
+//     * Get state indexed by {@link Codon#codeMap codeMap}
+//     * corresponding to a nucleotide triplet
+//     *
+//     * @param nuc1 the codon triplet as chars
+//     * @param nuc2 the codon triplet as chars
+//     * @param nuc3 the codon triplet as chars
+//     * @return state
+//     */
+//    public final int getCodonState(char nuc1, char nuc2, char nuc3) {
+//        char ns1 = geneticCode.getNucleotideChar(nuc1);
+//        char ns2 = geneticCode.getNucleotideChar(nuc2);
+//        char ns3 = geneticCode.getNucleotideChar(nuc3);
+//
+//        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
+//                ns3 == NUC_GAP_STATE)
+//            return GAP_STATE;
+//        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
+//            return UNKNOWN_STATE;
+//
+//        return stringToEncoding("" + nuc1 + nuc2 + nuc3).get(0);
+//    }
 
     /**
      * Get codon state indexed by {@link Codon#codeMap codeMap}
@@ -299,43 +282,5 @@ public class Codon extends DataType.Base {
         return geneticCode;
     }
 
-    /**
-     * Parse a text string to return a genetic code
-     */
-//    public static Codon findByName(String codeStr) {
-//        Codon codon = null;
-//        if (codeStr.equals(GeneticCode.UNIVERSAL.getName())) {
-//            codon = Codon.UNIVERSAL;
-//        } else if (codeStr.equals(GeneticCode.VERTEBRATE_MT.getName())) {
-//            codon = Codon.VERTEBRATE_MT;
-//        } else if (codeStr.equals(GeneticCode.YEAST.getName())) {
-//            codon = Codon.YEAST;
-//        } else if (codeStr.equals(GeneticCode.MOLD_PROTOZOAN_MT.getName())) {
-//            codon = Codon.MOLD_PROTOZOAN_MT;
-//        } else if (codeStr.equals(GeneticCode.INVERTEBRATE_MT.getName())) {
-//            codon = Codon.INVERTEBRATE_MT;
-//        } else if (codeStr.equals(GeneticCode.CILIATE.getName())) {
-//            codon = Codon.CILIATE;
-//        } else if (codeStr.equals(GeneticCode.ECHINODERM_MT.getName())) {
-//            codon = Codon.ECHINODERM_MT;
-//        } else if (codeStr.equals(GeneticCode.EUPLOTID_NUC.getName())) {
-//            codon = Codon.EUPLOTID_NUC;
-//        } else if (codeStr.equals(GeneticCode.BACTERIAL.getName())) {
-//            codon = Codon.BACTERIAL;
-//        } else if (codeStr.equals(GeneticCode.ALT_YEAST.getName())) {
-//            codon = Codon.ALT_YEAST;
-//        } else if (codeStr.equals(GeneticCode.ASCIDIAN_MT.getName())) {
-//            codon = Codon.ASCIDIAN_MT;
-//        } else if (codeStr.equals(GeneticCode.FLATWORM_MT.getName())) {
-//            codon = Codon.FLATWORM_MT;
-//        } else if (codeStr.equals(GeneticCode.BLEPHARISMA_NUC.getName())) {
-//            codon = Codon.BLEPHARISMA_NUC;
-//        } else if (codeStr.equals(GeneticCode.NO_STOPS.getName())) {
-//            codon = Codon.NO_STOPS;
-//        } else {
-//            throw new RuntimeException("Unknown genetics code");
-//        }
-//        return codon;
-//    }
 
 }

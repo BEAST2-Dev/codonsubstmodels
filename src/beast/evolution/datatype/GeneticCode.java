@@ -28,8 +28,13 @@ package beast.evolution.datatype;
 
 import beast.core.Description;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A set of standard genetic codes.
+ * Note: the codeState here is same the states in {@link Codon Codon} data type.
+ * See mapCodeToStateSet.
  *
  * @author Andrew Rambaut
  * @author Alexei Drummond
@@ -141,7 +146,6 @@ public final class GeneticCode {
 //        FLATWORM_MT, BLEPHARISMA_NUC, NO_STOPS
 //    };
 
-    protected Nucleotide nucleotide = new Nucleotide(); // char <=> state
 
     public GeneticCode(int geneticCodeId) {
         this.geneticCodeId = geneticCodeId;
@@ -149,11 +153,33 @@ public final class GeneticCode {
     }
 
     /**
-     * Returns the genetic code table currently used
+     * Return the genetic code table currently used
      */
     public String getCodeTable() {
         return codeTable;
     }
+
+    /**
+     * 64.
+     * Return the length of the code string in the currently used genetic code table,
+     * also the number of defined {@link Codon#CODON_TRIPLETS triplets}.
+     * @see DataType#getStateCount()
+     * @see DataType#stringToEncoding(String)
+     */
+    public int getCodeTableLength() {
+        return codeTable.length();
+    }
+
+
+    /**
+     * @param codeState the character index from the string of
+     *                  the currently used genetic code table.
+     * @return an Amino Acid character in codeTable.
+     */
+    public char getAChar(int codeState) {
+        return codeTable.charAt(codeState);
+    }
+
 
     /**
      * Returns the name of the genetic code
@@ -205,13 +231,14 @@ public final class GeneticCode {
         return geneticCode;
     }
 
+    protected Nucleotide nucleotide = new Nucleotide(); // char <=> state
 
     /**
-     * Get Nucleotide states from {@link Nucleotide#codeMap codeMap}.
+     * Get a Nucleotide state from {@link Nucleotide#codeMap codeMap}.
      * <code>codeMap = "ACGTURYMWSKBDHVNX" + GAP_CHAR + MISSING_CHAR</code>
      * @see DataType#stringToEncoding(String)
-     * @param c
-     * @return
+     * @param c a Nucleotide character in codeMap
+     * @return Nucleotide state, also the index in {@link Nucleotide#codeMap codeMap}.
      */
     public int getNucleotideState(char c) {
         return nucleotide.stringToEncoding(String.valueOf(c)).get(0);
@@ -220,8 +247,8 @@ public final class GeneticCode {
     /**
      * Infer char from {@link Nucleotide#codeMap codeMap}.
      * @see DataType#encodingToString(int[])
-     * @param state
-     * @return
+     * @param state Nucleotide state, also the index in {@link Nucleotide#codeMap codeMap}.
+     * @return a Nucleotide character
      */
     public char getNucleotideChar(int state) {
         return nucleotide.encodingToString(new int[]{state}).charAt(0);
@@ -277,84 +304,80 @@ public final class GeneticCode {
      * Note: the state is the canonical state (generated combinatorially),
      * which is different to BEAST 2 Aminoacid states, and which can be
      * from {@link Codon#getCodonState(int,int,int)} getCodonState}.
-     * @param codonState the state in {@link Codon Codon} triplets
+     * @param codeState the state in {@link Codon Codon} triplets
      * @see #AMINOACID_STATES
      * @return Amino Acid state
      */
-    public int getAminoAcidState(int codonState) {
-        if (codonState == Codon.UNKNOWN_STATE)
+    public int getAminoAcidState(int codeState) {
+        if (codeState == Codon.UNKNOWN_STATE)
             return AMINOACID_STATES[Aminoacid.MISSING_CHAR];
-        else if (codonState == Codon.GAP_STATE)
+        else if (codeState == Codon.GAP_STATE)
             return AMINOACID_STATES[Aminoacid.GAP_CHAR];
 
-        return AMINOACID_STATES[codeTable.charAt(codonState)];
+        return AMINOACID_STATES[getAChar(codeState)];
     }
 
     /**
      * Get amino acid corresponding to corresponding to a given codon (triplet) state.
      * @see #GENETIC_CODE_TABLES
-     * @param codonState the state in {@link Codon Codon} triplets
+     * @param codeState the code index in the currently used genetic code table,
+     * also the same index to the {@link Codon Codon} triplets.
      * @return Amino Acid
      */
-    public char getAminoAcid(int codonState) {
-        if (codonState == Codon.UNKNOWN_STATE)
+    public char getAminoAcid(int codeState) {
+        if (codeState == Codon.UNKNOWN_STATE)
             return Aminoacid.MISSING_CHAR;
-        else if (codonState == Codon.GAP_STATE)
+        else if (codeState == Codon.GAP_STATE)
             return Aminoacid.GAP_CHAR;
 
-        return codeTable.charAt(codonState);
+        return getAChar(codeState);
     }
 
 //    /**
 //     * Note that the state is the canonical state (generated combinatorially)
-//     * @return whether the codonState is a stop codon
+//     * @return whether the codeState is a stop codon
 //     */
-//    public boolean isStopCodon(int codonState) {
-//        return (getAminoAcidState(codonState) == Codon.STOP_STATE);
+//    public boolean isStopCodon(int codeState) {
+//        return (getAminoAcidState(codeState) == Codon.STOP_STATE);
 //    }
 
     /**
      * treat ? and - as not stop-codon
      */
-    public boolean isStopCodon(int codonState) {
-        if (codonState == Codon.UNKNOWN_STATE || codonState == Codon.GAP_STATE)
+    public boolean isStopCodon(int codeState) {
+        if (codeState == Codon.UNKNOWN_STATE || codeState == Codon.GAP_STATE)
             return false;
-        return (codeTable.charAt(codonState) == Codon.STOP_CHARACTER);
+        return (getAChar(codeState) == Codon.STOP_CHARACTER);
     }
 
     /**
-     * @return the codon states of stop amino acids.
+     * Return the indices of stop codon in
+     * the currently used genetic code table.
      */
     public int[] getStopCodonIndices() {
-    
-        int i, j, n = getStopCodonCount();
-        int[] indices = new int[n];
-        
-        j = 0;
-        for (i = 0; i < 64; i++) {
-            if (codeTable.charAt(i) == Codon.STOP_CHARACTER) {
-                indices[j] = i;
-                j++;
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < getCodeTableLength(); i++) {
+            if (getAChar(i) == Codon.STOP_CHARACTER) {
+                indices.add(i);
             }
         }
-        
-        return indices;
+        // >= Java 1.8
+        return indices.stream().mapToInt(i -> i).toArray();
     }
 
     /**
-     * Returns the number of terminator amino acids.
+     * Return the number of stop codon "*"
+     * in the currently used genetic code table.
      */
     public int getStopCodonCount() {
-        int i, count = 0;
-        
-        for (i = 0; i < 64; i++) {
-            if (codeTable.charAt(i) == Codon.STOP_CHARACTER)
+        int count = 0;
+        for (int i = 0; i < getCodeTableLength(); i++) {
+            if (getAChar(i) == Codon.STOP_CHARACTER)
                 count++;
         }
-        
         return count;
     }
-    
+
     private int geneticCodeId;
     private String codeTable;
 

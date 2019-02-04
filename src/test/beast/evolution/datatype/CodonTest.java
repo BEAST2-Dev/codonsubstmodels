@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonTestData;
 
+import java.util.Arrays;
+
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -18,6 +20,25 @@ public class CodonTest {
     @Before
     public void setUp() {
         codon = CodonTestData.codonUNIVERSAL;
+    }
+
+    @Test
+    public void testCodeMap(){
+        int stateCount = codon.getStateCount();
+        System.out.println(" stateCount = " + stateCount);
+
+        int codeLength = codon.getCodeLength();
+        System.out.println(" codeLength = " + codeLength);
+
+        String codeMap = codon.getCodeMap();
+        System.out.println(" codeMap = " + codeMap);
+
+        for (int i = 0; i < codon.getStateCountAmbiguous(); i++) {
+            int[] stateSet = codon.getStatesForCode(i);
+            System.out.println(" mapCodeToStateSet " + i + " = " + Arrays.toString(stateSet));
+        }
+
+
     }
 
     @Test

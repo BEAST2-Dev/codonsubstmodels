@@ -12,10 +12,7 @@ public class CodonTestData {
 
     // concatenate Codon.CODON_TRIPLETS to create a Sequence obj
     public static Sequence getSeq1() {
-        String s = "";
-        for (String t : Codon.CODON_TRIPLETS)
-            s += t;
-        return new Sequence("seq1", s);
+        return new Sequence("seq1", codonUNIVERSAL.getCodeMap());
     }
 
     public static int[] getTestStates() {

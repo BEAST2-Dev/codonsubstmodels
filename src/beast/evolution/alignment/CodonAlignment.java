@@ -235,7 +235,7 @@ public class CodonAlignment extends Alignment {
 //        String codeTable = geneticCode.getCodeTable();
 //        int[][] usage = new int[taxaNames.size()][codeTable.length()];
         // include --- ???
-        int[][] usage = new int[taxaNames.size()][getDataType().ambiguousStateCount];
+        int[][] usage = new int[taxaNames.size()][getDataType().getStateCountAmbiguous()];
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
@@ -354,7 +354,7 @@ public class CodonAlignment extends Alignment {
     protected void printCodonUsage(int[][] usage) {
 //        String codeTable = getGeneticCode().getCodeTable();
 //        int colMax = codeTable.length(); // no - ?
-        int colMax = getDataType().ambiguousStateCount;
+        int colMax = getDataType().getStateCountAmbiguous();
         List<String> taxaNames = getTaxaNames();
 
         Log.info.println("\n============ Codon Usage ============");
