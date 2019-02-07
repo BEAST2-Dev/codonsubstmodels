@@ -351,10 +351,10 @@ public final class GeneticCode {
     }
 
     /**
-     * Return the indices of stop codon in
+     * Return the codon states of all stop codon in
      * the currently used genetic code table.
      */
-    public int[] getStopCodonIndices() {
+    public int[] getStopCodonStates() {
         List<Integer> indices = new ArrayList<>();
         for (int i = 0; i < getCodeTableLength(); i++) {
             if (getAChar(i) == Codon.STOP_CHARACTER) {

@@ -51,20 +51,21 @@ public class CodonFrequencies extends Frequencies {
             CodonAlignment codonAlignment = getCodonAlignment();
             Codon codonDataType = getDataType(codonAlignment);
             int codonStateCount = codonDataType.getStateCount();
-            Log.info.println("Codon alignment " + codonAlignment.getID() + " : number of states = " + codonStateCount);
+            Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
+                    " : number of states = " + codonStateCount);
 
-            int[] indices = codonAlignment.getGeneticCode().getStopCodonIndices();
-            if (indices.length >= codonStateCount || indices.length == 0)
-                throw new IllegalArgumentException("Invalid stop codon indices length " + indices.length);
+//            int[] indices = codonAlignment.getGeneticCode().getStopCodonStates();
+//            if (indices.length >= codonStateCount || indices.length == 0)
+//                throw new IllegalArgumentException("Invalid stop codon indices length " + indices.length);
 
-//        double[] freqs;
+            // codon states exclude stop codon, freqs should be stateCount
             if ("equal".equals(piInput.get())) {
                 freqs = new double[codonStateCount];
-                double equalFreq = 1.0 / (double) (codonStateCount - indices.length);
+                double equalFreq = 1.0 / (double) codonStateCount;
                 Arrays.fill(freqs, equalFreq);
-                // replace to 0 for stop codon
-                for (int id : indices)
-                    freqs[id] = 0.0;
+//                // replace to 0 for stop codon
+//                for (int id : indices)
+//                    freqs[id] = 0.0;
 
             } else if ("F1X4".equals(piInput.get())) {
 
@@ -77,7 +78,7 @@ public class CodonFrequencies extends Frequencies {
                 freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
 
             } else if ("F60/F61".equals(piInput.get())) {
-                freqs = codonAlignment.getCodonFrequencies();
+                freqs = codonAlignment.getCodonFrequencies(false);
 
             } else {
                 throw new IllegalArgumentException("Invalid input of pi = " + piInput.get());
@@ -91,7 +92,7 @@ public class CodonFrequencies extends Frequencies {
 //            values[i] = freqs[i];
 
             Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
-            Log.info.println("Initial values to CodonFrequencies = " +
+            Log.info.println("Initial values to codon frequencies = " +
                     Arrays.toString(StringUtils.roundDoubleArrays(freqs, 5)));
 
 //        RealParameter frequencies = new RealParameter(values);
@@ -106,23 +107,30 @@ public class CodonFrequencies extends Frequencies {
     protected double[] estimateFrequencies(double[] nucFreq1, double[] nucFreq2, double[] nucFreq3,
                                            Codon codonDataType) {
         GeneticCode geneticCode = codonDataType.getGeneticCode();
-        int codonStateCount = codonDataType.getStateCount();
-        double[] freqs = new double[codonStateCount];
+        int stateCount = codonDataType.getStateCount();
+        double[] freqs = new double[stateCount]; // 60/61
         double sum = 0;
-        for (int i = 0; i < codonStateCount; i++) {
+        // 64
+        int n = 0;
+        for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (! geneticCode.isStopCodon(i)) {
-                int[] tripletStates = codonDataType.getTripletStates(i);
-                for (int t = 0; t < tripletStates.length; t++) {
-                    if (tripletStates[t] > 3)
-                        throw new IllegalArgumentException("Invalid nucleotide state ! " + tripletStates[t]);
+                // convert codon state i into 3 nuc states
+                int[] necStates = codonDataType.getTripletNucStates(i);
+                for (int t = 0; t < necStates.length; t++) {
+                    if (necStates[t] > 3)
+                        throw new IllegalArgumentException("Invalid nucleotide state ! " + necStates[t]);
                 }
 
-                freqs[i] = nucFreq1[tripletStates[0]] * nucFreq2[tripletStates[1]] * nucFreq3[tripletStates[2]];
-                sum += freqs[i];
+                freqs[n] = nucFreq1[necStates[0]] * nucFreq2[necStates[1]] * nucFreq3[necStates[2]];
+                sum += freqs[n];
+                n++;
             }
         }
+
+        assert n==stateCount;
+
         // re-normalize
-        for (int i = 0; i < codonStateCount; i++)
+        for (int i = 0; i < stateCount; i++)
             freqs[i] = freqs[i] / sum;
         return freqs;
     }

@@ -169,7 +169,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     // return i1, j1, k1, aa1 given i
     private int[] getCodonStatesForRateClass(int i, Codon codonDataType, GeneticCode geneticCode) {
         int i1, j1, k1, cs1, aa1;
-        int[] codon  = codonDataType.getTripletStates(i);
+        int[] codon  = codonDataType.getTripletNucStates(i);
         i1 = codon[0];
         j1 = codon[1];
         k1 = codon[2];

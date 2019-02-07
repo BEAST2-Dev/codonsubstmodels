@@ -30,8 +30,10 @@ import beast.core.util.Log;
 import beast.util.StringUtils;
 
 /**
- * Implements DataType for codons,
- * where codon states are the indices of CODON_TRIPLETS.
+ * Implements DataType for codon,
+ * where codon states are also the indices of CODON_TRIPLETS,
+ * and also the same character index from the string of
+ * the currently used genetic code table.
  * <p/>
  * Codon have tree different representations:
  * State numbers (codon states) - 0-63 + 64, 65 as unknown and gap
@@ -91,15 +93,6 @@ public class Codon extends DataType.Base {
 
     protected GeneticCode geneticCode;
 
-    /**
-     * indexMap saves the index 0-63, which is the character index from the string of
-     * the currently used genetic code table.
-     * Also same to the triplets index in CODON_TRIPLETS.
-     * It is different to codon states from {@link DataType#string2state(String) string2state}
-     * used in codeMap and mapCodeToStateSet.
-     */
-    protected int[] indexMap;
-
     // this constructor used by xml not java
     public Codon() {
         this(GeneticCode.UNIVERSAL);
@@ -109,8 +102,19 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
-    // offer to change GeneticCode later,
-    // especially after default constructor called by CodonAlignment.initDataType()
+    //stateMap saves the codon states 0-63, but the states of stop codon are saved in the end.
+    protected int[] stateMap;
+
+    /**
+     * Codon states are the triplets index in CODON_TRIPLETS,
+     * and are also the character index from the string of
+     * the currently used genetic code table.
+     * codeMap is the concatenated string of of triplets in CODON_TRIPLETS.
+     *
+     *
+     * This method enable CodonAlignment to choose the correct GeneticCode,
+     * especially after calling the default constructor using UNIVERSAL.
+     */
     public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
@@ -121,34 +125,45 @@ public class Codon extends DataType.Base {
         // 64 (no ambiguous) - 3
         stateCount = geneticCode.getCodeTableLength() - nStopCodon;
         // use triplets index in CODON_TRIPLETS as codon states
+        // Universal: 0-60 triplets, 61-63 *,
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
-        // Universal: 0-60 triplets, 61 ???, 62 ---, 63-65 *,
-        // 66 (ambiguous are currently only --- and ???)
-        mapCodeToStateSet = new int[getStateCountAmbiguous()][];
 
-        // ambiguous characters are represented by its possible states
+        assert codeMap.length()/codeLength == getStateCountAmbiguous();
+
+        // 64 ???, 65 ---
+        mapCodeToStateSet = new int[getStateCountAmbiguous()][];
         int[] allStates = new int[stateCount];
         int j = 0;
-        int k = stateCount;
-        // create codeMap from CODON_TRIPLETS but put stop codon in the last
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
+            mapCodeToStateSet[i] = new int[]{i};
             if (!geneticCode.isStopCodon(i)) {
-                mapCodeToStateSet[j] = new int[]{i};
                 allStates[j] = i;
                 j++;
-            } else {
-                // put stop codon states in the last, i.e. 63-65
-                mapCodeToStateSet[k] = new int[]{i};
-                k++;
             }
         }
-        // currently only --- and ???
+        // ambiguous are currently only --- and ??? represented by its possible states
         for (int i = geneticCode.getCodeTableLength(); i < getStateCountAmbiguous(); i++) {
             mapCodeToStateSet[i] = allStates;
         }
 
-        assert codeMap.length()/codeLength == getStateCountAmbiguous();
-        assert mapCodeToStateSet.length == getStateCountAmbiguous();
+        // array index is same as frequency array index, but stop codon in the end,
+        // value is codon states, no ambiguous
+        stateMap = new int[geneticCode.getCodeTableLength()];
+        j = 0;
+        int k = stateCount;
+        // put stop codon in the last, i.e. 63-65
+        for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
+            if (!geneticCode.isStopCodon(i)) {
+                stateMap[j] = i;
+                j++;
+            } else {
+                stateMap[k] =i;
+                k++;
+            }
+        }
+
+        // 1st stop codon state
+        assert geneticCode.isStopCodon(stateMap[stateCount]);
 
     }
 
@@ -194,7 +209,7 @@ public class Codon extends DataType.Base {
      * @param ns1 the codon triplet as states
      * @param ns2 the codon triplet as states
      * @param ns3 the codon triplet as states
-     * @return state
+     * @return codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
      */
     public final int getCodonState(int ns1, int ns2, int ns3) {
         if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
@@ -215,9 +230,8 @@ public class Codon extends DataType.Base {
      * Get triplet string corresponding to a given state
      * indexed by {@link Codon#codeMap codeMap}
      *
-     * @param state state
-     *              <p/>
-     *              return corresponding triplet string
+     * @param state codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
+     * @return the corresponding triplet string
      */
     public final String getTriplet(int state) {
         String triplet;
@@ -234,12 +248,11 @@ public class Codon extends DataType.Base {
      * Get an array of three nucleotide states making this codon state,
      * where nucleotide states are indexed by {@link Nucleotide#codeMap codeMap}.
      *
-     * @see GeneticCode#getNucleotideState
-     * @param state state
-     *              <p/>
-     *              return corresponding triplet string
+     * @param state codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
+     * @return the corresponding 3 Nucleotide state referred to
+     *         {@link GeneticCode#getNucleotideState getNucleotideState}
      */
-    public final int[] getTripletStates(int state) {
+    public final int[] getTripletNucStates(int state) {
         int[] triplet = new int[3];
 
         triplet[0] = geneticCode.getNucleotideState(getTriplet(state).charAt(0));
@@ -264,8 +277,8 @@ public class Codon extends DataType.Base {
     /**
      * Same function of {@link DataType#encodingToString(int[])} encodingToString(int[])},
      * but return Amino Acid string.
-     * @param states
-     * @return
+     * @param states codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
+     * @return Amino Acid string
      */
     public String stateToAminoAcid(int[] states) {
         StringBuilder strB = new StringBuilder();

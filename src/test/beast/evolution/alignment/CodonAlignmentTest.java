@@ -14,7 +14,7 @@ import static junit.framework.Assert.assertEquals;
 public class CodonAlignmentTest {
 
     @Test
-    public void testTripletsStates() {
+    public void testGetSequence() {
         Sequence seq1 = CodonTestData.getSeqCodeMap();
         System.out.println(seq1);
 

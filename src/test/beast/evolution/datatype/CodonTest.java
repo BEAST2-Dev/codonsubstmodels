@@ -39,23 +39,23 @@ public class CodonTest {
         assertEquals("Codon codeMap : ", CodonTestData.getTriplets(), codeMap);
     }
 
-    @Test
-    public void testGetStatesForCode() {
-        for (int i = 0; i < codon.getStateCountAmbiguous(); i++) {
-            int[] stateSet = codon.getStatesForCode(i);
-            System.out.println("mapCodeToStateSet " + i + " = " + Arrays.toString(stateSet));
-        }
-        assertEquals("Codon mapCodeToStateSet : ", 0, codon.getStatesForCode(0)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 10, codon.getStatesForCode(10)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 49, codon.getStatesForCode(48)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 51, codon.getStatesForCode(49)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 57, codon.getStatesForCode(54)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 63, codon.getStatesForCode(60)[0]);
-        // stop codon
-        assertEquals("Codon mapCodeToStateSet : ", 48, codon.getStatesForCode(61)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 50, codon.getStatesForCode(62)[0]);
-        assertEquals("Codon mapCodeToStateSet : ", 56, codon.getStatesForCode(63)[0]);
-    }
+//    @Test
+//    public void testGetStatesForCode() {
+//        for (int i = 0; i < codon.getStateCountAmbiguous(); i++) {
+//            int[] stateSet = codon.getStatesForCode(i);
+//            System.out.println("mapCodeToStateSet " + i + " = " + Arrays.toString(stateSet));
+//        }
+//        assertEquals("Codon mapCodeToStateSet : ", 0, codon.getStatesForCode(0)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 10, codon.getStatesForCode(10)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 49, codon.getStatesForCode(48)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 51, codon.getStatesForCode(49)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 57, codon.getStatesForCode(54)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 63, codon.getStatesForCode(60)[0]);
+//        // stop codon
+//        assertEquals("Codon mapCodeToStateSet : ", 48, codon.getStatesForCode(61)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 50, codon.getStatesForCode(62)[0]);
+//        assertEquals("Codon mapCodeToStateSet : ", 56, codon.getStatesForCode(63)[0]);
+//    }
 
     @SafeVarargs
     private final <T> List<T> toList(T... a) {
