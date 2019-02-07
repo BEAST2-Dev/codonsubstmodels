@@ -122,8 +122,10 @@ public class Codon extends DataType.Base {
         int nStopCodon = geneticCode.getStopCodonCount();
         // triplets
         codeLength = 3;
-        // 64 (no ambiguous) - 3
-        stateCount = geneticCode.getCodeTableLength() - nStopCodon;
+        // fix stateCount to 64 (no ambiguous)
+        // the codon states are used as array indices,
+        // removing stop codon will break code in frequency and subst model
+        stateCount = 64; //geneticCode.getCodeTableLength() - nStopCodon;
         // use triplets index in CODON_TRIPLETS as codon states
         // Universal: 0-60 triplets, 61-63 *,
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
@@ -150,7 +152,7 @@ public class Codon extends DataType.Base {
         // value is codon states, no ambiguous
         stateMap = new int[geneticCode.getCodeTableLength()];
         j = 0;
-        int k = stateCount;
+        int k = geneticCode.getCodeTableLength()- nStopCodon;
         // put stop codon in the last, i.e. 63-65
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (!geneticCode.isStopCodon(i)) {
@@ -163,9 +165,15 @@ public class Codon extends DataType.Base {
         }
 
         // 1st stop codon state
-        assert geneticCode.isStopCodon(stateMap[stateCount]);
+        k = geneticCode.getCodeTableLength()- nStopCodon;
+        assert geneticCode.isStopCodon(stateMap[k]);
 
     }
+
+    public int getCodonState(int stateMapIndex) {
+        return stateMap[stateMapIndex];
+    }
+
 
     @Override
     public String getTypeDescription() {

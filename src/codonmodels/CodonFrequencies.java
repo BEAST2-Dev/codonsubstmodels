@@ -51,17 +51,14 @@ public class CodonFrequencies extends Frequencies {
             CodonAlignment codonAlignment = getCodonAlignment();
             Codon codonDataType = getDataType(codonAlignment);
             int codonStateCount = codonDataType.getStateCount();
+            int stopCodonCount = codonDataType.getGeneticCode().getStopCodonCount();
             Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
-                    " : number of states = " + codonStateCount);
-
-//            int[] indices = codonAlignment.getGeneticCode().getStopCodonStates();
-//            if (indices.length >= codonStateCount || indices.length == 0)
-//                throw new IllegalArgumentException("Invalid stop codon indices length " + indices.length);
+                    " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
 
             // codon states exclude stop codon, freqs should be stateCount
             if ("equal".equals(piInput.get())) {
                 freqs = new double[codonStateCount];
-                double equalFreq = 1.0 / (double) codonStateCount;
+                double equalFreq = 1.0 / (double) (codonStateCount - stopCodonCount);
                 Arrays.fill(freqs, equalFreq);
 //                // replace to 0 for stop codon
 //                for (int id : indices)
@@ -78,7 +75,7 @@ public class CodonFrequencies extends Frequencies {
                 freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
 
             } else if ("F60/F61".equals(piInput.get())) {
-                freqs = codonAlignment.getCodonFrequencies(false);
+                freqs = codonAlignment.getCodonFrequencies();
 
             } else {
                 throw new IllegalArgumentException("Invalid input of pi = " + piInput.get());
@@ -107,11 +104,12 @@ public class CodonFrequencies extends Frequencies {
     protected double[] estimateFrequencies(double[] nucFreq1, double[] nucFreq2, double[] nucFreq3,
                                            Codon codonDataType) {
         GeneticCode geneticCode = codonDataType.getGeneticCode();
-        int stateCount = codonDataType.getStateCount();
-        double[] freqs = new double[stateCount]; // 60/61
+        int stateCount = codonDataType.getStateCount(); // 64
+
+        assert stateCount==64;
+
+        double[] freqs = new double[stateCount];
         double sum = 0;
-        // 64
-        int n = 0;
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (! geneticCode.isStopCodon(i)) {
                 // convert codon state i into 3 nuc states
@@ -121,16 +119,12 @@ public class CodonFrequencies extends Frequencies {
                         throw new IllegalArgumentException("Invalid nucleotide state ! " + necStates[t]);
                 }
 
-                freqs[n] = nucFreq1[necStates[0]] * nucFreq2[necStates[1]] * nucFreq3[necStates[2]];
-                sum += freqs[n];
-                n++;
+                freqs[i] = nucFreq1[necStates[0]] * nucFreq2[necStates[1]] * nucFreq3[necStates[2]];
+                sum += freqs[i];
             }
         }
-
-        assert n==stateCount;
-
         // re-normalize
-        for (int i = 0; i < stateCount; i++)
+        for (int i = 0; i < freqs.length; i++)
             freqs[i] = freqs[i] / sum;
         return freqs;
     }
