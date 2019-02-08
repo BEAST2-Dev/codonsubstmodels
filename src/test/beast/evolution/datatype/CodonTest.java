@@ -28,7 +28,7 @@ public class CodonTest {
     public void testCodeMap(){
         int stateCount = codon.getStateCount();
         System.out.println("stateCount = " + stateCount);
-        assertEquals("Codon stateCount : ", 61, stateCount);
+        assertEquals("Codon stateCount : ", 64, stateCount);
 
         int codeLength = codon.getCodeLength();
         System.out.println("codeLength = " + codeLength);

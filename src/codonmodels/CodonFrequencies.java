@@ -50,8 +50,12 @@ public class CodonFrequencies extends Frequencies {
         } else {
             CodonAlignment codonAlignment = getCodonAlignment();
             Codon codonDataType = getDataType(codonAlignment);
-            int codonStateCount = codonDataType.getStateCount();
-            int stopCodonCount = codonDataType.getGeneticCode().getStopCodonCount();
+            final int codonStateCount = codonDataType.getStateCount();
+
+            assert codonStateCount == 64;
+
+            final GeneticCode geneticCode = codonDataType.getGeneticCode();
+            final int stopCodonCount = geneticCode.getStopCodonCount();
             Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
                     " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
 
@@ -59,10 +63,12 @@ public class CodonFrequencies extends Frequencies {
             if ("equal".equals(piInput.get())) {
                 freqs = new double[codonStateCount];
                 double equalFreq = 1.0 / (double) (codonStateCount - stopCodonCount);
-                Arrays.fill(freqs, equalFreq);
-//                // replace to 0 for stop codon
-//                for (int id : indices)
-//                    freqs[id] = 0.0;
+                //  Log.info.println("equalFreq = " + equalFreq);
+
+                for (int i = 0; i < freqs.length; i++) {
+                    if (! geneticCode.isStopCodon(i))
+                        freqs[i] = equalFreq;
+                }
 
             } else if ("F1X4".equals(piInput.get())) {
 

@@ -48,15 +48,17 @@ public class M0TreeLikelihoodTest {
     @Test
     public void testCodonFrequencies(){
         // 60 states, exclude stop codon in freq
-        double[] freq = codonAlignment.getCodonFrequencies(false);
+        double[] freq = codonAlignment.getCodonFrequencies();
         // result from codeml
         assertArrayEquals(
-                new double[]{.03203203,.03653654,.00500501,.01501502,.03503504,.05705706,0,.02302302,.01051051,0,
-                .04604605,.05605606,.00800801,.04504505,.02902903,.02702703,.003003,.0035035,.02152152,.04304304,
-                .003003,.01201201,.00900901,.00850851,0,.001001,.08058058,.03403403,.01601602,.02202202,
-                .00800801,.00900901,.002002,.002002,.01801802,.04904905,.001001,.00800801,.01051051,.01601602,
-                .0015015,.002002,.01401401,.00800801,.003003,.00600601,.01301301,.0035035,.03003003,.01201201,
-                .002002,.00850851,.01851852,.003003,.003003,.001001,.02552553,.02152152,.002002,.01551552},
+                new double[]{.03203203,.03653654,.00500501,.01501502,.03503504,.05705706,0,.02302302,
+                        0,.01051051,0,0,.04604605,.05605606,.00800801,.04504505,
+                        .02902903,.02702703,.003003,.0035035,.02152152,.04304304,.003003,.01201201,
+                        .00900901,.00850851,0,.001001,.08058058,.03403403,.01601602,.02202202,
+                        .00800801,.00900901,.002002,.002002,.01801802,.04904905,.001001,.00800801,
+                        .01051051,.01601602,.0015015,.002002,.01401401,.00800801,.003003,.00600601,
+                        0,.01301301,0,.0035035,.03003003,.01201201,.002002,.00850851,
+                        .01851852,.003003,.003003,.001001,.02552553,.02152152,.002002,.01551552},
                 freq, 0.00000001);
     }
 
@@ -80,7 +82,9 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F1X4", "data", codonAlignment);
 
-        String startingTree = "";
+        String startingTree = "((Human_Horai: 0.014702, Human_Arnason: 0.014702): 0.251960, " +
+                "(Chimp_Horai: 0.003339, Chimp_Arnason: 0.003339): 0.263323, (Gorilla_Horai: 0.004302, " +
+                "Gorilla_Arnason: 0.004302): 0.262361);";
 
         double logP = getLogTreeLikelihood("0.10195", "13.49811",
                 codonFreq, codonAlignment, startingTree);
@@ -93,7 +97,9 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F3X4", "data", codonAlignment);
 
-        String startingTree = "";
+        String startingTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
+                "(Chimp_Horai: 0.002959, Chimp_Arnason: 0.002959): 0.255761, (Gorilla_Horai: 0.003918, " +
+                "Gorilla_Arnason: 0.003918): 0.254801);";
 
         double logP = getLogTreeLikelihood("0.08000", "15.34858",
                 codonFreq, codonAlignment, startingTree);
@@ -106,7 +112,9 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F60/F61", "data", codonAlignment);
 
-        String startingTree = "";
+        String startingTree = "((Human_Horai: 0.013483, Human_Arnason: 0.013483): 0.294406, " +
+                "(Chimp_Horai: 0.003084, Chimp_Arnason: 0.003084): 0.304805, (Gorilla_Horai: 0.004137, " +
+                "Gorilla_Arnason: 0.004137): 0.303752);";
 
         double logP = getLogTreeLikelihood("0.08327", "15.54039",
                 codonFreq, codonAlignment, startingTree);

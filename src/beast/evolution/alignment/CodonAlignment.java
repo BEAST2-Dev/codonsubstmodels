@@ -126,7 +126,7 @@ public class CodonAlignment extends Alignment {
 
         printCodonPositionBaseFrequencies();
         // freqs.length = 64
-        double[] freqs = getCodonFrequenciesByUsage(usage, true);
+        double[] freqs = getCodonFrequenciesByUsage(usage);
         printCodonFrequencies(freqs, "Codon frequencies by usage");
         Log.info.println();
     }
@@ -298,8 +298,7 @@ public class CodonAlignment extends Alignment {
 
     // int[][] usage has no total, and usage col has 2 ambiguous states count
     // return freqs[stateCount]
-    protected double[] getCodonFrequenciesByUsage(int[][] usage, boolean use64d) {
-        final int stateCount = getDataType().getStateCount();
+    protected double[] getCodonFrequenciesByUsage(int[][] usage) {
         final int stateMax = getGeneticCode().getCodeTableLength(); // 64
 
         // usage[0].length = getDataType().getStateCountAmbiguous(), 66
@@ -312,59 +311,35 @@ public class CodonAlignment extends Alignment {
         }
         Log.info.println("Find " + ambiguous + " ambiguous triplets in this alignment.");
 
-        int dim = use64d ? stateMax : stateCount;
-        double[] freqs = new double[dim];
+        double[] freqs = new double[stateMax];
         double sum = 0;
-        if (use64d) {
-            // include stop codon, same as codeml
-            for (int j = 0; j < stateMax; j++) {
-                for (int i = 0; i < usage.length; i++) {
-                    freqs[j] += usage[i][j];
-                    sum += usage[i][j];
-                }
-            }
-        } else {
-            // exclude stop codon
-            // loop through each taxon
+        // loop through each taxon
+        // include stop codon, same as codeml
+        for (int j = 0; j < stateMax; j++) {
             for (int i = 0; i < usage.length; i++) {
-                int n = 0;
-                for (int j = 0; j < stateMax; j++) {
-                    // exclude stop codon states
-                    if (getGeneticCode().isStopCodon(j)) {
-                        // check stop codon usage == 0
-                        if (usage[i][j] > 0)
-                            throw new IllegalStateException("Codon usage count (" + usage[i][j] +
-                                    ") > 0 in stop codon state " + j + " !");
-                    } else {
-                        freqs[n] += usage[i][j];
-                        sum += usage[i][j];
-                        n++;
-                    }
-                }
+                freqs[j] += usage[i][j];
+                sum += usage[i][j];
             }
         }
 
         if (sum == 0)
             throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
 
-        // equally distribute ambiguous into the count of each of actual state
+        // equally distribute ambiguous into the count of each of non-stop-codon state
         if (ambiguous > 0) {
-            int noAmbigu = use64d ? stateMax : stateCount;
-            int n = 0;
+            int stopCodonCount = getGeneticCode().getStopCodonCount();
             for (int j = 0; j < stateMax; j++) {
                 if (!getGeneticCode().isStopCodon(j)) {
-                    freqs[n] += ambiguous / stateCount;
-                    n++;
+                    // non-stop-codon state
+                    freqs[j] += (double) ambiguous / (double) (stateMax-stopCodonCount);
                 }
             }
             sum += ambiguous;
         }
 
         // re-normalize
-        for (int n = 0; n < dim; n++) {
-            freqs[n] = freqs[n] / sum;
-        }
-
+        for (int j = 0; j < freqs.length; j++)
+            freqs[j] = freqs[j] / sum;
         return freqs;
     }
 
@@ -374,7 +349,7 @@ public class CodonAlignment extends Alignment {
      */
     public double[] getCodonFrequencies() {
         int[][] usage = getCodonUsage();
-        return getCodonFrequenciesByUsage(usage, true);
+        return getCodonFrequenciesByUsage(usage);
     }
 
     //============ print ============
@@ -457,13 +432,13 @@ public class CodonAlignment extends Alignment {
     }
 
     public void printCodonFrequencies(double[] frequencies, String title) {
-        Log.info.println("\n============ " + title + " (" + frequencies.length + " states) ============");
+        Log.info.println("\n============ " + title + " (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============");
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(8);
         for (int i = 0; i < frequencies.length; i++) {
 //            int state = getDataType().getStatesForCode(i)[0];
 //            Log.info.println(i + "  " + state);
-            if (i % 10 == 0) {
+            if (i % 8 == 0) {
                 Log.info.print("\n" + df.format(frequencies[i]));
             } else {
                 Log.info.print("\t" + df.format(frequencies[i]));
