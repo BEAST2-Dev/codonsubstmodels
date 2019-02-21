@@ -46,6 +46,14 @@ The attribute _geneticCode_ includes "universal", "vertebrateMitochondrial",
 "alternativeYeast", "ascidianMitochondrial", "flatwormMitochondrial", 
 "blepharismaNuclear", "noStops".
 
+If the sequences contain partial nucleotide ambiguities in the code, such as -TA,
+then turn off the flag _unknownCodeException_ to replace any unmapped triplets to ---.
+
+```xml
+<data id="codon.alignment" data="@alignment" dataType="codon" 
+      geneticCode="vertebrateMitochondrial" spec="CodonAlignment" unknownCodeException="false"/>
+```
+
 The xml to use __M0__ looks like:
 
 ```xml

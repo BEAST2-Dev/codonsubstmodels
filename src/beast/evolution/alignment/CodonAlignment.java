@@ -188,8 +188,7 @@ public class CodonAlignment extends Alignment {
         }
     }
 
-    // if unknownCodeException is true :
-    // treat codons with partial ambiguities (-TA) as missing data;
+    // if unknownCodeException is true, treat codons with partial ambiguities (-TA) as missing data;
     // if false, then use original code sequence.getSequence(dataType).
     protected List<Integer> getCodonStates(Sequence sequence, DataType.Base dataType, boolean unknownCodeException) {
         List<Integer> codonStates = new ArrayList<>();
@@ -197,7 +196,7 @@ public class CodonAlignment extends Alignment {
             // throw IllegalArgumentException, if codon has partial ambiguities (-TA)
             codonStates = sequence.getSequence(dataType);
         } else {
-            // turn any unknown chars to ---
+            // allow partial ambiguities (-TA)
             String data = sequence.getData();
             // remove spaces
             data = data.replaceAll("\\s", "");
@@ -219,12 +218,13 @@ public class CodonAlignment extends Alignment {
                     if (map.containsKey(code)) {
                         codonStates.add(map.get(code));
                     } else {
+                        // replace any unmapped triplets to ---
                         codonStates.add(map.get("---"));
                         unkn++;
                     }
                 }
                 if (unkn > 0)
-                    Log.info.println("Replace " + unkn + " unknown codon code to missing data in sequence " +
+                    Log.info.println("Replace " + unkn + " unmapped triplets to missing data in sequence " +
                         sequence.getTaxon() + ".");
             } else {
                 throw new IllegalArgumentException("Invalid data type !\n" +
