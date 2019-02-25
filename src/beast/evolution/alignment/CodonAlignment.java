@@ -28,13 +28,13 @@ package beast.evolution.alignment;
 
 import beast.core.Input;
 import beast.core.util.Log;
-import beast.evolution.datatype.*;
+import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.DataType;
+import beast.evolution.datatype.GeneticCode;
+import beast.evolution.datatype.Nucleotide;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An alignment class that takes nucleotide alignment and converts it
@@ -56,10 +56,10 @@ public class CodonAlignment extends Alignment {
                     "called codons, specify which amino acid will be added next during protein synthesis.",
                     GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID]);
 
-    final public Input<Boolean> unknownCodeExceptionInput = new Input<>("unknownCodeException",
-            "Flag to throw exception for unknown code, but can be changed to 'false' to treat " +
-                    "partial ambiguities (-TA) as missing data.",
-            true, Input.Validate.OPTIONAL);
+//    final public Input<Boolean> unknownCodeExceptionInput = new Input<>("unknownCodeException",
+//            "Flag to throw exception for unknown code, but can be changed to 'false' to treat " +
+//                    "partial ambiguities (-TA) as missing data.",
+//            true, Input.Validate.OPTIONAL);
 
     protected Alignment alignment;
 
@@ -112,7 +112,8 @@ public class CodonAlignment extends Alignment {
         GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
         setGeneticCode(geneticCode);
 
-        convertCodonToState(unknownCodeExceptionInput.get()); // default to true
+//        convertCodonToState(unknownCodeExceptionInput.get()); // default to true
+        convertCodonToState();
 
         // after convertCodonToState
         if (alignmentInput.get().siteWeightsInput.get() != null) {
@@ -142,16 +143,20 @@ public class CodonAlignment extends Alignment {
     /**
      * modified from Alignment private initializeWithSequenceList(List<Sequence>, boolean)
      */
-    protected void convertCodonToState(boolean unknownCodeException) {
+    protected void convertCodonToState() {
         taxaNames.clear();
         stateCounts.clear();
         counts.clear();
         try {
             for (Sequence seq : alignment.sequences) {
+                // replace all ? to -
+                String data = seq.getData().replaceAll("\\?", "-");
+                seq.dataInput.setValue(data, seq);
+
                 // return mapCodeToStateSet indices i, also indices in Codon.CODON_TRIPLETS
-//                List<Integer> codonStates = seq.getSequence(getDataType());
+                List<Integer> codonStates = seq.getSequence(getDataType());
                 // unknownCodeException false to treat codons with partial ambiguities (-TA) as missing data
-                List<Integer> codonStates = getCodonStates(seq, getDataType(), unknownCodeException);
+//                List<Integer> codonStates = getCodonStates(seq, getDataType(), unknownCodeException);
 
                 int stopCodon = findStopCodon(codonStates);
                 if (stopCodon > -1)
@@ -190,49 +195,49 @@ public class CodonAlignment extends Alignment {
 
     // if unknownCodeException is true, treat codons with partial ambiguities (-TA) as missing data;
     // if false, then use original code sequence.getSequence(dataType).
-    protected List<Integer> getCodonStates(Sequence sequence, DataType.Base dataType, boolean unknownCodeException) {
-        List<Integer> codonStates = new ArrayList<>();
-        if (unknownCodeException) {
-            // throw IllegalArgumentException, if codon has partial ambiguities (-TA)
-            codonStates = sequence.getSequence(dataType);
-        } else {
-            // allow partial ambiguities (-TA)
-            String data = sequence.getData();
-            // remove spaces
-            data = data.replaceAll("\\s", "");
-            data = data.toUpperCase();
-
-            // overwrite DataType.Base.stringToEncoding(data)
-            if (dataType.getCodeLength() == 3 || dataType.getCodeMap()==null) {
-                // use code map to resolve state codes
-                Map<String, Integer> map = new HashMap<>();
-                // fixed length code
-                for (int i = 0; i < dataType.getCodeMap().length(); i += dataType.getCodeLength()) {
-                    String code = dataType.getCodeMap().substring(i, i + dataType.getCodeLength());
-                    map.put(code, i / dataType.getCodeLength());
-                }
-
-                int unkn = 0;
-                for (int i = 0; i < data.length(); i += dataType.getCodeLength()) {
-                    String code = data.substring(i, i + dataType.getCodeLength()).toUpperCase();
-                    if (map.containsKey(code)) {
-                        codonStates.add(map.get(code));
-                    } else {
-                        // replace any unmapped triplets to ---
-                        codonStates.add(map.get("---"));
-                        unkn++;
-                    }
-                }
-                if (unkn > 0)
-                    Log.info.println("Replace " + unkn + " unmapped triplets to missing data in sequence " +
-                        sequence.getTaxon() + ".");
-            } else {
-                throw new IllegalArgumentException("Invalid data type !\n" +
-                        "Codon data type is required : " + dataType.getTypeDescription());
-            }
-        }
-        return codonStates;
-    }
+//    protected List<Integer> getCodonStates(Sequence sequence, DataType.Base dataType, boolean unknownCodeException) {
+//        List<Integer> codonStates = new ArrayList<>();
+//        if (unknownCodeException) {
+//            // throw IllegalArgumentException, if codon has partial ambiguities (-TA)
+//            codonStates = sequence.getSequence(dataType);
+//        } else {
+//            // allow partial ambiguities (-TA)
+//            String data = sequence.getData();
+//            // remove spaces
+//            data = data.replaceAll("\\s", "");
+//            data = data.toUpperCase();
+//
+//            // overwrite DataType.Base.stringToEncoding(data)
+//            if (dataType.getCodeLength() == 3 || dataType.getCodeMap()==null) {
+//                // use code map to resolve state codes
+//                Map<String, Integer> map = new HashMap<>();
+//                // fixed length code
+//                for (int i = 0; i < dataType.getCodeMap().length(); i += dataType.getCodeLength()) {
+//                    String code = dataType.getCodeMap().substring(i, i + dataType.getCodeLength());
+//                    map.put(code, i / dataType.getCodeLength());
+//                }
+//
+//                int unkn = 0;
+//                for (int i = 0; i < data.length(); i += dataType.getCodeLength()) {
+//                    String code = data.substring(i, i + dataType.getCodeLength()).toUpperCase();
+//                    if (map.containsKey(code)) {
+//                        codonStates.add(map.get(code));
+//                    } else {
+//                        // replace any unmapped triplets to ---
+//                        codonStates.add(map.get("---"));
+//                        unkn++;
+//                    }
+//                }
+//                if (unkn > 0)
+//                    Log.info.println("Replace " + unkn + " unmapped triplets to missing data in sequence " +
+//                        sequence.getTaxon() + ".");
+//            } else {
+//                throw new IllegalArgumentException("Invalid data type !\n" +
+//                        "Codon data type is required : " + dataType.getTypeDescription());
+//            }
+//        }
+//        return codonStates;
+//    }
 
     protected int findStopCodon(List<Integer> seqStates) {
         for (int i = 0; i < seqStates.size(); i++) {
@@ -367,7 +372,6 @@ public class CodonAlignment extends Alignment {
                 ambiguous += usage[i][j];
             }
         }
-        Log.info.println("Find " + ambiguous + " ambiguous triplets in this alignment.");
 
         double[] freqs = new double[stateMax];
         double sum = 0;
@@ -416,9 +420,11 @@ public class CodonAlignment extends Alignment {
      * Codon usage in sequences
      */
     protected void printCodonUsage(int[][] usage) {
-//        String codeTable = getGeneticCode().getCodeTable();
-//        int colMax = codeTable.length(); // no - ?
         int colMax = getDataType().getStateCountAmbiguous();
+        assert colMax == usage[0].length;
+        final int stateMax = getDataType().getStateCount(); // 64
+        assert stateMax == 64;
+
         List<String> taxaNames = getTaxaNames();
 
         Log.info.println("\n============ Codon Usage ============");
@@ -439,6 +445,7 @@ public class CodonAlignment extends Alignment {
         Log.info.println();
 
         // Codon Usage
+        int ambiguous = 0;
         int[] colSums = new int[colMax];
         for (int i = 0; i < taxaNames.size(); i++) {
             Log.info.print(taxaNames.get(i));
@@ -446,6 +453,8 @@ public class CodonAlignment extends Alignment {
             for (int j = 0; j < colMax; j++) {
                 colSums[j] += usage[i][j];
                 Log.info.print("\t" + usage[i][j]);
+                if (j >= stateMax)
+                    ambiguous += usage[i][j];
             }
             Log.info.println();
         }
@@ -455,7 +464,11 @@ public class CodonAlignment extends Alignment {
         Log.info.print("overall");
         for (int j = 0; j < colMax; j++)
             Log.info.print("\t" + colSums[j]);
-        Log.info.println();
+        Log.info.println("\n");
+
+        if (ambiguous > 0)
+            Log.info.println("Warning : find " + ambiguous + " ambiguous triplets in this alignment.");
+
     }
 
 

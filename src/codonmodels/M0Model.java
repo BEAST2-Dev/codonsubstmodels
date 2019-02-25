@@ -74,16 +74,6 @@ public class M0Model extends CodonSubstitutionModel {//implements Loggable {
 
     }
 
-    // TODO wrong
-    public double getSynonymousRate(double kappa, double omega) {
-        return ((31.0 * kappa) + 36.0) / ((31.0 * kappa) + 36.0 + (138.0 * omega) + (58.0 * omega * kappa));
-    }
-
-    // TODO wrong
-    public double getNonSynonymousRate() {
-        return 0;
-    }
-
     @Override
     protected void setupRelativeRates() {
         double kappa = kappaInput.get().getValue();

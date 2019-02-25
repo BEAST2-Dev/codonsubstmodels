@@ -55,10 +55,11 @@ public class Codon extends DataType.Base {
             GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID], Input.Validate.REQUIRED);
 
 
-    public static final int UNKNOWN_STATE = 64;
-    public static final int GAP_STATE = 65;
+//    public static final int UNKNOWN_STATE = 64;
+//    public static final int GAP_STATE = 65;
 
-    // "???", "---" = indel of amino acid sequence
+    // NOT include ?, have to replace all ? to - in sequence
+    // = codeMap, state > 64 contains ambiguous nucleotides
     public static final String[] CODON_TRIPLETS = {
             "AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT",
             "AGA", "AGC", "AGG", "AGT", "ATA", "ATC", "ATG", "ATT", // 16
@@ -68,15 +69,23 @@ public class Codon extends DataType.Base {
             "GGA", "GGC", "GGG", "GGT", "GTA", "GTC", "GTG", "GTT", // 48
             "TAA", "TAC", "TAG", "TAT", "TCA", "TCC", "TCG", "TCT",
             "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG", "TTT", // 64 here
-            "???", "---"
-    };
+            "-AA", "-AC", "-AG", "-AT", "-CA", "-CC", "-CG", "-CT",
+            "-GA", "-GC", "-GG", "-GT", "-TA", "-TC", "-TG", "-TT",
+            "A-A", "A-C", "A-G", "A-T", "C-A", "C-C", "C-G", "C-T",
+            "G-A", "G-C", "G-G", "G-T", "T-A", "T-C", "T-G", "T-T",
+            "AA-", "AC-", "AG-", "AT-", "CA-", "CC-", "CG-", "CT-",
+            "GA-", "GC-", "GG-", "GT-", "TA-", "TC-", "TG-", "TT-", // 112
+            "--A", "--C", "--G", "--T", "-A-", "-C-", "-G-", "-T-",
+            "A--", "C--", "G--", "T--", "---" // 125
+    }; // "---" must be the last
+
 
     /**
      * This character represents the amino acid equivalent of a stop codon to cater for
      * situations arising from converting coding DNA to an amino acid sequence.
      */
     public static final char STOP_CHARACTER = '*';
-    public static final int STOP_STATE = 23;
+//    public static final int STOP_STATE = 23;
     public final static String CODON = "codon";
 
     @Override
@@ -85,7 +94,7 @@ public class Codon extends DataType.Base {
         setGeneticCode(geneticCode);
     }
 
-    // ambiguous are currently only --- and ???
+    // ambiguous states > 63
     public int getStateCountAmbiguous(){
         return CODON_TRIPLETS.length;
     }
@@ -220,11 +229,11 @@ public class Codon extends DataType.Base {
      * @return codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
      */
     public final int getCodonState(int ns1, int ns2, int ns3) {
-        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
-                ns3 == NUC_GAP_STATE)
-            return GAP_STATE;
-        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
-            return UNKNOWN_STATE;
+//        if (ns1 == NUC_GAP_STATE || ns2 == NUC_GAP_STATE ||
+//                ns3 == NUC_GAP_STATE)
+//            return GAP_STATE;
+//        if (isAmbiguousCode(ns1) || isAmbiguousCode(ns2) || isAmbiguousCode(ns3))
+//            return UNKNOWN_STATE;
 
 //        int canonicalState = (ns1 * 16) + (ns2 * 4) + ns3; // cannot use BEAST1 nice design
         char nuc1 = geneticCode.getNucleotideChar(ns1);

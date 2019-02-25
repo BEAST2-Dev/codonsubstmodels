@@ -160,7 +160,7 @@ public final class GeneticCode {
     }
 
     /**
-     * 64.
+     * 64, which is also the state count of Codon.
      * Return the length of the code string in the currently used genetic code table,
      * also the number of defined {@link Codon#CODON_TRIPLETS triplets}.
      * @see DataType#getStateCount()
@@ -175,8 +175,11 @@ public final class GeneticCode {
      * @param codeState the character index from the string of
      *                  the currently used genetic code table.
      * @return an Amino Acid character in codeTable.
+     *         if codeState >= codeTable.length, return -.
      */
     public char getAChar(int codeState) {
+        if (codeState >= getCodeTableLength())
+            return DataType.GAP_CHAR;
         return codeTable.charAt(codeState);
     }
 
@@ -309,12 +312,13 @@ public final class GeneticCode {
      * @return Amino Acid state
      */
     public int getAminoAcidState(int codeState) {
-        if (codeState == Codon.UNKNOWN_STATE)
-            return AMINOACID_STATES[Aminoacid.MISSING_CHAR];
-        else if (codeState == Codon.GAP_STATE)
-            return AMINOACID_STATES[Aminoacid.GAP_CHAR];
+//        if (codeState == Codon.UNKNOWN_STATE)
+//            return AMINOACID_STATES[Aminoacid.MISSING_CHAR];
+//        else if (codeState == Codon.GAP_STATE)
+//            return AMINOACID_STATES[Aminoacid.GAP_CHAR];
 
-        return AMINOACID_STATES[getAChar(codeState)];
+        char aa = getAChar(codeState);
+        return AMINOACID_STATES[aa];
     }
 
     /**
@@ -325,10 +329,10 @@ public final class GeneticCode {
      * @return Amino Acid
      */
     public char getAminoAcid(int codeState) {
-        if (codeState == Codon.UNKNOWN_STATE)
-            return Aminoacid.MISSING_CHAR;
-        else if (codeState == Codon.GAP_STATE)
-            return Aminoacid.GAP_CHAR;
+//        if (codeState == Codon.UNKNOWN_STATE)
+//            return Aminoacid.MISSING_CHAR;
+//        else if (codeState == Codon.GAP_STATE)
+//            return Aminoacid.GAP_CHAR;
 
         return getAChar(codeState);
     }
@@ -345,7 +349,7 @@ public final class GeneticCode {
      * treat ? and - as not stop-codon
      */
     public boolean isStopCodon(int codeState) {
-        if (codeState == Codon.UNKNOWN_STATE || codeState == Codon.GAP_STATE)
+        if (codeState >= getCodeTableLength()) // >= 64
             return false;
         return (getAChar(codeState) == Codon.STOP_CHARACTER);
     }

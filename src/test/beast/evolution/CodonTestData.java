@@ -22,6 +22,6 @@ public class CodonTestData {
     }
 
     public static int[] getTestStates() {
-        return new int[]{0, 20, 40, 60, 63, 64, 65};
+        return new int[]{0, 20, 40, 60, 63, 64, 124};
     }
 }

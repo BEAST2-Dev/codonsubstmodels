@@ -35,14 +35,14 @@ public class GeneticCodeTest {
         assertFalse(geneticCode.isStopCodon(63));
 
         //treat ? and - as not stop-codon
-        assertFalse(geneticCode.isStopCodon(Codon.UNKNOWN_STATE));
-        assertFalse(geneticCode.isStopCodon(Codon.GAP_STATE));
+        assertFalse(geneticCode.isStopCodon(64));
+        assertFalse(geneticCode.isStopCodon(120));
     }
 
     @Test
     public void testGetAminoAcid() {
         int[] states = CodonTestData.getTestStates();
-        Character[] aaExpected = new Character[]{'K','P','G','L','F','?','-'};
+        Character[] aaExpected = new Character[]{'K','P','G','L','F','-','-'};
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
             Character aa = geneticCode.getAminoAcid(state);
@@ -55,7 +55,7 @@ public class GeneticCodeTest {
     @Test
     public void testGetAminoAcidCodonState() {
         int[] states = CodonTestData.getTestStates();
-        Character[] aaExpected = new Character[]{'K','P','G','L','F','?','-'};
+        Character[] aaExpected = new Character[]{'K','P','G','L','F','-','-'};
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
             int aaState = geneticCode.getAminoAcidState(state);

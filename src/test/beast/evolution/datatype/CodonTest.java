@@ -79,9 +79,9 @@ public class CodonTest {
         assertEquals("StringToEncoding : ", toList(48, 50, 56), states);
 
         // ambiguous
-        data = "???---";
+        data = "-AA--A---";
         states = codon.stringToEncoding(data);
-        assertEquals("StringToEncoding : ", toList(64, 65), states);
+        assertEquals("StringToEncoding : ", toList(64, 112, 124), states);
     }
 
     @Test
@@ -90,8 +90,8 @@ public class CodonTest {
         assertEquals("StringToEncoding : ", "AAATTT", data);
         data = codon.encodingToString(toList(48, 50, 56));
         assertEquals("StringToEncoding : ", "TAATAGTGA", data);
-        data = codon.encodingToString(toList(64, 65));
-        assertEquals("StringToEncoding : ", "???---", data);
+        data = codon.encodingToString(toList(64, 112, 124));
+        assertEquals("StringToEncoding : ", "-AA--A---", data);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class CodonTest {
 
     @Test(expected = RuntimeException.class)
     public void testGetTripletException2() {
-        String triplet = codon.getTriplet(66);
+        String triplet = codon.getTriplet(125);
     }
 
     @Test
@@ -136,9 +136,9 @@ public class CodonTest {
         System.out.println("StateToAminoAcid : 48, 50, 56 => " + aa);
         assertEquals("StateToAminoAcid : ", "***", aa);
 
-        states = new int[]{64, 65};
+        states = new int[]{64, 124};
         aa = codon.stateToAminoAcid(states);
-        System.out.println("StateToAminoAcid : 64, 65 => " + aa);
-        assertEquals("StateToAminoAcid : ", "?-", aa);
+        System.out.println("StateToAminoAcid : 64, 124 => " + aa);
+        assertEquals("StateToAminoAcid : ", "--", aa);
     }
 }
