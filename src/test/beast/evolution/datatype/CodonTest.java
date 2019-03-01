@@ -79,7 +79,7 @@ public class CodonTest {
         assertEquals("StringToEncoding : ", toList(48, 50, 56), states);
 
         // ambiguous
-        data = "-AA--A---";
+        data = "AA-A-----";
         states = codon.stringToEncoding(data);
         assertEquals("StringToEncoding : ", toList(64, 112, 124), states);
     }
@@ -91,7 +91,7 @@ public class CodonTest {
         data = codon.encodingToString(toList(48, 50, 56));
         assertEquals("StringToEncoding : ", "TAATAGTGA", data);
         data = codon.encodingToString(toList(64, 112, 124));
-        assertEquals("StringToEncoding : ", "-AA--A---", data);
+        assertEquals("StringToEncoding : ", "AA-A-----", data);
     }
 
     @Test
