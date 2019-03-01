@@ -29,6 +29,12 @@ import beast.core.Input;
 import beast.core.util.Log;
 import beast.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Implements DataType for codon,
  * where codon states are also the indices of CODON_TRIPLETS,
@@ -69,15 +75,26 @@ public class Codon extends DataType.Base {
             "GGA", "GGC", "GGG", "GGT", "GTA", "GTC", "GTG", "GTT", // 48
             "TAA", "TAC", "TAG", "TAT", "TCA", "TCC", "TCG", "TCT",
             "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG", "TTT", // 64 here
-            "-AA", "-AC", "-AG", "-AT", "-CA", "-CC", "-CG", "-CT",
-            "-GA", "-GC", "-GG", "-GT", "-TA", "-TC", "-TG", "-TT",
-            "A-A", "A-C", "A-G", "A-T", "C-A", "C-C", "C-G", "C-T",
-            "G-A", "G-C", "G-G", "G-T", "T-A", "T-C", "T-G", "T-T",
             "AA-", "AC-", "AG-", "AT-", "CA-", "CC-", "CG-", "CT-",
-            "GA-", "GC-", "GG-", "GT-", "TA-", "TC-", "TG-", "TT-", // 112
-            "--A", "--C", "--G", "--T", "-A-", "-C-", "-G-", "-T-",
-            "A--", "C--", "G--", "T--", "---" // 125
+            "GA-", "GC-", "GG-", "GT-", "TA-", "TC-", "TG-", "TT-", // 80
+            "A-A", "A-C", "A-G", "A-T", "C-A", "C-C", "C-G", "C-T",
+            "G-A", "G-C", "G-G", "G-T", "T-A", "T-C", "T-G", "T-T", // 96
+            "-AA", "-AC", "-AG", "-AT", "-CA", "-CC", "-CG", "-CT",
+            "-GA", "-GC", "-GG", "-GT", "-TA", "-TC", "-TG", "-TT", // 112
+            "A--", "C--", "G--", "T--", "-A-", "-C-", "-G-", "-T-", // 120
+            "--A", "--C", "--G", "--T", "---" // 125
     }; // "---" must be the last
+
+
+//    public int[] getNoAmbiguousStatesOf(int state) {
+//        if (state < stateCount) {
+//            return new int[]{state};
+//        } else {
+//            String noAmbiguous =
+//
+//
+//        }
+//    }
 
 
     /**
@@ -127,40 +144,93 @@ public class Codon extends DataType.Base {
     public void setGeneticCode(GeneticCode geneticCode) {
         this.geneticCode = geneticCode;
 
-        // number of stop codon
-        int nStopCodon = geneticCode.getStopCodonCount();
         // triplets
         codeLength = 3;
         // fix stateCount to 64 (no ambiguous)
         // the codon states are used as array indices,
         // removing stop codon will break code in frequency and subst model
-        stateCount = 64; //geneticCode.getCodeTableLength() - nStopCodon;
+        stateCount = 64;
+        assert stateCount == geneticCode.getCodeTableLength();
         // use triplets index in CODON_TRIPLETS as codon states
         // Universal: 0-60 triplets, 61-63 *,
         codeMap = StringUtils.concatenateToString(CODON_TRIPLETS);
 
         assert codeMap.length()/codeLength == getStateCountAmbiguous();
 
-        // 64 ???, 65 ---
+        // getStateCountAmbiguous() == 125, last is ---
+        assert getStateCountAmbiguous() == 125;
         mapCodeToStateSet = new int[getStateCountAmbiguous()][];
-        int[] allStates = new int[stateCount];
-        int j = 0;
-        for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
+        // number of stop codon
+        int nStopCodon = geneticCode.getStopCodonCount();
+        List<Integer> allNonStopCodon = new ArrayList<>(); //new int[stateCount-nStopCodon];
+        for (int i = 0; i < 64; i++) {
             mapCodeToStateSet[i] = new int[]{i};
+            // fill in non stop codon
             if (!geneticCode.isStopCodon(i)) {
-                allStates[j] = i;
-                j++;
+                allNonStopCodon.add(i);
             }
         }
-        // ambiguous are currently only --- and ??? represented by its possible states
-        for (int i = geneticCode.getCodeTableLength(); i < getStateCountAmbiguous(); i++) {
-            mapCodeToStateSet[i] = allStates;
-        }
+        assert allNonStopCodon.size() == stateCount - nStopCodon;
+        // --- represented by all possible states
+        mapCodeToStateSet[124] = allNonStopCodon.stream().mapToInt(x->x).toArray();
 
+        // loop exclude ---
+        for (int i = 64; i < 124; i++) {
+            List<Integer> states = new ArrayList<>();
+
+            if (i < 112) {
+                int state; // codon state [0, 63]
+                // one ambiguous
+                for (int n = 0; n < 4; n++) {
+                    if (i < 80) {
+                        // i.e. "AAA", "AAC", "AAG", "AAT"
+                        state = (i - 64) * 4 + n;
+                    } else if (i < 96) {
+                        // i.e. "AAA", "ACA", "AGA", "ATA"
+                        state = (i - 80) % 4 + n * 4 + (int) Math.ceil((i - 80) / 4) * 16;
+                    } else { // i < 112
+                        // i.e. "AAA", "CAA", "GAA", "TAA"
+                        state = i - 96 + n * 16;
+                    }
+                    assert state >= 0 && state < 64;
+                    // no stop codon
+                    if (!geneticCode.isStopCodon(state))
+                        states.add(state);
+                } // end n loop
+
+            } else {
+                // two ambiguous
+                if (i < 116) { // A--
+                    states = Stream.iterate((i-112)*16, n -> n + 1)
+                            .limit(16).collect(Collectors.toList());
+                } else if (i < 120) { // -A-
+                    for (int n = 0; n < 16; n++)
+                        states.add(n + (int) Math.ceil((n / 4)) * 12 + (i-116) * 4);
+                } else { // --A
+                    states = Stream.iterate((i-120), n -> n + 4)
+                            .limit(16).collect(Collectors.toList());
+                }
+                for (int state : states)
+                    assert state >= 0 && state < 64;
+                // safe remove stop codon
+                states.removeIf(geneticCode::isStopCodon);
+            }
+
+            mapCodeToStateSet[i] = states.stream().mapToInt(x->x).toArray();
+
+            // print
+            System.out.print(i + " " + getTriplet(i) + " : " + Arrays.toString(mapCodeToStateSet[i]) + " ");
+            Arrays.stream(mapCodeToStateSet[i]).mapToObj(this::getTriplet).
+                    map(triplet -> triplet + " ").forEach(System.out::print);
+            System.out.println();
+        } // end i loop
+
+
+        // TODO
         // array index is same as frequency array index, but stop codon in the end,
         // value is codon states, no ambiguous
         stateMap = new int[geneticCode.getCodeTableLength()];
-        j = 0;
+        int j = 0;
         int k = geneticCode.getCodeTableLength()- nStopCodon;
         // put stop codon in the last, i.e. 63-65
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {

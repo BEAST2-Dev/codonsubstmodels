@@ -125,14 +125,12 @@
           GAATCAACCCCTATACGCAAAACTAACCCACTAGCAAAACTAATTAACCACTCATTCATT
           GACCTCCCTACCCCGTCCAACATCTCCACATGATGAAACTTCGGCTCACTCCTTGGTGCC
           TGCTTAATCCTTCAAATCACCACAGGGCTATTCCTAGCCATACACTACTCACCTGATGCC
-          TCAACCGCCTTCTCATCAATCGCCCACATCACCCGAGA-
+          TCAACCGCCTTCTCATCAATCGCCCACATCACCCGAGAT
 		</sequence>
 	</data>
 
     <data id="codon.alignment" data="@alignment" dataType="codon"
           geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
-    <!--<data id="codon.alignment" data="@alignment" dataType="codon"-->
-          <!--geneticCode="vertebrateMitochondrial" spec="CodonAlignment" unknownCodeException="false"/>-->
 
     <!--maximum likelihood tree from codeml -->
     <tree spec="beast.util.TreeParser" id="tree"

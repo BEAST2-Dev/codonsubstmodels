@@ -322,23 +322,17 @@ public class CodonAlignment extends Alignment {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
                 int state = codonStates.get(j);
-                // > 63 ambiguous
-                if (state >= geneticCode.getCodeTableLength()) {
-                    // add 0.25 to each nucleotide
-                    for (int pos = 0; pos < 3; pos++) {
+                // may have ambiguous nucleotide (i.e. 'A-T')
+                String triplet = getDataType().encodingToString(new int[]{state});
+
+                for (int pos = 0; pos < 3; pos++) {
+                    // col index = nucState: A,C,G,T,-
+                    int nucState = geneticCode.getNucleotideState(triplet.charAt(pos));
+                    // if -, add 0.25 to each nucleotide
+                    if (nucState >= colMax) {
                         for (int n = 0; n < colMax; n++)
                             freqs[pos][n] += 0.25;
-                    }
-                } else { // 0-63
-                    String triplet = getDataType().encodingToString(new int[]{state});
-                    // position
-                    for (int pos = 0; pos < 3; pos++) {
-                        // col index = nucState: A,C,G,T,-
-                        int nucState = geneticCode.getNucleotideState(triplet.charAt(pos));
-                        // TODO treat any ambiguous as a gap, add 1/4 to each freqs
-                        if (nucState >= colMax)
-                            throw new UnsupportedOperationException("Ambiguous nucleotide (i.e. 'A-T') " +
-                                    "in the triplets are not supported !");
+                    } else {
                         freqs[pos][nucState] += 1;
                     }
                 }
@@ -359,45 +353,37 @@ public class CodonAlignment extends Alignment {
         return freqs;
     }
 
-    // int[][] usage has no total, and usage col has 2 ambiguous states count
+    // int[][] usage has no total, and usage cols > 63 are ambiguous states count
     // return freqs[stateCount]
     protected double[] getCodonFrequenciesByUsage(int[][] usage) {
-        final int stateMax = getGeneticCode().getCodeTableLength(); // 64
+        final int stateMax = getDataType().getStateCount(); // 64
+        assert stateMax == 64;
 
-        // usage[0].length = getDataType().getStateCountAmbiguous(), 66
-        int ambiguous = 0;
-        // j should only loop 2 times
-        for (int j = stateMax; j < usage[0].length; j++) {
-            for (int i = 0; i < usage.length; i++) {
-                ambiguous += usage[i][j];
-            }
-        }
-
+        // include stop codon, same as codeml
         double[] freqs = new double[stateMax];
         double sum = 0;
         // loop through each taxon
-        // include stop codon, same as codeml
-        for (int j = 0; j < stateMax; j++) {
-            for (int i = 0; i < usage.length; i++) {
-                freqs[j] += usage[i][j];
+        for (int i = 0; i < usage.length; i++) {
+            // j is state
+            for (int j = 0; j < usage[0].length; j++) {
+                // j = [0, 63] no ambiguous
+                if (j < stateMax) {
+                    freqs[j] += usage[i][j];
+
+                } else if (usage[i][j] > 0) { // j > 63 are ambiguous
+                    // all non ambiguous states for this ambiguous state
+                    int[] states = getDataType().getStatesForCode(j);
+                    // equally distribute ambiguous into the count of each of non-stop-codon state
+                    for (int s : states)
+                        freqs[s] += (double) usage[i][j] / (double) states.length;
+
+                } // ignore 0 usage
                 sum += usage[i][j];
             }
         }
 
         if (sum == 0)
             throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
-
-        // equally distribute ambiguous into the count of each of non-stop-codon state
-        if (ambiguous > 0) {
-            int stopCodonCount = getGeneticCode().getStopCodonCount();
-            for (int j = 0; j < stateMax; j++) {
-                if (!getGeneticCode().isStopCodon(j)) {
-                    // non-stop-codon state
-                    freqs[j] += (double) ambiguous / (double) (stateMax-stopCodonCount);
-                }
-            }
-            sum += ambiguous;
-        }
 
         // re-normalize
         for (int j = 0; j < freqs.length; j++)
