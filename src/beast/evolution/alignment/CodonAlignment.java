@@ -371,7 +371,7 @@ public class CodonAlignment extends Alignment {
                     freqs[j] += usage[i][j];
 
                 } else if (usage[i][j] > 0) { // j > 63 are ambiguous
-                    // all non ambiguous states for this ambiguous state
+                    // all non-ambiguous states for this ambiguous state
                     int[] states = getDataType().getStatesForCode(j);
                     // equally distribute ambiguous into the count of each of non-stop-codon state
                     for (int s : states)
@@ -418,6 +418,19 @@ public class CodonAlignment extends Alignment {
         String firstTN = taxaNames.get(0);
         String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
 
+        // ambiguous check
+        int ambiguous = 0;
+        for (int i = 0; i < taxaNames.size(); i++) {
+            for (int j = 0; j < colMax; j++) {
+                if (j >= stateMax)
+                    ambiguous += usage[i][j];
+            }
+        }
+
+        // not print ambiguous if no ambiguous
+        if (ambiguous == 0)
+            colMax = stateMax;
+
         // header triplets
         Log.info.print(spaceN);
         for (int j = 0; j < colMax; j++)
@@ -431,7 +444,6 @@ public class CodonAlignment extends Alignment {
         Log.info.println();
 
         // Codon Usage
-        int ambiguous = 0;
         int[] colSums = new int[colMax];
         for (int i = 0; i < taxaNames.size(); i++) {
             Log.info.print(taxaNames.get(i));
@@ -439,8 +451,6 @@ public class CodonAlignment extends Alignment {
             for (int j = 0; j < colMax; j++) {
                 colSums[j] += usage[i][j];
                 Log.info.print("\t" + usage[i][j]);
-                if (j >= stateMax)
-                    ambiguous += usage[i][j];
             }
             Log.info.println();
         }
@@ -452,8 +462,12 @@ public class CodonAlignment extends Alignment {
             Log.info.print("\t" + colSums[j]);
         Log.info.println("\n");
 
-        if (ambiguous > 0)
+        // print warning for ambiguous
+        if (ambiguous > 0) {
             Log.info.println("Warning : find " + ambiguous + " ambiguous triplets in this alignment.");
+            Log.info.println("Please be aware that the code should be non-ambiguous, " +
+                    "a gap may be introduced by the sequencing error or bad alignment.");
+        }
 
     }
 

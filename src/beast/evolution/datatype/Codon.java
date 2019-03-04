@@ -217,12 +217,7 @@ public class Codon extends DataType.Base {
             }
 
             mapCodeToStateSet[i] = states.stream().mapToInt(x->x).toArray();
-
-            // print
-            System.out.print(i + " " + getTriplet(i) + " : " + Arrays.toString(mapCodeToStateSet[i]) + " ");
-            Arrays.stream(mapCodeToStateSet[i]).mapToObj(this::getTriplet).
-                    map(triplet -> triplet + " ").forEach(System.out::print);
-            System.out.println();
+//            printAmbiguousState(i);
         } // end i loop
 
 
@@ -247,6 +242,14 @@ public class Codon extends DataType.Base {
         k = geneticCode.getCodeTableLength()- nStopCodon;
         assert geneticCode.isStopCodon(stateMap[k]);
 
+    }
+
+    // print ambiguous state [64,124] map code to non-ambiguous states
+    public void printAmbiguousState(int state) {
+        Log.info.print(state + " " + getTriplet(state) + " : " + Arrays.toString(mapCodeToStateSet[state]) + " ");
+        Arrays.stream(mapCodeToStateSet[state]).mapToObj(this::getTriplet).
+                map(triplet -> triplet + " ").forEach(Log.info::print);
+        Log.info.println();
     }
 
     public int getCodonState(int stateMapIndex) {

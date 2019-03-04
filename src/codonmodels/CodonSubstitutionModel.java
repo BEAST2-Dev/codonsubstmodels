@@ -55,7 +55,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     protected byte[] rateMap;
 
     protected Codon codonDataType;
-    protected GeneticCode geneticCode;
+//    protected GeneticCode geneticCode; // get from codon
     protected int rateCount;
 
     public CodonSubstitutionModel() {
@@ -72,8 +72,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         if (! (dataType instanceof Codon) )
             throw new IllegalArgumentException("Codon data type is required !");
         this.codonDataType = (Codon) dataType;
-
-        this.geneticCode = codonDataType.getGeneticCode();
 
         //====== init states and rates ======
         updateMatrix = true;
@@ -99,10 +97,10 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         relativeRates = new double[rateCount];
         storedRelativeRates = new double[rateCount];
 
-        rateMap = constructRateMap(rateCount, nrOfStates, codonDataType, geneticCode);
+        rateMap = constructRateMap(rateCount, nrOfStates, codonDataType);
 
         if (verboseInput.get())
-            printRateMap(); // debug
+            printRateMap(codonDataType); // debug
 
     }
 
@@ -131,12 +129,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      *
      * The map is in an array whose length = nrOfStates * (nrOfStates - 1).
      * @param rateCount  get from {@link #getRateCount(int)} getRateCount}.
-     * @param stateCount  nrOfStates
+     * @param stateCount  nrOfStates 64
      * @param codon  {@link Codon Codon}
-     * @param geneticCode  {@link GeneticCode#GENETIC_CODE_NAMES GENETIC_CODE_NAMES}
      * @return
      */
-    protected byte[] constructRateMap(int rateCount, int stateCount, Codon codon, GeneticCode geneticCode)	{
+    protected byte[] constructRateMap(int rateCount, int stateCount, Codon codon)	{
         byte rateClass;
         byte[] rateMap = new byte[rateCount];
 
@@ -145,11 +142,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         for (int i = 0; i < stateCount; i++) {
 
             // i1, j1, k1, aa1
-            int[] ids1 = getCodonStatesForRateClass(i, codon, geneticCode);
+            int[] ids1 = getCodonStatesForRateClass(i, codon);
 
             for (int j = 0; j < i; j++) {
                 // i2, j2, k2, aa2
-                int[] ids2 = getCodonStatesForRateClass(j, codon, geneticCode);
+                int[] ids2 = getCodonStatesForRateClass(j, codon);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
                 rateMap[i * (stateCount - 1) + j] = rateClass;
@@ -157,7 +154,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             }
             for (int j = i + 1; j < stateCount; j++) {
                 // i2, j2, k2, aa2
-                int[] ids2 = getCodonStatesForRateClass(j, codon, geneticCode);
+                int[] ids2 = getCodonStatesForRateClass(j, codon);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
                 rateMap[i * (stateCount - 1) + j - 1] = rateClass;
@@ -168,7 +165,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     // return i1, j1, k1, aa1, given codonState
-    private int[] getCodonStatesForRateClass(int codonState, Codon codon, GeneticCode geneticCode) {
+    private int[] getCodonStatesForRateClass(int codonState, Codon codon) {
         int i1, j1, k1, cs1, aa1;
 //        int codonState = codon.getCodonState(stateMapIndex);
         int[] nucStates  = codon.getTripletNucStates(codonState);
@@ -177,6 +174,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         k1 = nucStates[2];
 
         cs1 = codon.getCodonState(i1, j1, k1);
+
+        GeneticCode geneticCode = codon.getGeneticCode();
         aa1 = geneticCode.getAminoAcidState(cs1);
         return new int[]{i1, j1, k1, aa1};
     }
@@ -225,7 +224,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     @Override
     protected void setupRelativeRates() {
-        throw new UnsupportedOperationException("setupRelativeRates needs to override in codon subst models !");
+        throw new UnsupportedOperationException("setupRelativeRates needs to be overridden " +
+                "in the child class of CodonSubstitutionModel !");
     }
 
 
@@ -242,10 +242,12 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      *		2: synonymous transversion
      *		3: non-synonymous transition
      *		4: non-synonymous transversion
+     * @param codon
      */
-    protected void printRateMap() {
+    protected void printRateMap(Codon codon) {
         byte rateClass;
         int stateCount = nrOfStates;
+        GeneticCode geneticCode = codon.getGeneticCode();
 
         Log.info.println("\n============ Rate Matrix ============");
         Log.info.println("  0: codon changes in more than one codon position (or stop codons)");
@@ -256,7 +258,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         Log.info.print("\t");
         for (int j = 0; j < stateCount; j++) {
             // i2, j2, k2, aa2
-            int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+            int[] ids2 = getCodonStatesForRateClass(j, codon);
 
             Log.info.print("\t" + geneticCode.getNucleotideChar(ids2[0]));
             Log.info.print(geneticCode.getNucleotideChar(ids2[1]));
@@ -266,7 +268,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
         Log.info.print("\t");
         for (int j = 0; j < stateCount; j++) {
-            int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+            int[] ids2 = getCodonStatesForRateClass(j, codon);
             Log.info.print("\t" + geneticCode.getAminoAcidChar(ids2[3]));
         }
         Log.info.println();
@@ -274,7 +276,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         for (int i = 0; i < stateCount; i++) {
 
             // i1, j1, k1, aa1
-            int[] ids1 = getCodonStatesForRateClass(i, codonDataType, geneticCode);
+            int[] ids1 = getCodonStatesForRateClass(i, codon);
 
             Log.info.print(geneticCode.getNucleotideChar(ids1[0]));
             Log.info.print(geneticCode.getNucleotideChar(ids1[1]));
@@ -283,7 +285,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             // lower triangle
             for (int j = 0; j < i; j++) {
                 // i2, j2, k2, aa2
-                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+                int[] ids2 = getCodonStatesForRateClass(j, codon);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
                 Log.info.print("\t" + rateClass);
@@ -293,7 +295,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             // upper triangle
             for (int j = i + 1; j < stateCount; j++) {
                 // i2, j2, k2, aa2
-                int[] ids2 = getCodonStatesForRateClass(j, codonDataType, geneticCode);
+                int[] ids2 = getCodonStatesForRateClass(j, codon);
 
                 rateClass = getRateClass(ids1[0], ids1[1], ids1[2], ids2[0], ids2[1], ids2[2], ids1[3], ids2[3]);
                 Log.info.print("\t" + rateClass);
