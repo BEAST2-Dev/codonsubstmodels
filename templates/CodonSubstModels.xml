@@ -110,7 +110,7 @@
         <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Partitions" tiptext="Codon Data Partitions"
             path='distribution/distribution[id="likelihood"]/distribution/data'
             hasPartitions="none" icon='2220.png.x' forceExpansion='FALSE'
-            type='beast.evolution.alignment.Alignment'
+            type='beast.evolution.alignment.CodonAlignment'
         />
 		<mergepoint id='aux-partitions-panels'/>
 

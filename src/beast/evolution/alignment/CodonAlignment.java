@@ -171,7 +171,7 @@ public class CodonAlignment extends Alignment {
                 taxaNames.add(seq.getTaxon());
 
                 if (seq.uncertain)
-                    throw new UnsupportedOperationException("Uncertain sequence is not available in this version !");
+                    throw new UnsupportedOperationException("Uncertain feature in sequence is not supported in this version !");
 
                     //TODO how to deal with uncertain? seq here is Nucleotide sequences not codons.
 //                tipLikelihoods.add(seq.getLikelihoods());
