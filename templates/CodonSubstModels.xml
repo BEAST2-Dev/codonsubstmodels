@@ -1,6 +1,6 @@
 <beast version='2.0'
        namespace='beast.app.beauti:beast.core:beast.evolution.branchratemodel
-       :beast.evolution.speciation:beast.evolution.tree.coalescent:beast.core.util
+       :beast.evolution.speciation:beast.evolution.tree.coalescent:beast.core.util:beast.util
        :beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
        :beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
        :beast.evolution.alignment:beast.evolution.datatype:codonmodels'
@@ -107,10 +107,10 @@
     >
         <!--disableMenus='Mode'-->
 
-        <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Partitions" tiptext="Codon Data Partitions"
+        <panel spec='BeautiPanelConfig' panelname="Partitions" tiptext="Codon Data Partitions"
             path='distribution/distribution[id="likelihood"]/distribution/data'
             hasPartitions="none" icon='2220.png.x' forceExpansion='FALSE'
-            type='beast.evolution.alignment.CodonAlignment'
+            type='beast.evolution.alignment.Alignment'
         />
 		<mergepoint id='aux-partitions-panels'/>
 
@@ -121,45 +121,45 @@
         />
 		<mergepoint id='aux-tipdates-panels'/>
 
-        <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Site Model"
+        <panel spec='BeautiPanelConfig' panelname="Site Model"
                tiptext="Site model and codon substitution model specifications"
                path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
         />
 
 		<mergepoint id='aux-sitemodel-panels'/>
 
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
+		<panel spec='BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
             path='branchRateModel'
             hasPartitions="ClockModel" icon='4.png.x' forceExpansion='TRUE'
         />
 		<mergepoint id='aux-clockmodel-panels'/>
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Initialization" tiptext="Initial state"
+		<panel spec='BeautiPanelConfig' panelname="Initialization" tiptext="Initial state"
             path='state/stateNode'
             hasPartitions="none" icon='6.png.x' forceExpansion='TRUE_START_COLLAPSED'
             isVisible='false'
         />
 		<mergepoint id='aux-initilisation-panels'/>
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Starting tree" tiptext="Starting tree"
+		<panel spec='BeautiPanelConfig' panelname="Starting tree" tiptext="Starting tree"
             path='init'
             hasPartitions="none" icon='6.png.x' forceExpansion='TRUE'
             isVisible='false'
         />
 
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Priors" tiptext="Other priors"
+		<panel spec='BeautiPanelConfig' panelname="Priors" tiptext="Other priors"
             path='distribution/distribution[id="prior"]/distribution'
             hasPartitions="none" icon='7.png.x' forceExpansion='TRUE_START_COLLAPSED'
             type='beast.core.Distribution'
         />
 		<mergepoint id='aux-priors-panels'/>
 
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Operators" tiptext="MCMC Operator details"
+		<panel spec='BeautiPanelConfig' panelname="Operators" tiptext="MCMC Operator details"
             path='operator'
             hasPartitions="none" icon='8.png.x' forceExpansion='TRUE_START_COLLAPSED'
             isVisible='false' buttonStatus='ADD_ONLY'
         />
 		<mergepoint id='aux-operators-panels'/>
 
-		<panel spec='beast.app.beauti.BeautiPanelConfig' panelname="MCMC" tiptext="MCMC parameters"
+		<panel spec='BeautiPanelConfig' panelname="MCMC" tiptext="MCMC parameters"
             path=''
             hasPartitions="none" icon='9.png.x' forceExpansion='TRUE'
         />
@@ -307,7 +307,7 @@
         <subtemplate id='RandomTree' class='beast.evolution.tree.RandomTree' mainid='RandomTree.t:$(n)'>
 <![CDATA[
             <tree spec='beast.evolution.tree.RandomTree' id='RandomTree.t:$(n)' estimate='false' initial="@Tree.t:$(n)">
-                <taxa idref='data'/>
+                <taxa idref='$(n)'/>
                 <populationModel id='ConstantPopulation0.t:$(n)' spec='ConstantPopulation'>
             		<popSize id='randomPopSize.t:$(n)' spec='parameter.RealParameter' value='1'/>
 	            </populationModel>
