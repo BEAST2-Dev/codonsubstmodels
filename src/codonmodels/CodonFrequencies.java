@@ -4,6 +4,7 @@ package codonmodels;
 import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
+import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
@@ -25,8 +26,9 @@ public class CodonFrequencies extends Frequencies {
     public CodonFrequencies() {
         estimateInput.setValue(false, this);
 //        estimateInput.setRule(Input.Validate.FORBIDDEN);
-//        frequenciesInput.setRule(Input.Validate.OPTIONAL);
-//        dataInput.setRule(Input.Validate.REQUIRED); // only use internally
+        // change freqs rule from XOR to OPT
+        frequenciesInput.setRule(Input.Validate.OPTIONAL);
+        dataInput.setRule(Input.Validate.REQUIRED); // only use internally
     }
 
     @Override
@@ -38,22 +40,27 @@ public class CodonFrequencies extends Frequencies {
 
     @Override
     protected void update() {
+        CodonAlignment codonAlignment = getCodonAlignment();
+        Codon codonDataType = getDataType(codonAlignment);
+        final int codonStateCount = codonDataType.getStateCount();
+
+        assert codonStateCount == 64;
+
         if (frequenciesInput.get() != null) {
+            // 64 codon frequencies (separated by white space) are in fixed order AAA AAC AAG AAT ... TTA TTC TTG TTT
+            RealParameter freqsInput = frequenciesInput.get();
+            assert freqsInput.getDimension() == codonStateCount;
 
-            // if user specified, parse frequencies from space delimited string
-            freqs = new double[frequenciesInput.get().getDimension()];
-
+            freqs = new double[freqsInput.getDimension()];
+            double sum = 0;
             for (int i = 0; i < freqs.length; i++) {
-                freqs[i] = frequenciesInput.get().getValue(i);
+                freqs[i] = freqsInput.getValue(i);
+                sum += freqs[i];
             }
+            if (Math.round(sum * 1.0e6) / 1.0e6 != 1)
+                throw new IllegalArgumentException("The codon frequencies not sum up to 1 ! " + sum);
 
         } else {
-            CodonAlignment codonAlignment = getCodonAlignment();
-            Codon codonDataType = getDataType(codonAlignment);
-            final int codonStateCount = codonDataType.getStateCount();
-
-            assert codonStateCount == 64;
-
             final GeneticCode geneticCode = codonDataType.getGeneticCode();
             final int stopCodonCount = geneticCode.getStopCodonCount();
             Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
