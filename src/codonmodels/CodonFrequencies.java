@@ -57,8 +57,8 @@ public class CodonFrequencies extends Frequencies {
                 freqs[i] = freqsInput.getValue(i);
                 sum += freqs[i];
             }
-            if (Math.round(sum * 1.0e6) / 1.0e6 != 1)
-                throw new IllegalArgumentException("The codon frequencies not sum up to 1 ! " + sum);
+            if (Math.round(sum * 1.0e6) / 1.0e6 != 1) // see also Frequencies.initAndValidate
+                throw new IllegalArgumentException("The codon frequencies do not sum up to 1 ! " + sum);
 
         } else {
             final GeneticCode geneticCode = codonDataType.getGeneticCode();
@@ -103,13 +103,13 @@ public class CodonFrequencies extends Frequencies {
 
             Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
             Log.info.println("Initial values to codon frequencies = " +
-                    Arrays.toString(StringUtils.roundDoubleArrays(freqs, 5)));
+                    Arrays.toString(StringUtils.roundDoubleArrays(freqs, 8)));
 
 //        RealParameter frequencies = new RealParameter(values);
 //        frequencies.lowerValueInput.setValue(0.0, frequencies);
 //        frequencies.upperValueInput.setValue(1.0, frequencies);
 //        frequenciesInput.setValue(frequencies, this);
-        }
+        } // end frequenciesInput.get() != null
         needsUpdate = false;
     }
 
