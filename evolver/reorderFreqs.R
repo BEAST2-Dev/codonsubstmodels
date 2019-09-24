@@ -4,7 +4,7 @@
 # AAA AAC AAG AAT ... TTA TTC TTG TTT
 
 library(tidyverse)
-# PAML
+# freqs in PAML order
 frequencies=
 "0.00983798  0.01745548  0.00222048  0.01443315
 0.00844604  0.01498576  0.00190632  0.01239105
@@ -23,25 +23,36 @@ frequencies=
 0.02730964  0.04845534  0.00616393  0.04006555
 0.01205015  0.02138052  0.00271978  0.01767859"
 
+# split string to a char vector 
 freqs = gsub("(\\n+)|(\\r+)|(\\s+)", " ", frequencies) %>% strsplit(" ") %>% unlist
 
-# PAML order
+# create triplets in PAML order
 paml = c("T","C","A","G")
 third = rep(paml, 16)
 second = rep(c(rep("T", 4), rep("C", 4),rep("A", 4),rep("G", 4)),4)
 first = c(rep("T", 16), rep("C", 16),rep("A", 16),rep("G", 16))
 tri = paste0(first, second, third)
 
-map = tibble(triplet=tri, freqs=freqs)
-map
+# create a 2-column (triplet, freqs) mapping between triplets and freqs 
+map.paml = tibble(triplet=tri, freqs=freqs)
+map.paml 
+# print triplets in PAML order
+paste(map.paml$triplet, collapse=", ")
 
-# BEAST order
-map = map %>% arrange(triplet)
+# reorder triplets to BEAST order
+map.beast = map.paml %>% arrange(triplet)
+# print triplets in BEAST order
+paste(map.beast$triplet, collapse=", ")
 #"AAA","AAC","AAG","AAT","ACA","ACC","ACG","ACT","AGA","AGC","AGG","AGT","ATA","ATC","ATG","ATT",
 #"CAA","CAC","CAG","CAT","CCA","CCC","CCG","CCT","CGA","CGC","CGG","CGT","CTA","CTC","CTG","CTT",
 #"GAA","GAC","GAG","GAT","GCA","GCC","GCG","GCT","GGA","GGC","GGG","GGT","GTA","GTC","GTG","GTT",
 #"TAA","TAC","TAG","TAT","TCA","TCC","TCG","TCT","TGA","TGC","TGG","TGT","TTA","TTC","TTG","TTT"
-#paste(map$triplet, collapse=" ")
-paste(map$freqs, collapse=" ")
+
+# copy this freqs in BEAST order to XML
+paste(map.beast$freqs, collapse=" ")
+
+###### test
+filter(map.paml, triplet %in% c("TCT","ACT","GGA")) %>% arrange(triplet) == 
+filter(map.beast, triplet %in% c("TCT","ACT","GGA")) %>% arrange(triplet)
 
 
