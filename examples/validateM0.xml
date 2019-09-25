@@ -1,0 +1,145 @@
+<beast version="2.0" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
+
+    <data id="alignment" dataType="nucleotide">
+        [SeqsHere]
+    </data>
+
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="universal" spec="CodonAlignment"/>
+
+    <parameter id="m0.omega" value="[OmegaHere]"/>
+    <parameter id="m0.kappa" value="[KappaHere]"/>
+    <parameter id="clockRate" name="stateNode">1.0</parameter>
+    <parameter id="birthRate" name="stateNode">1.0</parameter>
+
+    <substModel spec="codonmodels.M0Model" id="m0">
+        <omega idref="m0.omega"/>
+        <kappa idref="m0.kappa"/>
+        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies"
+                     frequencies="0.00384245 0.03020593 0.02497593 0.01702419 0.00305010 0.02397721 0.01982568 0.01351366
+                     0.00169545 0.01332811 0.01102042 0.00751178 0.00355278 0.02792876 0.02309304 0.01574077 0.00388819
+                     0.03056552 0.02527326 0.01722686 0.00308642 0.02426265 0.02006170 0.01367453 0.00171563 0.01348678
+                     0.01115161 0.00760121 0.00359507 0.02826125 0.02336796 0.01592816 0.00616393 0.04845534 0.04006555
+                     0.02730964 0.00489288 0.03846344 0.03180369 0.02167816 0.00271978 0.02138052 0.01767859 0.01205015
+                     0.00569924 0.04480239 0.03704508 0.02525082 0 0.01887870 0 0.01064012 0.00190632 0.01498576 0.01239105
+                     0.00844604 0 0.00833007 0.00688776 0.00469486 0.00222048 0.01745548 0.01443315 0.00983798" >
+            <data idref="codon.alignment"/>
+        </frequencies>
+    </substModel>
+
+    <!-- site model                                                              -->
+    <siteModel spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+        <substModel idref="m0"/>
+    </siteModel>
+
+    <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
+        <data name="data" idref="codon.alignment"/>
+        <tree name="tree" idref="tree"/>
+        <siteModel name="siteModel" idref="siteModel"/>
+        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
+    </distribution>
+
+    <tree spec='beast.util.ClusterTree' id='tree' clusterType='upgma'>
+        <!--<input name='taxa' idref='codon.alignment'/>-->
+        <data name='taxa' idref='alignment'/>
+    </tree>
+
+
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.math.distributions.Normal</map>
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+    <run spec="MCMC" id="mcmc" chainLength="10000000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="1000000">
+            <input name='stateNode' idref='m0.omega'/>
+            <input name='stateNode' idref='m0.kappa'/>
+            <input name='stateNode' idref='tree'/>
+            <input name='stateNode' idref='birthRate'/>
+        </state>
+
+        <distribution spec="util.CompoundDistribution" id="posterior">
+            <distribution id="prior" spec="util.CompoundDistribution">
+                <distribution id="YuleModel" spec="beast.evolution.speciation.YuleModel" birthDiffRate="@birthRate" tree="@tree"/>
+
+                <prior id="OmegaPrior" name="distribution" x="@m0.omega">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <!-- m -2  s 1   "1.9064e-02" "1.3534e-01" "9.6075e-01" -->
+                        <parameter id="RealParameter.1" estimate="false" name="M">[OmegaLogNormalM]</parameter>
+                        <parameter id="RealParameter.2" estimate="false" name="S">[OmegaLogNormalS]</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="KappaPrior" name="distribution" x="@m0.kappa">
+                    <LogNormal id="LogNormalDistributionModel.1" name="distr">
+                        <!-- m 2  s 1   "1.0408e+00" "7.3891e+00" "5.2455e+01" -->
+                        <parameter id="RealParameter.3" estimate="false" name="M">[KappaLogNormalM]</parameter>
+                        <parameter id="RealParameter.4" estimate="false" name="S">[KappaLogNormalM]</parameter>
+                    </LogNormal>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+                <distribution idref="treeLikelihood"/>
+            </distribution>
+        </distribution>
+
+        <!-- fix rate to 1
+        <operator id="StrictClockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.75" weight="1.0"/>
+
+        <operator id="strictClockUpDownOperator" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">
+            <up idref="clockRate"/>
+            <down idref="tree"/>
+        </operator>
+        -->
+
+        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.5" />
+
+        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="3"/>
+
+        <!-- fix birthRate to 1-->
+        <!--<operator id="birthRateScaler" spec="ScaleOperator" parameter="@birthRate" scaleFactor="0.75" weight="3.0"/>-->
+
+        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>
+
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>
+
+        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
+
+        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>
+
+        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>
+
+        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>
+
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>
+
+        <logger logEvery="10000" fileName="[FileNameHere].log" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="YuleModel"/>
+            <log idref="m0.omega"/>
+            <log idref="m0.kappa"/>
+            <log idref="clockRate"/>
+            <log idref="birthRate"/>
+        </logger>
+
+        <logger logEvery="1000000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="m0.omega"/>
+            <log idref="m0.kappa"/>
+        </logger>
+
+        <!--<logger logEvery="2000" fileName="test.m0.trees" mode="tree">-->
+            <!--<log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>-->
+        <!--</logger>-->
+    </run>
+
+</beast>

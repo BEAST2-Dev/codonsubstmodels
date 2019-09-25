@@ -193,14 +193,16 @@
                 </distribution>
                 <prior id="OmegaPrior" name="distribution" x="@m0.omega">
                     <LogNormal id="LogNormalDistributionModel.0" name="distr">
-                        <parameter id="RealParameter.1" estimate="false" name="M">-3</parameter>
-                        <parameter id="RealParameter.2" estimate="false" name="S">1.25</parameter>
+                        <!-- "1.9064e-02" "1.3534e-01" "9.6075e-01" -->
+                        <parameter id="RealParameter.1" estimate="false" name="M">-2</parameter>
+                        <parameter id="RealParameter.2" estimate="false" name="S">1</parameter>
                     </LogNormal>
                 </prior>
                 <prior id="KappaPrior" name="distribution" x="@m0.kappa">
                     <LogNormal id="LogNormalDistributionModel.1" name="distr">
-                        <parameter id="RealParameter.3" estimate="false" name="M">3</parameter>
-                        <parameter id="RealParameter.4" estimate="false" name="S">1.25</parameter>
+                        <!-- 2 to 40  "1.0408e+00" "7.3891e+00" "5.2455e+01" -->
+                        <parameter id="RealParameter.3" estimate="false" name="M">2</parameter>
+                        <parameter id="RealParameter.4" estimate="false" name="S">1</parameter>
                     </LogNormal>
                 </prior>
                 <prior id="PopSizePrior" name="distribution" x="@popSize">
@@ -235,11 +237,11 @@
 
         <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>
 
-        <!--<operator id="Narrow" spec="Exchange" tree="@tree" weight="50.0"/>-->
+        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>
 
-        <!--<operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="50.0"/>-->
+        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>
 
-        <!--<operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="50.0"/>-->
+        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>
 
         <logger logEvery="2000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
@@ -247,18 +249,16 @@
             <log idref="prior"/>
             <log idref="coalescent"/>
             <log idref="popSize"/>
-            <!--<log idref="m0"/> &lt;!&ndash;synonymousRate&ndash;&gt;-->
             <log idref="m0.omega"/>
             <log idref="m0.kappa"/>
             <log idref="clockRate"/>
         </logger>
 
-        <logger logEvery="50000">
+        <logger logEvery="10000">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>
             <log idref="popSize"/>
-            <!--<log idref="m0"/>-->
             <log idref="m0.omega"/>
             <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>
             <log idref="m0.kappa"/>
