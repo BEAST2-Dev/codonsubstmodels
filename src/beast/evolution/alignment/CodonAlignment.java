@@ -268,6 +268,11 @@ public class CodonAlignment extends Alignment {
         }
     }
 
+    @Override
+    public int getTaxonCount() {
+        return alignment.getTaxonCount();
+    }
+
     /**
      * @return number of sites
      */
