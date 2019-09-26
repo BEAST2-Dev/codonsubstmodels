@@ -6,7 +6,6 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
@@ -40,7 +39,7 @@ public class CodonFrequencies extends Frequencies {
 
     @Override
     protected void update() {
-        CodonAlignment codonAlignment = getCodonAlignment();
+        CodonAlignment codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
         Codon codonDataType = getDataType(codonAlignment);
         final int codonStateCount = codonDataType.getStateCount();
 
@@ -140,13 +139,6 @@ public class CodonFrequencies extends Frequencies {
         for (int i = 0; i < freqs.length; i++)
             freqs[i] = freqs[i] / sum;
         return freqs;
-    }
-
-    public CodonAlignment getCodonAlignment() {
-        Alignment alignment = dataInput.get();
-        if (! (alignment instanceof CodonAlignment) )
-            throw new IllegalArgumentException("Codon alignment is required by CodonFrequencies !");
-        return (CodonAlignment) alignment;
     }
 
     public Codon getDataType(CodonAlignment codonAlignment) {

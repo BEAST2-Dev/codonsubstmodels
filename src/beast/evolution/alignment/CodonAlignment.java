@@ -126,6 +126,7 @@ public class CodonAlignment extends Alignment {
         }
 
         // after checking siteWeightsInput
+        // include calcPatterns and setup Ascertainment
         sanityCheckCalcPatternsSetUpAscertainment(true);
 
         Log.info.println("\nGenetic code is " + getGeneticCode().getDescription());
@@ -268,11 +269,6 @@ public class CodonAlignment extends Alignment {
         }
     }
 
-    @Override
-    public int getTaxonCount() {
-        return alignment.getTaxonCount();
-    }
-
     /**
      * @return number of sites
      */
@@ -285,9 +281,21 @@ public class CodonAlignment extends Alignment {
         if (originalType instanceof Nucleotide) {
             count /= 3;
         }
-
         return count;
     }
+
+    /**
+     * Util to cast Alignment to CodonAlignment
+     * @param alignment
+     * @return
+     */
+    public static CodonAlignment toCodonAlignment(Alignment alignment) {
+        if (! (alignment instanceof CodonAlignment) )
+            throw new IllegalArgumentException("Cannot parse to CodonAlignment class !");
+        return (CodonAlignment) alignment;
+    }
+
+    //============ stats ============
 
     /**
      * The usage (counts) table of triplets
