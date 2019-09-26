@@ -33,7 +33,6 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
-import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 
 import java.lang.reflect.InvocationTargetException;
@@ -65,13 +64,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     @Override
     public void initAndValidate() {
         this.frequencies = frequenciesInput.get();
+        if (! (frequencies instanceof CodonFrequencies) )
+            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
 
-        CodonAlignment alignment = getCodonFrequencies().getCodonAlignment();
-        DataType dataType = alignment.getDataType();
-
-        if (! (dataType instanceof Codon) )
-            throw new IllegalArgumentException("Codon data type is required !");
-        this.codonDataType = (Codon) dataType;
+        CodonAlignment alignment = getCodonAlignment((CodonFrequencies) frequencies);
+        this.codonDataType = alignment.getDataType();
 
         //====== init states and rates ======
         updateMatrix = true;
@@ -79,7 +76,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         nrOfStates = freqs.length;
 
         if (verboseInput.get())
-            alignment.printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
+            ((CodonFrequencies) frequencies).printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
 
         try {
             eigenSystem = createEigenSystem();
@@ -104,11 +101,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     }
 
-    public CodonFrequencies getCodonFrequencies() {
-        Frequencies frequencies = frequenciesInput.get();
-        if (! (frequencies instanceof CodonFrequencies) )
-            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
-        return (CodonFrequencies) frequencies;
+
+    protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
+        return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());
     }
 
     //TODO move to GeneralSubstitutionModel ?

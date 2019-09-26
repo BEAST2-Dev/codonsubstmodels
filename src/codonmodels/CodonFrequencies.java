@@ -12,6 +12,7 @@ import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.Frequencies;
 import beast.util.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 
 
@@ -21,6 +22,12 @@ public class CodonFrequencies extends Frequencies {
 
     final public Input<String> piInput = new Input<>("pi", "The assumption of equilibrium codon frequencies PI, " +
             "including equal, F1X4, F3X4 (default), and F60/F61", "F3X4");
+
+    CodonAlignment codonAlignment;
+    Codon codonDataType; // contain selected genetic code
+    int codonStateCount;
+    GeneticCode geneticCode;
+    int stopCodonCount;
 
     public CodonFrequencies() {
         estimateInput.setValue(false, this);
@@ -32,18 +39,30 @@ public class CodonFrequencies extends Frequencies {
 
     @Override
     public void initAndValidate() {
+        this.codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
+        this.codonDataType = codonAlignment.getDataType();
+        codonStateCount = codonDataType.getStateCount();
+        assert codonStateCount == 64;
+
+        geneticCode = codonDataType.getGeneticCode();
+        stopCodonCount = geneticCode.getStopCodonCount();
+        Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
+                " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
+
+        // this includes update()
         super.initAndValidate();
+
+        int[][] usage = codonAlignment.getCodonUsage();
+        // freqs.length = 64
+        double[] freqs = getCodonFrequenciesByUsage(usage);
+        printCodonFrequencies(freqs, "Observed codon frequencies by usage");
+        Log.info.println();
 
         Log.info.println("Set frequencies dimension = " + getFreqs().length);
     }
 
     @Override
     protected void update() {
-        CodonAlignment codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
-        Codon codonDataType = getDataType(codonAlignment);
-        final int codonStateCount = codonDataType.getStateCount();
-
-        assert codonStateCount == 64;
 
         if (frequenciesInput.get() != null) {
             // 64 codon frequencies (separated by white space) are in fixed order AAA AAC AAG AAT ... TTA TTC TTG TTT
@@ -60,10 +79,6 @@ public class CodonFrequencies extends Frequencies {
                 throw new IllegalArgumentException("The codon frequencies do not sum up to 1 ! " + sum);
 
         } else {
-            final GeneticCode geneticCode = codonDataType.getGeneticCode();
-            final int stopCodonCount = geneticCode.getStopCodonCount();
-            Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
-                    " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
 
             // codon states exclude stop codon, freqs should be stateCount
             if ("equal".equals(piInput.get())) {
@@ -79,15 +94,16 @@ public class CodonFrequencies extends Frequencies {
             } else if ("F1X4".equals(piInput.get())) {
 
                 double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
-                freqs = estimateFrequencies(freqsCPB[3], freqsCPB[3], freqsCPB[3], codonDataType);
+                freqs = estimateFrequencies(freqsCPB[3], freqsCPB[3], freqsCPB[3]);
 
             } else if ("F3X4".equals(piInput.get())) {
 
                 double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
-                freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2], codonDataType);
+                freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2]);
 
             } else if ("F60/F61".equals(piInput.get())) {
-                freqs = codonAlignment.getCodonFrequencies();
+                int[][] usage = codonAlignment.getCodonUsage();
+                freqs = getCodonFrequenciesByUsage(usage);
 
             } else {
                 throw new IllegalArgumentException("Invalid input of pi = " + piInput.get());
@@ -113,14 +129,10 @@ public class CodonFrequencies extends Frequencies {
     }
 
     // F1X4 (nucFreq1==nucFreq2=nucFreq3) or F3X4, nuc order: A,C,G,T
-    protected double[] estimateFrequencies(double[] nucFreq1, double[] nucFreq2, double[] nucFreq3,
-                                           Codon codonDataType) {
+    protected double[] estimateFrequencies(double[] nucFreq1, double[] nucFreq2, double[] nucFreq3) {
         GeneticCode geneticCode = codonDataType.getGeneticCode();
-        int stateCount = codonDataType.getStateCount(); // 64
 
-        assert stateCount==64;
-
-        double[] freqs = new double[stateCount];
+        double[] freqs = new double[codonStateCount];
         double sum = 0;
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (! geneticCode.isStopCodon(i)) {
@@ -141,8 +153,70 @@ public class CodonFrequencies extends Frequencies {
         return freqs;
     }
 
-    public Codon getDataType(CodonAlignment codonAlignment) {
-        return codonAlignment.getDataType();
+    //============ stats ============
+
+    /**
+     * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT), excluding stop codon.
+     * @param usage i is taxon, j is state. Not include totals, and for j cols > 63 are ambiguous states count.
+     * @return length-trimmed 1d frequency array freqs[stateCount] excluding stop codon.
+     * dimension = 60/61
+     */
+    public double[] getCodonFrequenciesByUsage(int[][] usage) {
+        final int stateMax = codonStateCount; // 64
+//        assert stateMax == 64;
+
+        // include stop codon, same as codeml
+        double[] freqs = new double[stateMax];
+        double sum = 0;
+        // loop through each taxon
+        for (int i = 0; i < usage.length; i++) {
+            // j is state
+            for (int j = 0; j < usage[0].length; j++) {
+                // j = [0, 63] no ambiguous
+                if (j < stateMax) {
+                    freqs[j] += usage[i][j];
+
+                } else if (usage[i][j] > 0) { // j > 63 are ambiguous
+                    // all non-ambiguous states for this ambiguous state
+                    int[] states = codonDataType.getStatesForCode(j);
+                    // equally distribute ambiguous into the count of each of non-stop-codon state
+                    for (int s : states)
+                        freqs[s] += (double) usage[i][j] / (double) states.length;
+
+                } // ignore 0 usage
+                sum += usage[i][j];
+            }
+        }
+
+        if (sum == 0)
+            throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
+
+        // re-normalize
+        for (int j = 0; j < freqs.length; j++)
+            freqs[j] = freqs[j] / sum;
+        return freqs;
+    }
+
+
+    /**
+     * Print codon frequencies in the fixed order (AAA AAC AAG AAT ... TTT)
+     * @param frequencies
+     * @param title
+     */
+    public void printCodonFrequencies(double[] frequencies, String title) {
+        Log.info.println("\n============ " + title + " (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============");
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(8);
+        for (int i = 0; i < frequencies.length; i++) {
+//            int state = getDataType().getStatesForCode(i)[0];
+//            Log.info.println(i + "  " + state);
+            if (i % 8 == 0) {
+                Log.info.print("\n" + df.format(frequencies[i]));
+            } else {
+                Log.info.print("\t" + df.format(frequencies[i]));
+            }
+        }
+        Log.info.println();
     }
 
 } // class Frequencies

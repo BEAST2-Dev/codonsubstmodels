@@ -47,8 +47,12 @@ public class M0TreeLikelihoodTest {
 
     @Test
     public void testCodonFrequencies(){
+        int[][] usage = codonAlignment.getCodonUsage();
+        CodonFrequencies codonFreq = new CodonFrequencies();
+        codonFreq.initByName("data", codonAlignment);
+
         // 60 states, exclude stop codon in freq
-        double[] freq = codonAlignment.getCodonFrequencies();
+        double[] freq = codonFreq.getCodonFrequenciesByUsage(usage);
         // result from codeml
         assertArrayEquals(
                 new double[]{.03203203,.03653654,.00500501,.01501502,.03503504,.05705706,0,.02302302,

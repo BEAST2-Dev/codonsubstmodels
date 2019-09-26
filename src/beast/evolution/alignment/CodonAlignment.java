@@ -135,9 +135,6 @@ public class CodonAlignment extends Alignment {
         printCodonUsage(usage);
 
         printCodonPositionBaseFrequencies();
-        // freqs.length = 64
-        double[] freqs = getCodonFrequenciesByUsage(usage);
-        printCodonFrequencies(freqs, "Codon frequencies by usage");
         Log.info.println();
     }
 
@@ -304,7 +301,7 @@ public class CodonAlignment extends Alignment {
      * The current columns = 64 + 2 ambiguous.
      * @return matrix int[taxaNames.size()][getStateCountAmbiguous()]
      */
-    protected int[][] getCodonUsage() {
+    public int[][] getCodonUsage() {
         if (taxaNames.size() != counts.size())
             throw new IllegalArgumentException("taxaNames.size() " + taxaNames.size() + " != counts.size() " + counts.size());
 
@@ -364,53 +361,6 @@ public class CodonAlignment extends Alignment {
                 freqs[row][col] = freqs[row][col] / rowSum;
         }
         return freqs;
-    }
-
-    // int[][] usage has no total, and usage cols > 63 are ambiguous states count
-    // return freqs[stateCount]
-    protected double[] getCodonFrequenciesByUsage(int[][] usage) {
-        final int stateMax = getDataType().getStateCount(); // 64
-        assert stateMax == 64;
-
-        // include stop codon, same as codeml
-        double[] freqs = new double[stateMax];
-        double sum = 0;
-        // loop through each taxon
-        for (int i = 0; i < usage.length; i++) {
-            // j is state
-            for (int j = 0; j < usage[0].length; j++) {
-                // j = [0, 63] no ambiguous
-                if (j < stateMax) {
-                    freqs[j] += usage[i][j];
-
-                } else if (usage[i][j] > 0) { // j > 63 are ambiguous
-                    // all non-ambiguous states for this ambiguous state
-                    int[] states = getDataType().getStatesForCode(j);
-                    // equally distribute ambiguous into the count of each of non-stop-codon state
-                    for (int s : states)
-                        freqs[s] += (double) usage[i][j] / (double) states.length;
-
-                } // ignore 0 usage
-                sum += usage[i][j];
-            }
-        }
-
-        if (sum == 0)
-            throw new IllegalArgumentException("Invalid codon usage, the total is 0 !");
-
-        // re-normalize
-        for (int j = 0; j < freqs.length; j++)
-            freqs[j] = freqs[j] / sum;
-        return freqs;
-    }
-
-    /**
-     * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT), excluding stop codon.
-     * @return 1d frequency array excluding stop codon. dimension = 60/61
-     */
-    public double[] getCodonFrequencies() {
-        int[][] usage = getCodonUsage();
-        return getCodonFrequenciesByUsage(usage);
     }
 
     //============ print ============
@@ -515,20 +465,5 @@ public class CodonAlignment extends Alignment {
         Log.info.println();
     }
 
-    public void printCodonFrequencies(double[] frequencies, String title) {
-        Log.info.println("\n============ " + title + " (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============");
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(8);
-        for (int i = 0; i < frequencies.length; i++) {
-//            int state = getDataType().getStatesForCode(i)[0];
-//            Log.info.println(i + "  " + state);
-            if (i % 8 == 0) {
-                Log.info.print("\n" + df.format(frequencies[i]));
-            } else {
-                Log.info.print("\t" + df.format(frequencies[i]));
-            }
-        }
-        Log.info.println();
-    }
 
 }
