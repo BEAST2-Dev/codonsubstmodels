@@ -10,10 +10,8 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.Frequencies;
-import beast.util.StringUtils;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
 
 
 @Description("The equilibrium codon frequencies PI, including equal, F1X4, F3X4, and F60/F61.")
@@ -49,16 +47,25 @@ public class CodonFrequencies extends Frequencies {
         Log.info.println("Codon alignment " + (codonAlignment.getID()==null?"":codonAlignment.getID()) +
                 " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
 
-        // this includes update()
-        super.initAndValidate();
-
+        //======  Observe data
         int[][] usage = codonAlignment.getCodonUsage();
         // freqs.length = 64
         double[] freqs = getCodonFrequenciesByUsage(usage);
         printCodonFrequencies(freqs, "Observed codon frequencies by usage");
         Log.info.println();
 
-        Log.info.println("Set frequencies dimension = " + getFreqs().length);
+        //====== this includes update()
+        super.initAndValidate();
+
+        freqs = getFreqs();
+        Log.info.println();
+        Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
+        Log.info.println("Set frequencies dimension = " + freqs.length);
+
+//        Log.info.println("Initial values to codon frequencies = " +
+//                Arrays.toString(StringUtils.roundDoubleArrays(freqs, 8)));
+        printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
+        Log.info.println();
     }
 
     @Override
@@ -115,10 +122,6 @@ public class CodonFrequencies extends Frequencies {
 //        Double[] values = new Double[codonStateCount];
 //        for (int i = 0; i < freqs.length; i++)
 //            values[i] = freqs[i];
-
-            Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
-            Log.info.println("Initial values to codon frequencies = " +
-                    Arrays.toString(StringUtils.roundDoubleArrays(freqs, 8)));
 
 //        RealParameter frequencies = new RealParameter(values);
 //        frequencies.lowerValueInput.setValue(0.0, frequencies);
@@ -203,7 +206,7 @@ public class CodonFrequencies extends Frequencies {
      * @param frequencies
      * @param title
      */
-    public void printCodonFrequencies(double[] frequencies, String title) {
+    protected void printCodonFrequencies(double[] frequencies, String title) {
         Log.info.println("\n============ " + title + " (AAA AAC AAG AAT ... TTA TTC TTG TTT) ============");
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(8);

@@ -48,7 +48,7 @@ import java.lang.reflect.InvocationTargetException;
 public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     final public Input<Boolean> verboseInput = new Input<>("verbose",
-            "Print the codon usage, the rate classes in the rate matrix, etc.",
+            "Print the rate classes in the rate matrix, etc.",
             Boolean.FALSE);
 
     protected byte[] rateMap;
@@ -74,9 +74,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         updateMatrix = true;
         double[] freqs = frequencies.getFreqs();
         nrOfStates = freqs.length;
-
-        if (verboseInput.get())
-            ((CodonFrequencies) frequencies).printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
 
         try {
             eigenSystem = createEigenSystem();
