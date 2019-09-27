@@ -21,6 +21,10 @@ public class CodonFrequencies extends Frequencies {
     final public Input<String> piInput = new Input<>("pi", "The assumption of equilibrium codon frequencies PI, " +
             "including equal, F1X4, F3X4 (default), and F60/F61", "F3X4");
 
+    final public Input<Boolean> verboseInput = new Input<>("verbose",
+            "Print the codon frequencies, etc.",
+            Boolean.TRUE);
+
     CodonAlignment codonAlignment;
     Codon codonDataType; // contain selected genetic code
     int codonStateCount;
@@ -48,24 +52,28 @@ public class CodonFrequencies extends Frequencies {
                 " : number of states = " + codonStateCount + ", including " + stopCodonCount + " stop codon");
 
         //======  Observe data
-        int[][] usage = codonAlignment.getCodonUsage();
-        // freqs.length = 64
-        double[] freqs = getCodonFrequenciesByUsage(usage);
-        printCodonFrequencies(freqs, "Observed codon frequencies by usage");
-        Log.info.println();
+        if (verboseInput.get()) {
+            int[][] usage = codonAlignment.getCodonUsage();
+            // freqs.length = 64
+            double[] freqs = getCodonFrequenciesByUsage(usage);
+            printCodonFrequencies(freqs, "Observed codon frequencies by usage");
+            Log.info.println();
+        }
 
         //====== this includes update()
         super.initAndValidate();
 
-        freqs = getFreqs();
-        Log.info.println();
-        Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
-        Log.info.println("Set frequencies dimension = " + freqs.length);
+        if (verboseInput.get()) {
+            freqs = getFreqs();
+            Log.info.println();
+            Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
+            Log.info.println("Set frequencies dimension = " + freqs.length);
 
 //        Log.info.println("Initial values to codon frequencies = " +
 //                Arrays.toString(StringUtils.roundDoubleArrays(freqs, 8)));
-        printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
-        Log.info.println();
+            printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
+            Log.info.println();
+        }
     }
 
     @Override
@@ -156,13 +164,11 @@ public class CodonFrequencies extends Frequencies {
         return freqs;
     }
 
-    //============ stats ============
 
     /**
      * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT), excluding stop codon.
      * @param usage i is taxon, j is state. Not include totals, and for j cols > 63 are ambiguous states count.
-     * @return length-trimmed 1d frequency array freqs[stateCount] excluding stop codon.
-     * dimension = 60/61
+     * @return 1d frequency array freqs[64]
      */
     public double[] getCodonFrequenciesByUsage(int[][] usage) {
         final int stateMax = codonStateCount; // 64

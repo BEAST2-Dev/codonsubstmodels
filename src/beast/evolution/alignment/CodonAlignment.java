@@ -56,6 +56,10 @@ public class CodonAlignment extends Alignment {
                     "called codons, specify which amino acid will be added next during protein synthesis.",
                     GeneticCode.GENETIC_CODE_NAMES[GeneticCode.UNIVERSAL_ID]);
 
+    final public Input<Boolean> verboseInput = new Input<>("verbose",
+            "Print the codon usage, etc.",
+            Boolean.TRUE);
+
 //    final public Input<Boolean> unknownCodeExceptionInput = new Input<>("unknownCodeException",
 //            "Flag to throw exception for unknown code, but can be changed to 'false' to treat " +
 //                    "partial ambiguities (-TA) as missing data.",
@@ -131,11 +135,13 @@ public class CodonAlignment extends Alignment {
 
         Log.info.println("\nGenetic code is " + getGeneticCode().getDescription());
 
-        int[][] usage = getCodonUsage();
-        printCodonUsage(usage);
+        if (verboseInput.get()) {
+            int[][] usage = getCodonUsage();
+            printCodonUsage(usage);
 
-        printCodonPositionBaseFrequencies();
-        Log.info.println();
+            printCodonPositionBaseFrequencies();
+            Log.info.println();
+        }
     }
 
     /**
