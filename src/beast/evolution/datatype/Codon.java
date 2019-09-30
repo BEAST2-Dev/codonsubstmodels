@@ -91,7 +91,7 @@ public class Codon extends DataType.Base {
 //            return new int[]{state};
 //        } else {
 //            String noAmbiguous =
-//
+//TODO
 //
 //        }
 //    }

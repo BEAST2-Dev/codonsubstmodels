@@ -11,7 +11,7 @@ import java.io.PrintStream;
  * Rows are internal nodes, cols are sites.
  * The values are flattened into 1d <code>int[]</code>.<br>
  *
- * <code>minorDimension</code> is the number of sites.<br>
+ * <code>minorDimension</code> is the number of codons.<br>
  * <code>internalNodeCount</code> is the number of internal nodes.<br>
  * <code>nodeNr</code> is the node index number starting from 0,
  * and for internal nodes, they are ranged from the number of leaf nodes
@@ -19,7 +19,6 @@ import java.io.PrintStream;
  * So use the following formula to convert index:<br>
  * <code>rowIndex = nodeNr - internalNodeCount - 1</code><br>
  *
- * @author Walter Xie, Fabio Mendes
  */
 public class InternalNodeSeqs extends IntegerParameter {
 
@@ -42,7 +41,7 @@ public class InternalNodeSeqs extends IntegerParameter {
         // used to adjust Nr
         internalNodeCount = codonAlignment.getTaxonCount() - 1;
         assert internalNodeCount > 1;
-        // L
+        // L = num of codons, overwrite in CodonAlignment /= 3
         minorDimension = codonAlignment.getSiteCount();
 
         // internal nodes = n - 1, length = (n-1)*L
@@ -72,14 +71,14 @@ public class InternalNodeSeqs extends IntegerParameter {
 
     /**
      * get the sites in the column.
-     * @param siteNr the site index.
+     * @param codonNr the codon site index.
      * @return
      */
-    public int[] getSites(final int siteNr) {
-        assert siteNr < minorDimension;
+    public int[] getSites(final int codonNr) {
+        assert codonNr < minorDimension;
         int[] col = new int[internalNodeCount];
         for (int i = 0; i < internalNodeCount; i++)
-            col[i] = values[i * minorDimension + siteNr];
+            col[i] = values[i * minorDimension + codonNr];
         return col;
     }
 
@@ -91,15 +90,35 @@ public class InternalNodeSeqs extends IntegerParameter {
      *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
      *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
      *               The root node is always numbered <code>nodes-1</code>.
-     * @param siteNr the site index.
+     * @param codonNr the site index.
      * @return
      */
-    public int getASite(final int nodeNr, final int siteNr) {
+    public int getASite(final int nodeNr, final int codonNr) {
         assert nodeNr > internalNodeCount; // internalNodeCount = getTaxonCount() - 1;
         int rowIndex = nodeNr - internalNodeCount - 1; // convert nodeNr into 2d matrix row index
-        assert siteNr < minorDimension;
-        return values[rowIndex * minorDimension + siteNr];
+        assert codonNr < minorDimension;
+        return values[rowIndex * minorDimension + codonNr];
     }
+
+
+    /**
+     * set a codon state to a site of a sequence.
+     * <code>matrix[i,j] = values[i * minorDimension + j]</code>
+     *
+     * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
+     *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
+     *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
+     *               The root node is always numbered <code>nodes-1</code>.
+     * @param codonNr the site index.
+     */
+    public void setASite(final int nodeNr, final int codonNr, final int value) {
+        assert nodeNr > internalNodeCount; // internalNodeCount = getTaxonCount() - 1;
+        int rowIndex = nodeNr - internalNodeCount - 1; // convert nodeNr into 2d matrix row index
+        assert codonNr < minorDimension;
+
+        setValue(rowIndex * minorDimension + codonNr, value);
+    }
+
 
     @Override
     public void log(long sampleNr, PrintStream out) {

@@ -273,7 +273,7 @@ public class CodonAlignment extends Alignment {
     }
 
     /**
-     * @return number of sites
+     * @return number of codons
      */
     public int getSiteCount() {
         if (alignment == null) throw new RuntimeException("CodonAlignment has no alignment");
