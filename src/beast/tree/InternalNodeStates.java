@@ -7,7 +7,7 @@ import beast.evolution.alignment.CodonAlignment;
 import java.io.PrintStream;
 
 /**
- * The large 2-d matrix to store internal node sequences.
+ * The large 2-d matrix to store internal node states.
  * Rows are internal nodes, cols are sites.
  * The values are flattened into 1d <code>int[]</code>.<br>
  *
@@ -20,10 +20,10 @@ import java.io.PrintStream;
  * <code>rowIndex = nodeNr - internalNodeCount - 1</code><br>
  *
  */
-public class InternalNodeSeqs extends IntegerParameter {
+public class InternalNodeStates extends IntegerParameter {
 
     final public Input<CodonAlignment> dataInput = new Input<>("data",
-            "codon alignment to initialise internal node sequences", Input.Validate.REQUIRED);
+            "codon alignment to initialise the 2-d matrix of internal node states", Input.Validate.REQUIRED);
 
     // row (x) is internal nodes = leafNodeCount - 1
     protected int internalNodeCount = -1;
@@ -53,14 +53,14 @@ public class InternalNodeSeqs extends IntegerParameter {
     }
 
     /**
-     * get the internal node sequence.
+     * get an internal node states.
      * @param nodeNr the node index = <code>nodeNr - internalNodeCount - 1</code><br>
      *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
      *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
      *               The root node is always numbered <code>nodes-1</code>.
      * @return the codon states of the internal node sequence.
      */
-    public int[] getASequence(final int nodeNr) {
+    public int[] getNrStates(final int nodeNr) {
         assert nodeNr > internalNodeCount; // internalNodeCount = getTaxonCount() - 1;
         int rowIndex = nodeNr - internalNodeCount - 1; // convert nodeNr into 2d matrix row index
         int[] row = new int[minorDimension];
@@ -70,7 +70,7 @@ public class InternalNodeSeqs extends IntegerParameter {
     }
 
     /**
-     * get the sites in the column.
+     * get the sites at a site of all internal nodes.
      * @param codonNr the codon site index.
      * @return
      */
@@ -83,7 +83,7 @@ public class InternalNodeSeqs extends IntegerParameter {
     }
 
     /**
-     * get a codon state from a site of a sequence.
+     * get a codon state from the site at the internal node.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
      * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
@@ -102,7 +102,7 @@ public class InternalNodeSeqs extends IntegerParameter {
 
 
     /**
-     * set a codon state to a site of a sequence.
+     * set a codon state to the site at the internal node.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
      * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
