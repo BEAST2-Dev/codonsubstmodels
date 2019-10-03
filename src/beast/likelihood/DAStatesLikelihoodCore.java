@@ -14,14 +14,14 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     protected int nrOfStates; // e.g. 64
     protected int nrOfNodes;
     protected int nrOfSites; // e.g. number of codons
-    protected int partialsSize; // = nrOfSites * nrOfStates * nrOfMatrices;
+    protected int partialsSize; // = nrOfSites * nrOfMatrices;
     protected int matrixSize; // nrOfStates^2
     protected int nrOfMatrices; // number of categories
 
     // partial likelihood matrix(ices),
     // 1st dimension is matrix index (current, stored),
     // 2nd is node index,
-    // 3rd is nrOfSites * nrOfStates * nrOfMatrices
+    // 3rd is improved to nrOfSites * nrOfMatrices
     protected double[][][] partials;
 
     // states in nodes
@@ -51,43 +51,6 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     } // c'tor
 
 
-    /**
-     * Integrates partials across categories.
-     *
-     * @param inPartials  the array of partials to be integrated
-     * @param proportions the proportions of sites in each category
-     * @param outPartials an array into which the partials will go
-     */
-    @Override
-    protected void calculateIntegratePartials(double[] inPartials, double[] proportions, double[] outPartials) {
-
-        int u = 0;
-        int v = 0;
-        for (int k = 0; k < nrOfSites; k++) {
-
-            for (int i = 0; i < nrOfStates; i++) {
-
-                outPartials[u] = inPartials[v] * proportions[0];
-                u++;
-                v++;
-            }
-        }
-
-
-        for (int l = 1; l < nrOfMatrices; l++) {
-            u = 0;
-
-            for (int k = 0; k < nrOfSites; k++) {
-
-                for (int i = 0; i < nrOfStates; i++) {
-
-                    outPartials[u] += inPartials[v] * proportions[l];
-                    u++;
-                    v++;
-                }
-            }
-        }
-    }
 
     /**
      * Calculates pattern log likelihoods at a node.
@@ -100,13 +63,15 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 	public void calculateLogLikelihoods(double[] partials, double[] frequencies, double[] outLogLikelihoods) {
         int v = 0;
         for (int k = 0; k < nrOfSites; k++) {
-
+//TODO validate index
             double sum = 0.0;
-            for (int i = 0; i < nrOfStates; i++) {
-
+//            for (int i = 0; i < nrOfStates; i++) {
+            // TODO check here
+            int rootNr = nrOfNodes - 1;
+            int i = states[rootNr][k];
                 sum += frequencies[i] * partials[v];
                 v++;
-            }
+//            }
             outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
         }
     }
@@ -128,10 +93,12 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
 //        this.integrateCategories = integrateCategories;
 //        if (integrateCategories) { // always True
-            partialsSize = siteCount * nrOfStates * categoryCount;
+//            partialsSize = siteCount * nrOfStates * categoryCount;
 //        } else {
 //            partialsSize = siteCount * nrOfStates;
 //        }
+        // improve to site * category
+        partialsSize = siteCount * categoryCount;
         partials = new double[2][nodeCount][];
 
         currentMatrixIndex = new int[nodeCount];
@@ -184,6 +151,74 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         }
     }
 
+    //============ states for a node ============
+
+    /**
+     * Allocates states for a node
+     */
+    public void createNodeStates(int nodeIndex) {
+
+        this.states[nodeIndex] = new int[nrOfSites];
+    }
+
+    /**
+     * Sets states for a node
+     * TODO @param tips            sequences in tips, {@link final Alignment}
+     * TODO @param ins             sequences in internal nodes, {@link InternalNodeStates}
+     */
+    @Override
+	public void setNodeStates(int nodeIndex, int[] states) {
+
+        if (this.states[nodeIndex] == null) {
+            createNodeStates(nodeIndex);
+        }
+        System.arraycopy(states, 0, this.states[nodeIndex], 0, nrOfSites);
+    }
+
+    /**
+     * Gets states for a node
+     */
+    @Override
+	public void getNodeStates(int nodeIndex, int[] states) {
+        System.arraycopy(this.states[nodeIndex], 0, states, 0, nrOfSites);
+    }
+
+
+    //============ transition probability matrix ============
+
+    @Override
+    public void setNodeMatrixForUpdate(int nodeIndex) {
+        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex];
+
+    }
+
+
+    /**
+     * Sets probability matrix for a node
+     */
+    @Override
+	public void setNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
+        System.arraycopy(matrix, 0, matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
+                matrixIndex * matrixSize, matrixSize);
+    }
+
+//    public void setPaddedNodeMatrices(int nodeIndex, double[] matrix) {
+//        System.arraycopy(matrix, 0, matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
+//                0, nrOfMatrices * matrixSize);
+//    }
+
+
+    /**
+     * Gets probability matrix for a node
+     */
+    @Override
+	public void getNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
+        System.arraycopy(matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
+                matrixIndex * matrixSize, matrix, 0, matrixSize);
+    }
+
+    //============ partial likelihood ============
+
     /**
      * Allocates partials for a node
      */
@@ -219,68 +254,6 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         System.arraycopy(partials[currentPartialsIndex[nodeIndex]][nodeIndex], 0, partialsOut, 0, partialsOut.length);
     }
 
-
-    /**
-     * Allocates states for a node
-     */
-    public void createNodeStates(int nodeIndex) {
-
-        this.states[nodeIndex] = new int[nrOfSites];
-    }
-
-    /**
-     * Sets states for a node
-     * TODO @param tips            sequences in tips, {@link final Alignment}
-     * TODO @param ins             sequences in internal nodes, {@link InternalNodeStates}
-     */
-    @Override
-	public void setNodeStates(int nodeIndex, int[] states) {
-
-        if (this.states[nodeIndex] == null) {
-            createNodeStates(nodeIndex);
-        }
-        System.arraycopy(states, 0, this.states[nodeIndex], 0, nrOfSites);
-    }
-
-    /**
-     * Gets states for a node
-     */
-    @Override
-	public void getNodeStates(int nodeIndex, int[] states) {
-        System.arraycopy(this.states[nodeIndex], 0, states, 0, nrOfSites);
-    }
-
-    @Override
-    public void setNodeMatrixForUpdate(int nodeIndex) {
-        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex];
-
-    }
-
-
-    /**
-     * Sets probability matrix for a node
-     */
-    @Override
-	public void setNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
-        System.arraycopy(matrix, 0, matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-                matrixIndex * matrixSize, matrixSize);
-    }
-
-//    public void setPaddedNodeMatrices(int nodeIndex, double[] matrix) {
-//        System.arraycopy(matrix, 0, matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-//                0, nrOfMatrices * matrixSize);
-//    }
-
-
-    /**
-     * Gets probability matrix for a node
-     */
-    @Override
-	public void getNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
-        System.arraycopy(matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-                matrixIndex * matrixSize, matrix, 0, matrixSize);
-    }
-
     @Override
     public void setNodePartialsForUpdate(int nodeIndex) {
         currentPartialsIndex[nodeIndex] = 1 - currentPartialsIndex[nodeIndex];
@@ -299,7 +272,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
             calculateStatesStates(
                     states[nodeIndex1], matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
                     states[nodeIndex2], matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
-                    partials[currentPartialsIndex[nodeIndex3]][nodeIndex3]);
+                    states[nodeIndex3], partials[currentPartialsIndex[nodeIndex3]][nodeIndex3]);
         } else {
             throw new IllegalArgumentException("Every node must has states ! \n" + "child 1 " +
                     (states[nodeIndex1] != null) + ", child 2 " + (states[nodeIndex2] != null) +
@@ -307,7 +280,8 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         }
 
         if (useScaling) {
-            scalePartials(nodeIndex3);
+            throw new UnsupportedOperationException("in dev");
+//            scalePartials(nodeIndex3);
         }
 
 //
@@ -328,10 +302,11 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
     /**
      * Calculates partial likelihoods at a node given both children have states.
+     * matrix P(t) is flattened to n = i * state + j where n is index of double[] matrices?.
      */
     protected void calculateStatesStates(int[] stateIndex1, double[] matrices1,
                                          int[] stateIndex2, double[] matrices2,
-                                         double[] probs) {
+                                         int[] stateIndex3, double[] partials3) {
         int v = 0;
 
         for (int l = 0; l < nrOfMatrices; l++) {
@@ -340,55 +315,101 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
                 int state1 = stateIndex1[k];
                 int state2 = stateIndex2[k];
+                int state3 = stateIndex3[k];
 
                 int w = l * matrixSize;
 
                 if (state1 < nrOfStates && state2 < nrOfStates) {
 
-                    for (int i = 0; i < nrOfStates; i++) {
+//                    for (int i = 0; i < nrOfStates; i++) {
+//
+//                        partials3[v] = matrices1[w + state1] * matrices2[w + state2];
+//
+//                        v++;
+//                        w += nrOfStates;
+//                    }
 
-                        probs[v] = matrices1[w + state1] * matrices2[w + state2];
 
-                        v++;
-                        w += nrOfStates;
-                    }
+                    //TODO validate index
+                    partials3[k] = matrices1[w + state1*nrOfStates + state3] * matrices2[w + state2*nrOfStates + state3];
 
-                } else if (state1 < nrOfStates) {
-                    // child 2 has a gap or unknown state so treat it as unknown
 
-                    for (int i = 0; i < nrOfStates; i++) {
 
-                        probs[v] = matrices1[w + state1];
-
-                        v++;
-                        w += nrOfStates;
-                    }
-                } else if (state2 < nrOfStates) {
-                    // child 2 has a gap or unknown state so treat it as unknown
-
-                    for (int i = 0; i < nrOfStates; i++) {
-
-                        probs[v] = matrices2[w + state2];
-
-                        v++;
-                        w += nrOfStates;
-                    }
+//                } else if (state1 < nrOfStates) {
+//                    // child 2 has a gap or unknown state so treat it as unknown
+//
+//                    for (int i = 0; i < nrOfStates; i++) {
+//
+//                        partials3[v] = matrices1[w + state1];
+//
+//                        v++;
+//                        w += nrOfStates;
+//                    }
+//                } else if (state2 < nrOfStates) {
+//                    // child 2 has a gap or unknown state so treat it as unknown
+//
+//                    for (int i = 0; i < nrOfStates; i++) {
+//
+//                        partials3[v] = matrices2[w + state2];
+//
+//                        v++;
+//                        w += nrOfStates;
+//                    }
                 } else {
+                    throw new UnsupportedOperationException("in dev");
                     // both children have a gap or unknown state so set partials to 1
 
-                    for (int j = 0; j < nrOfStates; j++) {
-                        probs[v] = 1.0;
-                        v++;
-                    }
+//                    for (int j = 0; j < nrOfStates; j++) {
+//                        partials3[v] = 1.0;
+//                        v++;
+//                    }
                 }
-            }
-        }
+            } // end k  nrOfSites
+        } // end l nrOfMatrices
     }
 
 
     @Override
     public void integratePartials(int nodeIndex, double[] proportions, double[] outPartials) {
         calculateIntegratePartials(partials[currentPartialsIndex[nodeIndex]][nodeIndex], proportions, outPartials);
+    }
+
+    /**
+     * Integrates partials across categories.
+     *
+     * @param inPartials  the array of partials to be integrated
+     * @param proportions the proportions of sites in each category
+     * @param outPartials an array into which the partials will go
+     */
+    @Override
+    protected void calculateIntegratePartials(double[] inPartials, double[] proportions, double[] outPartials) {
+
+        int u = 0;
+        int v = 0;
+        for (int k = 0; k < nrOfSites; k++) {
+//TODO validate index
+//            for (int i = 0; i < nrOfStates; i++) {
+
+                outPartials[u] = inPartials[v] * proportions[0];
+                u++;
+                v++;
+//            }
+        }
+
+
+        for (int l = 1; l < nrOfMatrices; l++) {
+            u = 0;
+
+//            for (int k = 0; k < nrOfSites; k++) {
+
+                for (int i = 0; i < nrOfStates; i++) {
+
+                    outPartials[u] += inPartials[v] * proportions[l];
+                    u++;
+                    v++;
+                }
+//            }
+        }
     }
 
 
@@ -408,48 +429,41 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
      * @param nodeIndex
      */
     protected void scalePartials(int nodeIndex) {
-//        int v = 0;
-//    	double [] partials = m_fPartials[m_iCurrentPartialsIndices[nodeIndex]][nodeIndex];
-//        for (int i = 0; i < m_nPatternCount; i++) {
-//            for (int k = 0; k < m_nMatrixCount; k++) {
-//                for (int j = 0; j < m_nStateCount; j++) {
-//                	partials[v] *= SCALE;
-//                	v++;
-//                }
-//            }
-//        }
+
         int u = 0;
 
         for (int i = 0; i < nrOfSites; i++) {
-
+//TODO validate index
             double scaleFactor = 0.0;
             int v = u;
             for (int k = 0; k < nrOfMatrices; k++) {
-                for (int j = 0; j < nrOfStates; j++) {
+//                for (int j = 0; j < nrOfStates; j++) {
                     if (partials[currentPartialsIndex[nodeIndex]][nodeIndex][v] > scaleFactor) {
                         scaleFactor = partials[currentPartialsIndex[nodeIndex]][nodeIndex][v];
                     }
                     v++;
-                }
-                v += (nrOfSites - 1) * nrOfStates;
+//                }
+//                v += (nrOfSites - 1) * nrOfStates;
+                v += (nrOfSites - 1);
             }
 
             if (scaleFactor < scalingThreshold) {
 
                 v = u;
                 for (int k = 0; k < nrOfMatrices; k++) {
-                    for (int j = 0; j < nrOfStates; j++) {
+//                    for (int j = 0; j < nrOfStates; j++) {
                         partials[currentPartialsIndex[nodeIndex]][nodeIndex][v] /= scaleFactor;
                         v++;
-                    }
-                    v += (nrOfSites - 1) * nrOfStates;
+//                    }
+//                    v += (nrOfSites - 1) * nrOfStates;
+                    v += (nrOfSites - 1);
                 }
                 scalingFactors[currentPartialsIndex[nodeIndex]][nodeIndex][i] = Math.log(scaleFactor);
 
             } else {
                 scalingFactors[currentPartialsIndex[nodeIndex]][nodeIndex][i] = 0.0;
             }
-            u += nrOfStates;
+//            u += nrOfStates;
 
 
         }

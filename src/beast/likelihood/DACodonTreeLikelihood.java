@@ -174,7 +174,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         probabilities = new double[(stateCount + 1) * (stateCount + 1)];
         Arrays.fill(probabilities, 1.0);
 
-
+        if (codonAlignment.isAscertained) {
+            throw new UnsupportedOperationException("Ascertainment correction is not available !");
+        }
     }
 
     /**
