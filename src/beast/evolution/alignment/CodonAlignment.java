@@ -288,6 +288,16 @@ public class CodonAlignment extends Alignment {
     }
 
     /**
+     * Retrieve the "weight" of a particular site.
+     *
+     * @param siteIndex_ Index into site array.
+     * @return site weight
+     */
+    public int getSiteWeight(int siteIndex_) {
+        return siteWeights[siteIndex_];
+    }
+
+    /**
      * Util to cast Alignment to CodonAlignment
      * @param alignment
      * @return
