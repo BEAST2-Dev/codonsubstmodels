@@ -5,11 +5,13 @@ import beast.core.parameter.IntegerParameter;
 import beast.evolution.alignment.CodonAlignment;
 
 import java.io.PrintStream;
+import java.util.List;
 
 /**
  * The large 2-d matrix to store internal node states.
  * Rows are internal nodes, cols are sites.
- * The values are flattened into 1d <code>int[]</code>.<br>
+ * The values are flattened into 1d <code>int[]</code>,
+ * and the state starts from 0. <br>
  *
  * <code>minorDimension</code> is the number of codons.<br>
  * <code>internalNodeCount</code> is the number of internal nodes.<br>
@@ -28,9 +30,11 @@ public class InternalNodeStates extends IntegerParameter {
     // row (x) is internal nodes = leafNodeCount - 1
     protected int internalNodeCount = -1;
 
+    protected CodonAlignment codonAlignment;
+
     @Override
     public void initAndValidate() {
-        CodonAlignment codonAlignment = dataInput.get();
+        codonAlignment = dataInput.get();
         int stateCount = codonAlignment.getDataType().getStateCount(); // 64
         assert stateCount == 64;
 
@@ -53,7 +57,7 @@ public class InternalNodeStates extends IntegerParameter {
     }
 
     /**
-     * get an internal node states.
+     * Get an internal node states. The state starts from 0.
      * @param nodeNr the node index = <code>nodeNr - internalNodeCount - 1</code><br>
      *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
      *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
@@ -83,7 +87,8 @@ public class InternalNodeStates extends IntegerParameter {
     }
 
     /**
-     * get a codon state from the site at the internal node.
+     * Get a codon state from the site at the internal node.
+     * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
      * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
@@ -102,7 +107,8 @@ public class InternalNodeStates extends IntegerParameter {
 
 
     /**
-     * set a codon state to the site at the internal node.
+     * Set a codon state to the site at the internal node.
+     * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
      * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
@@ -124,4 +130,32 @@ public class InternalNodeStates extends IntegerParameter {
     public void log(long sampleNr, PrintStream out) {
         super.log(sampleNr, out);
     }
+
+
+    /**
+     *
+     * @param triplets coded nucleotides in string
+     * @return the list of codon states. The size should be 1/3 of string length
+     */
+    public List<Integer> stringToEncoding(String triplets) {
+        // remove spaces
+        triplets = triplets.replaceAll("\\s", "");
+        List<Integer> sequence = codonAlignment.getDataType().stringToEncoding(triplets);
+        if (sequence.size() * 3 != triplets.length())
+            throw new IllegalArgumentException("The string of triplets has invalid number ! " +
+                    triplets.length() + " != " + sequence.size() + " * 3");
+        return sequence;
+    }
+
+    /**
+     *
+     * @param triplets coded nucleotides in string
+     * @return the int[] of codon states. The size should be 1/3 of string length
+     */
+    public int[] stringToStates(String triplets) {
+        List<Integer> sequence = stringToEncoding(triplets);
+
+        return sequence.stream().mapToInt(i->i).toArray();
+    }
+
 }

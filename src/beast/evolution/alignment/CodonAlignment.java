@@ -153,7 +153,7 @@ public class CodonAlignment extends Alignment {
         counts.clear();
         try {
             for (Sequence seq : alignment.sequences) {
-                // replace all ? to -
+                // TODO need to distinguish ? and -, cannot just replace all ? to -
                 String data = seq.getData().replaceAll("\\?", "-");
                 seq.dataInput.setValue(data, seq);
 
@@ -296,6 +296,8 @@ public class CodonAlignment extends Alignment {
     public int getSiteWeight(int siteIndex_) {
         return siteWeights[siteIndex_];
     }
+
+    //============ Util ============
 
     /**
      * Util to cast Alignment to CodonAlignment

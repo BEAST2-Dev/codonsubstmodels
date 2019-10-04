@@ -24,7 +24,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     // 3rd is improved to nrOfSites * nrOfMatrices
     protected double[][][] partials;
 
-    // states in nodes
+    // states in nodes: 0-63
     // 1st is node index, 2nd is site index
     protected int[][] states;
 
