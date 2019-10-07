@@ -427,16 +427,17 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
                             substitutionModel.getFrequencies();
 
                     final double[] proportions = m_siteModel.getCategoryProportions(node);
-                    // m_fRootPartials length is siteCount
+                    // m_fRootPartials is integrated across categories, so length is siteCount
                     likelihoodCore.integratePartials(node.getNr(), proportions, m_fRootPartials);
 
                     //TODO in dev
                     if (constantPattern != null) { // && !SiteModel.g_bUseOriginal) {
-                        proportionInvariant = m_siteModel.getProportionInvariant();
-                        // some portion of sites is invariant, so adjust root partials for this
-                        for (final int i : constantPattern) {
-                            m_fRootPartials[i] += proportionInvariant;
-                        }
+                        throw new UnsupportedOperationException("proportionInvariant in dev");
+//                        proportionInvariant = m_siteModel.getProportionInvariant();
+//                        // some portion of sites is invariant, so adjust root partials for this
+//                        for (final int i : constantPattern) {
+//                            m_fRootPartials[i] += proportionInvariant;
+//                        }
                     }
 
                     likelihoodCore.calculateLogLikelihoods(m_fRootPartials, frequencies, siteLogLikelihoods);

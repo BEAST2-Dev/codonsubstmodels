@@ -70,12 +70,12 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "equal", "data", codonAlignment);
 
-        String startingTree = "((Human_Horai: 0.013346, Human_Arnason: 0.013346): 0.191383," +
+        String newickTree = "((Human_Horai: 0.013346, Human_Arnason: 0.013346): 0.191383," +
                 "(Chimp_Horai: 0.003004, Chimp_Arnason: 0.003004): 0.201725, (Gorilla_Horai: 0.003761, " +
                 "Gorilla_Arnason: 0.003761): 0.200968);";
 
         double logP = getLogTreeLikelihood("0.14593", "10.69924",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-2098.8642114431645, logP, 1e-6);
     }
@@ -85,12 +85,12 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F1X4", "data", codonAlignment);
 
-        String startingTree = "((Human_Horai: 0.014702, Human_Arnason: 0.014702): 0.251960, " +
+        String newickTree = "((Human_Horai: 0.014702, Human_Arnason: 0.014702): 0.251960, " +
                 "(Chimp_Horai: 0.003339, Chimp_Arnason: 0.003339): 0.263323, (Gorilla_Horai: 0.004302, " +
                 "Gorilla_Arnason: 0.004302): 0.262361);";
 
         double logP = getLogTreeLikelihood("0.10195", "13.49811",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-2009.8343141884977, logP, 1e-6);
     }
@@ -100,12 +100,12 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F3X4", "data", codonAlignment);
 
-        String startingTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
+        String newickTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
                 "(Chimp_Horai: 0.002959, Chimp_Arnason: 0.002959): 0.255761, (Gorilla_Horai: 0.003918, " +
                 "Gorilla_Arnason: 0.003918): 0.254801);";
 
         double logP = getLogTreeLikelihood("0.08000", "15.34858",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-1960.7661713238033, logP, 1e-6);
     }
@@ -115,12 +115,12 @@ public class M0TreeLikelihoodTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "F60/F61", "data", codonAlignment);
 
-        String startingTree = "((Human_Horai: 0.013483, Human_Arnason: 0.013483): 0.294406, " +
+        String newickTree = "((Human_Horai: 0.013483, Human_Arnason: 0.013483): 0.294406, " +
                 "(Chimp_Horai: 0.003084, Chimp_Arnason: 0.003084): 0.304805, (Gorilla_Horai: 0.004137, " +
                 "Gorilla_Arnason: 0.004137): 0.303752);";
 
         double logP = getLogTreeLikelihood("0.08327", "15.54039",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-1915.2251567137826, logP, 1e-6);
     }
@@ -145,12 +145,12 @@ public class M0TreeLikelihoodTest {
                         "0.016666666666666666 0.016666666666666666 0.016666666666666666 0.016666666666666666 " +
                         "0.016666666666666666 0.016666666666666666 0.016666666666666666");
 
-        String startingTree = "((Human_Horai: 0.013346, Human_Arnason: 0.013346): 0.191383," +
+        String newickTree = "((Human_Horai: 0.013346, Human_Arnason: 0.013346): 0.191383," +
                 "(Chimp_Horai: 0.003004, Chimp_Arnason: 0.003004): 0.201725, (Gorilla_Horai: 0.003761, " +
                 "Gorilla_Arnason: 0.003761): 0.200968);";
 
         double logP = getLogTreeLikelihood("0.14593", "10.69924",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-2098.8642114431645, logP, 1e-6);
     }
@@ -176,19 +176,19 @@ public class M0TreeLikelihoodTest {
                         "0.005223965155432802 0.005590680590185039 6.849967554805926E-4 0.002324837473146254 " +
                         "0.024914295356679515 0.026663245891651723 0.003266907603061288 0.011087686410389827");
 
-        String startingTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
+        String newickTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
                 "(Chimp_Horai: 0.002959, Chimp_Arnason: 0.002959): 0.255761, (Gorilla_Horai: 0.003918, " +
                 "Gorilla_Arnason: 0.003918): 0.254801);";
 
         double logP = getLogTreeLikelihood("0.08000", "15.34858",
-                codonFreq, codonAlignment, startingTree);
+                codonFreq, codonAlignment, newickTree);
         System.out.println("logTreeLikelihood = " + logP);
         assertEquals(-1960.7661713238033, logP, 1e-6);
     }
 
     // get logP
     protected double getLogTreeLikelihood(String omegaValue, String kappaValue, CodonFrequencies codonFreq,
-                                          Alignment data, String startingTree) {
+                                          Alignment data, String newickTree) {
         RealParameter omega = new RealParameter(omegaValue);
         RealParameter kappa = new RealParameter(kappaValue);
 
@@ -198,7 +198,7 @@ public class M0TreeLikelihoodTest {
         SiteModel siteModel = new SiteModel();
         siteModel.initByName("substModel", m0);
 
-        Tree tree = CodonTestData.getTree(data, startingTree);
+        Tree tree = CodonTestData.getTree(data, newickTree);
 
         System.setProperty("java.only","true");
         TreeLikelihood likelihood = new TreeLikelihood();

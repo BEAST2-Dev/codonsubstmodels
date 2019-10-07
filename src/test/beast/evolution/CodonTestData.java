@@ -1,11 +1,15 @@
 package test.beast.evolution;
 
+import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
+import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Tree;
 import beast.util.StringUtils;
 import beast.util.TreeParser;
+import codonmodels.CodonFrequencies;
+import codonmodels.M0Model;
 
 /**
  * @author Walter Xie
@@ -49,5 +53,20 @@ public class CodonTestData {
         t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true);
         return t;
     }
+
+    public static SiteModel getSiteModel(String omegaValue, String kappaValue, CodonFrequencies codonFreq) {
+        RealParameter omega = new RealParameter(omegaValue);
+        RealParameter kappa = new RealParameter(kappaValue);
+
+        M0Model m0 = new M0Model();
+        m0.initByName("omega", omega, "kappa", kappa, "frequencies", codonFreq);
+
+        SiteModel siteModel = new SiteModel();
+        siteModel.initByName("substModel", m0);
+
+        return siteModel;
+    }
+
+
 
 }

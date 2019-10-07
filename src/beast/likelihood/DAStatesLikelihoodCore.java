@@ -390,6 +390,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
     /**
      * Calculates site log likelihoods at root node.
+     * The input partial likelihoods here have been integrated across categories.
      *
      * @param integratedPartials   the partials used to calculate the likelihoods, and integrated across categories
      * @param frequencies          an array of state frequencies
