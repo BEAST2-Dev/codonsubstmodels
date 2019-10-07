@@ -44,9 +44,9 @@ public class CodonTestData {
         return data;
     }
 
-    public static Tree getStartingTree(Alignment data, String startingTree) {
+    public static Tree getTree(Alignment data, String newickTree) {
         TreeParser t = new TreeParser();
-        t.initByName("taxa", data, "newick", startingTree, "IsLabelledNewick", true);
+        t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true);
         return t;
     }
 

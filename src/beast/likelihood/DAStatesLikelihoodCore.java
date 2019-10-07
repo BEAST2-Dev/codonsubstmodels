@@ -53,31 +53,6 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
 
     /**
-     * Calculates pattern log likelihoods at a node.
-     *
-     * @param partials          the partials used to calculate the likelihoods
-     * @param frequencies       an array of state frequencies
-     * @param outLogLikelihoods an array into which the likelihoods will go
-     */
-    @Override
-	public void calculateLogLikelihoods(double[] partials, double[] frequencies, double[] outLogLikelihoods) {
-        int v = 0;
-        for (int k = 0; k < nrOfSites; k++) {
-//TODO validate index
-            double sum = 0.0;
-//            for (int i = 0; i < nrOfStates; i++) {
-            // TODO check here
-            int rootNr = nrOfNodes - 1;
-            int i = states[rootNr][k];
-                sum += frequencies[i] * partials[v];
-                v++;
-//            }
-            outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
-        }
-    }
-
-
-    /**
      * initializes likelihood arrays.
      * @param nodeCount           the number of nodes in the tree
      * @param siteCount        the number of patterns
@@ -369,13 +344,14 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     }
 
 
+    // length(outPartials) is siteCount
     @Override
     public void integratePartials(int nodeIndex, double[] proportions, double[] outPartials) {
         calculateIntegratePartials(partials[currentPartialsIndex[nodeIndex]][nodeIndex], proportions, outPartials);
     }
 
     /**
-     * Integrates partials across categories.
+     * Integrates partials across categories. length(outPartials) is siteCount.
      *
      * @param inPartials  the array of partials to be integrated
      * @param proportions the proportions of sites in each category
@@ -400,17 +376,43 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         for (int l = 1; l < nrOfMatrices; l++) {
             u = 0;
 
-//            for (int k = 0; k < nrOfSites; k++) {
+            for (int k = 0; k < nrOfSites; k++) {
 
-                for (int i = 0; i < nrOfStates; i++) {
+//                for (int i = 0; i < nrOfStates; i++) {
 
                     outPartials[u] += inPartials[v] * proportions[l];
                     u++;
                     v++;
-                }
-//            }
+//                }
+            }
         }
     }
+
+    /**
+     * Calculates site log likelihoods at root node.
+     *
+     * @param integratedPartials   the partials used to calculate the likelihoods, and integrated across categories
+     * @param frequencies          an array of state frequencies
+     * @param outLogLikelihoods    an array into which the likelihoods will go
+     */
+    @Override
+    public void calculateLogLikelihoods(double[] integratedPartials, double[] frequencies, double[] outLogLikelihoods) {
+//        int v = 0;
+        for (int k = 0; k < nrOfSites; k++) {
+            double sum = 0.0;
+//            for (int i = 0; i < nrOfStates; i++) {
+            // hard code for root node
+            int rootNr = nrOfNodes - 1;
+            int i = states[rootNr][k]; // 0-63
+//TODO validate index
+            // partials[] is nrOfSites * nrOfMatrices
+            sum += frequencies[i] * integratedPartials[k];
+//            v++;
+//            }
+            outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
+        }
+    }
+
 
 
     /**

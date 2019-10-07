@@ -181,8 +181,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         siteLogLikelihoods = new double[siteCount];
         m_fRootPartials = new double[siteCount]; // improved from patterns * stateCount to siteCount
         // transition probability matrix, P
-        matrixSize = (stateCount + 1) * (stateCount + 1);
-        probabilities = new double[(stateCount + 1) * (stateCount + 1)];
+        matrixSize = stateCount * stateCount;
+        probabilities = new double[matrixSize];
         Arrays.fill(probabilities, 1.0);
 
         if (codonAlignment.isAscertained) {
@@ -427,6 +427,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
                             substitutionModel.getFrequencies();
 
                     final double[] proportions = m_siteModel.getCategoryProportions(node);
+                    // m_fRootPartials length is siteCount
                     likelihoodCore.integratePartials(node.getNr(), proportions, m_fRootPartials);
 
                     //TODO in dev
