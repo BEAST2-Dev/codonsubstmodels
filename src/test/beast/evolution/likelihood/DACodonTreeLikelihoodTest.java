@@ -6,6 +6,7 @@ import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Tree;
 import beast.likelihood.DACodonTreeLikelihood;
+import beast.tree.InternalNodeStates;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,10 +83,19 @@ public class DACodonTreeLikelihoodTest {
 
         // =============== DA likelihood ===============
 
+        InternalNodeStates internalNodeStates = new InternalNodeStates();
+        int internalNr = tree.getInternalNodeCount();
+        int siteCount = codonAlignment.getSiteCount();
+        //TODO internalNodeStates.randomSampleStates(internalNr, siteCount);
+
         start = System.currentTimeMillis();
 
         for (int i=0; i<iteration; i++) {
             DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
+
+            //TODO
+
+
             likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
 
             double logP = likelihood.calculateLogP();

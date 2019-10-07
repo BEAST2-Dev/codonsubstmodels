@@ -44,7 +44,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         TreeLikelihood.Scaling._default, TreeLikelihood.Scaling.values());
 
 
-    final public Input<InternalNodeStates> internalNodeSeqsInput = new Input<>("internalNodeSeqs",
+    final public Input<InternalNodeStates> internalNodeStatesInput = new Input<>("internalNodeStates",
             "The large 2-d matrix to store internal node sequences.", Input.Validate.REQUIRED);
 
 
@@ -55,7 +55,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * internal node sequences 2d matrix = [(internal) nodeNr , codonNr]
      */
-    InternalNodeStates internalNodeSeqs;
+    InternalNodeStates internalNodeStates;
 
     /**
      * calculation engine *
@@ -116,7 +116,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     @Override
     public void initAndValidate() {
 
-        internalNodeSeqs = internalNodeSeqsInput.get();
+        internalNodeStates = internalNodeStatesInput.get();
 
         codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
 
@@ -273,7 +273,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         } else {
             // set internal node states
             int Nr = node.getNr();
-            int[] states = internalNodeSeqs.getNrStates(Nr);
+            int[] states = internalNodeStates.getNrStates(Nr);
 
             likelihoodCore.setNodeStates(node.getNr(), states);
 
