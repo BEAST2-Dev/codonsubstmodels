@@ -159,7 +159,7 @@ public class M0TreeLikelihoodTest {
     public void testLikelihoodGivenF3X4Freqs(){
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("data", codonAlignment, "frequencies",
-                // copied from F3X4 but change codon frequencies decimal place to 20
+                // copied from F3X4 after change decimal place to 20 in printCodonFrequencies()
                 "0.02704482396143513 0.028943334782568986 0.0035462749300424878 0.012035842186810867 " +
                         "0.04634205909572173 0.04959521026403068 0.006076640861558214 0.020623750802864244 0.0 " +
                         "0.012974598350806787 0.0 0.005395377532018664 0.05781996846927511 0.06187885367307853 " +

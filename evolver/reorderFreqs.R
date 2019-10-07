@@ -35,6 +35,8 @@ tri = paste0(first, second, third)
 
 # create a 2-column (triplet, freqs) mapping between triplets and freqs 
 map.paml = tibble(triplet=tri, freqs=freqs)
+formatC(sum(as.numeric(map.paml$freqs)), digits = 8, format = "f")
+stopifnot( sum(as.numeric(map.paml$freqs)) == 1 )
 map.paml 
 # print triplets in PAML order
 paste(map.paml$triplet, collapse=", ")
@@ -52,6 +54,7 @@ paste(map.beast$triplet, collapse=", ")
 paste(map.beast$freqs, collapse=" ")
 
 ###### test
+# select rows given triplets, after reorder, compare if they are same.
 filter(map.paml, triplet %in% c("TCT","ACT","GGA")) %>% arrange(triplet) == 
 filter(map.beast, triplet %in% c("TCT","ACT","GGA")) %>% arrange(triplet)
 
