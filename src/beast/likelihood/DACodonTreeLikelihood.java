@@ -345,7 +345,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
             m_nScale = 0;
             m_fScale *= 1.01;
             Log.warning.println("Turning on scaling to prevent numeric instability " + m_fScale);
-            likelihoodCore.setUseScaling(m_fScale);
+//TODO            likelihoodCore.setUseScaling(m_fScale);
             likelihoodCore.unstore();
             hasDirt = Tree.IS_FILTHY;
             traverse(tree.getRoot());
@@ -361,7 +361,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         logP = 0.0;
         for (int i = 0; i < codonAlignment.getSiteCount(); i++) {
             //TODO no pattern, check here
-            logP += siteLogLikelihoods[i] * codonAlignment.getSiteWeight(i);
+//            logP += siteLogLikelihoods[i] * codonAlignment.getSiteWeight(i);
+            logP += siteLogLikelihoods[i];
         }
     }
 
@@ -441,6 +442,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
                     }
 
                     likelihoodCore.calculateLogLikelihoods(m_fRootPartials, frequencies, siteLogLikelihoods);
+
+//                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
                 }
 
             }

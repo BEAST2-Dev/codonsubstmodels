@@ -4,6 +4,7 @@ package beast.likelihood;
 import beast.evolution.likelihood.LikelihoodCore;
 import beast.tree.InternalNodeStates;
 
+
 /**
  * standard data augmentation likelihood core, uses no caching *
  *
@@ -253,6 +254,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
                     (states[nodeIndex1] != null) + ", child 2 " + (states[nodeIndex2] != null) +
                     ", parent " + (states[nodeIndex3] != null));
         }
+//        System.out.println("partials = " + Arrays.toString(partials[currentPartialsIndex[nodeIndex3]][nodeIndex3]));
 
         if (useScaling) {
             throw new UnsupportedOperationException("in dev");
@@ -282,8 +284,9 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     protected void calculateStatesStates(int[] stateIndex1, double[] matrices1,
                                          int[] stateIndex2, double[] matrices2,
                                          int[] stateIndex3, double[] partials3) {
-        int v = 0;
-
+//        int v = 0;
+//        System.out.println("\nmatrices1 = " + matrices1.length + " matrices2 = " + matrices2.length +
+//                " partials3 = " + partials3.length + " nrOfSites = " + nrOfSites + " nrOfStates = " + nrOfStates);
         for (int l = 0; l < nrOfMatrices; l++) {
 
             for (int k = 0; k < nrOfSites; k++) {
@@ -304,9 +307,10 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                        w += nrOfStates;
 //                    }
 
-
+//System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
+//        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
                     //TODO validate index
-                    partials3[k] = matrices1[w + state1*nrOfStates + state3] * matrices2[w + state2*nrOfStates + state3];
+                    partials3[k] = matrices1[w + state1 + state3] * matrices2[w + state2 + state3];
 
 
 
@@ -331,6 +335,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                        w += nrOfStates;
 //                    }
                 } else {
+                    System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
                     throw new UnsupportedOperationException("in dev");
                     // both children have a gap or unknown state so set partials to 1
 
@@ -406,6 +411,9 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
             int rootNr = nrOfNodes - 1;
             int i = states[rootNr][k]; // 0-63
 //TODO validate index
+            if (frequencies[i] == 0)
+                throw new RuntimeException("frequencies[" + i + "] == 0 refers to stop codon, check the index i or frequencies !");
+
             // partials[] is nrOfSites * nrOfMatrices
             sum += frequencies[i] * integratedPartials[k];
 //            v++;

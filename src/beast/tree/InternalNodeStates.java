@@ -2,9 +2,11 @@ package beast.tree;
 
 import beast.core.Input;
 import beast.core.parameter.IntegerParameter;
+import beast.core.util.Log;
 import beast.evolution.alignment.CodonAlignment;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,27 +34,84 @@ public class InternalNodeStates extends IntegerParameter {
 
     protected CodonAlignment codonAlignment;
 
+    public InternalNodeStates() {
+        dimensionInput.setRule(Input.Validate.FORBIDDEN);
+        minorDimensionInput.setRule(Input.Validate.FORBIDDEN);
+        lowerValueInput.setRule(Input.Validate.FORBIDDEN);
+        upperValueInput.setRule(Input.Validate.FORBIDDEN);
+    }
+
+
+    public InternalNodeStates(int internalNodeCount, int siteCount) {
+        this(64, internalNodeCount, siteCount);
+    }
+
+    /**
+     * The large 2-d matrix to store internal node states.
+     * @param stateCount           to define upper
+     * @param internalNodeCount    to define rows of 2d matrix
+     * @param siteCount            to define cols of 2d matrix
+     */
+    public InternalNodeStates(int stateCount, int internalNodeCount, int siteCount) {
+        this(); // reserve  dimension, minorDimension
+        initParam(stateCount, internalNodeCount, siteCount);
+    }
+
     @Override
     public void initAndValidate() {
+        // need data type, site count, taxa count
         codonAlignment = dataInput.get();
         int stateCount = codonAlignment.getDataType().getStateCount(); // 64
         assert stateCount == 64;
+
+        // used to adjust Nr
+        int internalNodeCount = codonAlignment.getTaxonCount() - 1;
+        assert internalNodeCount > 1;
+        // L = num of codons, overwrite in CodonAlignment /= 3
+        int siteCount = codonAlignment.getSiteCount();
+
+        // stateCount -> upper, internalNodeCount * siteCount -> 2d matrix
+        initParam(stateCount, internalNodeCount, siteCount);
+    }
+
+    // stateCount -> upper, internalNodeCount * siteCount -> 2d matrix
+    private void initParam(int stateCount, int internalNodeCount, int siteCount) {
+        this.internalNodeCount = internalNodeCount;
 
         // 0 - 63, ignore lowerValueInput upperValueInput
         m_fLower = 0;
         m_fUpper = stateCount-1; // not deal unknown codon
 
-        // used to adjust Nr
-        internalNodeCount = codonAlignment.getTaxonCount() - 1;
-        assert internalNodeCount > 1;
         // L = num of codons, overwrite in CodonAlignment /= 3
-        minorDimension = codonAlignment.getSiteCount();
+        minorDimension = siteCount;
 
         // internal nodes = n - 1, length = (n-1)*L
         this.values = new Integer[internalNodeCount * minorDimension];
+        Arrays.fill(this.values, 0);
         this.storedValues = values.clone();
 
         m_bIsDirty = new boolean[values.length];
+
+        Log.info.println("Create internal node states matrix : " + internalNodeCount + " * " + minorDimension);
+
+
+//        T[] valuesString = valuesInput.get().toArray((T[]) Array.newInstance(getMax().getClass(), 0));
+//
+//        int dimension = Math.max(dimensionInput.get(), valuesString.length);
+//        dimensionInput.setValue(dimension, this);
+//        values = (T[]) Array.newInstance(getMax().getClass(), dimension);
+//        storedValues = (T[]) Array.newInstance(getMax().getClass(), dimension);
+//        for (int i = 0; i < values.length; i++) {
+//            values[i] = valuesString[i % valuesString.length];
+//        }
+//
+//        m_bIsDirty = new boolean[dimensionInput.get()];
+//
+//        minorDimension = minorDimensionInput.get();
+//        if (minorDimension > 0 && dimensionInput.get() % minorDimension > 0) {
+//            throw new IllegalArgumentException("Dimension must be divisible by stride");
+//        }
+//        this.storedValues = values.clone();
 
     }
 
@@ -67,10 +126,48 @@ public class InternalNodeStates extends IntegerParameter {
     public int[] getNrStates(final int nodeNr) {
         assert nodeNr > internalNodeCount; // internalNodeCount = getTaxonCount() - 1;
         int rowIndex = nodeNr - internalNodeCount - 1; // convert nodeNr into 2d matrix row index
-        int[] row = new int[minorDimension];
+        Integer[] row = new Integer[minorDimension];
         // matrix[i,j] = values[i * minorDimension + j]
         System.arraycopy(values, rowIndex * minorDimension, row, 0, row.length);
-        return row;
+
+        return Arrays.stream(row).mapToInt(Integer::intValue).toArray();
+    }
+
+    /**
+     * Set the states to an internal node.
+     * The node index has to convert to the array index before setValue.
+     * @param nodeNr the node index = <code>nodeNr - internalNodeCount - 1</code><br>
+     *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
+     *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
+     *               The root node is always numbered <code>nodes-1</code>.
+     * @param states  int[]
+     */
+    public void setNrStates(final int nodeNr, final int[] states) {
+        assert nodeNr > internalNodeCount; // internalNodeCount = getTaxonCount() - 1;
+        int rowIndex = nodeNr - internalNodeCount - 1; // convert nodeNr into 2d matrix row index
+        assert states.length == minorDimension; // minorDimension == cols
+
+        //TODO performance check
+        Integer[] vals = Arrays.stream( states ).boxed().toArray( Integer[]::new );
+
+        setValue(rowIndex * minorDimension, vals);
+    }
+
+    /**
+     * modify setValue for 2d matrix to take int[].
+     * @param param  the start index of parameter to set to the flattened matrix,
+     *               the values of the parameter is given by an int[].
+     * @param vals  int[] values of the parameter
+     */
+    protected void setValue(int param, Integer[] vals) {
+        assert vals.length + param <= this.values.length;
+
+        startEditing(null);
+
+        System.arraycopy(vals, 0, this.values, param, vals.length);
+        for (int i = param; i < (param + vals.length); i++)
+            m_bIsDirty[i] = true;
+//        m_nLastDirty = param;
     }
 
     /**

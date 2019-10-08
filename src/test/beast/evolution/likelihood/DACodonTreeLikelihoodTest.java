@@ -25,94 +25,103 @@ public class DACodonTreeLikelihoodTest {
         Alignment data = CodonTestData.getAlignment();
         // create Codon Alignment
         codonAlignment = new CodonAlignment();
-        codonAlignment.initByName("data", data, "dataType", "codon", "geneticCode", "vertebrateMitochondrial");
+        codonAlignment.initByName("data", data, "dataType", "codon",
+                "geneticCode", "vertebrateMitochondrial", "verbose", false);
 
         newickTree = "((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, " +
                 "(Chimp_Horai: 0.002959, Chimp_Arnason: 0.002959): 0.255761, (Gorilla_Horai: 0.003918, " +
                 "Gorilla_Arnason: 0.003918): 0.254801);";
-
-
     }
 
-    @Test
-    public void testCodonPositionBaseFrequencies(){
-    }
-
-    @Test
-    public void testCodonFrequencies(){
-    }
-
-    @Test
-    public void testEqualFreq(){
-    }
-
-    @Test
-    public void testF1X4(){
-    }
 
     @Test
     public void benchmarkingF3X4(){
         CodonFrequencies codonFreq = new CodonFrequencies();
-        codonFreq.initByName("pi", "F3X4", "data", codonAlignment);
+        codonFreq.initByName("pi", "F3X4", "data", codonAlignment, "verbose", false);
 
-        SiteModel siteModel = CodonTestData.getSiteModel("0.08000", "15.34858", codonFreq);
+        SiteModel siteModel = CodonTestData.getSiteModel("0.08000", "15.34858", codonFreq, false);
 
         Tree tree = CodonTestData.getTree(codonAlignment, newickTree);
 
         System.setProperty("java.only","true");
 
         // =============== Standard likelihood ===============
-        // Get current time
-        long start = System.currentTimeMillis();
         int iteration = 100;
+        long[] elapsedTimeMillis = new long[iteration];
+        double timeStandard = 0;
 
         for (int i=0; i<iteration; i++) {
+            // Get current time
+            long start = System.currentTimeMillis();
+
             TreeLikelihood likelihood = new TreeLikelihood();
             likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
 
             double logP = likelihood.calculateLogP();
+
+            // Get elapsed time in milliseconds
+            elapsedTimeMillis[i] = System.currentTimeMillis()-start;
+            timeStandard += elapsedTimeMillis[i];
+
+            System.out.println("i = " + i + " logP = " + logP);
         }
-
-        // Get elapsed time in milliseconds
-        long elapsedTimeMillis = System.currentTimeMillis()-start;
-        double time = (double) elapsedTimeMillis/iteration;
-
-        System.out.println("\n=============== Standard likelihood ===============\n");
-        System.out.println(iteration + " iteration(s) " + elapsedTimeMillis + " milliseconds");
-        System.out.println("Calculation time = " + time + " milliseconds per iteration in average.");
 
         // =============== DA likelihood ===============
 
-        InternalNodeStates internalNodeStates = new InternalNodeStates();
-        int internalNr = tree.getInternalNodeCount();
+        int tipCount = tree.getLeafNodeCount();
+        int internalNodeCount = tree.getInternalNodeCount();
         int siteCount = codonAlignment.getSiteCount();
-        //TODO internalNodeStates.randomSampleStates(internalNr, siteCount);
 
-        start = System.currentTimeMillis();
+        InternalNodeStates internalNodeStates = new InternalNodeStates(internalNodeCount, siteCount);
 
-        for (int i=0; i<iteration; i++) {
-            DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
-
-            //TODO
-
-
-            likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
-
-            double logP = likelihood.calculateLogP();
+        // internal nodes
+        for (int i=tipCount; i<tree.getNodeCount(); i++) {
+            int[] states = new int[siteCount];
+            // 0 - 63
+            for (int j=0; j < states.length; j++) {
+                states[j] = (int)(Math.random() * 64);
+                // not stop codon in vertebrateMitochondrial
+                while(states[j] == 8 || states[j] == 10 || states[j] == 48 || states[j] == 50)
+                    states[j] = (int)(Math.random() * 64);
+            }
+            internalNodeStates.setNrStates(i, states);
         }
 
-        // Get elapsed time in milliseconds
-        elapsedTimeMillis = System.currentTimeMillis()-start;
-        time = (double) elapsedTimeMillis/iteration;
+        elapsedTimeMillis = new long[iteration];
+        double timeDA = 0;
+
+        for (int i=0; i<iteration; i++) {
+            // Get current time
+            long start = System.currentTimeMillis();
+
+            DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
+
+            likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel,
+                    "internalNodeStates", internalNodeStates);
+
+            double logP = likelihood.calculateLogP();
+
+            // Get elapsed time in milliseconds
+            elapsedTimeMillis[i] = System.currentTimeMillis()-start;
+            timeDA += elapsedTimeMillis[i];
+
+            System.out.println("i = " + i + " logP = " + logP);
+        }
+
+        // =============== report ===============
+
+        System.out.println("\n=============== Standard likelihood ===============\n");
+        System.out.println(iteration + " iteration(s) " + timeStandard + " milliseconds");
+        timeStandard /= iteration;
+        System.out.println("Calculation time = " + timeStandard + " milliseconds per iteration in average.");
+
 
         System.out.println("\n=============== DA likelihood ===============\n");
-        System.out.println(iteration + " iteration(s) " + elapsedTimeMillis + " milliseconds");
-        System.out.println("Calculation time = " + time + " milliseconds per iteration in average.");
+        System.out.println(iteration + " iteration(s) " + timeDA + " milliseconds");
+        timeDA /= iteration;
+        System.out.println("Calculation time = " + timeDA + " milliseconds per iteration in average.");
 
     }
 
-    @Test
-    public void testF60(){
-    }
 
 }

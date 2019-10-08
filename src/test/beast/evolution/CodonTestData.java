@@ -54,12 +54,12 @@ public class CodonTestData {
         return t;
     }
 
-    public static SiteModel getSiteModel(String omegaValue, String kappaValue, CodonFrequencies codonFreq) {
+    public static SiteModel getSiteModel(String omegaValue, String kappaValue, CodonFrequencies codonFreq, boolean verbose) {
         RealParameter omega = new RealParameter(omegaValue);
         RealParameter kappa = new RealParameter(kappaValue);
 
         M0Model m0 = new M0Model();
-        m0.initByName("omega", omega, "kappa", kappa, "frequencies", codonFreq);
+        m0.initByName("omega", omega, "kappa", kappa, "frequencies", codonFreq, "verbose", verbose);
 
         SiteModel siteModel = new SiteModel();
         siteModel.initByName("substModel", m0);
