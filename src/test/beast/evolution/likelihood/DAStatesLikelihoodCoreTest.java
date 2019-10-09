@@ -91,14 +91,11 @@ public class DAStatesLikelihoodCoreTest {
         daLDCore.setNodeStates(1, new int[]{60,61});
         daLDCore.setNodeStates(2, new int[]{8,9});
 
-        daLDCore.setNodeMatrix(0, 0, p0);
-        daLDCore.setNodeMatrix(1, 0, p1);
-        daLDCore.setNodeMatrix(0, 1, p0);
-        daLDCore.setNodeMatrix(1, 1, p1);
-        daLDCore.setNodeMatrix(0, 2, p0);
-        daLDCore.setNodeMatrix(1, 2, p1);
-        daLDCore.setNodeMatrix(0, 3, p0);
-        daLDCore.setNodeMatrix(1, 3, p1);
+        // set same p to 4 categories
+        for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
+            daLDCore.setNodeMatrix(0, i, p0);
+            daLDCore.setNodeMatrix(1, i, p1);
+        }
 
         // DA intermediate likelihood per site at parent node
         daLDCore.calculatePartials(0,1,2);
@@ -111,11 +108,9 @@ public class DAStatesLikelihoodCoreTest {
         System.out.println("partials = " + Arrays.toString(partials));
 
         // 2 sites
-        assertEquals(7.2 * 38.48, partials[0], 1e-6);
-        assertEquals(13.7 * 39.13, partials[1], 1e-6);
-
-        // TODO partials = [277.05600000000004, 536.0810000000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-//        assertEquals(7.2 * 38.48, partials[2], 1e-6);
-//        assertEquals(13.7 * 39.13, partials[3], 1e-6);
+        for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
+            assertEquals(7.2 * 38.48, partials[i*2], 1e-6);
+            assertEquals(13.7 * 39.13, partials[i*2+1], 1e-6);
+        }
     }
 }

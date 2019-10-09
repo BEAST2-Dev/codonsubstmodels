@@ -293,19 +293,20 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                " partials3 = " + partials3.length + " nrOfSites = " + nrOfSites + " nrOfStates = " + nrOfStates);
         for (int l = 0; l < nrOfMatrices; l++) {
 
+            int w = l * matrixSize;
+            int v = l * nrOfSites;
+
             for (int k = 0; k < nrOfSites; k++) {
 
                 int state1 = stateIndex1[k];
                 int state2 = stateIndex2[k];
                 int state3 = stateIndex3[k];
 
-                int w = l * matrixSize;
-
                 if (state1 < nrOfStates && state2 < nrOfStates && state3 < nrOfStates) {
 //System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
 //        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
                     //TODO validate index
-                    partials3[k] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
+                    partials3[k + v] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
 //                    w += nrOfStates;
 
 //                    for (int i = 0; i < nrOfStates; i++) {
