@@ -41,27 +41,7 @@ public class DAStatesLikelihoodCoreTest {
             p1[i] = i * 0.01;
         }
 
-    }
-
-    @Test
-    public void testInit() {
-        assertEquals(64, daLDCore1site.getNrOfStates());
-        assertEquals(3, daLDCore1site.getNrOfNodes());
-        assertEquals(1, daLDCore1site.getNrOfSites());
-        assertEquals(1, daLDCore1site.getNrOfCategories()); // nrOfMatrices
-        assertEquals(4096, daLDCore1site.getMatrixSize()); // nrOfStates^2
-        assertEquals(1, daLDCore1site.getPartialsSize()); // = nrOfSites * nrOfMatrices;
-
-        assertEquals(2, daLDCore.getNrOfSites());
-        assertEquals(4, daLDCore.getNrOfCategories());
-        assertEquals(4096, daLDCore.getMatrixSize());
-        assertEquals(8, daLDCore.getPartialsSize());
-    }
-
-
-    @Test
-    public void calculatePartials() {
-
+        // ======= 2 tips + 1 internal node, 1 codon, 1 category =======
         daLDCore1site.createNodePartials(2);
 
         // set codon state to 1 site, state = [0, 63]
@@ -74,14 +54,6 @@ public class DAStatesLikelihoodCoreTest {
 
         // DA intermediate likelihood per site at parent node
         daLDCore1site.calculatePartials(0,1,2);
-
-        // test index: p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
-        double[] partials = new double[daLDCore1site.getPartialsSize()];
-        daLDCore1site.getNodePartials(2, partials);
-        System.out.println("partials = " + Arrays.toString(partials));
-
-        // 1 site
-        assertEquals(7.2 * 38.48, partials[0], 1e-6);
 
         // ======= 2 tips + 1 internal node, 2 codons, 4 category =======
         daLDCore.createNodePartials(2);
@@ -100,6 +72,35 @@ public class DAStatesLikelihoodCoreTest {
         // DA intermediate likelihood per site at parent node
         daLDCore.calculatePartials(0,1,2);
 
+    }
+
+    @Test
+    public void testInit() {
+        assertEquals(64, daLDCore1site.getNrOfStates());
+        assertEquals(3, daLDCore1site.getNrOfNodes());
+        assertEquals(1, daLDCore1site.getNrOfSites());
+        assertEquals(1, daLDCore1site.getNrOfCategories()); // nrOfCategories
+        assertEquals(4096, daLDCore1site.getMatrixSize()); // nrOfStates^2
+        assertEquals(1, daLDCore1site.getPartialsSize()); // = nrOfSites * nrOfCategories;
+
+        assertEquals(2, daLDCore.getNrOfSites());
+        assertEquals(4, daLDCore.getNrOfCategories());
+        assertEquals(4096, daLDCore.getMatrixSize());
+        assertEquals(8, daLDCore.getPartialsSize());
+    }
+
+
+    @Test
+    public void calculatePartials() {
+
+        // test index: p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
+        double[] partials = new double[daLDCore1site.getPartialsSize()];
+        daLDCore1site.getNodePartials(2, partials);
+        System.out.println("partials = " + Arrays.toString(partials));
+
+        // 1 site
+        assertEquals(7.2 * 38.48, partials[0], 1e-6);
+
         // test index category 1 :
         // p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
         // p0_2_9 = 6.4 * 2 + 0.9 = 13.7, p1_61_9 = 61 * 0.64 + 0.09 = 39.13
@@ -107,10 +108,24 @@ public class DAStatesLikelihoodCoreTest {
         daLDCore.getNodePartials(2, partials);
         System.out.println("partials = " + Arrays.toString(partials));
 
-        // 2 sites
+        // 2 sites, [277.05600000000004, 536.0810000000001, 277.05600000000004, 536.0810000000001, ...]
         for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
             assertEquals(7.2 * 38.48, partials[i*2], 1e-6);
             assertEquals(13.7 * 39.13, partials[i*2+1], 1e-6);
         }
+
+    }
+
+    @Test
+    public void integratePartials() {
+
+        double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
+        double[] integratedPartials = new double[daLDCore.getNrOfSites()];
+        daLDCore.integratePartials(2, proportions, integratedPartials);
+        System.out.println("integrated partials = " + Arrays.toString(integratedPartials));
+
+        // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
+        assertEquals(7.2 * 38.48 * 0.7, integratedPartials[0], 1e-6);
+        assertEquals(13.7 * 39.13 * 0.7, integratedPartials[1], 1e-6);
     }
 }
