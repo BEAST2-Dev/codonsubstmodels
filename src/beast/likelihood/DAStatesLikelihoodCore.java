@@ -19,7 +19,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     protected int matrixSize; // nrOfStates^2
     protected int nrOfMatrices; // number of categories
 
-    // partial likelihood matrix(ices),
+    // to store intermediate likelihood calculation per site:
     // 1st dimension is matrix index (current, stored),
     // 2nd is node index,
     // 3rd is improved to nrOfSites * nrOfMatrices
@@ -164,7 +164,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
     @Override
     public void setNodeMatrixForUpdate(int nodeIndex) {
-        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex];
+        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex]; // 0 or 1
 
     }
 
@@ -173,9 +173,9 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
      * Sets probability matrix for a node
      */
     @Override
-	public void setNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
+	public void setNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix) {
         System.arraycopy(matrix, 0, matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-                matrixIndex * matrixSize, matrixSize);
+                categoryIndex * matrixSize, matrixSize);
     }
 
 //    public void setPaddedNodeMatrices(int nodeIndex, double[] matrix) {
@@ -188,9 +188,9 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
      * Gets probability matrix for a node
      */
     @Override
-	public void getNodeMatrix(int nodeIndex, int matrixIndex, double[] matrix) {
+	public void getNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix) {
         System.arraycopy(matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-                matrixIndex * matrixSize, matrix, 0, matrixSize);
+                categoryIndex * matrixSize, matrix, 0, matrixSize);
     }
 
     //============ partial likelihood ============
@@ -234,7 +234,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
     @Override
     public void setNodePartialsForUpdate(int nodeIndex) {
-        currentPartialsIndex[nodeIndex] = 1 - currentPartialsIndex[nodeIndex];
+        currentPartialsIndex[nodeIndex] = 1 - currentPartialsIndex[nodeIndex]; // 0 or 1
     }
 
     /**
@@ -291,15 +291,20 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                " partials3 = " + partials3.length + " nrOfSites = " + nrOfSites + " nrOfStates = " + nrOfStates);
         for (int l = 0; l < nrOfMatrices; l++) {
 
-            int w = l * matrixSize;
-
             for (int k = 0; k < nrOfSites; k++) {
 
                 int state1 = stateIndex1[k];
                 int state2 = stateIndex2[k];
                 int state3 = stateIndex3[k];
 
-                if (state1 < nrOfStates && state2 < nrOfStates) {
+                int w = l * matrixSize;
+
+                if (state1 < nrOfStates && state2 < nrOfStates && state3 < nrOfStates) {
+//System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
+//        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
+                    //TODO validate index
+                    partials3[k] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
+//                    w += nrOfStates;
 
 //                    for (int i = 0; i < nrOfStates; i++) {
 //
@@ -308,14 +313,6 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                        v++;
 //                        w += nrOfStates;
 //                    }
-
-//System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
-//        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
-                    //TODO validate index
-                    partials3[k] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-
-
-
 //                } else if (state1 < nrOfStates) {
 //                    // child 2 has a gap or unknown state so treat it as unknown
 //
@@ -539,6 +536,8 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         System.arraycopy(currentMatrixIndex, 0, storedMatrixIndex, 0, nrOfNodes);
         System.arraycopy(currentPartialsIndex, 0, storedPartialsIndex, 0, nrOfNodes);
     }
+
+    // ======= getters for unit tests =======
 
     public int getNrOfStates() {
         return nrOfStates;
