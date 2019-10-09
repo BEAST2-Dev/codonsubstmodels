@@ -237,7 +237,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
             throw new UnsupportedOperationException("in development");
 //            setPartials(treeInput.get().getRoot(), codonAlignment.getSiteCount());
         } else {
-            setStates(treeInput.get().getRoot());
+//            setStates(treeInput.get().getRoot());
+            setStates(treeInput.get());
         }
         hasDirt = Tree.IS_FILTHY;
         for (int i = 0; i < intNodeCount; i++) {
@@ -257,31 +258,56 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * set all nodes states in likelihood core *
      */
-    protected void setStates(Node node) {
+    protected void setStates(TreeInterface tree) {
 
-        if (node.isLeaf()) {
-            // set leaf node states
-            int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
-            // no patterns
-            List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+        for (Node node : tree.getNodesAsArray()) {
+            final int[] states;
 
-            assert statesList.size() == codonAlignment.getSiteCount();
-            // Java 8
-            int[] states = statesList.stream().mapToInt(i->i).toArray();
+            if (node.isLeaf()) {
+                // set leaf node states
+                int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
+                // no patterns
+                List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+
+                assert statesList.size() == codonAlignment.getSiteCount();
+                // Java 8
+                states = statesList.stream().mapToInt(i->i).toArray();
+            } else {
+                // set internal node states
+                int Nr = node.getNr();
+                states = internalNodeStates.getNrStates(Nr);
+            }
 
             likelihoodCore.setNodeStates(node.getNr(), states);
-        } else {
-            // set internal node states
-            int Nr = node.getNr();
-            int[] states = internalNodeStates.getNrStates(Nr);
-
-            likelihoodCore.setNodeStates(node.getNr(), states);
-
-            // traverse
-            setStates(node.getChild(0));
-            setStates(node.getChild(1));
         }
     }
+    //TODO why speed is same?
+//    protected void setStates(Node node) {
+//
+//        if (node.isLeaf()) {
+//            // set leaf node states
+//            int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
+//            // no patterns
+//            List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+//
+//            assert statesList.size() == codonAlignment.getSiteCount();
+//            // Java 8
+//            int[] states = statesList.stream().mapToInt(i->i).toArray();
+//
+//            likelihoodCore.setNodeStates(node.getNr(), states);
+//        } else {
+//            // set internal node states
+//            int Nr = node.getNr();
+//            int[] states = internalNodeStates.getNrStates(Nr);
+//
+//            likelihoodCore.setNodeStates(node.getNr(), states);
+//
+//            // traverse
+//            setStates(node.getChild(0));
+//            setStates(node.getChild(1));
+//        }
+//    }
+
 
     /**
      *
@@ -326,34 +352,35 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         try {
             if (traverse(tree.getRoot()) != Tree.IS_CLEAN)
                 calcLogP();
+//            System.out.println("logP = " + logP);
         }
         catch (ArithmeticException e) {
             return Double.NEGATIVE_INFINITY;
         }
 
-        m_nScale++;
-        if (logP > 0 || (likelihoodCore.getUseScaling() && m_nScale > X)) {
-//            System.err.println("Switch off scaling");
-//            m_likelihoodCore.setUseScaling(1.0);
-//            m_likelihoodCore.unstore();
-//            m_nHasDirt = Tree.IS_FILTHY;
-//            X *= 2;
+//        m_nScale++;
+//        if (logP > 0 || (likelihoodCore.getUseScaling() && m_nScale > X)) {
+////            System.err.println("Switch off scaling");
+////            m_likelihoodCore.setUseScaling(1.0);
+////            m_likelihoodCore.unstore();
+////            m_nHasDirt = Tree.IS_FILTHY;
+////            X *= 2;
+////            traverse(tree.getRoot());
+////            calcLogP();
+////            return logP;
+//        } else if (logP == Double.NEGATIVE_INFINITY && m_fScale < 10 && !scaling.get().equals(TreeLikelihood.Scaling.none)) { // && !m_likelihoodCore.getUseScaling()) {
+//            m_nScale = 0;
+//            m_fScale *= 1.01;
+//            Log.warning.println("Turning on scaling to prevent numeric instability " + m_fScale);
+////TODO            likelihoodCore.setUseScaling(m_fScale);
+//            likelihoodCore.unstore();
+//            hasDirt = Tree.IS_FILTHY;
 //            traverse(tree.getRoot());
+//
 //            calcLogP();
+//
 //            return logP;
-        } else if (logP == Double.NEGATIVE_INFINITY && m_fScale < 10 && !scaling.get().equals(TreeLikelihood.Scaling.none)) { // && !m_likelihoodCore.getUseScaling()) {
-            m_nScale = 0;
-            m_fScale *= 1.01;
-            Log.warning.println("Turning on scaling to prevent numeric instability " + m_fScale);
-//TODO            likelihoodCore.setUseScaling(m_fScale);
-            likelihoodCore.unstore();
-            hasDirt = Tree.IS_FILTHY;
-            traverse(tree.getRoot());
-
-            calcLogP();
-
-            return logP;
-        }
+//        }
         return logP;
     }
 
@@ -363,6 +390,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
             //TODO no pattern, check here
 //            logP += siteLogLikelihoods[i] * codonAlignment.getSiteWeight(i);
             logP += siteLogLikelihoods[i];
+            System.out.println("i = " + i + " logP = " + logP + " siteLogLikelihoods = " + siteLogLikelihoods[i]);
         }
     }
 
@@ -421,11 +449,10 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
                     //m_pLikelihoodCore->calculatePartials(childNum1, childNum2, nodeNum, siteCategories);
                 }
 
+                // No parent this is the root of the beast.tree -
+                // calculate the pattern likelihoods
                 if (node.isRoot()) {
-                    // No parent this is the root of the beast.tree -
-                    // calculate the pattern likelihoods
-                    final double[] frequencies = //m_pFreqs.get().
-                            substitutionModel.getFrequencies();
+                    final double[] frequencies = substitutionModel.getFrequencies();
 
                     final double[] proportions = m_siteModel.getCategoryProportions(node);
                     // m_fRootPartials is integrated across categories, so length is siteCount
@@ -443,7 +470,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                     likelihoodCore.calculateLogLikelihoods(m_fRootPartials, frequencies, siteLogLikelihoods);
 
-//                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
+                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
                 }
 
             }

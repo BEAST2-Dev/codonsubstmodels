@@ -55,10 +55,10 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
     /**
      * initializes likelihood arrays.
-     * @param nodeCount           the number of nodes in the tree
+     * @param nodeCount        the number of nodes in the tree
      * @param siteCount        the number of patterns
-     * @param categoryCount   the number of matrices (i.e., number of categories)
-     * @param useAmbiguities  flag to indicate that sites containing ambiguous states should be handled instead of ignored
+     * @param categoryCount    the number of matrices (i.e., number of categories)
+     * @param useAmbiguities   flag to indicate that sites containing ambiguous states should be handled instead of ignored
      */
     @Override
 	public void initialize(int nodeCount, int siteCount, int categoryCount, boolean integrateCategories, boolean useAmbiguities) {
@@ -226,8 +226,10 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     }
 
     @Override
-    public void getNodePartials(int nodeIndex, double[] partialsOut) {
-        System.arraycopy(partials[currentPartialsIndex[nodeIndex]][nodeIndex], 0, partialsOut, 0, partialsOut.length);
+    public void getNodePartials(int nodeIndex, double[] outPartials) {
+        double[] partials1 = partials[currentPartialsIndex[nodeIndex]][nodeIndex];
+
+        System.arraycopy(partials1, 0, outPartials, 0, partialsSize);
     }
 
     @Override
@@ -289,13 +291,13 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                " partials3 = " + partials3.length + " nrOfSites = " + nrOfSites + " nrOfStates = " + nrOfStates);
         for (int l = 0; l < nrOfMatrices; l++) {
 
+            int w = l * matrixSize;
+
             for (int k = 0; k < nrOfSites; k++) {
 
                 int state1 = stateIndex1[k];
                 int state2 = stateIndex2[k];
                 int state3 = stateIndex3[k];
-
-                int w = l * matrixSize;
 
                 if (state1 < nrOfStates && state2 < nrOfStates) {
 
@@ -310,7 +312,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
 //        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
                     //TODO validate index
-                    partials3[k] = matrices1[w + state1 + state3] * matrices2[w + state2 + state3];
+                    partials3[k] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
 
 
 
@@ -410,7 +412,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
             // hard code for root node
             int rootNr = nrOfNodes - 1;
             int i = states[rootNr][k]; // 0-63
-//TODO validate index
+//TODO rm validation to fast speed, implement unit test
             if (frequencies[i] == 0)
                 throw new RuntimeException("frequencies[" + i + "] == 0 refers to stop codon, check the index i or frequencies !");
 
@@ -418,6 +420,10 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
             sum += frequencies[i] * integratedPartials[k];
 //            v++;
 //            }
+            if (sum == 0)
+                throw new RuntimeException("Likelihood -Inf at site " + k + " node " + i + " ! " +
+                        "\nintegratedPartials = " + integratedPartials[k]);
+
             outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
         }
     }
@@ -534,6 +540,30 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         System.arraycopy(currentPartialsIndex, 0, storedPartialsIndex, 0, nrOfNodes);
     }
 
+    public int getNrOfStates() {
+        return nrOfStates;
+    }
 
+    public int getNrOfNodes() {
+        return nrOfNodes;
+    }
 
+    public int getNrOfSites() {
+        return nrOfSites;
+    }
+
+    // = nrOfSites * nrOfMatrices;
+    public int getPartialsSize() {
+        return partialsSize;
+    }
+
+    // transition probability matrix size = nrOfStates^2
+    public int getMatrixSize() {
+        return matrixSize;
+    }
+
+    // nrOfMatrices
+    public int getNrOfCategories() {
+        return nrOfMatrices;
+    }
 } // class

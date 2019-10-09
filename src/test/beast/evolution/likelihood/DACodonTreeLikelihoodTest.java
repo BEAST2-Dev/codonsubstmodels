@@ -46,16 +46,20 @@ public class DACodonTreeLikelihoodTest {
         System.setProperty("java.only","true");
 
         // =============== Standard likelihood ===============
-        int iteration = 100;
+        int iteration = 1;
         long[] elapsedTimeMillis = new long[iteration];
         double timeStandard = 0;
 
-        for (int i=0; i<iteration; i++) {
-            // Get current time
-            long start = System.currentTimeMillis();
+        // Get current time
+        long start = System.currentTimeMillis();
 
-            TreeLikelihood likelihood = new TreeLikelihood();
-            likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
+        TreeLikelihood likelihood = new TreeLikelihood();
+        likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
+
+        long standardInit = System.currentTimeMillis()-start;
+
+        for (int i=0; i<iteration; i++) {
+            start = System.currentTimeMillis();
 
             double logP = likelihood.calculateLogP();
 
@@ -67,6 +71,9 @@ public class DACodonTreeLikelihoodTest {
         }
 
         // =============== DA likelihood ===============
+
+        // Get current time
+        start = System.currentTimeMillis();
 
         int tipCount = tree.getLeafNodeCount();
         int internalNodeCount = tree.getInternalNodeCount();
@@ -90,33 +97,37 @@ public class DACodonTreeLikelihoodTest {
         elapsedTimeMillis = new long[iteration];
         double timeDA = 0;
 
+        DACodonTreeLikelihood daLikelihood = new DACodonTreeLikelihood();
+
+        daLikelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel,
+                "internalNodeStates", internalNodeStates);
+
+        long daInit = System.currentTimeMillis()-start;
+
+
         for (int i=0; i<iteration; i++) {
-            // Get current time
-            long start = System.currentTimeMillis();
+            start = System.currentTimeMillis();
 
-            DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
-
-            likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel,
-                    "internalNodeStates", internalNodeStates);
-
-            double logP = likelihood.calculateLogP();
+            double logPDA = daLikelihood.calculateLogP();
 
             // Get elapsed time in milliseconds
             elapsedTimeMillis[i] = System.currentTimeMillis()-start;
             timeDA += elapsedTimeMillis[i];
 
-            System.out.println("i = " + i + " logP = " + logP);
+            System.out.println("i = " + i + " logPDA = " + logPDA);
         }
 
         // =============== report ===============
 
         System.out.println("\n=============== Standard likelihood ===============\n");
+        System.out.println("Init time " + standardInit + " milliseconds");
         System.out.println(iteration + " iteration(s) " + timeStandard + " milliseconds");
         timeStandard /= iteration;
         System.out.println("Calculation time = " + timeStandard + " milliseconds per iteration in average.");
 
 
         System.out.println("\n=============== DA likelihood ===============\n");
+        System.out.println("Init time " + daInit + " milliseconds");
         System.out.println(iteration + " iteration(s) " + timeDA + " milliseconds");
         timeDA /= iteration;
         System.out.println("Calculation time = " + timeDA + " milliseconds per iteration in average.");
