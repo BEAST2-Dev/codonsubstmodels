@@ -280,8 +280,10 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 
 
     /**
-     * Calculates partial likelihoods at a node given both children have states.
-     * matrix P(t) is flattened to n = i * state + j where n is index of double[] matrices?.
+     * Calculate DA intermediate likelihood per site per node.
+     * matrix P(t) is flattened to n = w + i * state + j,
+     * where n is index of flattened transition probability matrix (double[] matrices?),
+     * i is child state, j is parent state, w is the category index.
      */
     protected void calculateStatesStates(int[] stateIndex1, double[] matrices1,
                                          int[] stateIndex2, double[] matrices2,
