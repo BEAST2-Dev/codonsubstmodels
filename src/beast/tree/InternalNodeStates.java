@@ -2,6 +2,7 @@ package beast.tree;
 
 import beast.core.Input;
 import beast.core.StateNode;
+import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import org.w3c.dom.Node;
 
@@ -9,7 +10,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 /**
- * The large 2-d matrix to store internal node states.
+ * The large 2-d matrix to store all node states.
  * Rows are internal nodes, cols are sites.
  * The values are flattened into 1d <code>int[]</code>,
  * and the state starts from 0. <br>
@@ -21,11 +22,10 @@ import java.util.List;
  * to the total nodes - 1.<br>
  * So use the following formula to convert index:<br>
  * <code>rowIndex = nodeNr - internalNodeCount - 1</code><br>
- *
  */
 public class InternalNodeStates extends StateNode {
 
-    final public Input<CodonAlignment> dataInput = new Input<>("data",
+    final public Input<Alignment> dataInput = new Input<>("data",
             "codon alignment to initialise the 2-d matrix of internal node states", Input.Validate.REQUIRED);
 
     /**
@@ -48,9 +48,9 @@ public class InternalNodeStates extends StateNode {
 
     // row (x) is internal nodes = leafNodeCount - 1
 //    protected int internalNodeCount = -1;
-    //    protected CodonAlignment codonAlignment;
 
-    public InternalNodeStates() {    }
+    public InternalNodeStates() {
+    }
 
 
     public InternalNodeStates(int internalNodeCount, int siteCount) {
@@ -59,9 +59,10 @@ public class InternalNodeStates extends StateNode {
 
     /**
      * The large 2-d matrix to store internal node states.
-     * @param stateCount           to define upper
-     * @param internalNodeCount    to define rows of 2d matrix
-     * @param siteCount            to define cols of 2d matrix
+     *
+     * @param stateCount        to define upper
+     * @param internalNodeCount to define rows of 2d matrix
+     * @param siteCount         to define cols of 2d matrix
      */
     public InternalNodeStates(int stateCount, int internalNodeCount, int siteCount) {
         this(); // reserve  dimension, minorDimension
@@ -71,15 +72,17 @@ public class InternalNodeStates extends StateNode {
     @Override
     public void initAndValidate() {
         // need data type, site count, taxa count
-        CodonAlignment codonAlignment = dataInput.get();
-        int stateCount = codonAlignment.getDataType().getStateCount(); // 64
-        assert stateCount == 64;
+        Alignment alignment = dataInput.get();
+        int stateCount = alignment.getDataType().getStateCount();
+
+        if (alignment instanceof CodonAlignment) // 64
+            assert stateCount == 64;
 
         // used to adjust Nr
-        int internalNodeCount = codonAlignment.getTaxonCount() - 1;
+        int internalNodeCount = alignment.getTaxonCount() - 1;
         assert internalNodeCount > 1;
-        // L = num of codons, overwrite in CodonAlignment /= 3
-        int siteCount = codonAlignment.getSiteCount();
+        // siteCount = num of codons, overwrite in CodonAlignment /= 3
+        int siteCount = alignment.getSiteCount();
 
         // stateCount -> upper, internalNodeCount * siteCount -> 2d matrix
         initParam(stateCount, internalNodeCount, siteCount);
@@ -93,11 +96,9 @@ public class InternalNodeStates extends StateNode {
 
         // 0 - 63, ignore lowerValueInput upperValueInput
         m_fLower = 0;
-        m_fUpper = stateCount-1; // not deal unknown codon
+        m_fUpper = stateCount - 1; // not deal unknown codon
 
         m_bIsDirty = new boolean[internalNodeCount];
-
-
 
 
 //        minorDimension = siteCount;
@@ -106,7 +107,6 @@ public class InternalNodeStates extends StateNode {
 //        this.values = new Integer[internalNodeCount * minorDimension];
 //        Arrays.fill(this.values, 0);
 //        this.storedValues = values.clone();
-
 
 
 //        Log.info.println("Create internal node states matrix : " + internalNodeCount + " * " + minorDimension);
@@ -146,6 +146,7 @@ public class InternalNodeStates extends StateNode {
 
     /**
      * Get an internal node states. The state starts from 0.
+     *
      * @param nodeNr the node index = <code>nodeNr - internalNodeCount - 1</code><br>
      *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
      *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
@@ -163,11 +164,12 @@ public class InternalNodeStates extends StateNode {
     /**
      * Set the states to an internal node.
      * The node index has to convert to the array index before setValue.
+     *
      * @param nodeNr the node index = <code>nodeNr - internalNodeCount - 1</code><br>
      *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
      *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
      *               The root node is always numbered <code>nodes-1</code>.
-     * @param states  int[]
+     * @param states int[]
      */
     public void setNrStates(final int nodeNr, final int[] states) {
         // internal node index nodeNr starts from getTaxonCount();
@@ -180,9 +182,10 @@ public class InternalNodeStates extends StateNode {
 
     /**
      * modify setValue for 2d matrix to take int[].
-     * @param rowIndex  the start index of parameter to set to the flattened matrix,
-     *               the values of the parameter is given by an int[].
-     * @param vals  int[] values of the parameter
+     *
+     * @param rowIndex the start index of parameter to set to the flattened matrix,
+     *                 the values of the parameter is given by an int[].
+     * @param vals     int[] values of the parameter
      */
     protected void setValue(final int rowIndex, final int[] vals) {
         startEditing(null);
@@ -194,6 +197,7 @@ public class InternalNodeStates extends StateNode {
 
     /**
      * get the sites at a site of all internal nodes.
+     *
      * @param codonNr the codon site index.
      * @return
      */
@@ -209,10 +213,10 @@ public class InternalNodeStates extends StateNode {
      * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
-     * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
-     *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
-     *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
-     *               The root node is always numbered <code>nodes-1</code>.
+     * @param nodeNr  the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
+     *                Leaf nodes are number 0 to <code>leafnodes-1</code>;
+     *                Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
+     *                The root node is always numbered <code>nodes-1</code>.
      * @param codonNr the site index.
      * @return
      */
@@ -263,15 +267,15 @@ public class InternalNodeStates extends StateNode {
 
 
     /**
-     *
+     * For CodonAlignment, convert triplets string into list of codon states.
      * @param triplets coded nucleotides in string
      * @return the list of codon states. The size should be 1/3 of string length
      */
     public List<Integer> stringToEncoding(String triplets) {
         // remove spaces
         triplets = triplets.replaceAll("\\s", "");
-        CodonAlignment codonAlignment = dataInput.get();
-        List<Integer> sequence = codonAlignment.getDataType().stringToEncoding(triplets);
+        Alignment alignment = dataInput.get();
+        List<Integer> sequence = alignment.getDataType().stringToEncoding(triplets);
         if (sequence.size() * 3 != triplets.length())
             throw new IllegalArgumentException("The string of triplets has invalid number ! " +
                     triplets.length() + " != " + sequence.size() + " * 3");
@@ -279,14 +283,13 @@ public class InternalNodeStates extends StateNode {
     }
 
     /**
-     *
      * @param triplets coded nucleotides in string
      * @return the int[] of codon states. The size should be 1/3 of string length
      */
     public int[] stringToStates(String triplets) {
         List<Integer> sequence = stringToEncoding(triplets);
 
-        return sequence.stream().mapToInt(i->i).toArray();
+        return sequence.stream().mapToInt(i -> i).toArray();
     }
 
     @Override
