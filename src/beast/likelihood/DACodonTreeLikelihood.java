@@ -435,7 +435,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                 final int childNum1 = child1.getNr();
                 final int childNum2 = child2.getNr();
-
+//TODO review whether partials[][][] are still useful
                 likelihoodCore.setNodePartialsForUpdate(nodeIndex);
                 update |= (update1 | update2);
                 if (update >= Tree.IS_FILTHY) {

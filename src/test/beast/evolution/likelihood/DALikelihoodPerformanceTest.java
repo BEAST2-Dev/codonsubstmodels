@@ -60,7 +60,7 @@ public class DALikelihoodPerformanceTest {
         init("F3X4");
 
         // =============== Standard likelihood ===============
-        int iteration = 10;
+        int iteration = 1;
         long[] elapsedTimeMillis = new long[iteration];
 
         // Get current time
@@ -135,7 +135,7 @@ public class DALikelihoodPerformanceTest {
             elapsedTimeMillis2[i] = System.currentTimeMillis()-start;
             timeDA += elapsedTimeMillis2[i];
 
-            System.out.println("i = " + i + " DA logP = " + logPDA);
+//            System.out.println("i = " + i + " DA logP = " + logPDA);
         }
         double timeDAStdev = 0;
         for (int i=0; i<iteration; i++) {

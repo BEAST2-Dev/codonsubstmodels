@@ -35,7 +35,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     // 3rd is nrOfCategories * matrixSize
     protected double[][][] matrices;
     // store the matrix index, instead of different matrices
-    protected int[] currentMatrixIndex;
+    protected int[] currentMatrixIndex; // nodeCount
     protected int[] storedMatrixIndex;
     protected int[] currentPartialsIndex;
     protected int[] storedPartialsIndex;
