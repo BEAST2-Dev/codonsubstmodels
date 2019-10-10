@@ -10,9 +10,13 @@ import java.util.Arrays;
 import static junit.framework.Assert.assertEquals;
 
 /**
+ * Build transition probability matrices under 3-node tree,
+ * 2 tips + 1 internal node, to test if the index lookup is correct
+ * during the data augmentation likelihood calculation.
+ *
  * @author Walter Xie
  */
-public class DAStatesLikelihoodCoreTest {
+public class DAStatesLikelihoodCoreIndexTest {
 
     DAStatesLikelihoodCore daLDCore1site;
     DAStatesLikelihoodCore daLDCore;
@@ -128,4 +132,7 @@ public class DAStatesLikelihoodCoreTest {
         assertEquals(7.2 * 38.48 * 0.7, integratedPartials[0], 1e-6);
         assertEquals(13.7 * 39.13 * 0.7, integratedPartials[1], 1e-6);
     }
+
+
+
 }

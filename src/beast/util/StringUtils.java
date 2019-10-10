@@ -1,6 +1,8 @@
 package beast.util;
 
 
+import beast.evolution.datatype.Codon;
+
 import java.text.DecimalFormat;
 
 public class StringUtils {
@@ -33,5 +35,33 @@ public class StringUtils {
         }
         return numbersNew;
     }
+
+    /**
+     * for print and debug view, matrixSize = nrOfStates^2
+     * @param matrix transition probability matrix
+     * @return
+     */
+    public static String get2DMatrixString(double[] matrix, int dim, Codon codon) {
+        StringBuilder output = new StringBuilder();
+        assert matrix.length == dim * dim;
+        if (codon != null) {
+            // add header
+            for (int j = 0; j < dim; j++)
+                output.append("\t").append(codon.encodingToString(new int[]{j}));
+            output.append("\n");
+        }
+        for (int i = 0; i < dim; i++) {
+            if (codon != null) {
+                // add row names
+                output.append(codon.encodingToString(new int[]{i})).append("\t");
+            }
+            for (int j = 0; j < dim; j++) {
+                output.append(matrix[i * dim + j]).append("\t");
+            }
+            output.append("\n");
+        }
+        return output.toString();
+    }
+
 
 }

@@ -6,9 +6,9 @@ import beast.tree.InternalNodeStates;
 
 
 /**
- * standard data augmentation likelihood core, uses no caching *
+ * general data augmentation likelihood core
  *
- *
+ * TODO consider 0 branch length, for example, syn seqs
  *
  */
 public class DAStatesLikelihoodCore extends LikelihoodCore {
@@ -258,6 +258,19 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
         }
 //        System.out.println("partials = " + Arrays.toString(partials[currentPartialsIndex[nodeIndex3]][nodeIndex3]));
 
+        final double[] tmp = partials[currentPartialsIndex[nodeIndex3]][nodeIndex3];
+        for (int i=0; i < tmp.length; i++) {
+            if (tmp[i] == 0) {
+                // partials.length = nrOfSites * nrOfCategories, states.length = nrOfSites
+                int site = i % nrOfSites;
+                System.err.println("i = " + i + " site = " + site + " : " +
+                        "child 1 id = " + nodeIndex1 + " state = " + states[nodeIndex1][site] +
+                        ", child 2 id = " + nodeIndex2 + " state = " + states[nodeIndex2][site] +
+                        ", parent id = " + nodeIndex3 + " state = " + states[nodeIndex3][site] +
+                        ", partials[" + i + "] = " + tmp[i]);
+            }
+        }
+
         if (useScaling) {
             throw new UnsupportedOperationException("in dev");
 //            scalePartials(nodeIndex3);
@@ -306,8 +319,14 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
 //        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
                     //TODO validate index
+
                     partials3[k + v] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-//                    w += nrOfStates;
+
+                    if (partials3[k + v] == 0)
+                        System.err.println("w = " + w + " v = " + v + " k = " + k +
+                                "; state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
+                        "; " + matrices1[w + state1 * nrOfStates + state3] + " * " + matrices2[w + state2 * nrOfStates + state3]);
+
 
 //                    for (int i = 0; i < nrOfStates; i++) {
 //
@@ -337,7 +356,7 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
 //                        w += nrOfStates;
 //                    }
                 } else {
-                    System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
+                    System.err.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
                     throw new UnsupportedOperationException("in dev");
                     // both children have a gap or unknown state so set partials to 1
 
@@ -561,5 +580,6 @@ public class DAStatesLikelihoodCore extends LikelihoodCore {
     public int getMatrixSize() {
         return matrixSize;
     }
+
 
 } // class

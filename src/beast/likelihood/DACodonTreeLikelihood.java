@@ -387,10 +387,10 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     protected void calcLogP() {
         logP = 0.0;
         for (int i = 0; i < codonAlignment.getSiteCount(); i++) {
-            //TODO no pattern, check here
+            //TODO site weight ?
 //            logP += siteLogLikelihoods[i] * codonAlignment.getSiteWeight(i);
             logP += siteLogLikelihoods[i];
-            System.out.println("i = " + i + " logP = " + logP + " siteLogLikelihoods = " + siteLogLikelihoods[i]);
+//            System.out.println("i = " + i + " logP = " + logP + " siteLogLikelihoods = " + siteLogLikelihoods[i]);
         }
     }
 
@@ -401,7 +401,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         int update = (node.isDirty() | hasDirt);
 
         final int nodeIndex = node.getNr();
-
+//TODO deal with 0 branch length, such as SA
         final double branchRate = branchRateModel.getRateForBranch(node);
         final double branchTime = node.getLength() * branchRate;
 
@@ -470,7 +470,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                     likelihoodCore.calculateLogLikelihoods(m_fRootPartials, frequencies, siteLogLikelihoods);
 
-                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
+//                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
                 }
 
             }
