@@ -2,6 +2,7 @@ package test.beast.evolution.likelihood;
 
 
 import beast.likelihood.DAStatesLikelihoodCore;
+import beast.tree.InternalNodeStates;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,18 +27,10 @@ public class DAStatesLikelihoodCoreIndexTest {
 
     @Before
     public void setUp() throws Exception {
-        daLDCore1site = new DAStatesLikelihoodCore(64);
-        // 2 tips + 1 internal node, 1 codon, 1 category
-        daLDCore1site.initialize( 3, 1, 1,
-                true, false   );
+        final int nrOfState = 64;
 
-        daLDCore = new DAStatesLikelihoodCore(64);
-        // 2 tips + 1 internal node, 2 codons, 4 category
-        daLDCore.initialize( 3, 2, 4,
-                true, false   );
-
-        // transition probability matrix
-        int matrixSize = 64 * 64;
+        // ======= transition probability matrix =======
+        int matrixSize = nrOfState * nrOfState;
         p0 = new double[matrixSize];
         p1 = new double[matrixSize];
         for (int i=0; i < matrixSize; i++) {
@@ -46,26 +39,27 @@ public class DAStatesLikelihoodCoreIndexTest {
         }
 
         // ======= 2 tips + 1 internal node, 1 codon, 1 category =======
-        daLDCore1site.createNodePartials(2);
 
         // set codon state to 1 site, state = [0, 63]
-        daLDCore1site.setNodeStates(0, new int[]{1});
-        daLDCore1site.setNodeStates(1, new int[]{60});
-        daLDCore1site.setNodeStates(2, new int[]{8});
+        InternalNodeStates internalNodeStates = new InternalNodeStates(nrOfState, new int[][]{{8}});
+        daLDCore1site = new DAStatesLikelihoodCore(nrOfState);
+        // 2 tips + 1 internal node, 1 codon, 1 category
+        daLDCore1site.initialize( new int[][]{{1},{60}}, internalNodeStates, 1);
 
         daLDCore1site.setNodeMatrix(0, 0, p0);
         daLDCore1site.setNodeMatrix(1, 0, p1);
 
         // DA intermediate likelihood per site at parent node
-        daLDCore1site.calculatePartials(0,1,2);
+        daLDCore1site.calculateNodeBranchLd(0,1,2);
+
 
         // ======= 2 tips + 1 internal node, 2 codons, 4 category =======
-        daLDCore.createNodePartials(2);
 
         // set codon state to 1 site, state = [0, 63]
-        daLDCore.setNodeStates(0, new int[]{1,2});
-        daLDCore.setNodeStates(1, new int[]{60,61});
-        daLDCore.setNodeStates(2, new int[]{8,9});
+        internalNodeStates = new InternalNodeStates(nrOfState, new int[][]{{8,9}});
+        daLDCore = new DAStatesLikelihoodCore(nrOfState);
+        // 2 tips + 1 internal node, 2 codons, 4 category
+        daLDCore.initialize( new int[][]{{1,2},{60,61}}, internalNodeStates, 4);
 
         // set same p to 4 categories
         for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
@@ -74,7 +68,7 @@ public class DAStatesLikelihoodCoreIndexTest {
         }
 
         // DA intermediate likelihood per site at parent node
-        daLDCore.calculatePartials(0,1,2);
+        daLDCore.calculateNodeBranchLd(0,1,2);
 
     }
 
@@ -99,8 +93,8 @@ public class DAStatesLikelihoodCoreIndexTest {
 
         // test index: p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
         double[] partials = new double[daLDCore1site.getPartialsSize()];
-        daLDCore1site.getNodePartials(2, partials);
-        System.out.println("partials = " + Arrays.toString(partials));
+        daLDCore1site.getNodeBranchLd(2, partials);
+        System.out.println("branchLd = " + Arrays.toString(partials));
 
         // 1 site
         assertEquals(7.2 * 38.48, partials[0], 1e-6);
@@ -109,8 +103,8 @@ public class DAStatesLikelihoodCoreIndexTest {
         // p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
         // p0_2_9 = 6.4 * 2 + 0.9 = 13.7, p1_61_9 = 61 * 0.64 + 0.09 = 39.13
         partials = new double[daLDCore.getPartialsSize()];
-        daLDCore.getNodePartials(2, partials);
-        System.out.println("partials = " + Arrays.toString(partials));
+        daLDCore.getNodeBranchLd(2, partials);
+        System.out.println("branchLd = " + Arrays.toString(partials));
 
         // 2 sites, [277.05600000000004, 536.0810000000001, 277.05600000000004, 536.0810000000001, ...]
         for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
@@ -125,8 +119,8 @@ public class DAStatesLikelihoodCoreIndexTest {
 
         double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
         double[] integratedPartials = new double[daLDCore.getNrOfSites()];
-        daLDCore.integratePartials(2, proportions, integratedPartials);
-        System.out.println("integrated partials = " + Arrays.toString(integratedPartials));
+        daLDCore.integrateCateBrLd(2, proportions, integratedPartials);
+        System.out.println("integrated branchLd = " + Arrays.toString(integratedPartials));
 
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
         assertEquals(7.2 * 38.48 * 0.7, integratedPartials[0], 1e-6);
