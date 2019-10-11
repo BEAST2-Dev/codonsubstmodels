@@ -78,7 +78,7 @@ abstract public class DALikelihoodCore {
     public abstract void calculateNodeBranchLd(int childNum1, int childNum2, int nodeIndex);
 
 
-    public abstract void integrateCateBrLd(int nodeIndex, double[] proportions, double[] integratedBrLd);
+    public abstract void integrateBrLdOverCategories(int nodeIndex, double[] proportions, double[] integratedBrLd);
 
     public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
 

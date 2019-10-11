@@ -93,7 +93,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     protected double[] storedBranchLengths;
 
     /**
-     * memory allocation for likelihoods for each of the patterns *
+     * memory allocation for log likelihoods for each of site *
      */
     protected double[] siteLogLikelihoods;
     /**
@@ -235,12 +235,6 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         }
         hasDirt = Tree.IS_FILTHY;
 
-//        final int extNodeCount = nodeCount / 2 + 1;
-//        final int intNodeCount = nodeCount / 2;
-//        // only internal nodes
-//        for (int i = 0; i < intNodeCount; i++) {
-//            daLdCore.createNodeBranchLd(extNodeCount + i);
-//        }
 
     }
 
@@ -471,7 +465,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                     final double[] proportions = siteModel.getCategoryProportions(node);
                     // rootBranchLd is integrated across categories, so length is siteCount
-                    daLdCore.integrateCateBrLd(node.getNr(), proportions, rootBranchLd);
+                    daLdCore.integrateBrLdOverCategories(node.getNr(), proportions, rootBranchLd);
 
                     //TODO in dev
                     if (constantPattern != null) { // && !SiteModel.g_bUseOriginal) {

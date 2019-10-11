@@ -135,7 +135,12 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 
     //============ states for a node ============
 
-
+    /**
+     * get the states at the node, if tips, then use <code>tipStates[][]</code>,
+     * if internal nodes, then use {@link InternalNodeStates}.
+     * @param nodeIndex
+     * @return
+     */
     @Override
     public int[] getNodeStates(int nodeIndex) {
         if (nodeIndex < getNrOfTips()) { // tips
@@ -174,10 +179,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
      * Gets probability matrix for a node
      */
 //    @Override
-	public void getNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix) {
-        System.arraycopy(matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
-                categoryIndex * matrixSize, matrix, 0, matrixSize);
-    }
+//	public void getNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix) {
+//        System.arraycopy(matrices[currentMatrixIndex[nodeIndex]][nodeIndex],
+//                categoryIndex * matrixSize, matrix, 0, matrixSize);
+//    }
 
     //============ branch likelihood ============
 
@@ -365,7 +370,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
      * @param integratedBrLd   an array of the integrated branchLd. length = getNrOfSites().
      */
 //    @Override
-    public void integrateCateBrLd(int nodeIndex, double[] proportions, double[] integratedBrLd) {
+    public void integrateBrLdOverCategories(int nodeIndex, double[] proportions, double[] integratedBrLd) {
         // if nodeIndex is tip, then branchLd[][] is null
         double[] inBrLd = branchLd[currentBrLdIndex[nodeIndex]][nodeIndex];
 
@@ -408,10 +413,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
                 throw new RuntimeException("Likelihood -Inf at site " + k + " node " + state + " ! " +
                         "\nintegratedBrLd = " + integratedBrLd[k]);
 
-            // branchLd[] is getNrOfSites() * nrOfCategories
+            // integratedBrLd[] length is getNrOfSites()
             sum += frequencies[state] * integratedBrLd[k];
 
-            outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
+            outLogLikelihoods[k] = Math.log(sum); //+ getLogScalingFactor(k); TODO
         }
     }
 
@@ -555,7 +560,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
     }
 
     // = getNrOfSites() * nrOfCategories;
-    public int getPartialsSize() {
+    public int getBranchLdSize() {
         // branchLd[][tips] == null
         return branchLd[0][getNrOfTips()].length;
     }
