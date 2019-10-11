@@ -33,6 +33,9 @@ public class InternalNodeStates extends StateNode {
      */
     protected int[][] states;
     protected int[][] storedStates;
+
+    //TODO use storeIndex, 0 to select current, 1 to select stored
+
     /**
      * upper & lower bound These are located before the inputs (instead of
      * after the inputs, as usual) so that valuesInput can determines the
@@ -49,7 +52,12 @@ public class InternalNodeStates extends StateNode {
     // row (x) is internal nodes = leafNodeCount - 1
 //    protected int internalNodeCount = -1;
 
-    public InternalNodeStates() {
+    public InternalNodeStates(int stateCount, final int[][] states) {
+        initParam(stateCount, states.length, states[0].length);
+        for (int i = 0; i < states.length; i++) {
+            System.arraycopy(states[i], 0, this.states[i], 0, states[i].length);
+            System.arraycopy(states[i], 0, this.storedStates[i], 0, states[i].length);
+        }
     }
 
 
@@ -65,7 +73,6 @@ public class InternalNodeStates extends StateNode {
      * @param siteCount         to define cols of 2d matrix
      */
     public InternalNodeStates(int stateCount, int internalNodeCount, int siteCount) {
-        this(); // reserve  dimension, minorDimension
         initParam(stateCount, internalNodeCount, siteCount);
     }
 

@@ -22,7 +22,8 @@ import java.util.*;
  *
  * No pattern, use site count.
  *
- *
+ * TODO 1: store prob per branch
+ * TODO 2: try only log the cell of trans prob matrix once
  */
 public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
@@ -60,7 +61,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * calculation engine *
      */
-    protected LikelihoodCore likelihoodCore;
+    protected DALikelihoodCore daLdCore;
 //    protected BeagleTreeLikelihood beagle;
 
     /**
@@ -68,7 +69,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
      * is safe to link to them only once, during initAndValidate.
      */
     protected SubstitutionModel substitutionModel;
-    protected SiteModel.Base m_siteModel;
+    protected SiteModel.Base siteModel;
     protected BranchRateModel.Base branchRateModel;
 
     /**
@@ -88,7 +89,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
      * reasons as well...).
      * These lengths take branch rate models in account.
      */
-    protected double[] m_branchLengths;
+    protected double[] branchLengths;
     protected double[] storedBranchLengths;
 
     /**
@@ -96,9 +97,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
      */
     protected double[] siteLogLikelihoods;
     /**
-     * memory allocation for the root partials *
+     * memory allocation for the root branch likelihood *
      */
-    protected double[] m_fRootPartials;
+    protected double[] rootBranchLd;
     /**
      * memory allocation for probability tables obtained from the SiteModel *
      */
@@ -145,28 +146,28 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         if (!(siteModelInput.get() instanceof SiteModel.Base)) {
             throw new IllegalArgumentException("siteModel input should be of type SiteModel.Base");
         }
-        m_siteModel = (SiteModel.Base) siteModelInput.get();
-        m_siteModel.setDataType(codonAlignment.getDataType());
-        substitutionModel = m_siteModel.substModelInput.get();
+        siteModel = (SiteModel.Base) siteModelInput.get();
+        siteModel.setDataType(codonAlignment.getDataType());
+        substitutionModel = siteModel.substModelInput.get();
 
         if (branchRateModelInput.get() != null) {
             branchRateModel = branchRateModelInput.get();
         } else {
             branchRateModel = new StrictClockModel();
         }
-        m_branchLengths = new double[nodeCount];
+        branchLengths = new double[nodeCount];
         storedBranchLengths = new double[nodeCount];
 
         int stateCount = codonAlignment.getMaxStateCount();
         assert stateCount == 64;
-        likelihoodCore = new DAStatesLikelihoodCore(stateCount);
+        daLdCore = new DAStatesLikelihoodCore(stateCount);
 
         Log.info.println("  " + codonAlignment.toString(true));
         // print startup messages via Log.print*
 
         // TODO check
-        proportionInvariant = m_siteModel.getProportionInvariant();
-        m_siteModel.setPropInvariantIsCategory(false);
+        proportionInvariant = siteModel.getProportionInvariant();
+        siteModel.setPropInvariantIsCategory(false);
         // TODO no patterns, need to check
 //        int patterns = codonAlignment.getPatternCount();
         if (proportionInvariant > 0) {
@@ -179,7 +180,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         int siteCount = codonAlignment.getSiteCount();
 
         siteLogLikelihoods = new double[siteCount];
-        m_fRootPartials = new double[siteCount]; // improved from patterns * stateCount to siteCount
+        rootBranchLd = new double[siteCount]; // improved from patterns * stateCount to siteCount
         // transition probability matrix, P
         matrixSize = stateCount * stateCount;
         probabilities = new double[matrixSize];
@@ -222,28 +223,24 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
     // no pattern, use codonAlignment.getSiteCount()
     protected void initCore() {
-        final int nodeCount = treeInput.get().getNodeCount();
-        likelihoodCore.initialize(
-                nodeCount,
-                codonAlignment.getSiteCount(),
-                m_siteModel.getCategoryCount(),
-                true, m_useAmbiguities.get()
-        );
+        TreeInterface tree = treeInput.get();
+        final int nodeCount = tree.getNodeCount();
 
-        final int extNodeCount = nodeCount / 2 + 1;
-        final int intNodeCount = nodeCount / 2;
+        final int[][] tipStates = getTipStates(tree);
+        // init with states
+        daLdCore.initialize( tipStates, internalNodeStates, siteModel.getCategoryCount() );
 
         if (m_useAmbiguities.get() || m_useTipLikelihoods.get()) {
             throw new UnsupportedOperationException("in development");
-//            setPartials(treeInput.get().getRoot(), codonAlignment.getSiteCount());
-        } else {
-//            setStates(treeInput.get().getRoot());
-            setStates(treeInput.get());
         }
         hasDirt = Tree.IS_FILTHY;
-        for (int i = 0; i < intNodeCount; i++) {
-            likelihoodCore.createNodePartials(extNodeCount + i);
-        }
+
+//        final int extNodeCount = nodeCount / 2 + 1;
+//        final int intNodeCount = nodeCount / 2;
+//        // only internal nodes
+//        for (int i = 0; i < intNodeCount; i++) {
+//            daLdCore.createNodeBranchLd(extNodeCount + i);
+//        }
 
     }
 
@@ -255,33 +252,51 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         throw new UnsupportedOperationException("Can't sample a fixed alignment!");
     }
 
+    // get states from tips, row is nodeIndex, col is site
+    protected int[][] getTipStates(TreeInterface tree) {
+
+        final int[][] states = new int[tree.getLeafNodeCount()][];
+
+        for (Node node : tree.getExternalNodes()) {
+            // set leaf node states
+            int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
+            // no patterns
+            List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+
+            assert statesList.size() == codonAlignment.getSiteCount();
+            // Java 8
+            states[taxonIndex] = statesList.stream().mapToInt(i->i).toArray();
+        }
+        return states;
+    }
+
     /**
      * set all nodes states in likelihood core *
      */
-    protected void setStates(TreeInterface tree) {
+//    protected void setStates(TreeInterface tree) {
+//
+//        for (Node node : tree.getNodesAsArray()) {
+//            final int[] states;
+//
+//            if (node.isLeaf()) {
+//                // set leaf node states
+//                int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
+//                // no patterns
+//                List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+//
+//                assert statesList.size() == codonAlignment.getSiteCount();
+//                // Java 8
+//                states = statesList.stream().mapToInt(i->i).toArray();
+//            } else {
+//                // set internal node states
+//                int Nr = node.getNr();
+//                states = internalNodeStates.getNrStates(Nr);
+//            }
+//
+//            daLdCore.setNodeStates(node.getNr(), states);
+//        }
+//    }
 
-        for (Node node : tree.getNodesAsArray()) {
-            final int[] states;
-
-            if (node.isLeaf()) {
-                // set leaf node states
-                int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
-                // no patterns
-                List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
-
-                assert statesList.size() == codonAlignment.getSiteCount();
-                // Java 8
-                states = statesList.stream().mapToInt(i->i).toArray();
-            } else {
-                // set internal node states
-                int Nr = node.getNr();
-                states = internalNodeStates.getNrStates(Nr);
-            }
-
-            likelihoodCore.setNodeStates(node.getNr(), states);
-        }
-    }
-    //TODO why speed is same?
 //    protected void setStates(Node node) {
 //
 //        if (node.isLeaf()) {
@@ -294,13 +309,13 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //            // Java 8
 //            int[] states = statesList.stream().mapToInt(i->i).toArray();
 //
-//            likelihoodCore.setNodeStates(node.getNr(), states);
+//            daLdCore.setNodeStates(node.getNr(), states);
 //        } else {
 //            // set internal node states
 //            int Nr = node.getNr();
 //            int[] states = internalNodeStates.getNrStates(Nr);
 //
-//            likelihoodCore.setNodeStates(node.getNr(), states);
+//            daLdCore.setNodeStates(node.getNr(), states);
 //
 //            // traverse
 //            setStates(node.getChild(0));
@@ -359,7 +374,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         }
 
 //        m_nScale++;
-//        if (logP > 0 || (likelihoodCore.getUseScaling() && m_nScale > X)) {
+//        if (logP > 0 || (daLdCore.getUseScaling() && m_nScale > X)) {
 ////            System.err.println("Switch off scaling");
 ////            m_likelihoodCore.setUseScaling(1.0);
 ////            m_likelihoodCore.unstore();
@@ -372,8 +387,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //            m_nScale = 0;
 //            m_fScale *= 1.01;
 //            Log.warning.println("Turning on scaling to prevent numeric instability " + m_fScale);
-////TODO            likelihoodCore.setUseScaling(m_fScale);
-//            likelihoodCore.unstore();
+////TODO            daLdCore.setUseScaling(m_fScale);
+//            daLdCore.unstore();
 //            hasDirt = Tree.IS_FILTHY;
 //            traverse(tree.getRoot());
 //
@@ -384,6 +399,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         return logP;
     }
 
+    //TODO change calculation by nodes
     protected void calcLogP() {
         logP = 0.0;
         for (int i = 0; i < codonAlignment.getSiteCount(); i++) {
@@ -406,16 +422,16 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         final double branchTime = node.getLength() * branchRate;
 
         // First update the transition probability matrix(ices) for this branch
-        //if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_StoredBranchLengths[nodeIndex])) {
-        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex])) {
-            m_branchLengths[nodeIndex] = branchTime;
+        //if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != storedBranchLengths[nodeIndex])) {
+        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex])) {
+            branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
-            likelihoodCore.setNodeMatrixForUpdate(nodeIndex);
-            for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
-                final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
+            daLdCore.setNodeMatrixForUpdate(nodeIndex);
+            for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+                final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
                 substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
                 //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
-                likelihoodCore.setNodeMatrix(nodeIndex, i, probabilities);
+                daLdCore.setNodeMatrix(nodeIndex, i, probabilities);
             }
             update |= Tree.IS_DIRTY;
         }
@@ -435,40 +451,39 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                 final int childNum1 = child1.getNr();
                 final int childNum2 = child2.getNr();
-//TODO review whether partials[][][] are still useful
-                likelihoodCore.setNodePartialsForUpdate(nodeIndex);
-                update |= (update1 | update2);
-                if (update >= Tree.IS_FILTHY) {
-                    likelihoodCore.setNodeStatesForUpdate(nodeIndex);
-                }
 
-                if (m_siteModel.integrateAcrossCategories()) {
-                    likelihoodCore.calculatePartials(childNum1, childNum2, nodeIndex);
-                } else {
-                    throw new RuntimeException("Error TreeLikelihood 201: Site categories not supported");
-                    //m_pLikelihoodCore->calculatePartials(childNum1, childNum2, nodeNum, siteCategories);
-                }
+                daLdCore.setNodeBrLdForUpdate(nodeIndex);
+                update |= (update1 | update2);
+//                if (update >= Tree.IS_FILTHY) {
+//                    daLdCore.setNodeStatesForUpdate(nodeIndex);
+//                }
+
+//                if (siteModel.integrateAcrossCategories()) {
+                daLdCore.calculateNodeBranchLd(childNum1, childNum2, nodeIndex);
+//                } else {
+//                    throw new RuntimeException("Error TreeLikelihood 201: Site categories not supported");
+//                }
 
                 // No parent this is the root of the beast.tree -
                 // calculate the pattern likelihoods
                 if (node.isRoot()) {
                     final double[] frequencies = substitutionModel.getFrequencies();
 
-                    final double[] proportions = m_siteModel.getCategoryProportions(node);
-                    // m_fRootPartials is integrated across categories, so length is siteCount
-                    likelihoodCore.integratePartials(node.getNr(), proportions, m_fRootPartials);
+                    final double[] proportions = siteModel.getCategoryProportions(node);
+                    // rootBranchLd is integrated across categories, so length is siteCount
+                    daLdCore.integrateCateBrLd(node.getNr(), proportions, rootBranchLd);
 
                     //TODO in dev
                     if (constantPattern != null) { // && !SiteModel.g_bUseOriginal) {
                         throw new UnsupportedOperationException("proportionInvariant in dev");
-//                        proportionInvariant = m_siteModel.getProportionInvariant();
-//                        // some portion of sites is invariant, so adjust root partials for this
+//                        proportionInvariant = siteModel.getProportionInvariant();
+//                        // some portion of sites is invariant, so adjust root branch likelihood for this
 //                        for (final int i : constantPattern) {
-//                            m_fRootPartials[i] += proportionInvariant;
+//                            rootBranchLd[i] += proportionInvariant;
 //                        }
                     }
 
-                    likelihoodCore.calculateLogLikelihoods(m_fRootPartials, frequencies, siteLogLikelihoods);
+                    daLdCore.calculateLogLikelihoods(rootBranchLd, frequencies, siteLogLikelihoods);
 
 //                    System.out.println("siteLogLikelihoods = " + Arrays.toString(siteLogLikelihoods));
                 }
@@ -502,7 +517,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
             hasDirt = Tree.IS_FILTHY;
             return true;
         }
-        if (m_siteModel.isDirtyCalculation()) {
+        if (siteModel.isDirtyCalculation()) {
             hasDirt = Tree.IS_DIRTY;
             return true;
         }
@@ -520,11 +535,11 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //            super.store();
 //            return;
 //        }
-        if (likelihoodCore != null) {
-            likelihoodCore.store();
+        if (daLdCore != null) {
+            daLdCore.store();
         }
         super.store();
-        System.arraycopy(m_branchLengths, 0, storedBranchLengths, 0, m_branchLengths.length);
+        System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
     }
 
     @Override
@@ -534,12 +549,12 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //            super.restore();
 //            return;
 //        }
-        if (likelihoodCore != null) {
-            likelihoodCore.restore();
+        if (daLdCore != null) {
+            daLdCore.restore();
         }
         super.restore();
-        double[] tmp = m_branchLengths;
-        m_branchLengths = storedBranchLengths;
+        double[] tmp = branchLengths;
+        branchLengths = storedBranchLengths;
         storedBranchLengths = tmp;
     }
 
@@ -556,7 +571,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
      */
     @Override
     public List<String> getConditions() {
-        return m_siteModel.getConditions();
+        return siteModel.getConditions();
     }
 
 } // class TreeLikelihood
