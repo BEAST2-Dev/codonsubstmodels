@@ -20,8 +20,8 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 
     // to store branch likelihood calculation per site:
     // 1st dimension is matrix index (current, stored),
-    // 2nd is node index, categories are integrated
-    // 3rd is getNrOfSites()
+    // 2nd is node index,
+    // 3rd is getNrOfSites(), Ld across categories are integrated
     protected double[][][] branchLd;
 
     // states in tip/internal nodes: 0-63
@@ -87,17 +87,19 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //        states = new int[getNrOfNodes()][];
 
         // init branchLd[][][]
-        for (int i = 0; i < getNrOfTips(); i++) {
-            // tips
-            branchLd[0][i] = null;
-            branchLd[1][i] = null;
-        }
+//        for (int i = 0; i < getNrOfTips(); i++) {
+//            // tips
+//            branchLd[0][i] = null;
+//            branchLd[1][i] = null;
+//        }
 //        final int branchLdSize = categoryCount * getNrOfSites();
-        for (int i = getNrOfTips(); i < getNrOfNodes(); i++) {
+        for (int i = 0; i < getNrOfNodes()-1; i++) {
             // internal nodes
             branchLd[0][i] = new double[getNrOfSites()];
             branchLd[1][i] = new double[getNrOfSites()];
         }
+        branchLd[0][getNrOfNodes()-1] = null;
+        branchLd[1][getNrOfNodes()-1] = null;
 
         matrixSize = nrOfStates * nrOfStates;
 
@@ -231,22 +233,22 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
      * and integrates branch likelihood across categories.
      *
      * @param nodeIndex1  the 'child 1' node
-     * @param nodeIndex2  the 'child 2' node
+//     * @param nodeIndex2  the 'child 2' node
      * @param nodeIndex3  the 'parent' node
      * @param proportions the proportions of sites in each category. length = nrOfCategories.
      */
     @Override
-    public void integrateNodeBranchLdOverCategories(int nodeIndex1, int nodeIndex2, int nodeIndex3, double[] proportions) {
+    public void calculateNodeBrLdOverCategories(int nodeIndex1, int nodeIndex3, double[] proportions) { //int nodeIndex2,
         final int[] node1States = getNodeStates(nodeIndex1);
-        final int[] node2States = getNodeStates(nodeIndex2);
+//        final int[] node2States = getNodeStates(nodeIndex2);
         final int[] node3States = getNodeStates(nodeIndex3);
 
-        if (node1States.length == getNrOfSites() && node2States.length == getNrOfSites() && node3States.length == getNrOfSites()) {
+        if (node1States.length == getNrOfSites() && node3States.length == getNrOfSites()) {// && node2States.length == getNrOfSites()
 
             calculateNodeBranchLd( node1States, matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
-                    node2States, matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
-                    node3States, proportions, branchLd[currentBrLdIndex[nodeIndex3]][nodeIndex3] );
-
+//                    node2States, matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
+//                    node3States, proportions, branchLd[currentBrLdIndex[nodeIndex3]][nodeIndex3] );
+                    node3States, proportions, branchLd[currentBrLdIndex[nodeIndex1]][nodeIndex1] );
 //            branchLd[currentBrLdIndex[nodeIndex3]][nodeIndex3] =
 //                    calculateNodeBranchLd( node1States, matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
 //                                           node2States, matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
@@ -254,7 +256,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 
         } else {
             throw new IllegalArgumentException("Every node must has states and length of " + getNrOfSites() + " ! \n" +
-                    "child 1 " + node1States.length + ", child 2 " + node2States.length +
+                    "child 1 " + node1States.length + //", child 2 " + node2States.length +
                     ", parent " + node3States.length);
         }
 //        System.out.println("branchLd = " + Arrays.toString(branchLd[currentPartialsIndex[nodeIndex3]][nodeIndex3]));
@@ -300,38 +302,38 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
      * i is child state, j is parent state, w is the category index.
      */
     protected void calculateNodeBranchLd(final int[] stateIndex1, final double[] matrices1,
-                                         final int[] stateIndex2, final double[] matrices2,
+//                                         final int[] stateIndex2, final double[] matrices2,
                                          final int[] stateIndex3, final double proportions[],
-                                         double branchLd3[]) {
+                                         double branchLd1[]) { // branchLd[] is linked to the branch above the child node 1
 //        int v = 0;
 //        System.out.println("\nmatrices1 = " + matrices1.length + " matrices2 = " + matrices2.length +
 //                " branchLd3 = " + branchLd3.length + " getNrOfSites() = " + getNrOfSites() + " nrOfStates = " + nrOfStates);
 //        double branchLogLd3 = 0;
 //        double branchLd3Trunk = 0;
 //        double branchLd3 = 0;
-        double siteLd3;
+//        double siteLd3;
 //            int v = l * getNrOfSites();
 
         // integrate over sites
         for (int k = 0; k < getNrOfSites(); k++) {
 
             int state1 = stateIndex1[k];
-            int state2 = stateIndex2[k];
+//            int state2 = stateIndex2[k];
             int state3 = stateIndex3[k];
 
-            if (state1 < nrOfStates && state2 < nrOfStates && state3 < nrOfStates) {
+            if (state1 < nrOfStates && state3 < nrOfStates) { // && state2 < nrOfStates
 //System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
 //        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
 
-                siteLd3 = matrices1[state1 * nrOfStates + state3] * matrices2[state2 * nrOfStates + state3];
-                branchLd3[k] += siteLd3 * proportions[0];
+//                siteLd3 = matrices1[state1 * nrOfStates + state3] * matrices2[state2 * nrOfStates + state3];
+                branchLd1[k] = matrices1[state1 * nrOfStates + state3] * proportions[0];
 
 //                branchLd3Trunk += siteLd3 * proportions[0];
 
                 for (int l = 1; l < nrOfCategories; l++) {
                     int w = l * matrixSize;
-                    siteLd3 = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-                    branchLd3[k] += siteLd3 * proportions[l];
+//                    siteLd3 = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
+                    branchLd1[k] += matrices1[w + state1 * nrOfStates + state3] * proportions[l];
 
 //                    branchLd3Trunk += siteLd3 * proportions[l];
                 } // end l nrOfCategories
@@ -373,7 +375,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //                        w += nrOfStates;
 //                    }
             } else {
-                System.err.println("k = " + k + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
+                System.err.println("k = " + k + " state1 = " + state1 + " state3 = " + state3); // + " state2 = " + state2
                 throw new UnsupportedOperationException("in dev");
                 // both children have a gap or unknown state so set branchLd to 1
 
@@ -383,12 +385,12 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //                    }
             }
 
-            if (branchLd3[k] == 0) {
-                System.err.println("Site = " + k + " : state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
+            if (branchLd1[k] == 0) {
+                System.err.println("Site = " + k + " : state1 = " + state1 + " state3 = " + state3);// + " state2 = " + state2
                 for (int l = 0; l < nrOfCategories; l++)
                     System.err.println("Product at category " + l + " = " +
-                            matrices1[l * matrixSize + state1 * nrOfStates + state3] + " * " +
-                            matrices2[l * matrixSize + state2 * nrOfStates + state3]);
+                            matrices1[l * matrixSize + state1 * nrOfStates + state3]);
+//                + " * " + matrices2[l * matrixSize + state2 * nrOfStates + state3]);
             }
 
 //            if (k % 1000 == 0) {
@@ -517,8 +519,8 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         double logP = 0;
 
         for (int k = 0; k < getNrOfSites(); k++) {
-
-            for (int i = getNrOfTips(); i < getNrOfNodes(); i++) {
+//TODO review branchLd[currentBrLdIndex[root]][root] = null
+            for (int i = 0; i < getNrOfNodes()-1; i++) {
                 // internal nodes
                 product *= branchLd[currentBrLdIndex[i]][i][k];
 
@@ -711,8 +713,8 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 
     // = getNrOfSites();
     public int getBranchLdSize() {
-        // branchLd[][tips] == null
-        return branchLd[0][getNrOfTips()].length;
+        // branchLd[][root] == null
+        return branchLd[0][0].length;
     }
 
     // transition probability matrix size = nrOfStates^2

@@ -290,7 +290,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         final double[] frequencies = substitutionModel.getFrequencies();
 
         try {
-            if (traverse(tree.getRoot(), proportions) != Tree.IS_CLEAN)
+            if (updateNode(tree.getRoot(), proportions) != Tree.IS_CLEAN)
                 logP = daLdCore.calculateLogLikelihoods(frequencies);
 //            System.out.println("logP = " + logP);
         }
@@ -305,7 +305,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 ////            m_likelihoodCore.unstore();
 ////            m_nHasDirt = Tree.IS_FILTHY;
 ////            X *= 2;
-////            traverse(tree.getRoot());
+////            updateNode(tree.getRoot());
 ////            calcLogP();
 ////            return logP;
 //        } else if (logP == Double.NEGATIVE_INFINITY && m_fScale < 10 && !scaling.get().equals(TreeLikelihood.Scaling.none)) { // && !m_likelihoodCore.getUseScaling()) {
@@ -315,7 +315,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 ////TODO            daLdCore.setUseScaling(m_fScale);
 //            daLdCore.unstore();
 //            hasDirt = Tree.IS_FILTHY;
-//            traverse(tree.getRoot());
+//            updateNode(tree.getRoot());
 //
 //            calcLogP();
 //
@@ -361,8 +361,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //    }
 
 
-    /* Assumes there IS a branch rate model as opposed to traverse() */
-    int traverse(final Node node, final double[] proportions) {
+    /* Assumes there IS a branch rate model as opposed to updateNode() */
+    protected int updateNode(final Node node, final double[] proportions) {
 
         int update = (node.isDirty() | hasDirt);
 
@@ -395,28 +395,45 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         if (!node.isLeaf()) {
 
             // Traverse down the two child nodes
-            final Node child1 = node.getChild(0);
-            final int update1 = traverse(child1, proportions);
+            for (final Node child : node.getChildren()) {
+                final int update1 = updateNode(child, proportions);
 
-            final Node child2 = node.getChild(1);
-            final int update2 = traverse(child2, proportions);
+                if (update1 != Tree.IS_CLEAN) {
+                    final int childNum = child.getNr();
+                    // brLD is linked to the child node index down
+                    daLdCore.setNodeBrLdForUpdate(childNum); // TODO review
+
+                    update |= update1;
+
+                    // populate branchLd[][only internal nodes]
+                    daLdCore.calculateNodeBrLdOverCategories(childNum, nodeIndex, proportions);
+                }
+
+            }
+
+
+//            final Node child1 = node.getChild(0);
+//            final int update1 = updateNode(child1, proportions);
+//
+//            final Node child2 = node.getChild(1);
+//            final int update2 = updateNode(child2, proportions);
 
             // If either child node was updated then update this node too
-            if (update1 != Tree.IS_CLEAN || update2 != Tree.IS_CLEAN) {
-
-                final int childNum1 = child1.getNr();
-                final int childNum2 = child2.getNr();
-
-                daLdCore.setNodeBrLdForUpdate(nodeIndex); // TODO review
-                update |= (update1 | update2);
-//                if (update >= Tree.IS_FILTHY) {
-//                    daLdCore.setNodeStatesForUpdate(nodeIndex); // TODO review
-//                }
-
-                // populate branchLd[][only internal nodes]
-                daLdCore.integrateNodeBranchLdOverCategories(childNum1, childNum2, nodeIndex, proportions);
-            }
-        }
+//            if (update1 != Tree.IS_CLEAN || update2 != Tree.IS_CLEAN) {
+//
+//                final int childNum1 = child1.getNr();
+//                final int childNum2 = child2.getNr();
+//
+//                daLdCore.setNodeBrLdForUpdate(nodeIndex);
+//                update |= (update1 | update2);
+////                if (update >= Tree.IS_FILTHY) {
+////                    daLdCore.setNodeStatesForUpdate(nodeIndex); // TODO review
+////                }
+//
+//                // populate branchLd[][only internal nodes]
+//                daLdCore.calculateNodeBrLdOverCategories(childNum1, childNum2, nodeIndex, proportions);
+//            }
+        } // end if (!node.isLeaf())
         return update;
     } // traverseWithBRM
 
@@ -580,7 +597,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //
 //            daLdCore.setNodeStates(node.getNr(), states);
 //
-//            // traverse
+//            // updateNode
 //            setStates(node.getChild(0));
 //            setStates(node.getChild(1));
 //        }
