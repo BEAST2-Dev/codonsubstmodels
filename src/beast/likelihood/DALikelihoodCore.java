@@ -35,7 +35,6 @@ abstract public class DALikelihoodCore {
     public boolean getUseScaling() {
         return m_bUseScaling;
     }
-
     /**
      * return the cumulative scaling effect. Should be zero if no scaling is used *
      */
@@ -74,13 +73,16 @@ abstract public class DALikelihoodCore {
      * assign values of states for probability transition matrix for node with number nodeIndex *
      */
     public abstract void setNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix);
+//    public abstract void setNodeMatrix(int nodeIndex, double[] matrix);
 
-    public abstract void calculateNodeBranchLd(int childNum1, int childNum2, int nodeIndex);
+//    public abstract void calculateNodeBranchLd(int childNum1, int childNum2, int nodeIndex);
+//    public abstract void integrateBrLdOverCategories(int nodeIndex, double[] proportions, double[] integratedBrLd);
 
+    public abstract void integrateNodeBranchLdOverCategories(int nodeIndex1, int nodeIndex2, int nodeIndex3, double[] proportions);
 
-    public abstract void integrateBrLdOverCategories(int nodeIndex, double[] proportions, double[] integratedBrLd);
+//    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
+    public abstract double calculateLogLikelihoods(double[] frequencies);
 
-    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
 
     public abstract void setNodeBrLdForUpdate(int nodeIndex);
 

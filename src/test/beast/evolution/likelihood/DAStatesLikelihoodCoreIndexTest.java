@@ -50,7 +50,7 @@ public class DAStatesLikelihoodCoreIndexTest {
         daLDCore1site.setNodeMatrix(1, 0, p1);
 
         // DA intermediate likelihood per site at parent node
-        daLDCore1site.calculateNodeBranchLd(0,1,2);
+        daLDCore1site.integrateNodeBranchLdOverCategories(0,1,2, new double[]{1});
 
 
         // ======= 2 tips + 1 internal node, 2 codons, 4 category =======
@@ -67,8 +67,9 @@ public class DAStatesLikelihoodCoreIndexTest {
             daLDCore.setNodeMatrix(1, i, p1);
         }
 
+        double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
         // DA intermediate likelihood per site at parent node
-        daLDCore.calculateNodeBranchLd(0,1,2);
+        daLDCore.integrateNodeBranchLdOverCategories(0,1,2, proportions);
 
     }
 
@@ -84,7 +85,7 @@ public class DAStatesLikelihoodCoreIndexTest {
         assertEquals(2, daLDCore.getNrOfSites());
         assertEquals(4, daLDCore.getNrOfCategories());
         assertEquals(4096, daLDCore.getMatrixSize());
-        assertEquals(8, daLDCore.getBranchLdSize());
+        assertEquals(2, daLDCore.getBranchLdSize());
     }
 
 
@@ -92,35 +93,23 @@ public class DAStatesLikelihoodCoreIndexTest {
     public void testNodeBranchLdIndices() {
 
         // test index: p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
-        double[] partials = new double[daLDCore1site.getBranchLdSize()];
-        daLDCore1site.getNodeBranchLd(2, partials);
-        System.out.println("branchLd = " + Arrays.toString(partials));
+        double[] brLd = new double[daLDCore1site.getBranchLdSize()];
+        daLDCore1site.getNodeBranchLd(2, brLd);
+        System.out.println("branchLd = " + Arrays.toString(brLd));
 
         // 1 site
-        assertEquals(7.2 * 38.48, partials[0], 1e-6);
-
-        // test index category 1 :
-        // p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
-        // p0_2_9 = 6.4 * 2 + 0.9 = 13.7, p1_61_9 = 61 * 0.64 + 0.09 = 39.13
-        partials = new double[daLDCore.getBranchLdSize()];
-        daLDCore.getNodeBranchLd(2, partials);
-        System.out.println("branchLd = " + Arrays.toString(partials));
-
-        // 2 sites, [277.05600000000004, 536.0810000000001, 277.05600000000004, 536.0810000000001, ...]
-        for (int i=0; i < daLDCore.getNrOfCategories(); i++) {
-            assertEquals(7.2 * 38.48, partials[i*2], 1e-6);
-            assertEquals(13.7 * 39.13, partials[i*2+1], 1e-6);
-        }
-
+        assertEquals(7.2 * 38.48, brLd[0], 1e-6);
     }
 
     @Test
     public void testIntegratedBrLd() {
 
-        double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
-        double[] integratedBrLd = new double[daLDCore.getNrOfSites()];
-        daLDCore.integrateBrLdOverCategories(2, proportions, integratedBrLd);
-        System.out.println("integrated branchLd = " + Arrays.toString(integratedBrLd));
+        // test index category 1 :
+        // p0_1_8 = 6.4 + 0.8 = 7.2, p1_60_8 = 60 * 0.64 + 0.08 = 38.48
+        // p0_2_9 = 6.4 * 2 + 0.9 = 13.7, p1_61_9 = 61 * 0.64 + 0.09 = 39.13
+        double[] integratedBrLd = new double[daLDCore.getBranchLdSize()];
+        daLDCore.getNodeBranchLd(2, integratedBrLd);
+        System.out.println("branchLd = " + Arrays.toString(integratedBrLd));
 
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
         assertEquals(7.2 * 38.48 * 0.7, integratedBrLd[0], 1e-6);
