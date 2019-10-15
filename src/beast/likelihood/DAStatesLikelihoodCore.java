@@ -513,7 +513,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
     @Override
     public double calculateLogLikelihoods(double[] frequencies) {
 
-        final int rootNr = getNrOfNodes() - 1;
+//        final int rootNr = getNrOfNodes() - 1;
 //        int trunk = 1;
         double product = 1.0;
         double logP = 0;
@@ -530,14 +530,14 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
             } // end i
 
             // hard code for root node
-            int state = internalNodeStates.getASite(rootNr, k); // 0-63
+//            int state = internalNodeStates.getASite(rootNr, k); // 0-63
 
 //TODO rm validation to fast speed, implement unit test
-            if (frequencies[state] == 0)
-                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
+//            if (frequencies[state] == 0)
+//                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
 
-            // TODO review multiple frequencies[state], instead of summing up over all states
-            product *= frequencies[state];
+            // TODO review I do not think prior prob in root is required
+//            product *= frequencies[state];
 
             if (product < 1e-150) {
                 logP += Math.log(product); //+ getLogScalingFactor(k); TODO

@@ -169,8 +169,6 @@ public class DALikelihoodPerformanceTest {
             internalNodeStates.setNrStates(i, states);
         }
 
-        long[] elapsedTimeMillis2 = new long[iteration];
-
         DACodonTreeLikelihood daLikelihood = new DACodonTreeLikelihood();
 
         daLikelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel,
@@ -178,6 +176,7 @@ public class DALikelihoodPerformanceTest {
 
         long daInit = System.currentTimeMillis()-start;
 
+        long[] elapsedTimeMillis2 = new long[iteration];
         double timeDA = 0;
         for (int i=0; i<iteration; i++) {
             start = System.currentTimeMillis();
@@ -218,5 +217,50 @@ public class DALikelihoodPerformanceTest {
         System.out.println("\n" + df.format(timeStandard/timeDA) + " times faster ");
     }
 
+
+    @Test
+    public void benchmarkingForLoop(){
+
+        double[][] m = new double[64][64];
+        double sum = 0;
+
+        long start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            for (int i = 0; i < m.length; i++) {
+                for (int j = 0; j < m.length; j++) {
+                    sum += m[i][j];
+                }
+            }
+        }
+        long end1 = System.currentTimeMillis()-start;
+        System.out.println("Sum 64*64 time is " + end1 + " milliseconds");
+
+        start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+//        for (int i=0; i<m.length; i++) {
+            for (int j=0; j<m.length; j++) {
+            sum += m[16][j];
+            }
+//        }
+        }
+        long end2 = System.currentTimeMillis()-start;
+        System.out.println("Sum 64 time is " + end2 + " milliseconds");
+
+
+        start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+//        for (int i=0; i<m.length; i++) {
+//            for (int j=0; j<m.length; j++) {
+            sum += m[16][63];
+//            }
+//        }
+        }
+        long end3 = System.currentTimeMillis()-start;
+        System.out.println("Take 1 element " + end3 + " milliseconds");
+
+
+        System.out.println("\nend1 / end3 = " + (end1 / end3) + " times");
+        System.out.println("end2 / end3 = " + (end2 / end3) + " times");
+    }
 
 }
