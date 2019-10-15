@@ -23,7 +23,7 @@ public class M0TreeLikelihoodTest {
 
     @Before
     public void setUp() {
-        Alignment data = CodonTestData.getAlignment();
+        Alignment data = CodonTestData.getAlig6T333();
         // create Codon Alignment
         codonAlignment = new CodonAlignment();
         codonAlignment.initByName("data", data, "dataType", "codon", "geneticCode", "vertebrateMitochondrial");

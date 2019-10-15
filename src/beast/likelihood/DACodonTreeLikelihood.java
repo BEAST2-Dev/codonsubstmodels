@@ -384,8 +384,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
             for (int i = 0; i < siteModel.getCategoryCount(); i++) {
                 final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
                 substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
-                //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
-                daLdCore.setNodeMatrix(nodeIndex, i, probabilities);
+                //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+
+                daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
             }
             update |= Tree.IS_DIRTY;
         }

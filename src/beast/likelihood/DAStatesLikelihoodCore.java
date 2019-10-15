@@ -512,7 +512,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
     public double calculateLogLikelihoods(double[] frequencies) {
 
         final int rootNr = getNrOfNodes() - 1;
-        int trunk = 1;
+//        int trunk = 1;
         double product = 1.0;
         double logP = 0;
 
@@ -537,10 +537,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
             // TODO review multiple frequencies[state], instead of summing up over all states
             product *= frequencies[state];
 
-            if (product < 1e200) {
+            if (product < 1e-150) {
                 logP += Math.log(product); //+ getLogScalingFactor(k); TODO
                 product = 1.0;
-                trunk++;
+//                trunk++;
             }
         } // end k
 // the rest
