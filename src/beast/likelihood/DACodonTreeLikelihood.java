@@ -324,42 +324,6 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         return logP;
     }
 
-//    protected void calcLogP() {
-//        logP = 0.0;
-//
-//        //TODO change calculation by nodes
-//        for (int i = 0; i < nodeLogLikelihoods.length; i++) {
-//            logP += nodeLogLikelihoods[i];
-////            System.out.println("i = " + i + " logP = " + logP + " nodeLogLikelihoods = " + nodeLogLikelihoods[i]);
-//        }
-//
-//
-//        // No parent this is the root of the beast.tree -
-//        // calculate the pattern likelihoods
-//        if (node.isRoot()) {
-//            final double[] frequencies = substitutionModel.getFrequencies();
-//
-////            final double[] proportions = siteModel.getCategoryProportions(node);
-//            // rootBranchLd is integrated across categories, so length is siteCount
-////            daLdCore.integrateBrLdOverCategories(node.getNr(), proportions, rootBranchLd);
-//
-//            //TODO in dev
-//            if (constantPattern != null) { // && !SiteModel.g_bUseOriginal) {
-//                throw new UnsupportedOperationException("proportionInvariant in dev");
-////                        proportionInvariant = siteModel.getProportionInvariant();
-////                        // some portion of sites is invariant, so adjust root branch likelihood for this
-////                        for (final int i : constantPattern) {
-////                            rootBranchLd[i] += proportionInvariant;
-////                        }
-//            }
-//
-//            daLdCore.calculateLogLikelihoods(rootBranchLd, frequencies, nodeLogLikelihoods);
-//
-////                    System.out.println("nodeLogLikelihoods = " + Arrays.toString(nodeLogLikelihoods));
-//        }
-//
-//    }
-
 
     /* Assumes there IS a branch rate model as opposed to updateNode() */
     protected int updateNode(final Node node, final double[] proportions) {

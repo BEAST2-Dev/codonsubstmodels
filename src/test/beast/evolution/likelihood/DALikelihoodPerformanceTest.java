@@ -271,6 +271,8 @@ public class DALikelihoodPerformanceTest {
     public void benchmarkingArrays(){
         // 2*16-1
         double[][] nodes = new double[31][10000];
+        for (int j = 0; j < nodes[16].length; j++)
+            nodes[16][j] = j;
         double[] arr;
 
         long start = System.currentTimeMillis();
