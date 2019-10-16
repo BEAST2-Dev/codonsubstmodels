@@ -31,8 +31,8 @@ public class DALikelihoodPerformanceTest {
     @Before
     public void setUp() {
 //        init6T333("F3X4");
-        init16T10K("F3X4");
-//        init32T10K("F3X4");
+//        init16T10K("F3X4");
+        init32T10K("F3X4");
     }
 
     private void init6T333(String pi) {
@@ -217,7 +217,14 @@ public class DALikelihoodPerformanceTest {
         System.out.println("\n" + df.format(timeStandard/timeDA) + " times faster ");
     }
 
-
+    /**
+     * Sum 64*64 time is 4577 milliseconds
+     * Sum 64 time is 74 milliseconds
+     * Take 1 element 4 milliseconds
+     *
+     * end1 / end3 = 1144 times
+     * end2 / end3 = 18 times
+     */
     @Test
     public void benchmarkingForLoop(){
 
