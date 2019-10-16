@@ -9,7 +9,6 @@ import beast.likelihood.DACodonTreeLikelihood;
 import beast.tree.InternalNodeStates;
 import beast.util.XMLParserException;
 import codonmodels.CodonFrequencies;
-import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonTestData;
 
@@ -28,12 +27,12 @@ public class DALikelihoodPerformanceTest {
     SiteModel siteModel;
     Tree tree;
 
-    @Before
-    public void setUp() {
-//        init6T333("F3X4");
-//        init16T10K("F3X4");
-        init32T10K("F3X4");
-    }
+//    @Before
+//    public void setUp() {
+////        init6T333("F3X4");
+////        init16T10K("F3X4");
+//        init32T10K("F3X4");
+//    }
 
     private void init6T333(String pi) {
         Alignment data = CodonTestData.getAlig6T333();
@@ -111,6 +110,10 @@ public class DALikelihoodPerformanceTest {
 
     @Test
     public void benchmarkingF3X4(){
+//        init6T333("F3X4");
+        init16T10K("F3X4");
+//        init32T10K("F3X4");
+
 
         // =============== Standard likelihood ===============
         int iteration = 1;
@@ -240,15 +243,13 @@ public class DALikelihoodPerformanceTest {
             }
         }
         long end1 = System.currentTimeMillis()-start;
-        System.out.println("Sum 64*64 time is " + end1 + " milliseconds");
+        System.out.println("\nSum 64*64 time is " + end1 + " milliseconds");
 
         start = System.currentTimeMillis();
         for (int n=0; n<1000000; n++) {
-//        for (int i=0; i<m.length; i++) {
             for (int j=0; j<m.length; j++) {
-            sum += m[16][j];
+                sum += m[16][j];
             }
-//        }
         }
         long end2 = System.currentTimeMillis()-start;
         System.out.println("Sum 64 time is " + end2 + " milliseconds");
@@ -256,11 +257,7 @@ public class DALikelihoodPerformanceTest {
 
         start = System.currentTimeMillis();
         for (int n=0; n<1000000; n++) {
-//        for (int i=0; i<m.length; i++) {
-//            for (int j=0; j<m.length; j++) {
             sum += m[16][63];
-//            }
-//        }
         }
         long end3 = System.currentTimeMillis()-start;
         System.out.println("Take 1 element " + end3 + " milliseconds");
@@ -268,6 +265,39 @@ public class DALikelihoodPerformanceTest {
 
         System.out.println("\nend1 / end3 = " + (end1 / end3) + " times");
         System.out.println("end2 / end3 = " + (end2 / end3) + " times");
+    }
+
+    @Test
+    public void benchmarkingArrays(){
+        // 2*16-1
+        double[][] nodes = new double[31][10000];
+        double[] arr;
+
+        long start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            arr = nodes[16];
+        }
+        long end1 = System.currentTimeMillis()-start;
+        System.out.println("\nTake reference from 2D array: time is " + end1 + " milliseconds");
+
+        start = System.currentTimeMillis();
+        arr = new double[nodes[16].length];
+        for (int n=0; n<1000000; n++) {
+            System.arraycopy(arr, 0, nodes[16], 0, arr.length);
+        }
+        long end2 = System.currentTimeMillis()-start;
+        System.out.println("System.arraycopy: time is " + end2 + " milliseconds");
+
+
+        start = System.currentTimeMillis();
+        arr = new double[nodes[16].length];
+        for (int n=0; n<1000000; n++) {
+            for (int j = 0; j < nodes[16].length; j++)
+                arr[j] = nodes[16][j];
+        }
+        long end3 = System.currentTimeMillis()-start;
+        System.out.println("For loop: time is " + end3 + " milliseconds");
+
     }
 
 }

@@ -405,7 +405,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
                     update |= update1;
 
-                    // populate branchLd[][only internal nodes]
+                    // populate branchLd[][excl. root]
                     daLdCore.calculateNodeBrLdOverCategories(childNum, nodeIndex, proportions);
                 }
 

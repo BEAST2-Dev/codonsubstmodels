@@ -244,11 +244,11 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         final int[] node3States = getNodeStates(nodeIndex3);
 
         if (node1States.length == getNrOfSites() && node3States.length == getNrOfSites()) {// && node2States.length == getNrOfSites()
-
-            calculateNodeBranchLd( node1States, matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
+            //branchLd[][] is linked to the branch above the child node 1
+            calculateNodeBranchLd( getNodeStates(nodeIndex1), matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
 //                    node2States, matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
 //                    node3States, proportions, branchLd[currentBrLdIndex[nodeIndex3]][nodeIndex3] );
-                    node3States, proportions, branchLd[currentBrLdIndex[nodeIndex1]][nodeIndex1] );
+                    getNodeStates(nodeIndex3), proportions, branchLd[currentBrLdIndex[nodeIndex1]][nodeIndex1] );
 //            branchLd[currentBrLdIndex[nodeIndex3]][nodeIndex3] =
 //                    calculateNodeBranchLd( node1States, matrices[currentMatrixIndex[nodeIndex1]][nodeIndex1],
 //                                           node2States, matrices[currentMatrixIndex[nodeIndex2]][nodeIndex2],
@@ -326,6 +326,8 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
 
 //                siteLd3 = matrices1[state1 * nrOfStates + state3] * matrices2[state2 * nrOfStates + state3];
+
+                //branchLd[] is linked to the branch above the child node 1
                 branchLd1[k] = matrices1[state1 * nrOfStates + state3] * proportions[0];
 
 //                branchLd3Trunk += siteLd3 * proportions[0];
