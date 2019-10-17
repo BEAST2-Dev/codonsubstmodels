@@ -523,12 +523,19 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         for (int k = 0; k < getNrOfSites(); k++) {
 //TODO review
             for (int i = 0; i < getNrOfNodes()-1; i++) {
-                // internal nodes
+                // internal nodes Double.MAX_VALUE =
                 product *= branchLd[currentBrLdIndex[i]][i][k];
 
-                if (product == 0)
-                    throw new RuntimeException("Likelihood -Inf at site " + k + " node " + i + " ! " +
-                            "\nintegratedBrLd = " + product);
+                // log when product is too small, Double.MAX_VALUE 1.79...e+308
+                if (product < 1e-200) {
+                    if (product == 0)
+                        throw new RuntimeException("Likelihood -Inf at site " + k + " node " + i + " ! " +
+                                "\nintegratedBrLd = " + product);
+
+                    logP += Math.log(product); //+ getLogScalingFactor(k); TODO
+                    product = 1.0;
+//                trunk++;
+                }
             } // end i
 
             // hard code for root node
@@ -541,11 +548,6 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
             // TODO review I do not think prior prob in root is required
 //            product *= frequencies[state];
 
-            if (product < 1e-150) {
-                logP += Math.log(product); //+ getLogScalingFactor(k); TODO
-                product = 1.0;
-//                trunk++;
-            }
         } // end k
 // the rest
         if (product < 1)

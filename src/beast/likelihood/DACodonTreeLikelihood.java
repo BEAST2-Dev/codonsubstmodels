@@ -290,7 +290,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         final double[] frequencies = substitutionModel.getFrequencies();
 
         try {
-            if (updateNode(tree.getRoot(), proportions) != Tree.IS_CLEAN)
+//            if (updateNode(tree.getRoot(), proportions) != Tree.IS_CLEAN)
+//                logP = daLdCore.calculateLogLikelihoods(frequencies);
+            if (updateNode2(tree) != Tree.IS_CLEAN)
                 logP = daLdCore.calculateLogLikelihoods(frequencies);
 //            System.out.println("logP = " + logP);
         }
@@ -400,6 +402,66 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         } // end if (!node.isLeaf())
         return update;
     } // traverseWithBRM
+
+    protected int updateNode2(final TreeInterface tree) {
+
+        final double[] proportions = siteModel.getCategoryProportions(tree.getRoot());
+
+        int update = hasDirt;
+
+        for (Node node : tree.getNodesAsArray()) {
+
+            if (!node.isRoot()) {
+
+                int nodeUpdate = node.isDirty();
+
+                final int nodeIndex = node.getNr();
+                final double branchRate = branchRateModel.getRateForBranch(node);
+                final double branchTime = node.getLength() * branchRate;
+
+//TODO deal with 0 branch length, such as SA
+                if (branchTime < 1e-6)
+                    throw new UnsupportedOperationException("Node " + nodeIndex + " time is 0  !\n" +
+                            "branch length = " + node.getLength() + ", branchRate = " + branchRate);
+
+                //TODO how to distinguish branch len change and internal node seq change, when topology is same
+                // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
+                if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
+                    branchLengths[nodeIndex] = branchTime;
+                    final Node parent = node.getParent();
+                    daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
+                    for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+                        final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+                        substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+                        //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+
+                        daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
+                    }
+                    nodeUpdate |= Tree.IS_DIRTY; // TODO review
+                }
+
+                // ====== 2. recalculate likelihood if either child node wasn't clean ======
+                if (nodeUpdate != Tree.IS_CLEAN) {
+                    Node parent = node.getParent();
+
+                    final int parentNum = parent.getNr();
+                    // brLD is linked to the child node index down
+                    daLdCore.setNodeBrLdForUpdate(parentNum); // TODO review
+
+                    // populate branchLd[][excl. root], nodeIndex is child
+                    daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
+                }
+
+                update |= nodeUpdate;
+            }
+
+        }
+
+        return update;
+    }
+
+
+
 
     /* return copy of node log likelihoods */
     public double [] getNodeLogLikelihoods() {
