@@ -52,9 +52,9 @@ public class DALikelihoodPerformanceTest {
 
         String newickTree;
         String pi = "F3X4";
-//        if (nTaxa == 2) { // NullPointerException in TreeLikelihood.setStates
-//            newickTree = "((t1:0.5,t2:0.1):0.0);";
-        if (nTaxa == 4 && symmetric) {
+        if (nTaxa == 2) { // NullPointerException in TreeLikelihood.setStates
+            newickTree = "(t1:0.5,t2:0.1):0.0;";
+        } else if (nTaxa == 4 && symmetric) {
             newickTree = "((t1:0.5,t2:0.1):0.2, (t3:0.5,t4:0.1):0.3);";
         } else if (nTaxa == 4) { // not symmetric
             newickTree = "(((t1:0.5,t2:0.1):0.2, t3:0.5):0.1,t4:0.1);";
@@ -228,24 +228,16 @@ public class DALikelihoodPerformanceTest {
     @Test
     public void benchmarkingF3X4(){
 //        init6T333("F3X4");
-        String[] test = new String[]{"4 taxa", "8 taxa symmetric", "8 taxa unsymmetric", "16 taxa", "32 taxa"};
+        String[] test = new String[]{"2 taxa", "4 taxa", "8 taxa symmetric", "8 taxa unsymmetric", "16 taxa", "32 taxa"};
+        boolean[] symmetric = new boolean[]{true, true, true, false, true, true};
+        int[] nTaxa = new int[]{2, 4, 8, 8, 16, 32};
         double[] faster = new double[test.length];
         int ite = 10;
 
-        initF3X4L10K(4, true);
-        faster[0] = benchmarking(ite);
-
-        initF3X4L10K(8, false);
-        faster[2] = benchmarking(ite);
-
-        initF3X4L10K(8, true);
-        faster[1] = benchmarking(ite);
-
-        initF3X4L10K(16, true);
-        faster[3] = benchmarking(ite);
-
-        initF3X4L10K(32, true);
-        faster[4] = benchmarking(ite);
+        for (int i=0; i< test.length ; i++) {
+            initF3X4L10K(nTaxa[i], symmetric[i]);
+            faster[i] = benchmarking(ite);
+        }
 
         System.out.println("\n=============== Summary ===============\n");
         System.out.println(ite + " iteration(s) :\n");
