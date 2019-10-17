@@ -515,15 +515,17 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
     @Override
     public double calculateLogLikelihoods(double[] frequencies) {
 
-//        final int rootNr = getNrOfNodes() - 1;
 //        int trunk = 1;
         double product = 1.0;
         double logP = 0;
 
+        // exclude root node
+        int rootIndex = getNrOfNodes()-1;
+
         for (int k = 0; k < getNrOfSites(); k++) {
 //TODO review
-            for (int i = 0; i < getNrOfNodes()-1; i++) {
-                // internal nodes Double.MAX_VALUE =
+            for (int i = 0; i < rootIndex; i++) {
+                // internal nodes, excl root
                 product *= branchLd[currentBrLdIndex[i]][i][k];
 
                 // log when product is too small, Double.MAX_VALUE 1.79...e+308
@@ -538,20 +540,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
                 }
             } // end i
 
-            // hard code for root node
-//            int state = internalNodeStates.getASite(rootNr, k); // 0-63
-
-//TODO rm validation to fast speed, implement unit test
-//            if (frequencies[state] == 0)
-//                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
-
-            // TODO review I do not think prior prob in root is required
-//            product *= frequencies[state];
-
         } // end k
-// the rest
+        // the rest
         if (product < 1)
-        logP += Math.log(product); //+ getLogScalingFactor(k); TODO
+            logP += Math.log(product); //+ getLogScalingFactor(k); TODO
 
         return logP;
     }

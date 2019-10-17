@@ -409,53 +409,57 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
         int update = hasDirt;
 
-        for (Node node : tree.getNodesAsArray()) {
+        // exclude root node
+        int rootIndex = tree.getNodeCount() - 1;
+        if (rootIndex != tree.getRoot().getNr())
+            throw new RuntimeException("Invalid root index " + tree.getRoot().getNr() + " != " + rootIndex);
 
-            if (!node.isRoot()) {
+//        for (Node node : tree.getNodesAsArray()) {
+        for (int n = 0; n < rootIndex; n++) {
+            Node node = tree.getNode(n);
+//            if (!node.isRoot()) {
+            int nodeUpdate = node.isDirty();
 
-                int nodeUpdate = node.isDirty();
-
-                final int nodeIndex = node.getNr();
-                final double branchRate = branchRateModel.getRateForBranch(node);
-                final double branchTime = node.getLength() * branchRate;
+            final int nodeIndex = node.getNr();
+            final double branchRate = branchRateModel.getRateForBranch(node);
+            final double branchTime = node.getLength() * branchRate;
 
 //TODO deal with 0 branch length, such as SA
-                if (branchTime < 1e-6)
-                    throw new UnsupportedOperationException("Node " + nodeIndex + " time is 0  !\n" +
-                            "branch length = " + node.getLength() + ", branchRate = " + branchRate);
+            if (branchTime < 1e-6)
+                throw new UnsupportedOperationException("Node " + nodeIndex + " time is 0  !\n" +
+                        "branch length = " + node.getLength() + ", branchRate = " + branchRate);
 
-                //TODO how to distinguish branch len change and internal node seq change, when topology is same
-                // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
-                if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
-                    branchLengths[nodeIndex] = branchTime;
-                    final Node parent = node.getParent();
-                    daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
-                    for (int i = 0; i < siteModel.getCategoryCount(); i++) {
-                        final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
-                        substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
-                        //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+            //TODO how to distinguish branch len change and internal node seq change, when topology is same
+            // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
+            if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
+                branchLengths[nodeIndex] = branchTime;
+                final Node parent = node.getParent();
+                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
+                for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+                    final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+                    substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+                    //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
-                        daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
-                    }
-                    nodeUpdate |= Tree.IS_DIRTY; // TODO review
+                    daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
                 }
-
-                // ====== 2. recalculate likelihood if either child node wasn't clean ======
-                if (nodeUpdate != Tree.IS_CLEAN) {
-                    Node parent = node.getParent();
-
-                    final int parentNum = parent.getNr();
-                    // brLD is linked to the child node index down
-                    daLdCore.setNodeBrLdForUpdate(parentNum); // TODO review
-
-                    // populate branchLd[][excl. root], nodeIndex is child
-                    daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
-                }
-
-                update |= nodeUpdate;
+                nodeUpdate |= Tree.IS_DIRTY; // TODO review
             }
 
-        }
+            // ====== 2. recalculate likelihood if either child node wasn't clean ======
+            if (nodeUpdate != Tree.IS_CLEAN) {
+                Node parent = node.getParent();
+
+                final int parentNum = parent.getNr();
+                // brLD is linked to the child node index down
+                daLdCore.setNodeBrLdForUpdate(parentNum); // TODO review
+
+                // populate branchLd[][excl. root], nodeIndex is child
+                daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
+            }
+
+            update |= nodeUpdate;
+//            }
+        } // end i loop
 
         return update;
     }

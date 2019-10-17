@@ -14,6 +14,7 @@ import test.beast.evolution.CodonTestData;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Random;
 
 
 /**
@@ -26,6 +27,8 @@ public class DALikelihoodPerformanceTest {
     CodonAlignment codonAlignment;
     SiteModel siteModel;
     Tree tree;
+
+    DecimalFormat df = new DecimalFormat("#.00");
 
 //    @Before
 //    public void setUp() {
@@ -49,9 +52,9 @@ public class DALikelihoodPerformanceTest {
 
         String newickTree;
         String pi = "F3X4";
-        if (nTaxa == 2) {
-            newickTree = "((t1:0.5,t2:0.1):0.0);";
-        } else if (nTaxa == 4 && symmetric) {
+//        if (nTaxa == 2) { // NullPointerException in TreeLikelihood.setStates
+//            newickTree = "((t1:0.5,t2:0.1):0.0);";
+        if (nTaxa == 4 && symmetric) {
             newickTree = "((t1:0.5,t2:0.1):0.2, (t3:0.5,t4:0.1):0.3);";
         } else if (nTaxa == 4) { // not symmetric
             newickTree = "(((t1:0.5,t2:0.1):0.2, t3:0.5):0.1,t4:0.1);";
@@ -102,8 +105,9 @@ public class DALikelihoodPerformanceTest {
         System.setProperty("java.only","true");
     }
 
+    // return how many times faster
+    private double benchmarking(int iteration) {
 
-    private void benchmarking(int iteration) {
         // =============== Standard likelihood ===============
         long[] elapsedTimeMillis = new long[iteration];
 
@@ -135,30 +139,25 @@ public class DALikelihoodPerformanceTest {
 
         // =============== DA likelihood ===============
 
+
+        int tipCount = tree.getLeafNodeCount();
+        int siteCount = codonAlignment.getSiteCount();
+
+        Random generator = new Random(777);
+        final int[][] states = generateInternalNodeStatesVertMT(generator, tipCount, siteCount);
+
         // Get current time
         start = System.currentTimeMillis();
 
-        int tipCount = tree.getLeafNodeCount();
         int internalNodeCount = tree.getInternalNodeCount();
-        int siteCount = codonAlignment.getSiteCount();
         // vert MT stop codon states = 8, 10, 48, 50
         int[] stopCodons = codonAlignment.getGeneticCode().getStopCodonStates();
         System.out.println("Stop codon states " + Arrays.toString(stopCodons));
 
         InternalNodeStates internalNodeStates = new InternalNodeStates(internalNodeCount, siteCount);
-
         // internal nodes
-        for (int i=tipCount; i<tree.getNodeCount(); i++) {
-            int[] states = new int[siteCount];
-            // 0 - 63
-            for (int j=0; j < states.length; j++) {
-                states[j] = (int)(Math.random() * 64);
-                // not stop codon in vertebrateMitochondrial
-                while(states[j] == 8 || states[j] == 10 || states[j] == 48 || states[j] == 50)
-                    states[j] = (int)(Math.random() * 64);
-            }
-            internalNodeStates.setNrStates(i, states);
-        }
+        for (int i=tipCount; i<tree.getNodeCount(); i++)
+            internalNodeStates.setNrStates(i, states[i-tipCount]);
 
         DACodonTreeLikelihood daLikelihood = new DACodonTreeLikelihood();
 
@@ -188,8 +187,6 @@ public class DALikelihoodPerformanceTest {
 
         // =============== report ===============
 
-        DecimalFormat df = new DecimalFormat("#.00");
-
         System.out.println("\n=============== Standard likelihood ===============\n");
         System.out.println("Init time " + standardInit + " milliseconds");
         System.out.println(iteration + " iteration(s) " + timeStandard + " milliseconds");
@@ -206,25 +203,62 @@ public class DALikelihoodPerformanceTest {
                 " milliseconds per iteration in average.");
 
         System.out.println("\n" + df.format(timeStandard/timeDA) + " times faster\n\n");
+
+        return timeStandard/timeDA;
+    }
+
+    // vertebrateMitochondrial
+    private int[][] generateInternalNodeStatesVertMT(Random generator, int tipCount, int siteCount) {
+        // internal nodes
+        int[][] states = new int[tipCount-1][siteCount];
+
+        for (int i=0; i< tipCount-1 ; i++) {
+//            states[i] = new int[siteCount];
+            // 0 - 63
+            for (int j=0; j < states.length; j++) {
+                states[i][j] = (int)(generator.nextDouble() * 64);
+                // stop codon states in vertebrateMitochondrial
+                while(states[i][j] == 8 || states[i][j] == 10 || states[i][j] == 48 || states[i][j] == 50)
+                    states[i][j] = (int)(generator.nextDouble() * 64);
+            }
+        }
+        return states;
     }
 
     @Test
     public void benchmarkingF3X4(){
 //        init6T333("F3X4");
+        String[] test = new String[]{"4 taxa", "8 taxa symmetric", "8 taxa unsymmetric", "16 taxa", "32 taxa"};
+        double[] faster = new double[test.length];
+        int ite = 10;
+
+        initF3X4L10K(4, true);
+        faster[0] = benchmarking(ite);
 
         initF3X4L10K(8, false);
-        benchmarking(1);
+        faster[2] = benchmarking(ite);
 
         initF3X4L10K(8, true);
-        benchmarking(1);
+        faster[1] = benchmarking(ite);
 
+        initF3X4L10K(16, true);
+        faster[3] = benchmarking(ite);
+
+        initF3X4L10K(32, true);
+        faster[4] = benchmarking(ite);
+
+        System.out.println("\n=============== Summary ===============\n");
+        System.out.println(ite + " iteration(s) :\n");
+        for (int i = 0; i < faster.length; i++) {
+            System.out.println("test " + test[i] + " : DA likelihood " + df.format(faster[i]) + " times faster\n");
+        }
     }
 
     @Test
     public void benchmarkingF3X4T128(){
 
         initF3X4T128L500();
-        benchmarking(1);
+        benchmarking(20);
 
     }
 
