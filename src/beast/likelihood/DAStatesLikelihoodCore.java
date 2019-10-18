@@ -219,6 +219,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //    }
 
     // suppose only used by unit test
+    @Override
     public void getNodeBranchLd(int nodeIndex, double[] branchLdOut) {
         System.arraycopy(branchLd[currentBrLdIndex[nodeIndex]][nodeIndex], 0, branchLdOut, 0, branchLdOut.length);
     }
@@ -406,103 +407,6 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //        return branchLogLd3; // node log likelihood
     }
 
-//    protected double calculateLogNodeBranchLd(final int[] stateIndex1, final double[] matrices1,
-//                                           final int[] stateIndex2, final double[] matrices2,
-//                                           final int[] stateIndex3, final int category) {
-////        int v = 0;
-////        System.out.println("\nmatrices1 = " + matrices1.length + " matrices2 = " + matrices2.length +
-////                " branchLd3 = " + branchLd3.length + " getNrOfSites() = " + getNrOfSites() + " nrOfStates = " + nrOfStates);
-//
-//        double branchLogLd3 = 0;
-//
-////        for (int l = 0; l < nrOfCategories; l++) {
-//
-//        int w = category * matrixSize;
-////            int v = l * getNrOfSites();
-//
-//        int k=0;
-//        int state1 = stateIndex1[k];
-//        int state2 = stateIndex2[k];
-//        int state3 = stateIndex3[k];
-//
-//        double branchLd3Trunk = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-//
-//        // integrate over sites
-//        for (k = 1; k < getNrOfSites(); k++) {
-//
-//            state1 = stateIndex1[k];
-//            state2 = stateIndex2[k];
-//            state3 = stateIndex3[k];
-//
-//            if (state1 < nrOfStates && state2 < nrOfStates && state3 < nrOfStates) {
-////System.out.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
-////        ", matrices1[] = " + (w + state1 + state3) + " matrices2[] = " + (w + state2 + state3));
-//
-//                branchLd3Trunk *= matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-//
-////                    branchLd3[k + v] = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-////
-////                    if (branchLd3[k + v] == 0)
-////                        System.err.println("w = " + w + " v = " + v + " k = " + k +
-////                                "; state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
-////                        "; " + matrices1[w + state1 * nrOfStates + state3] + " * " + matrices2[w + state2 * nrOfStates + state3]);
-//
-//
-////                    for (int i = 0; i < nrOfStates; i++) {
-////
-////                        branchLd3[v] = matrices1[w + state1] * matrices2[w + state2];
-////
-////                        v++;
-////                        w += nrOfStates;
-////                    }
-////                } else if (state1 < nrOfStates) {
-////                    // child 2 has a gap or unknown state so treat it as unknown
-////
-////                    for (int i = 0; i < nrOfStates; i++) {
-////
-////                        branchLd3[v] = matrices1[w + state1];
-////
-////                        v++;
-////                        w += nrOfStates;
-////                    }
-////                } else if (state2 < nrOfStates) {
-////                    // child 2 has a gap or unknown state so treat it as unknown
-////
-////                    for (int i = 0; i < nrOfStates; i++) {
-////
-////                        branchLd3[v] = matrices2[w + state2];
-////
-////                        v++;
-////                        w += nrOfStates;
-////                    }
-//            } else {
-//                System.err.println("w = " + w + " state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3);
-//                throw new UnsupportedOperationException("in dev");
-//                // both children have a gap or unknown state so set branchLd to 1
-//
-////                    for (int j = 0; j < nrOfStates; j++) {
-////                        branchLd3[v] = 1.0;
-////                        v++;
-////                    }
-//            }
-//
-//            if (branchLd3Trunk == 0)
-//                System.err.println("category = " + category + " site = " + k +
-//                        "; state1 = " + state1 + " state2 = " + state2 + " state3 = " + state3 +
-//                        "; " + matrices1[w + state1 * nrOfStates + state3] + " * " + matrices2[w + state2 * nrOfStates + state3]);
-//
-//            // log every 1000 sites
-//            if (k % 1000 == 0) {
-//                branchLogLd3 += Math.log(branchLd3Trunk) + getLogScalingFactor(k);
-//                branchLd3Trunk = 1;
-//            }
-//
-//        } // end k  getNrOfSites()
-////        } // end l nrOfCategories
-//
-//        return branchLogLd3;
-//    }
-
 
     /**
      * Calculates site log likelihoods at root node.
@@ -520,7 +424,7 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         double logP = 0;
 
         // exclude root node
-        int rootIndex = getNrOfNodes()-1;
+        final int rootIndex = getNrOfNodes()-1;
 
         for (int k = 0; k < getNrOfSites(); k++) {
 //TODO review
@@ -539,6 +443,16 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
 //                trunk++;
                 }
             } // end i
+
+            // hard code for root node
+            int state = internalNodeStates.getASite(rootIndex, k); // 0-63
+
+            //TODO rm validation to fast speed, implement unit test
+            if (frequencies[state] == 0)
+                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
+
+            // TODO review I do not think prior prob in root is required
+            product *= frequencies[state];
 
         } // end k
         // the rest

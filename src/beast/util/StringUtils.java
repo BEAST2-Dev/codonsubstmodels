@@ -41,9 +41,13 @@ public class StringUtils {
      * @param matrix transition probability matrix
      * @return
      */
-    public static String get2DMatrixString(double[] matrix, int dim, Codon codon) {
+    public static String get2DMatrixString(double[] matrix, Codon codon) {
         StringBuilder output = new StringBuilder();
-        assert matrix.length == dim * dim;
+        int dim = (int) Math.sqrt(matrix.length);
+
+        if (matrix.length != dim * dim)
+            throw new IllegalArgumentException("The array length " + matrix.length + " != " + dim + " * " + dim);
+
         if (codon != null) {
             // add header
             for (int j = 0; j < dim; j++)

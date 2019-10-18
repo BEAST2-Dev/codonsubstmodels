@@ -50,9 +50,12 @@ public class CodonTestData {
         return data;
     }
 
-    public static Tree getTree(Alignment data, String newickTree) {
+    /**
+     * Create BEAST tree from alignment and newick string
+     */
+    public static Tree getTree(Alignment data, String newickTree, boolean adjustTipHeights) {
         TreeParser t = new TreeParser();
-        t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true);
+        t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true, "adjustTipHeights", adjustTipHeights);
         return t;
     }
 

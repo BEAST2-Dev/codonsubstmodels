@@ -74,7 +74,7 @@ public class DALikelihoodPerformanceTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", false);
         siteModel = CodonTestData.getSiteModel("0.3", "5", codonFreq, false);
-        tree = CodonTestData.getTree(codonAlignment, newickTree);
+        tree = CodonTestData.getTree(codonAlignment, newickTree, false);
 
         System.setProperty("java.only","true");
     }
@@ -100,7 +100,7 @@ public class DALikelihoodPerformanceTest {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", false);
         siteModel = CodonTestData.getSiteModel("0.3", "5", codonFreq, false);
-        tree = CodonTestData.getTree(codonAlignment, newickTree);
+        tree = CodonTestData.getTree(codonAlignment, newickTree, false);
 
         System.setProperty("java.only","true");
     }
@@ -138,7 +138,6 @@ public class DALikelihoodPerformanceTest {
         timeStandardStdev = Math.sqrt(timeStandardStdev / iteration);
 
         // =============== DA likelihood ===============
-
 
         int tipCount = tree.getLeafNodeCount();
         int siteCount = codonAlignment.getSiteCount();
@@ -225,10 +224,19 @@ public class DALikelihoodPerformanceTest {
         return states;
     }
 
+    /**
+     * 10 iteration(s) :
+     * test 2 taxa : DA likelihood 2.50 times faster
+     * test 4 taxa : DA likelihood 4.43 times faster
+     * test 8 taxa symmetric : DA likelihood 9.77 times faster
+     * test 8 taxa asymmetric : DA likelihood 15.57 times faster
+     * test 16 taxa : DA likelihood 19.92 times faster
+     * test 32 taxa : DA likelihood 24.45 times faster
+     */
     @Test
     public void benchmarkingF3X4(){
-//        init6T333("F3X4");
-        String[] test = new String[]{"2 taxa", "4 taxa", "8 taxa symmetric", "8 taxa unsymmetric", "16 taxa", "32 taxa"};
+        // symmetric slower than asymmetric
+        String[] test = new String[]{"2 taxa", "4 taxa", "8 taxa symmetric", "8 taxa asymmetric", "16 taxa", "32 taxa"};
         boolean[] symmetric = new boolean[]{true, true, true, false, true, true};
         int[] nTaxa = new int[]{2, 4, 8, 8, 16, 32};
         double[] faster = new double[test.length];
@@ -359,7 +367,7 @@ public class DALikelihoodPerformanceTest {
             CodonFrequencies codonFreq = new CodonFrequencies();
             codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", false);
             siteModel = CodonTestData.getSiteModel("0.08000", "15.34858", codonFreq, false);
-            tree = CodonTestData.getTree(codonAlignment, newickTree);
+            tree = CodonTestData.getTree(codonAlignment, newickTree, false);
 
             System.setProperty("java.only","true");
         } else {

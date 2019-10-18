@@ -86,6 +86,26 @@ abstract public class DALikelihoodCore {
     public abstract double calculateLogLikelihoods(double[] frequencies);
 
 
+    //    @Override
+//    public void setNodeBranchLd(int nodeIndex, double[] branchLd) {
+//
+//        if (this.branchLd[0][nodeIndex] == null) {
+//            createNodeBranchLd(nodeIndex);
+//        }
+//        if (branchLd.length < branchLdSize) {
+//            int k = 0;
+//            for (int i = 0; i < nrOfCategories; i++) {
+//                System.arraycopy(branchLd, 0, this.branchLd[0][nodeIndex], k, branchLd.length);
+//                k += branchLd.length;
+//            }
+//        } else {
+//            System.arraycopy(branchLd, 0, this.branchLd[0][nodeIndex], 0, branchLd.length);
+//        }
+//    }
+
+    // suppose only used by unit test
+    public abstract void getNodeBranchLd(int nodeIndex, double[] branchLdOut);
+
     public abstract void setNodeBrLdForUpdate(int nodeIndex);
 
     public abstract int[] getNodeStates(int nodeIndex);

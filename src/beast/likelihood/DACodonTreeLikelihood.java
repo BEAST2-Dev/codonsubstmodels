@@ -346,7 +346,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex])) {
             branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
-            daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
+//            daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
             for (int i = 0; i < siteModel.getCategoryCount(); i++) {
                 final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
                 substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
@@ -416,25 +416,30 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
 //        for (Node node : tree.getNodesAsArray()) {
         for (int n = 0; n < rootIndex; n++) {
-            Node node = tree.getNode(n);
+            final Node node = tree.getNode(n);
+            final Node parent = node.getParent();
 //            if (!node.isRoot()) {
             int nodeUpdate = node.isDirty();
 
             final int nodeIndex = node.getNr();
+            final int parentNum = parent.getNr();
+
             final double branchRate = branchRateModel.getRateForBranch(node);
             final double branchTime = node.getLength() * branchRate;
 
 //TODO deal with 0 branch length, such as SA
             if (branchTime < 1e-6)
-                throw new UnsupportedOperationException("Node " + nodeIndex + " time is 0  !\n" +
+//                throw new UnsupportedOperationException(
+                System.err.println(
+                        "Time from parent " + parentNum + " to node " + nodeIndex + " is 0 !  " +
                         "branch length = " + node.getLength() + ", branchRate = " + branchRate);
 
             //TODO how to distinguish branch len change and internal node seq change, when topology is same
             // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
             if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
                 branchLengths[nodeIndex] = branchTime;
-                final Node parent = node.getParent();
-                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
+
+//                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO implement updates
                 for (int i = 0; i < siteModel.getCategoryCount(); i++) {
                     final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
                     substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
@@ -447,11 +452,8 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
             // ====== 2. recalculate likelihood if either child node wasn't clean ======
             if (nodeUpdate != Tree.IS_CLEAN) {
-                Node parent = node.getParent();
-
-                final int parentNum = parent.getNr();
                 // brLD is linked to the child node index down
-                daLdCore.setNodeBrLdForUpdate(parentNum); // TODO review
+//                daLdCore.setNodeBrLdForUpdate(parentNum); // TODO implement updates
 
                 // populate branchLd[][excl. root], nodeIndex is child
                 daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
@@ -465,7 +467,10 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     }
 
 
-
+    // for testing
+    public void getBranchPartials(int nodeIndex, double[] branchLdOut) {
+        daLdCore.getNodeBranchLd(nodeIndex, branchLdOut);
+    }
 
     /* return copy of node log likelihoods */
     public double [] getNodeLogLikelihoods() {

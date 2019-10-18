@@ -198,7 +198,7 @@ public class M0TreeLikelihoodTest {
         SiteModel siteModel = new SiteModel();
         siteModel.initByName("substModel", m0);
 
-        Tree tree = CodonTestData.getTree(data, newickTree);
+        Tree tree = CodonTestData.getTree(data, newickTree, true);
 
         System.setProperty("java.only","true");
         TreeLikelihood likelihood = new TreeLikelihood();
