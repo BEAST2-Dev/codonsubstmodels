@@ -13,24 +13,24 @@ import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonTestData;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import static junit.framework.Assert.assertEquals;
 
 
 /**
- *
+ * Use BEAST 2 core TreeLikelihood result to test DACodonTreeLikelihood.
  *
  * @author Walter Xie
  */
 public class DALikelihoodTest {
+
     TreeLikelihood treeLikelihood;
     DACodonTreeLikelihood daTreeLikelihood;
     int rootNr;
     InternalNodeStates internalNodeStates;
 
-    DecimalFormat df = new DecimalFormat("#.00");
+//    DecimalFormat df = new DecimalFormat("#.00");
 
     @Before
     public void setUp() {
