@@ -37,13 +37,15 @@ public class DALikelihoodTest {
 
 //        String newickTree = "(t1:0.5, t2:0.0):0.0;"; // TODO bug for 0 branch length ?
         String newickTree = "(t1:0.5, t2:0.1):0.0;";
+//        boolean adjustTipHeights = true;
+        boolean adjustTipHeights = false;
 
         // =============== Standard tree likelihood ===============
-        treeLikelihood = getTreeLikelihood("equal", newickTree, false);
+        treeLikelihood = getTreeLikelihood("equal", newickTree, adjustTipHeights);
 
         // =============== DA tree likelihood ===============
         // need to set internal node states
-        daTreeLikelihood = getDATreeLikelihood("equal", newickTree, false);
+        daTreeLikelihood = getDATreeLikelihood("equal", newickTree, adjustTipHeights);
 
         rootNr = daTreeLikelihood.treeInput.get().getRoot().getNr();
         System.out.println("Root index = " + rootNr);
@@ -60,7 +62,7 @@ public class DALikelihoodTest {
         System.out.println("Root partial without freqs = " + Arrays.toString(partial));
 
         System.out.println("\n=============== DA tree likelihood ===============");
-        final double freq = 1.0/60.0;
+        final double freq = 1.0/60.0; // vertebrateMitochondrial
         double totalLogPDA = 0;
         // 0 - 63
         for (int s=0; s < 64; s++) {
@@ -86,11 +88,12 @@ public class DALikelihoodTest {
 
                 assertEquals(partial[s], nodeLd, 1e-16);
 
-                totalLogPDA += nodeLd * freq;
+                totalLogPDA += nodeLd * freq; // frequencies prior on the root
             }
         }
+        totalLogPDA = Math.log(totalLogPDA);
         System.out.println("\nTotal :");
-        System.out.println("Total DA tree likelihood logP = " + Math.log(totalLogPDA));
+        System.out.println("Total DA tree likelihood logP = " + totalLogPDA);
         System.out.println("Standard tree likelihood logP = " + logP);
         //Total DA tree likelihood logP = -15.667929146385474
         //Standard tree likelihood logP = -15.667929146369291
