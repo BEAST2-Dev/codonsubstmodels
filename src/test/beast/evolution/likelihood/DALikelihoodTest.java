@@ -63,7 +63,8 @@ public class DALikelihoodTest {
 
         System.out.println("\n=============== DA tree likelihood ===============");
         final double freq = 1.0/60.0; // vertebrateMitochondrial
-        double totalLogPDA = 0;
+        double daLogP = 0;
+        double daLogP2 = 0; // nodeLd * freq
         // 0 - 63
         for (int s=0; s < 64; s++) {
             // stop codon states in vertebrateMitochondrial
@@ -74,6 +75,8 @@ public class DALikelihoodTest {
 
                 double logPDA = daTreeLikelihood.calculateLogP();
                 System.out.println(" DA logP = " + logPDA);
+
+                daLogP += Math.exp(logPDA);
 
                 // [branch][site]
                 double[][] branchLd = new double[2][1];
@@ -88,16 +91,19 @@ public class DALikelihoodTest {
 
                 assertEquals(partial[s], nodeLd, 1e-16);
 
-                totalLogPDA += nodeLd * freq; // frequencies prior on the root
+                daLogP2 += nodeLd * freq; // frequencies prior on the root
             }
         }
-        totalLogPDA = Math.log(totalLogPDA);
+        daLogP = Math.log(daLogP);
+        daLogP2 = Math.log(daLogP2);
         System.out.println("\nTotal :");
-        System.out.println("Total DA tree likelihood logP = " + totalLogPDA);
+        System.out.println("Total DA tree likelihood logP = " + daLogP);
+        System.out.println("Total DA tree likelihood logP2 = " + daLogP2);
         System.out.println("Standard tree likelihood logP = " + logP);
         //Total DA tree likelihood logP = -15.667929146385474
         //Standard tree likelihood logP = -15.667929146369291
-        assertEquals(logP, totalLogPDA, 1e-10);
+        assertEquals(logP, daLogP, 1e-10);
+        assertEquals(logP, daLogP2, 1e-10);
     }
 
 
