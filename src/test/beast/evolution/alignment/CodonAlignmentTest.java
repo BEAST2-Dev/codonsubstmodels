@@ -2,7 +2,7 @@ package test.beast.evolution.alignment;
 
 import beast.evolution.alignment.Sequence;
 import org.junit.Test;
-import test.beast.evolution.CodonTestData;
+import test.beast.evolution.CodonData;
 
 import java.util.List;
 
@@ -15,10 +15,10 @@ public class CodonAlignmentTest {
 
     @Test
     public void testGetSequence() {
-        Sequence seq1 = CodonTestData.getSeqCodeMap();
+        Sequence seq1 = CodonData.getSeqCodeMap();
         System.out.println(seq1);
 
-        List<Integer> codonStates = seq1.getSequence(CodonTestData.codonUNIVERSAL);
+        List<Integer> codonStates = seq1.getSequence(CodonData.codonUNIVERSAL);
         System.out.println(codonStates);
 
         // define codon triplets states as indices of Codon.CODON_TRIPLETS

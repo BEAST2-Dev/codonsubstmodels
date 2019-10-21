@@ -10,7 +10,7 @@ import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonTestData;
+import test.beast.evolution.CodonData;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
@@ -23,7 +23,7 @@ public class M0TreeLikelihoodTest {
 
     @Before
     public void setUp() {
-        Alignment data = CodonTestData.getAlig6T333();
+        Alignment data = CodonData.getAlig6T333();
         // create Codon Alignment
         codonAlignment = new CodonAlignment();
         codonAlignment.initByName("data", data, "dataType", "codon", "geneticCode", "vertebrateMitochondrial");
@@ -198,7 +198,7 @@ public class M0TreeLikelihoodTest {
         SiteModel siteModel = new SiteModel();
         siteModel.initByName("substModel", m0);
 
-        Tree tree = CodonTestData.getTree(data, newickTree, true);
+        Tree tree = CodonData.getTree(data, newickTree, true);
 
         System.setProperty("java.only","true");
         TreeLikelihood likelihood = new TreeLikelihood();

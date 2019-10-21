@@ -11,7 +11,7 @@ import beast.tree.InternalNodeStates;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonTestData;
+import test.beast.evolution.CodonData;
 
 import java.util.Arrays;
 
@@ -129,9 +129,9 @@ public class DALikelihoodTest {
 
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", true);
-        SiteModel siteModel = CodonTestData.getSiteModel("0.3", "5", codonFreq, false);
+        SiteModel siteModel = CodonData.getSiteModel("0.3", "5", codonFreq, false);
 
-        Tree tree = CodonTestData.getTree(codonAlignment, newickTree, adjustTipHeights);
+        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights);
         System.out.println("Tree is " + newickTree + "\n");
 
         System.setProperty("java.only","true");
@@ -154,9 +154,9 @@ public class DALikelihoodTest {
 
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", true);
-        SiteModel siteModel = CodonTestData.getSiteModel("0.3", "5", codonFreq, false);
+        SiteModel siteModel = CodonData.getSiteModel("0.3", "5", codonFreq, false);
 
-        Tree tree = CodonTestData.getTree(codonAlignment, newickTree, adjustTipHeights);
+        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights);
         System.out.println("Tree is " + newickTree + "\n");
 
         System.setProperty("java.only","true");

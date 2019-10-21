@@ -5,7 +5,7 @@ import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.Nucleotide;
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonTestData;
+import test.beast.evolution.CodonData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ public class CodonTest {
 
     @Before
     public void setUp() {
-        codon = CodonTestData.codonUNIVERSAL;
+        codon = CodonData.codonUNIVERSAL;
     }
 
     @Test
@@ -36,7 +36,7 @@ public class CodonTest {
 
         String codeMap = codon.getCodeMap();
         System.out.println("codeMap = " + codeMap);
-        assertEquals("Codon codeMap : ", CodonTestData.getTriplets(), codeMap);
+        assertEquals("Codon codeMap : ", CodonData.getTriplets(), codeMap);
     }
 
 //    @Test
@@ -64,7 +64,7 @@ public class CodonTest {
 
     @Test
     public void testStringToEncoding() {
-        String data = CodonTestData.getTriplets();
+        String data = CodonData.getTriplets();
         List<Integer> states = codon.stringToEncoding(data);
         System.out.println("StringToEncoding : " + data);
         System.out.println("StringToEncoding : " + states);
@@ -105,7 +105,7 @@ public class CodonTest {
 
     @Test
     public void testGetTriplet() {
-        int[] states = CodonTestData.getTestStates();
+        int[] states = CodonData.getTestStates();
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
             String triplet = codon.getTriplet(state);

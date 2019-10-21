@@ -4,7 +4,7 @@ import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonTestData;
+import test.beast.evolution.CodonData;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
@@ -41,7 +41,7 @@ public class GeneticCodeTest {
 
     @Test
     public void testGetAminoAcid() {
-        int[] states = CodonTestData.getTestStates();
+        int[] states = CodonData.getTestStates();
         Character[] aaExpected = new Character[]{'K','P','G','L','F','-','-'};
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
@@ -54,7 +54,7 @@ public class GeneticCodeTest {
 
     @Test
     public void testGetAminoAcidCodonState() {
-        int[] states = CodonTestData.getTestStates();
+        int[] states = CodonData.getTestStates();
         Character[] aaExpected = new Character[]{'K','P','G','L','F','-','-'};
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
