@@ -37,7 +37,7 @@ public class DALikelihoodBenchmarking {
     String[] test;
     final boolean[] symmetric = new boolean[]{true, true, false, true, false, true, true, true, true};
     final int[] nTaxa = new int[]{2, 4, 4, 8, 8, 16, 32, 64, 128};
-    final int[] nCodons = new int[]{100, 200, 500};
+    final int[] nCodons = new int[]{500};
 
     public DALikelihoodBenchmarking() {
         assert nTaxa.length == symmetric.length;
@@ -258,91 +258,6 @@ public class DALikelihoodBenchmarking {
     }
 
 
-    /**
-     * Sum 64*64 time is 4577 nanoseconds
-     * Sum 64 time is 74 nanoseconds
-     * Take 1 element 4 nanoseconds
-     *
-     * end1 / end3 = 1144 times
-     * end2 / end3 = 18 times
-     */
-    public void benchmarkingForLoop(){
-
-        double[][] m = new double[64][64];
-        double sum = 0;
-
-        long start = System.nanoTime();
-        for (int n=0; n<1000000; n++) {
-            for (int i = 0; i < m.length; i++) {
-                for (int j = 0; j < m.length; j++) {
-                    sum += m[i][j];
-                }
-            }
-        }
-        long end1 = System.nanoTime()-start;
-        System.out.println("\nSum 64*64 time is " + end1 + " nanoseconds");
-
-        start = System.nanoTime();
-        for (int n=0; n<1000000; n++) {
-            for (int j=0; j<m.length; j++) {
-                sum += m[16][j];
-            }
-        }
-        long end2 = System.nanoTime()-start;
-        System.out.println("Sum 64 time is " + end2 + " nanoseconds");
-
-
-        start = System.nanoTime();
-        for (int n=0; n<1000000; n++) {
-            sum += m[16][63];
-        }
-        long end3 = System.nanoTime()-start;
-        System.out.println("Take 1 element " + end3 + " nanoseconds");
-
-
-        System.out.println("\nend1 / end3 = " + (end1 / end3) + " times");
-        System.out.println("end2 / end3 = " + (end2 / end3) + " times");
-    }
-
-    /**
-     * Take reference from 2D array: time is 6 nanoseconds
-     * System.arraycopy: time is 3562 nanoseconds
-     * For loop: time is 1806 nanoseconds
-     */
-    public void benchmarkingArrays(){
-        // 2*16-1
-        double[][] nodes = new double[31][10000];
-        for (int j = 0; j < nodes[16].length; j++)
-            nodes[16][j] = j;
-        double[] arr;
-
-        long start = System.nanoTime();
-        for (int n=0; n<1000000; n++) {
-            arr = nodes[16];
-        }
-        long end1 = System.nanoTime()-start;
-        System.out.println("\nTake reference from 2D array: time is " + end1 + " nanoseconds");
-
-        start = System.nanoTime();
-        arr = new double[nodes[16].length];
-        for (int n=0; n<1000000; n++) {
-            System.arraycopy(arr, 0, nodes[16], 0, arr.length);
-        }
-        long end2 = System.nanoTime()-start;
-        System.out.println("System.arraycopy: time is " + end2 + " nanoseconds");
-
-
-        start = System.nanoTime();
-        arr = new double[nodes[16].length];
-        for (int n=0; n<1000000; n++) {
-            for (int j = 0; j < nodes[16].length; j++)
-                arr[j] = nodes[16][j];
-        }
-        long end3 = System.nanoTime()-start;
-        System.out.println("For loop: time is " + end3 + " nanoseconds");
-
-    }
-
     // up to 128 taxa, 500 codons
     public Alignment getAlignment(int nTaxa, int nCodon) throws XMLParserException {
         assert nTaxa <= MAX_TIPS;
@@ -559,6 +474,90 @@ public class DALikelihoodBenchmarking {
         return siteModel;
     }
 
+    /**
+     * Sum 64*64 time is 4577 milliseconds
+     * Sum 64 time is 74 millseconds
+     * Take 1 element 4 millseconds
+     *
+     * end1 / end3 = 1144 times
+     * end2 / end3 = 18 times
+     */
+    public void benchmarkingForLoop(){
+
+        double[][] m = new double[64][64];
+        double sum = 0;
+
+        long start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            for (int i = 0; i < m.length; i++) {
+                for (int j = 0; j < m.length; j++) {
+                    sum += m[i][j];
+                }
+            }
+        }
+        long end1 = System.currentTimeMillis()-start;
+        System.out.println("\nSum 64*64 time is " + end1 + " milliseconds");
+
+        start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            for (int j=0; j<m.length; j++) {
+                sum += m[16][j];
+            }
+        }
+        long end2 = System.currentTimeMillis()-start;
+        System.out.println("Sum 64 time is " + end2 + " milliseconds");
+
+
+        start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            sum += m[16][63];
+        }
+        long end3 = System.currentTimeMillis()-start;
+        System.out.println("Take 1 element " + end3 + " milliseconds");
+
+
+        System.out.println("\nend1 / end3 = " + (end1 / end3) + " times");
+        System.out.println("end2 / end3 = " + (end2 / end3) + " times");
+    }
+
+    /**
+     * Take reference from 2D array: time is 6 milliseconds
+     * System.arraycopy: time is 3562 milliseconds
+     * For loop: time is 1806 milliseconds
+     */
+    public void benchmarkingArrays(){
+        // 2*16-1
+        double[][] nodes = new double[31][10000];
+        for (int j = 0; j < nodes[16].length; j++)
+            nodes[16][j] = j;
+        double[] arr;
+
+        long start = System.currentTimeMillis();
+        for (int n=0; n<1000000; n++) {
+            arr = nodes[16];
+        }
+        long end1 = System.currentTimeMillis()-start;
+        System.out.println("\nTake reference from 2D array: time is " + end1 + " milliseconds");
+
+        start = System.currentTimeMillis();
+        arr = new double[nodes[16].length];
+        for (int n=0; n<1000000; n++) {
+            System.arraycopy(arr, 0, nodes[16], 0, arr.length);
+        }
+        long end2 = System.currentTimeMillis()-start;
+        System.out.println("System.arraycopy: time is " + end2 + " milliseconds");
+
+
+        start = System.currentTimeMillis();
+        arr = new double[nodes[16].length];
+        for (int n=0; n<1000000; n++) {
+            for (int j = 0; j < nodes[16].length; j++)
+                arr[j] = nodes[16][j];
+        }
+        long end3 = System.currentTimeMillis()-start;
+        System.out.println("For loop: time is " + end3 + " milliseconds");
+
+    }
 
 // ========== in dev ===========
 
