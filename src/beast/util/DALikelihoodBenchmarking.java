@@ -87,6 +87,7 @@ public class DALikelihoodBenchmarking {
 
         for (int i=0; i<nCodons.length; i++) {
             int nCodon = nCodons[i];
+            System.out.println("\nSummary time of " + nCodon + " codons :\n");
 
             for (int j = 0; j < test.length; j++) {
                 BEASTObject[] models = initF3X4(nTaxa[j], nCodon, symmetric[j], verbose);
@@ -101,14 +102,11 @@ public class DALikelihoodBenchmarking {
                 }
                 time[i][j] = tm[1];
                 initime[i][j] = tm[0];
-            }
 
-            System.out.println("\nSummary time of " + nCodon + " codons :\n");
-            for (int j = 0; j < time[i].length; j++) {
                 System.out.println("test " + test[j] + " : ");
                 summarise(iteration, initime[i][j], time[i][j]);
+                System.out.println();
             }
-            System.out.println();
         } // end i
         return time;
     }
