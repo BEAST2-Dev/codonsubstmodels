@@ -361,10 +361,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
                 product *= branchLd[currentBrLdIndex[i]][i][k];
 
                 // log when product is too small, Double.MAX_VALUE 1.79...e+308
-                if (product < 1e-100) {
+                if (product < 1e-200) {
                     if (product == 0)
                         throw new RuntimeException("Likelihood -Inf at site " + k + " node " + i + " ! " +
-                                "\nintegratedBrLd = " + product);
+                                "\nbranch likelihood = " + branchLd[currentBrLdIndex[i]][i][k]);
 
                     logP += Math.log(product); //+ getLogScalingFactor(k); TODO
                     product = 1.0;
