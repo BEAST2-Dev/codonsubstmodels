@@ -285,14 +285,10 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         logP = 0;
 
         final TreeInterface tree = treeInput.get();
-        //TODO strange code in SiteModel, node is not used
-        final double[] proportions = siteModel.getCategoryProportions(tree.getRoot());
         final double[] frequencies = substitutionModel.getFrequencies();
 
         try {
-//            if (updateNode(tree.getRoot(), proportions) != Tree.IS_CLEAN)
-//                logP = daLdCore.calculateLogLikelihoods(frequencies);
-            if (updateNode2(tree) != Tree.IS_CLEAN)
+            if (updateNode(tree) != Tree.IS_CLEAN)
                 logP = daLdCore.calculateLogLikelihoods(frequencies);
 //            System.out.println("logP = " + logP);
         }
@@ -327,84 +323,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     }
 
 
-    /* Assumes there IS a branch rate model as opposed to updateNode() */
-    protected int updateNode(final Node node, final double[] proportions) {
+    protected int updateNode(final TreeInterface tree) {
 
-        int update = (node.isDirty() | hasDirt);
-
-        final int nodeIndex = node.getNr();
-        final double branchRate = branchRateModel.getRateForBranch(node);
-        final double branchTime = node.getLength() * branchRate;
-
-//TODO deal with 0 branch length, such as SA
-        if (!node.isRoot() && branchTime < 1e-6)
-            throw new UnsupportedOperationException("Node " + nodeIndex + " time is 0  !\n" +
-                    "branch length = " + node.getLength() + ", branchRate = " + branchRate);
-
-        //TODO how to distinguish branch len change and internal node seq change, when topology is same
-        // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
-        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex])) {
-            branchLengths[nodeIndex] = branchTime;
-            final Node parent = node.getParent();
-//            daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO review
-            for (int i = 0; i < siteModel.getCategoryCount(); i++) {
-                final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
-                substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
-                //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
-
-                daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
-            }
-            update |= Tree.IS_DIRTY;
-        }
-
-        // ====== 2. recalculate likelihood if either child node wasn't clean ======
-        if (!node.isLeaf()) {
-
-            // Traverse down the two child nodes
-            for (final Node child : node.getChildren()) {
-                final int update1 = updateNode(child, proportions);
-
-                if (update1 != Tree.IS_CLEAN) {
-                    final int childNum = child.getNr();
-                    // brLD is linked to the child node index down
-                    daLdCore.setNodeBrLdForUpdate(childNum); // TODO review
-
-                    update |= update1;
-
-                    // populate branchLd[][excl. root]
-                    daLdCore.calculateNodeBrLdOverCategories(childNum, nodeIndex, proportions);
-                }
-
-            }
-
-
-//            final Node child1 = node.getChild(0);
-//            final int update1 = updateNode(child1, proportions);
-//
-//            final Node child2 = node.getChild(1);
-//            final int update2 = updateNode(child2, proportions);
-
-            // If either child node was updated then update this node too
-//            if (update1 != Tree.IS_CLEAN || update2 != Tree.IS_CLEAN) {
-//
-//                final int childNum1 = child1.getNr();
-//                final int childNum2 = child2.getNr();
-//
-//                daLdCore.setNodeBrLdForUpdate(nodeIndex);
-//                update |= (update1 | update2);
-////                if (update >= Tree.IS_FILTHY) {
-////                    daLdCore.setNodeStatesForUpdate(nodeIndex); // TODO review
-////                }
-//
-//                // populate branchLd[][only internal nodes]
-//                daLdCore.calculateNodeBrLdOverCategories(childNum1, childNum2, nodeIndex, proportions);
-//            }
-        } // end if (!node.isLeaf())
-        return update;
-    } // traverseWithBRM
-
-    protected int updateNode2(final TreeInterface tree) {
-
+        //TODO strange code in SiteModel, node is not used
         final double[] proportions = siteModel.getCategoryProportions(tree.getRoot());
 
         int update = hasDirt;
