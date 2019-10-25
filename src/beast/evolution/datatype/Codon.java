@@ -172,10 +172,7 @@ public class Codon extends DataType.Base {
         }
         assert allNonStopCodon.size() == stateCount - nStopCodon;
         // --- represented by all possible states
-//        mapCodeToStateSet[124] = allNonStopCodon.stream().mapToInt(x->x).toArray();
-        mapCodeToStateSet[124] = new int[allNonStopCodon.size()];
-        for (int i = 0; i < allNonStopCodon.size(); i++)
-            mapCodeToStateSet[124][i] = allNonStopCodon.get(i);
+        mapCodeToStateSet[124] = allNonStopCodon.stream().mapToInt(x->x).toArray();
 
         // loop exclude ---
         for (int i = 64; i < 124; i++) {
