@@ -1,8 +1,8 @@
 
 
-package beast.likelihood;
+package beast.evolution.likelihood;
 
-import beast.tree.InternalNodeStates;
+import beast.evolution.tree.InternalNodeStates;
 
 /**
  * data augmentation likelihood core

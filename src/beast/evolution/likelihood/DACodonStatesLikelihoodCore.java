@@ -1,4 +1,4 @@
-package beast.likelihood;
+package beast.evolution.likelihood;
 
 
 /**

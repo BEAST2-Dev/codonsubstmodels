@@ -1,7 +1,7 @@
-package beast.likelihood;
+package beast.evolution.likelihood;
 
 
-import beast.tree.InternalNodeStates;
+import beast.evolution.tree.InternalNodeStates;
 
 
 /**
@@ -10,7 +10,7 @@ import beast.tree.InternalNodeStates;
  * TODO consider 0 branch length, for example, syn seqs
  *
  */
-public class DAStatesLikelihoodCore extends DALikelihoodCore {
+public class DAStatesLikelihoodCore extends beast.evolution.likelihood.DALikelihoodCore {
     protected int nrOfStates; // e.g. 64
 //    protected int nrOfNodes;
 //    protected int getNrOfSites(); // e.g. number of codons

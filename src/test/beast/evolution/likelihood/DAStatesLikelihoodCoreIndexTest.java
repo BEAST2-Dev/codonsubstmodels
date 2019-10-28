@@ -1,8 +1,8 @@
 package test.beast.evolution.likelihood;
 
 
-import beast.likelihood.DAStatesLikelihoodCore;
-import beast.tree.InternalNodeStates;
+import beast.evolution.likelihood.DAStatesLikelihoodCore;
+import beast.evolution.tree.InternalNodeStates;
 import org.junit.Before;
 import org.junit.Test;
 

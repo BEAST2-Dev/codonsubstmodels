@@ -1,4 +1,4 @@
-package beast.tree;
+package beast.evolution.tree;
 
 import beast.core.Input;
 import beast.core.StateNode;

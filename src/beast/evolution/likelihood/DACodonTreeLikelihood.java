@@ -1,4 +1,4 @@
-package beast.likelihood;
+package beast.evolution.likelihood;
 
 import beast.core.Input;
 import beast.core.State;
@@ -7,13 +7,12 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
-import beast.evolution.likelihood.*;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
-import beast.tree.InternalNodeStates;
+import beast.evolution.tree.InternalNodeStates;
 
 import java.util.*;
 
@@ -22,7 +21,7 @@ import java.util.*;
  *
  * No pattern, use site count.
  *
- * TODO 1: store prob per branch
+ * TODO 1: make it working in MCMC
  * TODO 2: try only log the cell of trans prob matrix once
  */
 public class DACodonTreeLikelihood extends GenericTreeLikelihood {
@@ -357,62 +356,69 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
             //TODO how to distinguish branch len change and internal node seq change, when topology is same
             // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
-            nodeUpdate = getNodeUpdate(node, parent, nodeUpdate, nodeIndex, branchRate, branchTime);
+            if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
+                branchLengths[nodeIndex] = branchTime;
+
+//                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO implement updates
+                for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+                    final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+                    substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+                    //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+
+                    daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
+                }
+                nodeUpdate |= Tree.IS_DIRTY; // TODO review
+            }
 
             // ====== 2. recalculate likelihood if either child node wasn't clean ======
-            update = getUpdate(proportions, update, nodeUpdate, nodeIndex, parentNum);
+            if (nodeUpdate != Tree.IS_CLEAN) {
+                // brLD is linked to the child node index down
+//                daLdCore.setNodeBrLdForUpdate(parentNum); // TODO implement updates
+
+                // populate branchLd[][excl. root], nodeIndex is child
+                daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
+            }
+
+            update |= nodeUpdate;
 //            }
         } // end i loop
 
         return update;
     }
-
-    public int getUpdate(double[] proportions, int update, int nodeUpdate, int nodeIndex, int parentNum) {
-        if (nodeUpdate != Tree.IS_CLEAN) {
-            // brLD is linked to the child node index down
-//                daLdCore.setNodeBrLdForUpdate(parentNum); // TODO implement updates
-
-            // populate branchLd[][excl. root], nodeIndex is child
-            daLdCore.calculateNodeBrLdOverCategories(nodeIndex, parentNum, proportions);
-        }
-
-        update |= nodeUpdate;
-        return update;
-    }
-
-    public int getNodeUpdate(Node node, Node parent, int nodeUpdate, int nodeIndex, double branchRate, double branchTime) {
-        if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
-            branchLengths[nodeIndex] = branchTime;
-
-            long time1 = 0;
-            long time2 = 0;
-//                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO implement updates
-            for (int i = 0; i < siteModel.getCategoryCount(); i++) {
-                time1 += getPt(node, parent, branchRate, i);
-                //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
-
-                time2 += arraycopy(nodeIndex, i);
-            }
-            nodeUpdate |= Tree.IS_DIRTY; // TODO review
-
-            System.out.println("\ngetTransitionProbabilities time is " + time1 + " nanoseconds");
-            System.out.println("arraycopy time is " + time2 + " nanoseconds\n");
-        }
-        return nodeUpdate;
-    }
-
-    public long getPt(Node node, Node parent, double branchRate, int i) {
-        long start = System.nanoTime();
-        final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
-        substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
-        return System.nanoTime()-start;
-    }
-
-    public long arraycopy(int nodeIndex, int i) {
-        long start = System.nanoTime();
-        daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
-        return System.nanoTime()-start;
-    }
+//+++++++++++ time ++++++++++++
+//    public int getNodeUpdate(Node node, Node parent, int nodeUpdate, int nodeIndex, double branchRate, double branchTime) {
+//        if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
+//            branchLengths[nodeIndex] = branchTime;
+//
+//            long time1 = 0;
+//            long time2 = 0;
+////                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO implement updates
+//            for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+//                time1 += getPt(node, parent, branchRate, i);
+//                //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+//
+//                time2 += arraycopy(nodeIndex, i);
+//            }
+//            nodeUpdate |= Tree.IS_DIRTY; // TODO review
+//
+//            System.out.println("\ngetTransitionProbabilities time is " + time1 + " nanoseconds");
+//            System.out.println("arraycopy time is " + time2 + " nanoseconds\n");
+//        }
+//        return nodeUpdate;
+//    }
+//
+//    public long getPt(Node node, Node parent, double branchRate, int i) {
+//        long start = System.nanoTime();
+//        final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+//        substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+//        return System.nanoTime()-start;
+//    }
+//
+//    public long arraycopy(int nodeIndex, int i) {
+//        long start = System.nanoTime();
+//        daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
+//        return System.nanoTime()-start;
+//    }
 
 
     // for testing
