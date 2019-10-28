@@ -384,17 +384,34 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         if (nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
             branchLengths[nodeIndex] = branchTime;
 
+            long time1 = 0;
+            long time2 = 0;
 //                daLdCore.setNodeMatrixForUpdate(nodeIndex); // TODO implement updates
             for (int i = 0; i < siteModel.getCategoryCount(); i++) {
-                final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
-                substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+                time1 += getPt(node, parent, branchRate, i);
                 //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
-                daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
+                time2 += arraycopy(nodeIndex, i);
             }
             nodeUpdate |= Tree.IS_DIRTY; // TODO review
+
+            System.out.println("\ngetTransitionProbabilities time is " + time1 + " nanoseconds");
+            System.out.println("arraycopy time is " + time2 + " nanoseconds\n");
         }
         return nodeUpdate;
+    }
+
+    public long getPt(Node node, Node parent, double branchRate, int i) {
+        long start = System.nanoTime();
+        final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+        substitutionModel.getTransitionProbabilities(node, parent.getHeight(), node.getHeight(), jointBranchRate, probabilities);
+        return System.nanoTime()-start;
+    }
+
+    public long arraycopy(int nodeIndex, int i) {
+        long start = System.nanoTime();
+        daLdCore.setNodeMatrix(nodeIndex, i, probabilities); //TODO how to rm arraycopy
+        return System.nanoTime()-start;
     }
 
 
