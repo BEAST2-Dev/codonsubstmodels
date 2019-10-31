@@ -7,6 +7,7 @@ import beast.evolution.alignment.CodonAlignment;
 import org.w3c.dom.Node;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,7 +34,6 @@ public class InternalNodeStates extends StateNode {
      */
     protected int[][] states;
     protected int[][] storedStates;
-
     //TODO use storeIndex, 0 to select current, 1 to select stored
 
     /**
@@ -44,7 +44,7 @@ public class InternalNodeStates extends StateNode {
     protected int m_fUpper;
     protected int m_fLower;
     /**
-     * isDirty flags for individual elements in high dimensional parameters
+     * isDirty flags for each internal node
      */
     protected boolean[] m_bIsDirty;
 
@@ -257,22 +257,6 @@ public class InternalNodeStates extends StateNode {
 //    }
 
 
-    @Override
-    public void init(PrintStream out) {
-
-    }
-
-    @Override
-    public void log(long sampleNr, PrintStream out) {
-        super.log(sampleNr, out);
-    }
-
-    @Override
-    public void close(PrintStream out) {
-
-    }
-
-
     /**
      * For CodonAlignment, convert triplets string into list of codon states.
      * @param triplets coded nucleotides in string
@@ -298,59 +282,157 @@ public class InternalNodeStates extends StateNode {
 
         return sequence.stream().mapToInt(i -> i).toArray();
     }
-
-    @Override
-    public void setEverythingDirty(boolean isDirty) {
-
-    }
-
-    @Override
-    public StateNode copy() {
-        return null;
-    }
-
-    @Override
-    public void assignTo(StateNode other) {
-
-    }
-
-    @Override
-    public void assignFrom(StateNode other) {
-
-    }
-
-    @Override
-    public void assignFromFragile(StateNode other) {
-
-    }
-
-    @Override
-    public void fromXML(Node node) {
-
-    }
-
-    @Override
-    public int scale(double scale) {
-        return 0;
-    }
-
+//TODO store restore a site
     @Override
     protected void store() {
-
+        if (storedStates.length != states.length || storedStates[0].length != states[0].length) {
+            storedStates = states.clone();
+            for (int i = 0; i < states.length; i++)
+                storedStates[i] = states[i].clone();
+        } else {
+            for (int i = 0; i < states.length; i++)
+                System.arraycopy(states[i], 0, storedStates[i], 0, states[i].length);
+        }
     }
 
     @Override
     public void restore() {
+        // final T[] tmp = storedValues;
+        final int[][] tmp = storedStates.clone();
+        for (int i = 0; i < storedStates.length; i++)
+            System.arraycopy(storedStates[i], 0, tmp[i], 0, storedStates[i].length);
+        // storedValues = values;
+        for (int i = 0; i < storedStates.length; i++)
+            System.arraycopy(states[i], 0, storedStates[i], 0, states[i].length);
+        // values = tmp;
+        for (int i = 0; i < states.length; i++)
+            System.arraycopy(tmp[i], 0, states[i], 0, tmp[i].length);
+
+        hasStartedEditing = false;
+        if (m_bIsDirty.length != states.length) {
+            m_bIsDirty = new boolean[states.length];
+        }
 
     }
 
     @Override
-    public int getDimension() {
-        return 0;
+    public void init(PrintStream out) {
+        final int innoCount = getInternalNodeCount();
+        if (innoCount == 1) {
+            out.print(getID() + "\t");
+        } else {
+            for (int i = 0; i < innoCount; i++) {
+                out.print(getID() + (i + 1) + "\t");
+            }
+        }
     }
 
     @Override
-    public double getArrayValue(int dim) {
-        return 0;
+    public void log(long sampleNr, PrintStream out) {
+        super.log(sampleNr, out);
     }
+
+    @Override
+    public void close(PrintStream out) {
+        // nothing to do
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append(getID()).append("[").append(states.length);
+        buf.append(" ").append(getInternalNodeCount());
+        buf.append(" ").append(getSiteCount());
+        buf.append("] ");
+        buf.append("(").append(m_fLower).append(",").append(m_fUpper).append("): ");
+//        for (final int value : states) {
+//            buf.append(value).append(" ");
+//        }
+        return buf.toString();
+    }
+
+    @Override
+    public void setEverythingDirty(boolean isDirty) {
+        setSomethingIsDirty(isDirty);
+        Arrays.fill(m_bIsDirty, isDirty);
+    }
+
+    @Override
+    public StateNode copy() {
+        try {
+            @SuppressWarnings("unchecked")
+            final InternalNodeStates copy = (InternalNodeStates) this.clone();
+            copy.states = states.clone();
+            for (int i = 0; i < states.length; i++)
+                copy.states[i] = states[i].clone();
+            //storedStates = copy.storedStates.clone();
+            copy.m_bIsDirty = new boolean[states.length];
+            return copy;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    @Override
+    public void assignTo(StateNode other) {
+        @SuppressWarnings("unchecked")
+        final InternalNodeStates copy = (InternalNodeStates) other;
+        copy.setID(getID());
+        copy.index = index;
+        copy.states = states.clone();
+        for (int i = 0; i < states.length; i++)
+            copy.states[i] = states[i].clone();
+        //storedStates = copy.storedStates.clone();
+        copy.m_fLower = m_fLower;
+        copy.m_fUpper = m_fUpper;
+        copy.m_bIsDirty = new boolean[states.length];
+    }
+
+    @Override
+    public void assignFrom(StateNode other) {
+        @SuppressWarnings("unchecked")
+        final InternalNodeStates source = (InternalNodeStates) other;
+        setID(source.getID());
+        states = source.states.clone();
+        storedStates = source.storedStates.clone();
+        for (int i = 0; i < states.length; i++) {
+            states[i] = source.states[i].clone();
+            storedStates[i] = source.storedStates[i].clone();
+        }
+        m_fLower = source.m_fLower;
+        m_fUpper = source.m_fUpper;
+        m_bIsDirty = new boolean[source.states.length];
+    }
+
+    @Override
+    public void assignFromFragile(StateNode other) {
+        @SuppressWarnings("unchecked")
+        final InternalNodeStates source = (InternalNodeStates) other;
+        for (int i = 0; i < states.length; i++)
+            System.arraycopy(source.states[i], 0, states[i], 0, source.states[i].length);
+        Arrays.fill(m_bIsDirty, false);
+    }
+
+    @Override
+    public void fromXML(Node node) {
+        throw new UnsupportedOperationException("in dev");
+    }
+
+    @Override
+    public int scale(double scale) {
+        throw new UnsupportedOperationException("in dev");
+    }
+
+    @Override
+    public int getDimension() { // use getInternalNodeCount() & getSiteCount()
+        throw new UnsupportedOperationException("Unsupported");
+    }
+
+    @Override
+    public double getArrayValue(int dim) { // use getASite(int, int)
+        throw new UnsupportedOperationException("Unsupported");
+    }
+
 }

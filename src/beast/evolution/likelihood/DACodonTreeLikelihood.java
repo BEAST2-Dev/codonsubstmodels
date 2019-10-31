@@ -9,12 +9,15 @@ import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.substitutionmodel.SubstitutionModel;
+import beast.evolution.tree.InternalNodeStates;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
-import beast.evolution.tree.InternalNodeStates;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Data augmentation to fast codon tree likelihood calculation.
@@ -60,7 +63,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * calculation engine *
      */
-    protected DALikelihoodCore daLdCore;
+    protected DAStatesLikelihoodCore daLdCore;
 //    protected BeagleTreeLikelihood beagle;
 
     /**
@@ -119,11 +122,13 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         internalNodeStates = internalNodeStatesInput.get();
 
         codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
-
         // sanity check: alignment should have same #taxa as tree
         if (codonAlignment.getTaxonCount() != treeInput.get().getLeafNodeCount()) {
             throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
         }
+        Log.info.println("  " + codonAlignment.toString(true));
+        // print startup messages via Log.print*
+
 //        beagle = null;
 //        beagle = new BeagleTreeLikelihood();
 //        try {
@@ -157,18 +162,6 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         branchLengths = new double[nodeCount];
         storedBranchLengths = new double[nodeCount];
 
-        int stateCount = codonAlignment.getMaxStateCount();
-        assert stateCount == 64;
-        daLdCore = new DAStatesLikelihoodCore(stateCount);
-
-        Log.info.println("  " + codonAlignment.toString(true));
-        // print startup messages via Log.print*
-
-        // transition probability matrix, P
-        matrixSize = stateCount * stateCount;
-        probabilities = new double[matrixSize];
-        Arrays.fill(probabilities, 1.0);
-
         initCore(); // init DALikelihoodCore
 
 
@@ -195,11 +188,21 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
     // no pattern, use codonAlignment.getSiteCount()
     protected void initCore() {
-        TreeInterface tree = treeInput.get();
+        final int stateCount = codonAlignment.getMaxStateCount();
+        assert stateCount == 64;
 
-        final int[][] tipStates = getTipStates(tree);
+        TreeInterface tree = treeInput.get();
         // init with states
-        daLdCore.initialize( tipStates, internalNodeStates, siteModel.getCategoryCount() );
+        final int[][] tipStates = getTipStates(tree);
+
+        daLdCore = new DAStatesLikelihoodCore(stateCount, tipStates, internalNodeStates, siteModel.getCategoryCount());
+//        daLdCore.initialize();
+
+        // transition probability matrix, P
+//        matrixSize = stateCount * stateCount;
+        matrixSize = daLdCore.getMatrixSize();
+        probabilities = new double[matrixSize];
+        Arrays.fill(probabilities, 1.0);
 
         if (m_useAmbiguities.get() || m_useTipLikelihoods.get()) {
             throw new UnsupportedOperationException("in development");

@@ -6,7 +6,7 @@ package beast.evolution.likelihood;
  * data augmentation likelihood core
  */
 
-abstract public class DALikelihoodCore {
+abstract public class DABranchLikelihoodCore {
 
     /**
      * reserve memory for branchLd, indices and other
@@ -67,27 +67,27 @@ abstract public class DALikelihoodCore {
      * nodeIndex is about the be changed, that is, that the stored
      * state for node nodeIndex cannot be reused *
      */
-    public abstract void setNodeMatrixForUpdate(int nodeIndex);
+    public abstract void setNodeMatrixForUpdate();
 
     /**
      * assign values of states for probability transition matrix for node with number nodeIndex *
      */
-    public abstract void setNodeMatrix(int nodeIndex, int categoryIndex, double[] matrix);
-//    public abstract void setNodeMatrix(int nodeIndex, double[] matrix);
+    public abstract void setNodeMatrix(int categoryIndex, double[] matrix);
+//    public abstract void setNodeMatrix(double[] matrix);
 
 //    public abstract void calculateNodeBranchLd(int childNum1, int childNum2, int nodeIndex);
-//    public abstract void integrateBrLdOverCategories(int nodeIndex, double[] proportions, double[] integratedBrLd);
+//    public abstract void integrateBrLdOverCategories(double[] proportions, double[] integratedBrLd);
 
 //    public abstract void calculateNodeBrLdOverCategories(int nodeIndex1, int nodeIndex2, int nodeIndex3, double[] proportions);
 
-    public abstract void calculateNodeBrLdOverCategories(int nodeIndex1, int nodeIndex3, double[] proportions);
+    public abstract void calculateNodeBrLdOverCategories(int[] childNodeStates, int[] parentNodeStates, double[] proportions);
 
     //    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
-    public abstract double calculateLogLikelihoods(double[] frequencies);
+    public abstract double calculateLogLikelihoods(boolean isRoot, double frequencies);
 
 
     //    @Override
-//    public void setNodeBranchLd(int nodeIndex, double[] branchLd) {
+//    public void setNodeBranchLd(double[] branchLd) {
 //
 //        if (this.branchLd[0][nodeIndex] == null) {
 //            createNodeBranchLd(nodeIndex);
@@ -104,11 +104,11 @@ abstract public class DALikelihoodCore {
 //    }
 
     // suppose only used by unit test
-    public abstract void getNodeBranchLd(int nodeIndex, double[] branchLdOut);
+    public abstract void getNodeBranchLd(double[] branchLdOut);
 
-    public abstract void setNodeBrLdForUpdate(int nodeIndex);
+    public abstract void setNodeBrLdForUpdate();
 
-    public abstract int[] getNodeStates(int nodeIndex);
-
-    public abstract void setInternalNodeStates(int nodeIndex, int[] states);
+//    public abstract int[] getNodeStates();
+//
+//    public abstract void setInternalNodeStates(int[] states);
 }
