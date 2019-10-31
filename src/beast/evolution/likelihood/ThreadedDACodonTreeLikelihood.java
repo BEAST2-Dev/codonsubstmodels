@@ -14,10 +14,7 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Data augmentation to fast codon tree likelihood calculation.
@@ -27,7 +24,7 @@ import java.util.Random;
  * TODO 1: make it working in MCMC
  * TODO 2: try only log the cell of trans prob matrix once
  */
-public class DACodonTreeLikelihood extends GenericTreeLikelihood {
+public class ThreadedDACodonTreeLikelihood extends GenericTreeLikelihood {
 
 //    final public Input<Boolean> m_useAmbiguities = new Input<>("useAmbiguities",
 //            "flag to indicate that sites containing ambiguous states should be handled instead of ignored (the default)",
@@ -50,6 +47,13 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     final public Input<InternalNodeStates> internalNodeStatesInput = new Input<>("internalNodeStates",
             "The large 2-d matrix to store internal node sequences.", Input.Validate.REQUIRED);
 
+    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
+            "maximum number of threads to use, if less than 1 the number of threads " +
+                    "in BeastMCMC is used (default -1)", -1);
+
+    /** private list of likelihoods, to notify framework of TreeLikelihoods being created in initAndValidate() **/
+    final private Input<List<DABranchLikelihoodCore>> likelihoodsInput = new Input<>("*","",new ArrayList<>());
+
 
     /**
      * states in tips is stored by CodonAlignment List<List<Integer>> counts
@@ -63,7 +67,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * calculation engine *
      */
-    protected AbstrDATreeLikelihoodCore daLdCore;
+    protected DATreeLikelihoodCore daLdCore;
 //    protected BeagleTreeLikelihood beagle;
 
     /**
@@ -204,7 +208,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         probabilities = new double[matrixSize];
         Arrays.fill(probabilities, 1.0);
 
-//        if (m_useAmbiguities.get() ) || m_useTipLikelihoods.get() ) {
+//        if (m_useAmbiguities.get() || m_useTipLikelihoods.get()) {
 //            throw new UnsupportedOperationException("in development");
 //        }
         hasDirt = Tree.IS_FILTHY;

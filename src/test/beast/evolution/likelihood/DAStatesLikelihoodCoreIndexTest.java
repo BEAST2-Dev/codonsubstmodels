@@ -1,7 +1,7 @@
 package test.beast.evolution.likelihood;
 
 
-import beast.evolution.likelihood.DAStatesLikelihoodCore;
+import beast.evolution.likelihood.DATreeLikelihoodCore;
 import beast.evolution.tree.InternalNodeStates;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,8 +19,8 @@ import static junit.framework.Assert.assertEquals;
  */
 public class DAStatesLikelihoodCoreIndexTest {
 
-    DAStatesLikelihoodCore daLDCore1site;
-    DAStatesLikelihoodCore daLDCore;
+    DATreeLikelihoodCore daLDCore1site;
+    DATreeLikelihoodCore daLDCore;
     // flattened transition probability matrix
     double[] p0;
     double[] p1;
@@ -42,9 +42,8 @@ public class DAStatesLikelihoodCoreIndexTest {
 
         // set codon state to 1 site, state = [0, 63]
         InternalNodeStates internalNodeStates = new InternalNodeStates(nrOfState, new int[][]{{8}});
-        daLDCore1site = new DAStatesLikelihoodCore(nrOfState);
         // 2 tips + 1 internal node, 1 codon, 1 category
-        daLDCore1site.initialize( new int[][]{{1},{60}}, internalNodeStates, 1);
+        daLDCore1site = new DATreeLikelihoodCore(nrOfState, new int[][]{{1},{60}}, internalNodeStates, 1);
 
         daLDCore1site.setNodeMatrix(0, 0, p0);
         daLDCore1site.setNodeMatrix(1, 0, p1);
@@ -57,9 +56,8 @@ public class DAStatesLikelihoodCoreIndexTest {
 
         // set codon state to 1 site, state = [0, 63]
         internalNodeStates = new InternalNodeStates(nrOfState, new int[][]{{8,9}});
-        daLDCore = new DAStatesLikelihoodCore(nrOfState);
         // 2 tips + 1 internal node, 2 codons, 4 category
-        daLDCore.initialize( new int[][]{{1,2},{60,61}}, internalNodeStates, 4);
+        daLDCore = new DATreeLikelihoodCore(nrOfState, new int[][]{{1,2},{60,61}}, internalNodeStates, 4);
 
         // set same p to 4 categories
         for (int i=0; i < daLDCore.getNrOfCategories(); i++) {

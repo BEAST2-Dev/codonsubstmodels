@@ -2,59 +2,86 @@
 
 package beast.evolution.likelihood;
 
+import beast.evolution.tree.InternalNodeStates;
+
 /**
- * data augmentation likelihood core
+ * framework of data augmentation tree likelihood core
  */
 
-abstract public class DALikelihoodCore {
+public abstract class AbstrDATreeLikelihoodCore extends AbstrDALikelihoodCore {
+    // to store branch likelihood calculation per site:
+    // 1st dimension is matrix index (current, stored),
+    // 2nd is node index,
+    // 3rd is getNrOfSites(), Ld across categories are integrated
+    protected double[][][] branchLd;
+
+    // transition probability matrix(ices), P
+    // 1st dimension is matrix index (current, stored),
+    // 2nd is node index,
+    // 3rd is nrOfCategories * matrixSize
+    protected double[][][] matrices;
+    // store the matrix index, instead of different matrices
+    protected int[] currentMatrixIndex; // node count
+    protected int[] storedMatrixIndex;
+    protected int[] currentBrLdIndex;
+    protected int[] storedBrLdIndex;
+
+
+    // states in tip/internal nodes: 0-63
+    // 1st is node index, 2nd is site index
+    protected int[][] tipStates;
+    protected InternalNodeStates internalNodeStates;
+
 
     /**
-     * reserve memory for branchLd, indices and other
-     * data structures required by the core *
-     * call it inside constructor
+     * called initialize() inside
+     * @param nrOfStates
+     * @param tipStates
+     * @param internalNodeStates
+     * @param nrOfCategories
      */
-    protected abstract void initialize();
-    //int[][] tipStates, InternalNodeStates internalNodeStates, int categoryCount
+    public AbstrDATreeLikelihoodCore(int nrOfStates, int[][] tipStates, InternalNodeStates internalNodeStates,
+                                     int nrOfCategories) {
+        super(nrOfStates, nrOfCategories);
+
+        this.tipStates = tipStates;
+        this.internalNodeStates = internalNodeStates;
+
+        initialize();
+    }
+
 
     /**
-     * clean up after last likelihood calculation, if at all required *
+     * Store current state
      */
     @Override
-    public abstract void finalize() throws Throwable;
+    public void restore() {
+        // Rather than copying the stored stuff back, just swap the pointers...
+        int[] tmp1 = currentMatrixIndex;
+        currentMatrixIndex = storedMatrixIndex;
+        storedMatrixIndex = tmp1;
 
-
-    /**
-     * flag to indicate whether scaling should be used in the
-     * likelihood calculation. Scaling can help in dealing with
-     * numeric issues (underflow).
-     */
-    boolean m_bUseScaling = false;
-
-    abstract public void setUseScaling(double scale);
-
-    public boolean getUseScaling() {
-        return m_bUseScaling;
+        int[] tmp2 = currentBrLdIndex;
+        currentBrLdIndex = storedBrLdIndex;
+        storedBrLdIndex = tmp2;
     }
-    /**
-     * return the cumulative scaling effect. Should be zero if no scaling is used *
-     */
-    abstract public double getLogScalingFactor(int patternIndex_);
 
-
-    /**
-     * store current state *
-     */
-    abstract public void store();
+    @Override
+    public void unstore() {
+        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNrOfNodes());
+        System.arraycopy(storedBrLdIndex, 0, currentBrLdIndex, 0, getNrOfNodes());
+    }
 
     /**
-     * reset current state to stored state, only used when switching from non-scaled to scaled or vice versa *
+     * Restore the stored state
      */
-    abstract public void unstore();
+    @Override
+    public void store() {
+        System.arraycopy(currentMatrixIndex, 0, storedMatrixIndex, 0, getNrOfNodes());
+        System.arraycopy(currentBrLdIndex, 0, storedBrLdIndex, 0, getNrOfNodes());
+    }
 
-    /**
-     * restore state *
-     */
-    abstract public void restore();
+    public abstract int getNrOfNodes();
 
 //    /**
 //     * reserve memory for branchLd for node with number nodeIndex *

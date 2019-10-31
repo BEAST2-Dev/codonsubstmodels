@@ -5,40 +5,37 @@ import beast.evolution.tree.InternalNodeStates;
 
 
 /**
- * general data augmentation likelihood core
+ * data augmentation tree likelihood core
  *
  * TODO consider 0 branch length, for example, syn seqs
  *
  */
-public class DAStatesLikelihoodCore extends DALikelihoodCore {
-    final protected int nrOfStates; // e.g. 64
-    final protected int matrixSize; // nrOfStates^2
+public class DATreeLikelihoodCore extends AbstrDATreeLikelihoodCore {
 //    protected int nrOfNodes;
 //    protected int getNrOfSites(); // e.g. number of codons
-    protected int nrOfCategories; // number of categories
 //    protected int branchLdSize; // = getNrOfSites() * nrOfCategories;
 
     // to store branch likelihood calculation per site:
     // 1st dimension is matrix index (current, stored),
     // 2nd is node index,
     // 3rd is getNrOfSites(), Ld across categories are integrated
-    protected double[][][] branchLd;
+//    protected double[][][] branchLd;
 
     // states in tip/internal nodes: 0-63
     // 1st is node index, 2nd is site index
-    protected int[][] tipStates;
-    protected InternalNodeStates internalNodeStates;
+//    protected int[][] tipStates;
+//    protected InternalNodeStates internalNodeStates;
 
     // transition probability matrix(ices), P
     // 1st dimension is matrix index (current, stored),
     // 2nd is node index,
     // 3rd is nrOfCategories * matrixSize
-    protected double[][][] matrices;
+//    protected double[][][] matrices;
     // store the matrix index, instead of different matrices
-    protected int[] currentMatrixIndex; // node count
-    protected int[] storedMatrixIndex;
-    protected int[] currentBrLdIndex;
-    protected int[] storedBrLdIndex;
+//    protected int[] currentMatrixIndex; // node count
+//    protected int[] storedMatrixIndex;
+//    protected int[] currentBrLdIndex;
+//    protected int[] storedBrLdIndex;
 
     protected boolean useScaling = false;
 
@@ -53,17 +50,9 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
      * @param tipStates
      * @param internalNodeStates
      */
-    public DAStatesLikelihoodCore(int nrOfStates, int[][] tipStates, InternalNodeStates internalNodeStates, int categoryCount) {
-        this.nrOfStates = nrOfStates;
-        matrixSize = nrOfStates * nrOfStates;
-
-        this.tipStates = tipStates;
-        this.internalNodeStates = internalNodeStates;
-
-        this.nrOfCategories = categoryCount;
-
-        initialize();
-    } //
+    public DATreeLikelihoodCore(int nrOfStates, int[][] tipStates, InternalNodeStates internalNodeStates, int categoryCount) {
+        super(nrOfStates, tipStates, internalNodeStates, categoryCount);
+    } // called initialize()
 
     /**
      * initializes states, likelihood arrays.
@@ -482,41 +471,8 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         return logScalingFactor;
     }
 
-    /**
-     * Store current state
-     */
-    @Override
-    public void restore() {
-        // Rather than copying the stored stuff back, just swap the pointers...
-        int[] tmp1 = currentMatrixIndex;
-        currentMatrixIndex = storedMatrixIndex;
-        storedMatrixIndex = tmp1;
-
-        int[] tmp2 = currentBrLdIndex;
-        currentBrLdIndex = storedBrLdIndex;
-        storedBrLdIndex = tmp2;
-    }
-
-    @Override
-	public void unstore() {
-        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNrOfNodes());
-        System.arraycopy(storedBrLdIndex, 0, currentBrLdIndex, 0, getNrOfNodes());
-    }
-
-    /**
-     * Restore the stored state
-     */
-    @Override
-    public void store() {
-        System.arraycopy(currentMatrixIndex, 0, storedMatrixIndex, 0, getNrOfNodes());
-        System.arraycopy(currentBrLdIndex, 0, storedBrLdIndex, 0, getNrOfNodes());
-    }
 
     // ======= getters for unit tests =======
-
-    public int getNrOfStates() {
-        return nrOfStates;
-    }
 
     public int getNrOfSites() {
         return tipStates[0].length;
@@ -534,20 +490,10 @@ public class DAStatesLikelihoodCore extends DALikelihoodCore {
         return getNrOfTips() + getNrOfInterNodes();
     }
 
-    // nrOfCategories
-    public int getNrOfCategories() {
-        return nrOfCategories;
-    }
-
     // = getNrOfSites();
     public int getBranchLdSize() {
         // branchLd[][root] == null
         return branchLd[0][0].length;
-    }
-
-    // transition probability matrix size = nrOfStates^2
-    public int getMatrixSize() {
-        return matrixSize;
     }
 
 
