@@ -34,7 +34,7 @@ public abstract class AbstrDATreeLikelihoodCore extends AbstrDALikelihoodCore {
 
 
     /**
-     * called initialize() inside
+     * need to call initialize() after this
      * @param nrOfStates
      * @param tipStates
      * @param internalNodeStates
@@ -47,7 +47,6 @@ public abstract class AbstrDATreeLikelihoodCore extends AbstrDALikelihoodCore {
         this.tipStates = tipStates;
         this.internalNodeStates = internalNodeStates;
 
-        initialize();
     }
 
 

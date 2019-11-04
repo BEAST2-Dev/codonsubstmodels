@@ -107,7 +107,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
      */
     protected double[] probabilities;
 
-    protected int matrixSize;
+//    protected int matrixSize;
 
     /**
      * dealing with proportion of site being invariant *
@@ -196,15 +196,13 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
         final int[][] tipStates = getTipStates(tree);
 
         daLdCore = new DATreeLikelihoodCore(stateCount, tipStates, internalNodeStates, siteModel.getCategoryCount());
-//        daLdCore.initialize();
 
+        final int matrixSize = daLdCore.getMatrixSize(); // matrixSize = stateCount * stateCount;
         // transition probability matrix, P
-//        matrixSize = stateCount * stateCount;
-        matrixSize = daLdCore.getMatrixSize();
         probabilities = new double[matrixSize];
         Arrays.fill(probabilities, 1.0);
 
-//        if (m_useAmbiguities.get() ) || m_useTipLikelihoods.get() ) {
+//        if (m_useAmbiguities.get() || m_useTipLikelihoods.get()) {
 //            throw new UnsupportedOperationException("in development");
 //        }
         hasDirt = Tree.IS_FILTHY;

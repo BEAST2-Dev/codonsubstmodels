@@ -8,7 +8,6 @@ package beast.evolution.likelihood;
 
 public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore {
 
-    final protected boolean isTip;
     final protected int nrOfSites; // e.g. number of codons
 
     // to store branch likelihood calculation per site:
@@ -29,15 +28,12 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
 
     /**
      * called initialize() inside
-     * @param isTip
      * @param nrOfStates
      * @param nrOfSites
      * @param nrOfCategories
      */
-    public AbstrDABranchLikelihoodCore(boolean isTip, int nrOfStates, int nrOfSites, int nrOfCategories) {
+    public AbstrDABranchLikelihoodCore(int nrOfStates, int nrOfSites, int nrOfCategories) {
         super(nrOfStates, nrOfCategories);
-
-        this.isTip = isTip;
         this.nrOfSites = nrOfSites;
 
         initialize();
@@ -103,7 +99,7 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
     public abstract void calculateNodeBrLdOverCategories(int[] childNodeStates, int[] parentNodeStates, double[] proportions);
 
     //    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
-    public abstract double calculateLogLikelihoods(boolean isRoot, double frequencies);
+    public abstract double calculateLogLikelihoods();
 
 
     //    @Override

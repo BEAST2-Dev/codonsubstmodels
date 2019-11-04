@@ -3,37 +3,11 @@ package beast.evolution.likelihood;
 
 /**
  * data augmentation likelihood core based on a branch
- * for multithreading
+ * for multithreading.
+ * the branch is defined above the selected node.
  *
  */
 public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
-//    final protected int nrOfStates; // e.g. 64
-//    final protected int matrixSize; // nrOfStates^2
-//    final protected int nodeNr; // TODO need nodeNr?
-//    final protected boolean isTip;
-//    final protected int nrOfSites; // e.g. number of codons
-//    protected int nrOfCategories; // number of categories
-//    protected int branchLdSize; // = getNrOfSites() * nrOfCategories;
-
-    // to store branch likelihood calculation per site:
-    // 1st dimension is matrix index (current, stored),
-    // 2nd is getNrOfSites(), Ld across categories are integrated
-//    protected double[][] branchLd;
-
-    // states in tip/internal nodes: 0-63
-    // 1st is node index, 2nd is site index
-//    protected int[][] tipStates;
-//    protected InternalNodeStates internalNodeStates;
-
-    // transition probability matrix(ices), P
-    // 1st dimension is matrix index (current, stored),
-    // 2nd is nrOfCategories * matrixSize
-//    protected double[][] matrices;
-    // store the matrix index, instead of different matrices
-//    protected int currentMatrixIndex = -1;
-//    protected int storedMatrixIndex = -1;
-//    protected int currentBrLdIndex = -1;
-//    protected int storedBrLdIndex = -1;
 
     protected boolean useScaling = false;
 
@@ -42,8 +16,8 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
     private double scalingThreshold = 1.0E-100;
     double SCALE = 2;
 
-    public DABranchLikelihoodCore(boolean isTip, int nrOfStates, int nrOfSites, int categoryCount) {
-        super(isTip, nrOfStates, nrOfSites, categoryCount);
+    public DABranchLikelihoodCore(int nrOfStates, int nrOfSites, int categoryCount) {
+        super(nrOfStates, nrOfSites, categoryCount);
     } // called initialize()
 
 
@@ -52,15 +26,9 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
      */
     @Override
 	protected void initialize() {
-        // 1 likelihood for all sites
-        if (isTip) {
-            branchLd = new double[2][];
-            branchLd[0] = null;
-            branchLd[1] = null;
-        } else {
-            // internal nodes
-            branchLd = new double[2][nrOfSites];
-        }
+        // the branch above the node
+        // merged likelihood for all categories
+        branchLd = new double[2][nrOfSites];
 
         // 2 means current and stored
         matrices = new double[2][nrOfCategories * matrixSize];
@@ -71,7 +39,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
      */
     @Override
 	public void finalize() throws Throwable {
-        nrOfCategories = 0;
+        nrOfCategories = 0; // TODO review
 
         branchLd = null;
         currentBrLdIndex = -1;
@@ -297,16 +265,15 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
 
     /**
-     * Calculates site log likelihoods at root node.
+     * Calculates site log likelihoods at branches excluding root node.
      * The input branch likelihoods here have been integrated across categories.
-     *
+     * frequency[] need to be added later in DATreeLikelihood
      */
     @Override
-    public double calculateLogLikelihoods(boolean isRoot, double frequency) {
+    public double calculateLogLikelihoods() {
 
 //        int trunk = 1;
         double product = 1.0;
-        if (isRoot) product = frequency;
         double logP = 0;
 
         // exclude root node
