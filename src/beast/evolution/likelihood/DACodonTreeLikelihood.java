@@ -27,6 +27,7 @@ import java.util.Random;
  * TODO 1: make it working in MCMC
  * TODO 2: try only log the cell of trans prob matrix once
  */
+@Deprecated
 public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
 //    final public Input<Boolean> m_useAmbiguities = new Input<>("useAmbiguities",

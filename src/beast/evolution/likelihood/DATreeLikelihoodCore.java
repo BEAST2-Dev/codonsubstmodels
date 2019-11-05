@@ -10,6 +10,7 @@ import beast.evolution.tree.InternalNodeStates;
  * TODO consider 0 branch length, for example, syn seqs
  *
  */
+@Deprecated
 public class DATreeLikelihoodCore extends AbstrDATreeLikelihoodCore {
 //    protected int nrOfNodes;
 //    protected int getNrOfSites(); // e.g. number of codons

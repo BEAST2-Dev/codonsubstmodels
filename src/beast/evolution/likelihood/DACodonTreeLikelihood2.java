@@ -49,7 +49,7 @@
 //        TreeLikelihood.Scaling._default, TreeLikelihood.Scaling.values());
 //
 //
-//    final public Input<InternalNodeStates> internalNodeStatesInput = new Input<>("internalNodeStates",
+//    final public Input<InternalNodeStates> nodeStates = new Input<>("internalNodeStates",
 //            "The large 2-d matrix to store internal node sequences.", Input.Validate.REQUIRED);
 //
 //    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
@@ -171,7 +171,7 @@
 //
 //
 //
-//        internalNodeStates = internalNodeStatesInput.get();
+//        internalNodeStates = nodeStates.get();
 //
 //        codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
 //        // sanity check: alignment should have same #taxa as tree

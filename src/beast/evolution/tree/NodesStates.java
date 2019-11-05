@@ -5,11 +5,13 @@ import beast.core.StateNode;
 import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
+import beast.evolution.datatype.GeneticCode;
 import org.w3c.dom.Node;
 
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * The large 2-d matrix to store all node states including tips.
@@ -27,13 +29,24 @@ import java.util.List;
  */
 public class NodesStates extends StateNode {
 
-    final public Input<Alignment> dataInput = new Input<>("data",
+    final public Input<CodonAlignment> codonAlignmentInput = new Input<>("codon",
             "codon alignment to initialise the 2-d matrix of nodes (including tips) states",
             Input.Validate.REQUIRED);
+
+    final public Input<String> initINInput = new Input<>("initIN",
+            "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
+            Input.Validate.OPTIONAL);
+
+    final public Input<Long> initINSeedInput = new Input<>("seed",
+            "seed to initialise the states of internal nodes if choosing 'random' method",
+            Input.Validate.OPTIONAL);
+
+    final GeneticCode geneticCode;
 
     // 1st dimension is matrix index (current, stored),
     // 2nd is node index,
     // 3rd is nrOfSites
+    // states[matrix index][node index][sites]
     protected int[][][] states;
     protected int[][][] storedStates;
     // store the matrix index, instead of different matrices
@@ -53,21 +66,29 @@ public class NodesStates extends StateNode {
     protected boolean[] nodeIsDirty;
 
 
-    public NodesStates(int stateCount, final int[][] tipsStates, final int[][] internalNodesStates) {
-        assert tipsStates.length == internalNodesStates.length + 1;
-        initParam(stateCount, tipsStates.length + internalNodesStates.length, tipsStates[0].length);
+    /**
+     * init class and states in tips given {@link CodonAlignment}.
+     * @param codonAlignment
+     */
+    public NodesStates(CodonAlignment codonAlignment) {
+        final int stateCount = codonAlignment.getDataType().getStateCount();
+        assert stateCount == 64;
 
-        for (int i = 0; i < tipsStates.length; i++)
-            System.arraycopy(tipsStates[i], 0, this.states[0][i], 0, tipsStates[i].length);
-        for (int i = tipsStates.length; i < (internalNodesStates.length+tipsStates.length); i++)
-            System.arraycopy(internalNodesStates[i-tipsStates.length],
-                    0, this.states[0][i], 0, internalNodesStates[i-tipsStates.length].length);
+        this.geneticCode = codonAlignment.getDataType().getGeneticCode();
 
-    }
+        // nodeCount defines rows of 2d matrix
+        final int nodeCount = 2 * codonAlignment.getTaxonCount() - 1;
+        assert nodeCount > 2;
 
+        // siteCount defines cols of 2d matrix
+        // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
+        final int siteCount = codonAlignment.getSiteCount();
 
-    public NodesStates(int nodeCount, int siteCount) {
-        this(64, nodeCount, siteCount);
+        // init from constructor
+        initParam(stateCount, nodeCount, siteCount);
+        // set tips states after initParam
+        setTipStates(codonAlignment);
+
     }
 
     /**
@@ -77,27 +98,42 @@ public class NodesStates extends StateNode {
      * @param nodeCount         to define rows of 2d matrix
      * @param siteCount         to define cols of 2d matrix
      */
-    public NodesStates(int stateCount, int nodeCount, int siteCount) {
+    public NodesStates(int stateCount, int nodeCount, int siteCount, GeneticCode geneticCode) {
+        this.geneticCode = geneticCode;
         initParam(stateCount, nodeCount, siteCount);
     }
 
     @Override
     public void initAndValidate() {
         // need data type, site count, taxa count
-        Alignment alignment = dataInput.get();
-        int stateCount = alignment.getDataType().getStateCount();
+        CodonAlignment codonAlignment = codonAlignmentInput.get();
+        final int stateCount = codonAlignment.getDataType().getStateCount();
+        assert stateCount == 64;
 
-        if (alignment instanceof CodonAlignment) // 64
-            assert stateCount == 64;
+        GeneticCode geneticCode = codonAlignment.getDataType().getGeneticCode();
 
-        // used to adjust Nr
-        int nodeCount = 2 * alignment.getTaxonCount() - 1;
+        // nodeCount defines rows of 2d matrix
+        final int nodeCount = 2 * codonAlignment.getTaxonCount() - 1;
         assert nodeCount > 2;
-        // siteCount = num of codons, overwrite in CodonAlignment /= 3
-        int siteCount = alignment.getSiteCount();
 
-        // stateCount -> upper, nodeCount * siteCount -> 2d matrix
-        initParam(stateCount, nodeCount, siteCount);
+        // siteCount defines cols of 2d matrix
+        // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
+        final int siteCount = codonAlignment.getSiteCount();
+
+        // init from constructor
+        NodesStates nodesStates = new NodesStates(stateCount, nodeCount, siteCount, geneticCode);
+        // set tips states after initParam
+        nodesStates.setTipStates(codonAlignment);
+
+        //TODO init internal nodes states
+        if ("random".equalsIgnoreCase(initINInput.get())) {
+            long seed = initINSeedInput.get();
+            nodesStates.initINSates(seed);
+        } else if ("parsimony".equalsIgnoreCase(initINInput.get())) {
+            nodesStates.initINSates(-1);
+        } else {
+            throw new IllegalArgumentException("The internal nodes states have to be initialised !");
+        }
     }
 
     // stateCount -> upper, nodeCount * siteCount -> 2d matrix
@@ -120,6 +156,85 @@ public class NodesStates extends StateNode {
 
     }
 
+    // set tips states after initParam
+    public void setTipStates(CodonAlignment codonAlignment) {
+        final int tipsCount = codonAlignment.getTaxonCount();
+
+        for (int taxonIndex = 0; taxonIndex < tipsCount; taxonIndex++) {
+            // no patterns
+            List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
+
+            assert statesList.size() == codonAlignment.getSiteCount();
+            // Java 8
+            states[currentMatrixIndex[taxonIndex]][taxonIndex] = statesList.stream().mapToInt(i->i).toArray();
+        }
+    }
+
+
+    // init internal nodes states
+    public void initINSates(long seed) {
+        // init internal nodes states
+        if (seed < 0) {
+            initINStatesParsimony();
+        } else {
+            initINStatesRandom(getInternalNodeCount(), getSiteCount(), geneticCode, seed);
+        }
+    }
+
+    /**
+     * random states given genetic code
+     */
+    protected void initINStatesRandom(int internalNodeCount, int siteCount, GeneticCode geneticCode, long seed) {
+        final int stateCount = 64;
+        Random generator = new Random(seed);
+        // vertebrateMitochondrial: 8   10   48   50
+//        int[] stopCodons = geneticCode.getStopCodonStates();
+
+        Log.info("Random generate codon states using " + geneticCode.getDescription() +
+                " for " + internalNodeCount + " internal nodes, " + siteCount + " codon, seed = " + seed);
+
+        // internal nodes, i from NrTips to NrRoot
+        for (int i=getTipsCount(); i < getNodeCount() ; i++) {
+            // states[matrix index][node index][sites]
+            int[] inStates = states[currentMatrixIndex[i]][i];
+            for (int j=0; j < inStates.length; j++) {
+                // 0 - 63
+                inStates[j] = (int)(generator.nextDouble() * stateCount);
+                // skip stop codon states
+                while(geneticCode.isStopCodon(inStates[j]))
+                    inStates[j] = (int)(generator.nextDouble() * stateCount);
+            }
+        }// end i loop
+
+    }
+
+    /**
+     * Parsimony to init states. Equally to choose a state from the ambiguous set.
+     */
+    protected void initINStatesParsimony() {
+
+        throw new UnsupportedOperationException();
+
+        //traverse 1
+
+
+        //traverse 2
+
+
+    }
+
+
+
+
+    /**
+     * indicate that the states matrix for node nodeIndex is to be changed *
+     */
+    public void setStatesForUpdate(int nodeIndex) {
+        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex]; // 0 or 1
+    }
+
+
+
     /**
      * cleans up and deallocates arrays.
      */
@@ -133,6 +248,30 @@ public class NodesStates extends StateNode {
     }
 
 
+    //TODO store restore a site
+    @Override
+    protected void store() {
+        System.arraycopy(currentMatrixIndex, 0, storedMatrixIndex, 0, getNodeCount());
+    }
+
+    @Override
+    public void restore() {
+        // Rather than copying the stored stuff back, just swap the pointers...
+        int[] tmp1 = currentMatrixIndex;
+        currentMatrixIndex = storedMatrixIndex;
+        storedMatrixIndex = tmp1;
+
+        hasStartedEditing = false;
+        if (nodeIsDirty.length != getNodeCount()) {
+            nodeIsDirty = new boolean[getNodeCount()];
+        }
+
+    }
+
+//    @Override
+//    public void unstore() {
+//        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
+//    }
 
 
     public int getTipsCount() {
@@ -251,7 +390,7 @@ public class NodesStates extends StateNode {
     public List<Integer> stringToEncoding(String triplets) {
         // remove spaces
         triplets = triplets.replaceAll("\\s", "");
-        Alignment alignment = dataInput.get();
+        Alignment alignment = codonAlignmentInput.get();
         List<Integer> sequence = alignment.getDataType().stringToEncoding(triplets);
         if (sequence.size() * 3 != triplets.length())
             throw new IllegalArgumentException("The string of triplets has invalid number ! " +
@@ -269,35 +408,6 @@ public class NodesStates extends StateNode {
         return sequence.stream().mapToInt(i -> i).toArray();
     }
 
-
-    public void setStatesForUpdate(int nodeIndex) {
-        currentMatrixIndex[nodeIndex] = 1 - currentMatrixIndex[nodeIndex]; // 0 or 1
-    }
-
-    //TODO store restore a site
-    @Override
-    protected void store() {
-        System.arraycopy(currentMatrixIndex, 0, storedMatrixIndex, 0, getNodeCount());
-    }
-
-    @Override
-    public void restore() {
-        // Rather than copying the stored stuff back, just swap the pointers...
-        int[] tmp1 = currentMatrixIndex;
-        currentMatrixIndex = storedMatrixIndex;
-        storedMatrixIndex = tmp1;
-
-        hasStartedEditing = false;
-        if (nodeIsDirty.length != getNodeCount()) {
-            nodeIsDirty = new boolean[getNodeCount()];
-        }
-
-    }
-
-//    @Override
-//    public void unstore() {
-//        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
-//    }
 
     @Override
     public void init(PrintStream out) {

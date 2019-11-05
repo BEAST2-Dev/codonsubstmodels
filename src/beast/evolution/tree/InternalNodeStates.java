@@ -24,6 +24,7 @@ import java.util.List;
  * So use the following formula to convert index:<br>
  * <code>rowIndex = nodeNr - internalNodeCount - 1</code><br>
  */
+@Deprecated
 public class InternalNodeStates extends StateNode {
 
     final public Input<Alignment> dataInput = new Input<>("data",
