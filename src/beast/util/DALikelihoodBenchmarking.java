@@ -621,6 +621,10 @@ public class DALikelihoodBenchmarking {
         return siteModel;
     }
 
+    // System.currentTimeMillis() will give you the most accurate possible elapsed time in milliseconds since the epoch,
+    // but System.nanoTime() gives you a nanosecond-precise time, relative to some arbitrary point.
+    // https://stackoverflow.com/questions/351565/system-currenttimemillis-vs-system-nanotime
+
     /**
      * Sum 64*64 time is 4577 milliseconds
      * Sum 64 time is 74 millseconds

@@ -128,9 +128,9 @@ public class NodesStates extends StateNode {
         //TODO init internal nodes states
         if ("random".equalsIgnoreCase(initINInput.get())) {
             long seed = initINSeedInput.get();
-            nodesStates.initINSates(seed);
+            nodesStates.initINStatesRandom(stateCount, getInternalNodeCount(), getSiteCount(), geneticCode, seed);
         } else if ("parsimony".equalsIgnoreCase(initINInput.get())) {
-            nodesStates.initINSates(-1);
+            nodesStates.initINStatesParsimony();
         } else {
             throw new IllegalArgumentException("The internal nodes states have to be initialised !");
         }
@@ -170,24 +170,13 @@ public class NodesStates extends StateNode {
         }
     }
 
-
-    // init internal nodes states
-    public void initINSates(long seed) {
-        // init internal nodes states
-        if (seed < 0) {
-            initINStatesParsimony();
-        } else {
-            initINStatesRandom(getInternalNodeCount(), getSiteCount(), geneticCode, seed);
-        }
-    }
-
     /**
      * random states given genetic code
      */
-    protected void initINStatesRandom(int internalNodeCount, int siteCount, GeneticCode geneticCode, long seed) {
-        final int stateCount = 64;
+    public void initINStatesRandom(final int stateCount, int internalNodeCount, int siteCount,
+                                   GeneticCode geneticCode, long seed) {
         Random generator = new Random(seed);
-        // vertebrateMitochondrial: 8   10   48   50
+        // such as vertebrateMitochondrial: 8   10   48   50
 //        int[] stopCodons = geneticCode.getStopCodonStates();
 
         Log.info("Random generate codon states using " + geneticCode.getDescription() +
@@ -211,7 +200,7 @@ public class NodesStates extends StateNode {
     /**
      * Parsimony to init states. Equally to choose a state from the ambiguous set.
      */
-    protected void initINStatesParsimony() {
+    public void initINStatesParsimony() {
 
         throw new UnsupportedOperationException();
 
@@ -451,6 +440,7 @@ public class NodesStates extends StateNode {
         Arrays.fill(nodeIsDirty, isDirty);
     }
 
+    //TODO full copy or just currentMatrixIndex?
     @Override
     public StateNode copy() {
         try {
