@@ -346,14 +346,12 @@ public class DATreeLikelihoodCore extends AbstrDATreeLikelihoodCore {
      */
     @Override
     public double calculateLogLikelihoods(double[] frequencies) {
-
-//        int trunk = 1;
         double product = 1.0;
         double logP = 0;
 
         // exclude root node
         final int rootIndex = getNrOfNodes()-1;
-
+//TODO need nodeLogLikelihoods[] to store the sum of logP at one branch, to avoid recalculation
         for (int k = 0; k < getNrOfSites(); k++) {
 //TODO review
             for (int i = 0; i < rootIndex; i++) {

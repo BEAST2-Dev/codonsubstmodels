@@ -98,7 +98,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     /**
      * memory allocation for log likelihoods for each of node *
      */
-    protected double[] nodeLogLikelihoods;
+//    protected double[] nodeLogLikelihoods;
     /**
      * memory allocation for the root branch likelihood *
      */
@@ -208,9 +208,9 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 //        }
         hasDirt = Tree.IS_FILTHY;
 
-        final int nodeCount = tree.getNodeCount();
+//        final int nodeCount = tree.getNodeCount();
         // log likelihoods for each of node
-        nodeLogLikelihoods = new double[nodeCount];
+//        nodeLogLikelihoods = new double[nodeCount];
 
     }
 
@@ -383,7 +383,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
             update |= nodeUpdate;
 //            }
-        } // end i loop
+        } // end n loop
 
         return update;
     }
@@ -429,12 +429,12 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
     }
 
     /* return copy of node log likelihoods */
-    public double [] getNodeLogLikelihoods() {
-//        if (beagle != null) {
-//            return beagle.getNodeLogLikelihoods();
-//        }
-        return nodeLogLikelihoods.clone();
-    } // getNodeLogLikelihoods
+//    public double [] getNodeLogLikelihoods() {
+////        if (beagle != null) {
+////            return beagle.getNodeLogLikelihoods();
+////        }
+//        return nodeLogLikelihoods.clone();
+//    } // getNodeLogLikelihoods
 
     /** CalculationNode methods **/
 

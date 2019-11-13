@@ -2,11 +2,14 @@
 
 package beast.evolution.likelihood;
 
+import beast.evolution.tree.Node;
+
 /**
  * framework of data augmentation branch likelihood core
  */
 
 public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore {
+    private final Node node;
 
     final protected int nrOfSites; // e.g. number of codons
 
@@ -32,9 +35,17 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
      * @param nrOfSites
      * @param nrOfCategories
      */
-    public AbstrDABranchLikelihoodCore(int nrOfStates, int nrOfSites, int nrOfCategories) {
+//    public AbstrDABranchLikelihoodCore(int nrOfStates, int nrOfSites, int nrOfCategories) {
+//        super(nrOfStates, nrOfCategories);
+//        this.nrOfSites = nrOfSites;
+//
+//        initialize();
+//    }
+
+    public AbstrDABranchLikelihoodCore(Node node, int nrOfStates, int nrOfSites, int nrOfCategories) {
         super(nrOfStates, nrOfCategories);
         this.nrOfSites = nrOfSites;
+        this.node = node;
 
         initialize();
     }
@@ -129,4 +140,7 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
         return nrOfSites;
     }
 
+    public Node getNode() {
+        return node;
+    }
 }

@@ -1,6 +1,8 @@
 package beast.evolution.likelihood;
 
 
+import beast.evolution.tree.Node;
+
 /**
  * data augmentation likelihood core based on a branch
  * for multithreading.
@@ -16,8 +18,8 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
     private double scalingThreshold = 1.0E-100;
     double SCALE = 2;
 
-    public DABranchLikelihoodCore(int nrOfStates, int nrOfSites, int categoryCount) {
-        super(nrOfStates, nrOfSites, categoryCount);
+    public DABranchLikelihoodCore(Node node, int nrOfStates, int nrOfSites, int categoryCount) {
+        super(node, nrOfStates, nrOfSites, categoryCount);
     } // called initialize()
 
 
@@ -160,6 +162,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
      * @param proportions the proportions of sites in each category. length = nrOfCategories.
      */
     // branchLd[] is linked to the branch above the child node 1
+    //TODO need to cache per site to avoid recalculation, when only sequence at a site is changed
     @Override
     public void calculateNodeBrLdOverCategories(final int[] childNodeStates, final int[] parentNodeStates,
                                                 double[] proportions) {
