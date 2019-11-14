@@ -7,6 +7,7 @@ import beast.evolution.tree.NodesStatesAndTree;
 /**
  * framework of data augmentation tree likelihood core
  */
+@Deprecated
 public abstract class AbstrDATreeLikelihoodCore2 extends AbstrDALikelihoodCore {
     // to store branch likelihood calculation per site:
     // 1st dimension is matrix index (current, stored),

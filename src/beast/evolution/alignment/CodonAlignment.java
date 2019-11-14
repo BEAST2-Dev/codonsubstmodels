@@ -142,6 +142,9 @@ public class CodonAlignment extends Alignment {
             printCodonPositionBaseFrequencies();
             Log.info.println();
         }
+
+        if (isAscertained)
+            throw new UnsupportedOperationException("Ascertainment correction is not available !");
     }
 
     /**

@@ -4,7 +4,6 @@ import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
@@ -23,7 +22,7 @@ import java.util.concurrent.*;
  * TODO 1: make it working in MCMC
  * TODO 2: try only log the cell of trans prob matrix once
  */
-public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
+public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 
 //    final public Input<Boolean> m_useAmbiguities = new Input<>("useAmbiguities",
 //            "flag to indicate that sites containing ambiguous states should be handled instead of ignored (the default)",
@@ -42,16 +41,12 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
                 ". If not specified, the -beagle_scaling flag is used.",
         TreeLikelihood.Scaling._default, TreeLikelihood.Scaling.values());
 
-
-    final public Input<NodesStatesAndTree> nodesStatesInput = new Input<>("nodesStates",
-            "The large 2-d matrix to store all nodes sequences.", Input.Validate.REQUIRED);
-
     final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
             "maximum number of threads to use, if less than 1 the number of threads " +
                     "in BeastMCMC is used (default -1)", -1);
 
     /** calculation engine, excl. root index, nrOfNodes-1 **/
-    private DABranchLikelihoodCore[] daBranchLikelihoods;
+    private DABranchLikelihoodCore[] daBranchLdCores;
 
     private ExecutorService executor = null;
 //    private List<Future<Double>> logPBranchList = new ArrayList<>();
@@ -63,20 +58,23 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
     /****** end threads ******/
 
 
-    /**
-     * states in tips is stored by CodonAlignment List<List<Integer>> counts
-     */
-    CodonAlignment codonAlignment;
-    /**
-     * internal node sequences 2d matrix = [(internal) nodeNr , codonNr]
-     */
-    NodesStatesAndTree nodesStates;
+//    /**
+//     * states in tips is stored by CodonAlignment List<List<Integer>> counts
+//     */
+//    CodonAlignment codonAlignment;
+//    /**
+//     * internal node sequences 2d matrix = [(internal) nodeNr , codonNr]
+//     */
+//    NodesStatesAndTree nodesStates;
 
     /**
      * calculation engine *
      */
 //    protected AbstrDATreeLikelihoodCore daLdCore;
 //    protected BeagleTreeLikelihood beagle;
+
+    // data and tree
+    protected NodesStatesAndTree nodesStatesAndTree;
 
     /**
      * BEASTObject associated with inputs. Since none of the inputs are StateNodes, it
@@ -129,11 +127,12 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
     List<Integer> constantPattern = null;
 
     public DACodonTreeLikelihood2(CodonAlignment codonAlignment, TreeInterface treeInterface, SiteModel.Base siteModel,
-                                  BranchRateModel.Base branchRateModel, NodesStatesAndTree nodesStates, int threadCount) {
+                                  BranchRateModel.Base branchRateModel, NodesStatesAndTree nodesStatesAndTree,
+                                  int threadCount) {
         this.siteModel = siteModel;
         this.substitutionModel = siteModel.getSubstitutionModel();
         this.branchRateModel = branchRateModel;
-        this.nodesStates = nodesStates;
+        this.nodesStatesAndTree = nodesStatesAndTree;
         this.threadCount = threadCount;
 
         // sanity check: alignment should have same #taxa as tree
@@ -158,16 +157,8 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
             threadCount = Integer.parseInt(instanceCount);
         }
 
-
-        nodesStates = nodesStatesInput.get();
-
-        codonAlignment = CodonAlignment.toCodonAlignment(dataInput.get());
-        // sanity check: alignment should have same #taxa as tree
-        if (codonAlignment.getTaxonCount() != treeInput.get().getLeafNodeCount()) {
-            throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
-        }
-        Log.info.println("  " + codonAlignment.toString(true));
-        // print startup messages via Log.print*
+        // data and tree
+        nodesStatesAndTree = dataAndTreeInput.get();
 
 //        beagle = null;
 //        beagle = new BeagleTreeLikelihood();
@@ -186,12 +177,11 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //        // No Beagle instance was found, so we use the good old java likelihood core
 //        beagle = null;
 
-        int nodeCount = treeInput.get().getNodeCount();
         if (!(siteModelInput.get() instanceof SiteModel.Base)) {
             throw new IllegalArgumentException("siteModel input should be of type SiteModel.Base");
         }
         siteModel = (SiteModel.Base) siteModelInput.get();
-        siteModel.setDataType(codonAlignment.getDataType()); //TODO review
+        siteModel.setDataType(nodesStatesAndTree.getCodonDataType());
         substitutionModel = siteModel.getSubstitutionModel();
 
         if (branchRateModelInput.get() != null) {
@@ -199,14 +189,13 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
         } else {
             branchRateModel = new StrictClockModel();
         }
+
+        int nodeCount = nodesStatesAndTree.getNodeCount();
         branchLengths = new double[nodeCount];
         storedBranchLengths = new double[nodeCount];
 
 
-
         initCore(); // init DALikelihoodCore
-
-
 
 
         // TODO check
@@ -222,22 +211,19 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //        int siteCount = codonAlignment.getSiteCount();
 //        rootBranchLd = new double[siteCount]; // improved from patterns * stateCount to siteCount
 
-        if (codonAlignment.isAscertained) {
-            throw new UnsupportedOperationException("Ascertainment correction is not available !");
-        }
+
     }
 
 
     // no pattern, use codonAlignment.getSiteCount()
     protected void initCore() {
-        final int stateCount = codonAlignment.getMaxStateCount();
-        assert stateCount == 64;
+        final int stateCount = nodesStatesAndTree.getStateCount();
+        final int siteCount = nodesStatesAndTree.getSiteCount();
+        final int nodeCount = nodesStatesAndTree.getNodeCount();
+        TreeInterface tree = nodesStatesAndTree.getTree();
 
-        TreeInterface tree = treeInput.get();
-        final int siteCount = nodesStates.getSiteCount();
-        final int nodeCount = tree.getNodeCount();
         // excl. root index
-        daBranchLikelihoods = new DABranchLikelihoodCore[nodeCount-1];
+        daBranchLdCores = new DABranchLikelihoodCore[nodeCount-1];
 
         // exclude root node, branches = nodes - 1
         final int rootIndex = tree.getNodeCount() - 1;
@@ -246,13 +232,13 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 
         for (int n = 0; n < rootIndex; n++) {
             final Node node = tree.getNode(n);
-            daBranchLikelihoods[n] = new DABranchLikelihoodCore(node, stateCount, siteCount, siteModel.getCategoryCount());
+            daBranchLdCores[n] = new DABranchLikelihoodCore(node, stateCount, siteCount, siteModel.getCategoryCount());
         }
 
         if (threadCount > 1) {
             executor = Executors.newFixedThreadPool(threadCount);
             for (int i = 0; i < rootIndex; i++) {
-                likelihoodCallers.add(new DABranchLikelihoodCallable(daBranchLikelihoods[i]));
+                likelihoodCallers.add(new DABranchLikelihoodCallable(daBranchLdCores[i]));
             }
         }
 
@@ -282,51 +268,6 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
     }
 
     /**
-     * get states from tips, row is nodeIndex, col is site
-     * @param tree  TreeInterface
-     * @return      int[][]
-     * @see {@link DATreeLikelihoodCore#getNodeStates(int)}
-     * @see {@link InternalNodeStates#getNrStates(int)}
-     */
-    protected int[][] getTipStates(TreeInterface tree) {
-
-        final int[][] states = new int[tree.getLeafNodeCount()][];
-
-        for (Node node : tree.getExternalNodes()) {
-            // set leaf node states
-            int taxonIndex = getTaxonIndex(node.getID(), codonAlignment);
-            // no patterns
-            List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
-
-            assert statesList.size() == codonAlignment.getSiteCount();
-            // Java 8
-            states[taxonIndex] = statesList.stream().mapToInt(i->i).toArray();
-        }
-        return states;
-    }
-
-
-    /**
-     *
-     * @param taxon the taxon name as a string
-     * @param data the alignment
-     * @return the taxon index of the given taxon name for accessing its sequence data in the given alignment,
-     *         throw RuntimeException when -1 if the taxon is not in the alignment.
-     */
-    private int getTaxonIndex(String taxon, Alignment data) {
-        int taxonIndex = data.getTaxonIndex(taxon);
-        if (taxonIndex == -1) {
-            if (taxon.startsWith("'") || taxon.startsWith("\"")) {
-                taxonIndex = data.getTaxonIndex(taxon.substring(1, taxon.length() - 1));
-            }
-            if (taxonIndex == -1) {
-                throw new RuntimeException("Could not find sequence " + taxon + " in the alignment");
-            }
-        }
-        return taxonIndex;
-    }
-
-    /**
      * Calculate the log likelihood of the current state.
      *
      * @return the log likelihood.
@@ -343,7 +284,7 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //            return logP;
 //        }
 
-        final TreeInterface tree = treeInput.get();
+        final TreeInterface tree = nodesStatesAndTree.getTree();
         final double[] frequencies = substitutionModel.getFrequencies();
 
         // exclude root node, branches = nodes - 1
@@ -355,7 +296,7 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
             // branch likelihoods indexes excludes root index
             for (int n = 0; n < rootIndex; n++) {
 //                final Node node = tree.getNode(n);
-                DABranchLikelihoodCore daBranchLikelihood = daBranchLikelihoods[n];
+                DABranchLikelihoodCore daBranchLikelihood = daBranchLdCores[n];
                 try {
                     if (updateBranch(daBranchLikelihood) != Tree.IS_CLEAN) {
                         nodeLogLikelihoods[n] = daBranchLikelihood.calculateLogLikelihoods();
@@ -395,16 +336,11 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //        executor.shutdown();
         }
 
-        // sum logP
-        logP =0;
-        for (int i = 0; i < nodeLogLikelihoods.length; i++) {
-            logP += nodeLogLikelihoods[i];
-        }
         // frequencies at root
         double product = 1.0;
-        for (int k = 0; k < nodesStates.getSiteCount(); k++) {
+        for (int k = 0; k < nodesStatesAndTree.getSiteCount(); k++) {
             // hard code for root node
-            int state = nodesStates.getASite(rootIndex, k); // 0-63
+            int state = nodesStatesAndTree.getASite(rootIndex, k); // 0-63
 
             //TODO rm validation to fast speed, implement unit test
             if (frequencies[state] == 0)
@@ -413,7 +349,15 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
             // TODO review I do not think prior prob in root is required
             product *= frequencies[state];
         }
-        logP += Math.log(product); //+ getLogScalingFactor(k); TODO
+        nodeLogLikelihoods[rootIndex] = Math.log(product); //+ getLogScalingFactor(k); TODO
+
+//TODO extract this to calcLogP() for caching
+        // sum logP
+        logP =0;
+        // nodeLogLikelihoods[rootIndex] is frequencies prior at root
+        for (int i = 0; i < nodeLogLikelihoods.length; i++) {
+            logP += nodeLogLikelihoods[i];
+        }
 
 //        m_nScale++;
 //        if (logP > 0 || (daLdCore.getUseScaling() && m_nScale > X)) {
@@ -449,14 +393,14 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
     protected int updateBranch(final DABranchLikelihoodCore daBranchLdCore) {
         // the node below this branch
         final Node node = daBranchLdCore.getNode();
+        final Node parent = node.getParent();
 
         boolean seqUpdate = false; //TODO internal node sequence updated at any site
 
         int update = hasDirt; //TODO need?
 //            if (!node.isRoot()) {
-        int nodeUpdate = node.isDirty();
+        int nodeUpdate = node.isDirty() | parent.isDirty(); // TODO need to review
 
-        final Node parent = node.getParent();
 
         final double branchRate = branchRateModel.getRateForBranch(node);
         final double branchTime = node.getLength() * branchRate;
@@ -499,8 +443,8 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
             // brLD is linked to the child node index down
             daBranchLdCore.setNodeBrLdForUpdate(); // TODO need to review
 
-            final int[] nodeStates = nodesStates.getNodeStates(nodeIndex);
-            final int[] parentNodeStates = nodesStates.getNodeStates(parentNum);
+            final int[] nodeStates = nodesStatesAndTree.getNodeStates(nodeIndex);
+            final int[] parentNodeStates = nodesStatesAndTree.getNodeStates(parentNum);
             // populate branchLd[][excl. root], nodeIndex is child
             daBranchLdCore.calculateNodeBrLdOverCategories(nodeStates, parentNodeStates, proportions);
         }
@@ -551,7 +495,7 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //        }
         hasDirt = Tree.IS_CLEAN;
 
-        if (dataInput.get().isDirtyCalculation()) {
+        if (nodesStatesAndTree.isDirtyCalculation()) {
             hasDirt = Tree.IS_FILTHY;
             return true;
         }
@@ -563,7 +507,7 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
             //m_nHasDirt = Tree.IS_DIRTY;
             return true;
         }
-        return treeInput.get().somethingIsDirty();
+        return nodesStatesAndTree.getTree().somethingIsDirty();
     }
 
     @Override
@@ -573,8 +517,8 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //            super.store();
 //            return;
 //        }
-        if (daLdCore != null) {
-            daLdCore.store();
+        for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores) {
+            daBrLdCore.store();
         }
         super.store();
         System.arraycopy(branchLengths, 0, storedBranchLengths, 0, branchLengths.length);
@@ -587,8 +531,8 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
 //            super.restore();
 //            return;
 //        }
-        if (daLdCore != null) {
-            daLdCore.restore();
+        for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores) {
+            daBrLdCore.restore();
         }
         super.restore();
         double[] tmp = branchLengths;
@@ -601,7 +545,7 @@ public class DACodonTreeLikelihood2 extends GenericTreeLikelihood {
      */
     @Override
     public List<String> getArguments() {
-        return Collections.singletonList(codonAlignment.getID());
+        return Collections.singletonList(nodesStatesAndTree.getID());
     }
 
     /**

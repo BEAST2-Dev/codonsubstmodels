@@ -40,7 +40,7 @@ public class NodesStates extends StateNode {
 
     public NodesStates(CodonAlignment codonAlignment) {
         this.codonDataType = codonAlignment.getDataType();
-        final int stateCount = codonDataType.getStateCount();
+        final int stateCount = getStateCount();
         assert stateCount == 64;
         // 0 - 63, ignore lowerValueInput upperValueInput
         lower = 0;
@@ -55,12 +55,17 @@ public class NodesStates extends StateNode {
         siteCount = codonAlignment.getSiteCount();
 
         nodeIsDirty = new boolean[nodeCount];
+
+        // fix ID
+        if (getID() == null || getID().length() < 1)
+            setID(codonAlignment.getID());
     }
 
 
     @Override
     public void initAndValidate() {
-        throw new UnsupportedOperationException("Unsupported");
+        // init in NodesStatesAndTree using its constructor
+        throw new IllegalArgumentException("Not used");
 //        // need data type, site count, taxa count
 //        CodonAlignment codonAlignment = codonAlignmentInput.get();
 //        // initParam
@@ -94,6 +99,13 @@ public class NodesStates extends StateNode {
         return sequence.stream().mapToInt(i -> i).toArray();
     }
 
+    public Codon getCodonDataType() {
+        return codonDataType;
+    }
+
+    public int getStateCount() {
+        return codonDataType.getStateCount();
+    }
 
     public int getSiteCount() {
         return siteCount;
@@ -138,6 +150,33 @@ public class NodesStates extends StateNode {
     }
 
     @Override
+    public String toString() {
+        final StringBuilder buf = new StringBuilder();
+        buf.append(getID()).append("[").
+                append(" ").append(getNodeCount());
+        buf.append(" ").append(getSiteCount());
+        buf.append("] ");
+        buf.append("(").append(lower).append(",").append(upper).append("): ");
+//        for (final int value : states) {
+//            buf.append(value).append(" ");
+//        }
+        return buf.toString();
+    }
+
+
+    //******* use those in NodesStatesAndTree not these below *******
+
+    @Override
+    protected void store() {
+        throw new UnsupportedOperationException("Unsupported");
+    }
+
+    @Override
+    public void restore() {
+        throw new UnsupportedOperationException("Unsupported");
+    }
+
+    @Override
     public StateNode copy() {
         throw new UnsupportedOperationException("Unsupported");
     }
@@ -165,30 +204,6 @@ public class NodesStates extends StateNode {
     @Override
     public int scale(double scale) {
         throw new UnsupportedOperationException("Unsupported");
-    }
-
-    @Override
-    protected void store() {
-        throw new UnsupportedOperationException("Unsupported");
-    }
-
-    @Override
-    public void restore() {
-        throw new UnsupportedOperationException("Unsupported");
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder buf = new StringBuilder();
-        buf.append(getID()).append("[").
-                append(" ").append(getNodeCount());
-        buf.append(" ").append(getSiteCount());
-        buf.append("] ");
-        buf.append("(").append(lower).append(",").append(upper).append("): ");
-//        for (final int value : states) {
-//            buf.append(value).append(" ");
-//        }
-        return buf.toString();
     }
 
 }

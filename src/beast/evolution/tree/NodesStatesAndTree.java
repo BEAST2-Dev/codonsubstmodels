@@ -2,6 +2,7 @@ package beast.evolution.tree;
 
 import beast.core.Input;
 import beast.core.StateNode;
+import beast.core.util.Log;
 import beast.evolution.alignment.CodonAlignment;
 
 import java.io.PrintStream;
@@ -30,9 +31,10 @@ public class NodesStatesAndTree extends NodesStates {
             new Long(777));
 
 
-    // all nodes
-    NodeStates[] nodesStates;
+    // all nodes, use nodeNr to map the index of nodesStates[]
+    protected  NodeStates[] nodesStates;
 
+    protected TreeInterface tree;
 
     /**
      * init class and states in tips given {@link CodonAlignment}.
@@ -41,7 +43,12 @@ public class NodesStatesAndTree extends NodesStates {
      */
     public NodesStatesAndTree(CodonAlignment codonAlignment, TreeInterface tree) {
         super(codonAlignment);
+        this.tree = tree;
 
+        // sanity check: alignment should have same #taxa as tree
+        if (codonAlignment.getTaxonCount() != tree.getLeafNodeCount())
+            throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
+        // nodeCount == tree.getNodeCount()
         if (getNodeCount() != tree.getNodeCount())
             throw new IllegalArgumentException("The dimension of nodes states should equal to " +
                     "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
@@ -49,12 +56,15 @@ public class NodesStatesAndTree extends NodesStates {
         assert getTipsCount() == tree.getLeafNodeCount();
         assert getInternalNodeCount() == tree.getInternalNodeCount();
 
+        Log.info.println("  " + codonAlignment.toString(true));
+
         // init from constructor
         nodesStates = new NodeStates[nodeCount];
 
         // set tips states after initParam
         for (int i=0; i < getTipsCount() ; i++) {
             Node tip = tree.getNode(i);
+            // use nodeNr to map the index of nodesStates[]
             nodesStates[i] = new NodeStates(tip, codonAlignment);
         }
         // call initINS
@@ -118,15 +128,6 @@ public class NodesStatesAndTree extends NodesStates {
 //    public void unstore() {
 //        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
 //    }
-
-
-    public int getTipsCount() {
-        return (getNodeCount() + 1) / 2;
-    }
-
-    public int getInternalNodeCount() {
-        return getTipsCount() - 1;
-    }
 
 
     /**
@@ -226,6 +227,19 @@ public class NodesStatesAndTree extends NodesStates {
 //
 //        setValue(rowIndex, codonNr, value);
 //    }
+
+
+    public TreeInterface getTree() {
+        return tree;
+    }
+
+    public int getTipsCount() {
+        return (getNodeCount() + 1) / 2;
+    }
+
+    public int getInternalNodeCount() {
+        return getTipsCount() - 1;
+    }
 
 
     @Override

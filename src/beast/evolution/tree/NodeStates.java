@@ -13,17 +13,21 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The large array to store one node states (can be a tip).
- * Cols are sites,
- * and the state starts from 0. <br>
+ * The large array to store one node states (can be a tip).<br>
  *
- * <code>nodeNr</code> is the node index number starting from 0,
- * and for internal nodes, they are ranged from the number of leaf nodes
- * to the total nodes - 1.<br>
+ * <code>nodeNr</code> used for all indexing system
+ * is the node index number starting from 0 to root index (nodeCount - 1).
+ * For internal nodes, they are ranged from the number of leaf nodes
+ * to the nodeCount - 1.<br>
+ *
+ * Not use {@link beast.core.parameter.IntegerParameter}
+ * because of both <code>arraycopy</code> and storing Object are slow.
+ * Apple the index trick implemented in {@link beast.evolution.likelihood.BeerLikelihoodCore}
+ * to avoid <code>arraycopy</code>.<br>
  */
 public class NodeStates extends StateNode {
 
-    private final int nodeNr;
+    private final int nodeNr; // used to map to index of DABranchLikelihoodCore[]
 
     final GeneticCode geneticCode;
 
@@ -73,32 +77,11 @@ public class NodeStates extends StateNode {
         final int siteCount = codonAlignment.getSiteCount();
 
         initParam(stateCount, siteCount);
-        // make sure the taxon maps nodeNr
-        int taxonIndex = getTaxonIndex(tip.getID(), codonAlignment);
-        setTipStates(codonAlignment, taxonIndex);
-
-    }
-    /**
-     *
-     * @param taxon the taxon name as a string
-     * @param data the alignment
-     * @return the taxon index of the given taxon name for accessing its sequence data in the given alignment,
-     *         throw RuntimeException when -1 if the taxon is not in the alignment.
-     */
-    private int getTaxonIndex(String taxon, Alignment data) {
-        int taxonIndex = data.getTaxonIndex(taxon);
-        if (taxonIndex == -1) {
-            if (taxon.startsWith("'") || taxon.startsWith("\"")) {
-                taxonIndex = data.getTaxonIndex(taxon.substring(1, taxon.length() - 1));
-            }
-            if (taxonIndex == -1) {
-                throw new RuntimeException("Could not find sequence " + taxon + " in the alignment");
-            }
-        }
-        return taxonIndex;
+        // Note: nodeNr != taxonIndex
+        setTipStates(tip, codonAlignment);
     }
 
-    // for internal nodes
+    // for internal nodes, initINStatesRandom
     public NodeStates(int nodeNr, int stateCount, int siteCount, GeneticCode geneticCode, long seed) {
         this.nodeNr = nodeNr;
         this.geneticCode = geneticCode;
@@ -107,7 +90,7 @@ public class NodeStates extends StateNode {
         initINStatesRandom(stateCount, seed);
     }
 
-    // for internal nodes
+    // for internal nodes, initINStatesParsimony
     public NodeStates(int nodeNr, int stateCount, int siteCount) {
         this.nodeNr = nodeNr;
         this.geneticCode = null;
@@ -139,18 +122,46 @@ public class NodeStates extends StateNode {
 
         Log.info.println("Create node states array length = " + siteCount);
 
-
     }
 
-    // set tips states after initParam
-    public void setTipStates(CodonAlignment codonAlignment, final int taxonIndex) {
-        assert taxonIndex == nodeNr;
+    /**
+     * set tips states given {@link CodonAlignment}. <br>
+     * Note: nodeNr != taxonIndex.<br>
+     * The sequence index (taxonIndex) in {@link CodonAlignment} is different to
+     * the node index (nodeNr) in {@link Tree}.
+     *
+     * @param tip               Leaf {@link Node}
+     * @param codonAlignment    {@link CodonAlignment}
+     */
+    public void setTipStates(Node tip, CodonAlignment codonAlignment) {
+        // make sure to use taxonIndex to getCounts, nodeNr not mapping to the order in List<Sequence>
+        int taxonIndex = getTaxonIndex(tip.getID(), codonAlignment);
 
         // no patterns
         List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
         assert statesList.size() == states[currentMatrixIndex].length;
         // Java 8
         states[currentMatrixIndex] = statesList.stream().mapToInt(i->i).toArray();
+    }
+
+    /**
+     * Copied from
+     * @param taxon the taxon name as a string
+     * @param data the alignment
+     * @return the taxon index of the given taxon name for accessing its sequence data in the given alignment,
+     *         throw RuntimeException when -1 if the taxon is not in the alignment.
+     */
+    public int getTaxonIndex(String taxon, Alignment data) {
+        int taxonIndex = data.getTaxonIndex(taxon);
+        if (taxonIndex == -1) {
+            if (taxon.startsWith("'") || taxon.startsWith("\"")) {
+                taxonIndex = data.getTaxonIndex(taxon.substring(1, taxon.length() - 1));
+            }
+            if (taxonIndex == -1) {
+                throw new RuntimeException("Could not find sequence " + taxon + " in the alignment");
+            }
+        }
+        return taxonIndex;
     }
 
     /**
@@ -242,7 +253,7 @@ public class NodeStates extends StateNode {
 
 //    @Override
 //    public void unstore() {
-//        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
+//        currentMatrixIndex = storedMatrixIndex;
 //    }
 
     public int getSiteCount() {
