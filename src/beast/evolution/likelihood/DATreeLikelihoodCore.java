@@ -372,12 +372,11 @@ public class DATreeLikelihoodCore extends AbstrDATreeLikelihoodCore {
 
             // hard code for root node
             int state = internalNodeStates.getASite(rootIndex, k); // 0-63
-
-            //TODO rm validation to fast speed, implement unit test
+            
             if (frequencies[state] == 0)
-                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
+                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, " +
+                        "check the state or frequencies !");
 
-            // TODO review I do not think prior prob in root is required
             product *= frequencies[state];
 
         } // end k

@@ -273,37 +273,26 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
      * frequency[] need to be added later in DATreeLikelihood
      */
     @Override
-    public double calculateLogLikelihoods() {
+    public double calculateBranchLogLikelihood() {
 
-//        int trunk = 1;
         double product = 1.0;
         double logP = 0;
 
         // exclude root node
-//        final int rootIndex = getNrOfNodes()-1;
 //TODO review
         for (int k = 0; k < getNrOfSites(); k++) {
-//            for (int i = 0; i < rootIndex; i++) {
-                // internal nodes, excl root
-                product *= branchLd[currentBrLdIndex][k];
+            // internal nodes, excl root
+            product *= branchLd[currentBrLdIndex][k];
 
-                // log when product is too small, Double.MAX_VALUE 1.79...e+308
-                if (product < 1e-200) {
-                    if (product == 0)
-                        throw new RuntimeException("Likelihood -Inf at site " + k + " ! " +
-                                "\nbranch likelihood = " + branchLd[currentBrLdIndex][k]);
+            // hard code to log when product is too small, Double.MAX_VALUE 1.79...e+308
+            if (product < 1e-200) {
+                if (product == 0)
+                    throw new RuntimeException("Likelihood -Inf at site " + k + " ! " +
+                            "\nbranch likelihood = " + branchLd[currentBrLdIndex][k]);
 
-                    logP += Math.log(product); //+ getLogScalingFactor(k); TODO
-                    product = 1.0;
-//                trunk++;
-//                }
-            } // end i
-
-            // hard code for root node
-//            int state = internalNodeStates.getASite(rootIndex, k); // 0-63
-
-//            if (frequencies[state] == 0)
-//                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, check the state or frequencies !");
+                logP += Math.log(product); //+ getLogScalingFactor(k); TODO
+                product = 1.0;
+            } // if
 
         } // end k
 

@@ -228,10 +228,29 @@ public class NodesStatesAndTree extends NodesStates {
 //        setValue(rowIndex, codonNr, value);
 //    }
 
+    /**
+     * Assuming rootIndex = tree.getNodeCount() - 1,
+     * and then validate rootIndex == tree.getRoot().getNr()
+     * @return {@link TreeInterface}
+     */
+    public TreeInterface getValidTree() {
+        // exclude root node, branches = nodes - 1
+        final int rootIndex = tree.getNodeCount() - 1;
+        if (rootIndex != tree.getRoot().getNr())
+            throw new RuntimeException("Invalid root index " + tree.getRoot().getNr() + " != " + rootIndex);
 
-    public TreeInterface getTree() {
         return tree;
     }
+
+    public int getRootIndex() {
+        int rootIndex = tree.getNodeCount() - 1;
+        assert rootIndex == tree.getRoot().getNr();
+        return rootIndex;
+    }
+
+//    public TreeInterface getTree() {
+//        return tree;
+//    }
 
     public int getTipsCount() {
         return (getNodeCount() + 1) / 2;
