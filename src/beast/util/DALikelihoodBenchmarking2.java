@@ -5,11 +5,11 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.likelihood.DACodonTreeLikelihood;
+import beast.evolution.likelihood.DACodonTreeLikelihood2;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.operators.ScaleOperator;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.InternalNodeStates;
+import beast.evolution.tree.NodesStatesAndTree;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeStatLogger;
 import codonmodels.CodonFrequencies;
@@ -22,7 +22,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -242,26 +241,20 @@ public class DALikelihoodBenchmarking2 {
         // init time
         long startInit = System.currentTimeMillis();
 
-        int tipCount = tree.getLeafNodeCount();
-        int siteCount = codonAlignment.getSiteCount();
+//        int tipCount = tree.getLeafNodeCount();
+//        int siteCount = codonAlignment.getSiteCount();
+//
+//        int internalNodeCount = tree.getInternalNodeCount();
+//        // vert MT stop codon states = 8, 10, 48, 50
+//        int[] stopCodons = codonAlignment.getGeneticCode().getStopCodonStates();
+//        System.out.println("Stop codon states " + Arrays.toString(stopCodons));
 
-        int internalNodeCount = tree.getInternalNodeCount();
-        // vert MT stop codon states = 8, 10, 48, 50
-        int[] stopCodons = codonAlignment.getGeneticCode().getStopCodonStates();
-        System.out.println("Stop codon states " + Arrays.toString(stopCodons));
-
-        InternalNodeStates internalNodeStates = new InternalNodeStates(internalNodeCount, siteCount);
+        NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
         // internal nodes
-        for (int i = tipCount; i < tree.getNodeCount(); i++) {
-            int[] inSt = new int[siteCount];
-            // states[][] may longer than siteCount, because it is created for all runs.
-            System.arraycopy(states[i - tipCount], 0, inSt, 0, inSt.length);
-            internalNodeStates.setNrStates(i, inSt);
-        }
+        nodesStatesAndTree.initINS("random", 777);
 
-        DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
-        likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel,
-                "internalNodeStates", internalNodeStates);
+        DACodonTreeLikelihood2 likelihood = new DACodonTreeLikelihood2();
+        likelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
 
         MCMC mcmc = initMCMC(tree, likelihood, chainLength, logEvery);
 

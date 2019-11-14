@@ -3,16 +3,21 @@ package beast.evolution.likelihood;
 import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
-import beast.core.util.Log;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.*;
+import beast.evolution.tree.Node;
+import beast.evolution.tree.NodesStatesAndTree;
+import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeInterface;
+import beast.util.Randomizer;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Data augmentation to fast codon tree likelihood calculation.
@@ -104,20 +109,17 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
     double proportionInvariant = 0;
 
 
-    public DACodonTreeLikelihood2(CodonAlignment codonAlignment, TreeInterface treeInterface, SiteModel.Base siteModel,
-                                  BranchRateModel.Base branchRateModel, NodesStatesAndTree nodesStatesAndTree,
-                                  int threadCount) {
+    public DACodonTreeLikelihood2(){}
+
+    public DACodonTreeLikelihood2(CodonAlignment codonAlignment, TreeInterface tree, SiteModel.Base siteModel,
+                                  BranchRateModel.Base branchRateModel, int threadCount) {
         this.siteModel = siteModel;
         this.substitutionModel = siteModel.getSubstitutionModel();
         this.branchRateModel = branchRateModel;
-        this.nodesStatesAndTree = nodesStatesAndTree;
         this.threadCount = threadCount;
 
-        // sanity check: alignment should have same #taxa as tree
-        if (codonAlignment.getTaxonCount() != treeInterface.getLeafNodeCount()) {
-            throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
-        }
-        Log.info.println("  " + codonAlignment.toString(true));
+        this.nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
+        nodesStatesAndTree.initINS("random", Randomizer.getSeed());
 
     }
 

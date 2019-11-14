@@ -61,28 +61,34 @@ public class NodesStatesAndTree extends NodesStates {
         // init from constructor
         nodesStates = new NodeStates[nodeCount];
 
-        // set tips states after initParam
-        for (int i=0; i < getTipsCount() ; i++) {
-            Node tip = tree.getNode(i);
-            // use nodeNr to map the index of nodesStates[]
-            nodesStates[i] = new NodeStates(tip, codonAlignment);
-        }
+        // set tips states
+        initTipStates(codonAlignment, tree);
         // call initINS
     }
-
 
     @Override
     public void initAndValidate() {
         // need data type, site count, taxa count
         CodonAlignment codonAlignment = codonAlignmentInput.get();
         TreeInterface tree = treeInput.get();
-        // initParam
+        // init params
         NodesStatesAndTree ns = new NodesStatesAndTree(codonAlignment, tree);
 
         // internal nodes
         initINS(initINSInput.get(), initINSRandomSeedInput.get());
     }
 
+    // set tips states to nodesStates[] by nodeNr indexing
+    protected void initTipStates(CodonAlignment codonAlignment, TreeInterface tree) {
+        // tips
+        for (int i=0; i < getTipsCount() ; i++) {
+            Node tip = tree.getNode(i);
+            // use nodeNr to map the index of nodesStates[]
+            nodesStates[i] = new NodeStates(tip, codonAlignment);
+        }
+    }
+
+    // "random", "parsimony"
     public void initINS(String initMethod, long seed) {
         // internal nodes
         for (int i=getTipsCount(); i < getNodeCount(); i++) {

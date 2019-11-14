@@ -49,8 +49,8 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 //        states = null;
 //        internalNodeStates = null;
         matrices = null;
-        currentMatrixIndex = -1;
-        storedMatrixIndex = -1;
+        currentMatrixIndex = 0;
+        storedMatrixIndex = 0;
 
         scalingFactors = null;
     }

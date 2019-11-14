@@ -23,10 +23,10 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
     // 2nd is nrOfCategories * matrixSize
     protected double[][] matrices;
     // store the matrix index, instead of different matrices
-    protected int currentMatrixIndex = -1;
-    protected int storedMatrixIndex = -1;
-    protected int currentBrLdIndex = -1;
-    protected int storedBrLdIndex = -1;
+    protected int currentMatrixIndex = 0;
+    protected int storedMatrixIndex = 0;
+    protected int currentBrLdIndex = 0;
+    protected int storedBrLdIndex = 0;
 
 
     /**

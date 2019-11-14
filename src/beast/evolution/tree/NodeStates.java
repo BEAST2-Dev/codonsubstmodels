@@ -65,7 +65,7 @@ public class NodeStates extends StateNode {
         setNodeStates(states);
     }
 
-    // for tips
+    // for tips, where nodeNr != taxonIndex
     public NodeStates(Node tip, CodonAlignment codonAlignment) {
         this.nodeNr = tip.getNr();
         this.geneticCode = codonAlignment.getDataType().getGeneticCode();
