@@ -207,9 +207,12 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 
         for (int n = 0; n < rootIndex; n++) {
             final Node node = tree.getNode(n);
+            // make every nodes dirty
+            node.makeDirty(Tree.IS_FILTHY);
             // init by the node below the branch
             daBranchLdCores[n] = new DABranchLikelihoodCore(node, stateCount, siteCount, siteModel.getCategoryCount());
         }
+        tree.getRoot().makeDirty(Tree.IS_FILTHY);
 
         // multi-threading
         if (threadCount > 1) {
@@ -232,6 +235,7 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 //            throw new UnsupportedOperationException("in development");
 //        }
 //        hasDirt = Tree.IS_FILTHY;
+
 
     }
 
@@ -402,12 +406,12 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
             final double[] proportions = siteModel.getCategoryProportions(node);
 
             // brLD is linked to the child node index down
-            daBranchLdCore.setNodeBrLdForUpdate(); // TODO review
+            daBranchLdCore.setBranchLdForUpdate(); // TODO review
 
             final int[] nodeStates = nodesStatesAndTree.getNodeStates(nodeIndex);
             final int[] parentNodeStates = nodesStatesAndTree.getNodeStates(parentNum);
             // populate branchLd[][excl. root], nodeIndex is child
-            daBranchLdCore.calculateNodeBrLdOverCategories(nodeStates, parentNodeStates, proportions);
+            daBranchLdCore.calculateBranchLdOverCategories(nodeStates, parentNodeStates, proportions);
         }
 
 //        update |= nodeUpdate; //need?
@@ -502,6 +506,16 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
         branchLengths = storedBranchLengths;
         storedBranchLengths = tmp;
     }
+
+    public NodesStatesAndTree getNodesStatesAndTree() {
+        return nodesStatesAndTree;
+    }
+
+    // for testing, nodeIndex is the child node below this branch
+    public void getBranchLdFromCore(int nodeIndex, double[] branchLdOut) {
+        daBranchLdCores[nodeIndex].getBranchLikelihoods(branchLdOut);
+    }
+
 
     /**
      * @return a list of unique ids for the state nodes that form the argument

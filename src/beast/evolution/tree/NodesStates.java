@@ -5,6 +5,7 @@ import beast.core.StateNode;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
+import beast.evolution.datatype.GeneticCode;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -105,6 +106,10 @@ public class NodesStates extends StateNode {
 
     public int getStateCount() {
         return codonDataType.getStateCount();
+    }
+
+    public GeneticCode getGeneticCode() {
+        return codonDataType.getGeneticCode();
     }
 
     public int getSiteCount() {

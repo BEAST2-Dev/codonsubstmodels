@@ -1,16 +1,13 @@
 package beast.evolution.tree;
 
 import beast.core.StateNode;
-import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
-import beast.evolution.datatype.GeneticCode;
 
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * The large array to store one node states (can be a tip).<br>
@@ -29,13 +26,12 @@ public class NodeStates extends StateNode {
 
     private final int nodeNr; // used to map to index of DABranchLikelihoodCore[]
 
-    final GeneticCode geneticCode;
+//    final GeneticCode geneticCode;
 
     // 1st dimension is matrix index (current, stored),
     // 2nd is nrOfSites
     // states[matrix index][sites]
     protected int[][] states;
-    protected int[][] storedStates;
     // store the matrix index, instead of different matrices
     protected int currentMatrixIndex;
     protected int storedMatrixIndex;
@@ -56,7 +52,7 @@ public class NodeStates extends StateNode {
 
     public NodeStates(int nodeNr, int[] states, int stateCount) {
         this.nodeNr = nodeNr;
-        this.geneticCode = null;
+//        this.geneticCode = null;
 
         // init from constructor
         assert stateCount == 64;
@@ -68,7 +64,7 @@ public class NodeStates extends StateNode {
     // for tips, where nodeNr != taxonIndex
     public NodeStates(Node tip, CodonAlignment codonAlignment) {
         this.nodeNr = tip.getNr();
-        this.geneticCode = codonAlignment.getDataType().getGeneticCode();
+//        this.geneticCode = codonAlignment.getDataType().getGeneticCode();
 
         final int stateCount = codonAlignment.getDataType().getStateCount();
         assert stateCount == 64;
@@ -81,24 +77,24 @@ public class NodeStates extends StateNode {
         setTipStates(tip, codonAlignment);
     }
 
-    // for internal nodes, initINStatesRandom
-    public NodeStates(int nodeNr, int stateCount, int siteCount, GeneticCode geneticCode, long seed) {
-        this.nodeNr = nodeNr;
-        this.geneticCode = geneticCode;
-
-        initParam(stateCount, siteCount);
-        initINStatesRandom(stateCount, seed);
-    }
-
-    // for internal nodes, initINStatesParsimony
-    public NodeStates(int nodeNr, int stateCount, int siteCount) {
-        this.nodeNr = nodeNr;
-        this.geneticCode = null;
-
-        initParam(stateCount, siteCount);
-        //TODO
-        initINStatesParsimony();
-    }
+//    // for internal nodes, initINStatesRandom
+//    public NodeStates(int nodeNr, int stateCount, int siteCount, GeneticCode geneticCode, long seed) {
+//        this.nodeNr = nodeNr;
+//        this.geneticCode = geneticCode;
+//
+//        initParam(stateCount, siteCount);
+//        initINStatesRandom(stateCount, seed);
+//    }
+//
+//    // for internal nodes, initINStatesParsimony
+//    public NodeStates(int nodeNr, int stateCount, int siteCount) {
+//        this.nodeNr = nodeNr;
+//        this.geneticCode = null;
+//
+//        initParam(stateCount, siteCount);
+//        //TODO
+//        initINStatesParsimony();
+//    }
 
     @Override
     public void initAndValidate() {
@@ -109,7 +105,6 @@ public class NodeStates extends StateNode {
     private void initParam(int stateCount, int siteCount) {
         // siteCount = num of codons, overwrite in CodonAlignment /= 3
         states = new int[2][siteCount];
-        storedStates = new int[2][siteCount];
 
 //        currentMatrixIndex = 0;
 //        storedMatrixIndex = 0;
@@ -120,7 +115,7 @@ public class NodeStates extends StateNode {
 
         siteIsDirty = new boolean[siteCount];
 
-        Log.info.println("Create node states array length = " + siteCount);
+//        Log.info.println("Create node states array length = " + siteCount);
 
     }
 
@@ -164,47 +159,47 @@ public class NodeStates extends StateNode {
         return taxonIndex;
     }
 
-    /**
-     * random states given genetic code
-     */
-    public void initINStatesRandom(final int stateCount, final long seed) {
-
-        Log.info("Random generate codon states using " + geneticCode.getDescription() +
-                " for internal node " + nodeNr + ", " + getSiteCount() + " codon, seed = " + seed);
-
-        Random generator;
-        if (seed > 0)
-            generator = new Random(seed);
-        else
-            generator = new Random();
-
-        // internal nodes, i from NrTips to NrRoot
-        // states[matrix index][sites]
-        int[] inStates = states[currentMatrixIndex];
-        for (int j=0; j < inStates.length; j++) {
-            // 0 - 63
-            inStates[j] = (int)(generator.nextDouble() * stateCount);
-            // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
-            while(geneticCode.isStopCodon(inStates[j]))
-                inStates[j] = (int)(generator.nextDouble() * stateCount);
-        }
-
-    }
-
-    /**
-     * Parsimony to init states. Equally to choose a state from the ambiguous set.
-     */
-    public void initINStatesParsimony() {
-
-        throw new UnsupportedOperationException();
-
-        //traverse 1
-
-
-        //traverse 2
-
-
-    }
+//    /**
+//     * random states given genetic code
+//     */
+//    public void initINStatesRandom(final int stateCount, final long seed) {
+//
+//        Log.info("Random generate codon states using " + geneticCode.getDescription() +
+//                " for internal node " + nodeNr + ", " + getSiteCount() + " codon, seed = " + seed);
+//
+//        Random generator;
+//        if (seed > 0)
+//            generator = new Random(seed);
+//        else
+//            generator = new Random();
+//
+//        // internal nodes, i from NrTips to NrRoot
+//        // states[matrix index][sites]
+//        int[] inStates = states[currentMatrixIndex];
+//        for (int j=0; j < inStates.length; j++) {
+//            // 0 - 63
+//            inStates[j] = (int)(generator.nextDouble() * stateCount);
+//            // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
+//            while(geneticCode.isStopCodon(inStates[j]))
+//                inStates[j] = (int)(generator.nextDouble() * stateCount);
+//        }
+//
+//    }
+//
+//    /**
+//     * Parsimony to init states. Equally to choose a state from the ambiguous set.
+//     */
+//    public void initINStatesParsimony() {
+//
+//        throw new UnsupportedOperationException();
+//
+//        //traverse 1
+//
+//
+//        //traverse 2
+//
+//
+//    }
 
     @Override
     public String getID() {
@@ -226,7 +221,6 @@ public class NodeStates extends StateNode {
     @Override
     public void finalize() throws Throwable {
         states = null;
-        storedStates = null;
         siteIsDirty = null;
         currentMatrixIndex = 0;
         storedMatrixIndex = 0;
@@ -435,8 +429,6 @@ public class NodeStates extends StateNode {
 
         states[0] = source.states[0].clone();
         states[1] = source.states[1].clone();
-        storedStates[0] = source.storedStates[0].clone();
-        storedStates[1] = source.storedStates[1].clone();
 
         lower = source.lower;
         upper = source.upper;

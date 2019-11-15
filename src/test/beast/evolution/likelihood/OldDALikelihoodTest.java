@@ -81,8 +81,8 @@ public class OldDALikelihoodTest {
 
                 // [branch][site]
                 double[][] branchLd = new double[2][1];
-                daTreeLikelihood.getBranchPartials(0, branchLd[0]); // child 1
-                daTreeLikelihood.getBranchPartials(1, branchLd[1]); // child 2
+                daTreeLikelihood.getBranchLikelihoods(0, branchLd[0]); // child 1
+                daTreeLikelihood.getBranchLikelihoods(1, branchLd[1]); // child 2
                 System.out.println("Branch likelihood child1 child2 without freqs = " +
                         Arrays.toString(branchLd[0]) + ", " + Arrays.toString(branchLd[1]));
 

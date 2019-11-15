@@ -107,7 +107,7 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
 
 //    public abstract void calculateNodeBrLdOverCategories(int nodeIndex1, int nodeIndex2, int nodeIndex3, double[] proportions);
 
-    public abstract void calculateNodeBrLdOverCategories(int[] childNodeStates, int[] parentNodeStates, double[] proportions);
+    public abstract void calculateBranchLdOverCategories(int[] childNodeStates, int[] parentNodeStates, double[] proportions);
 
     //    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
     public abstract double calculateBranchLogLikelihood();
@@ -131,9 +131,9 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
 //    }
 
     // suppose only used by unit test
-    public abstract void getNodeBranchLd(double[] branchLdOut);
+    public abstract void getBranchLikelihoods(double[] branchLdOut);
 
-    public abstract void setNodeBrLdForUpdate();
+    public abstract void setBranchLdForUpdate();
 
 
     public int getNrOfSites() {

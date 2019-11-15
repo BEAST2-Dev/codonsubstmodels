@@ -13,11 +13,18 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
     protected boolean useScaling = false;
 
-    protected double[][] scalingFactors;
+    protected double[][] scalingFactors; //TODO
 
-    private double scalingThreshold = 1.0E-100;
+    final private double scalingThreshold = 1.0E-100;
     double SCALE = 2;
 
+    /**
+     * data augmentation likelihood core based on a branch
+     * @param node          the child {@link Node} below the branch
+     * @param nrOfStates    64 for codon
+     * @param nrOfSites     codon sites
+     * @param categoryCount site model gamma category count
+     */
     public DABranchLikelihoodCore(Node node, int nrOfStates, int nrOfSites, int categoryCount) {
         super(node, nrOfStates, nrOfSites, categoryCount);
     } // called initialize()
@@ -144,12 +151,12 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
     // suppose only used by unit test
     @Override
-    public void getNodeBranchLd(double[] branchLdOut) {
+    public void getBranchLikelihoods(double[] branchLdOut) {
         System.arraycopy(branchLd[currentBrLdIndex], 0, branchLdOut, 0, branchLdOut.length);
     }
 
     @Override
-    public void setNodeBrLdForUpdate() {
+    public void setBranchLdForUpdate() {
         currentBrLdIndex = 1 - currentBrLdIndex; // 0 or 1
     }
 
@@ -164,7 +171,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
     // branchLd[] is linked to the branch above the child node 1
     //TODO need to cache per site to avoid recalculation, when only sequence at a site is changed
     @Override
-    public void calculateNodeBrLdOverCategories(final int[] childNodeStates, final int[] parentNodeStates,
+    public void calculateBranchLdOverCategories(final int[] childNodeStates, final int[] parentNodeStates,
                                                 double[] proportions) {
 //        final int[] node1States = getNodeStates(nodeChild1);
 //        final int[] node3States = getNodeStates(nodeParent);
@@ -268,7 +275,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
 
     /**
-     * Calculates site log likelihoods at branches excluding root node.
+     * Calculates site log likelihoods at branches excluding root frequency prior.
      * The input branch likelihoods here have been integrated across categories.
      * frequency[] need to be added later in DATreeLikelihood
      */
@@ -278,14 +285,15 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
         double product = 1.0;
         double logP = 0;
 
-        // exclude root node
+        // exclude root frequency prior
 //TODO review
         for (int k = 0; k < getNrOfSites(); k++) {
             // internal nodes, excl root
             product *= branchLd[currentBrLdIndex][k];
 
             // hard code to log when product is too small, Double.MAX_VALUE 1.79...e+308
-            if (product < 1e-200) {
+            if (product < scalingThreshold) {
+                // important check before implement log scaling
                 if (product == 0)
                     throw new RuntimeException("Likelihood -Inf at site " + k + " ! " +
                             "\nbranch likelihood = " + branchLd[currentBrLdIndex][k]);
@@ -297,7 +305,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
         } // end k
 
         // the rest
-        if (product < 1)
+        if (product < 1.0)
             logP += Math.log(product); //+ getLogScalingFactor(k); TODO
 
         return logP;
@@ -400,7 +408,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 //        return getNrOfTips() + getNrOfInterNodes();
 //    }
 
-    // = getNrOfSites();
+    // for test, = getNrOfSites();
     public int getBranchLdSize() {
         // branchLd[][root] == null
         return branchLd[0].length;

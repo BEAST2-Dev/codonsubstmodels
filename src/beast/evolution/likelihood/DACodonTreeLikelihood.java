@@ -424,7 +424,7 @@ public class DACodonTreeLikelihood extends GenericTreeLikelihood {
 
 
     // for testing
-    public void getBranchPartials(int nodeIndex, double[] branchLdOut) {
+    public void getBranchLikelihoods(int nodeIndex, double[] branchLdOut) {
         daLdCore.getNodeBranchLd(nodeIndex, branchLdOut);
     }
 

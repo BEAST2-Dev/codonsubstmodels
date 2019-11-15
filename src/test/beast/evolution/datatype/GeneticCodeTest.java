@@ -37,6 +37,15 @@ public class GeneticCodeTest {
         //treat ? and - as not stop-codon
         assertFalse(geneticCode.isStopCodon(64));
         assertFalse(geneticCode.isStopCodon(120));
+
+        GeneticCode geneticCode2 = GeneticCode.VERTEBRATE_MT;
+        states = geneticCode2.getStopCodonStates();
+        assertArrayEquals("Stop codon : ", new int[]{8,10,48,50}, states);
+
+        assertTrue(geneticCode2.isStopCodon(8));
+        assertTrue(geneticCode2.isStopCodon(10));
+        assertTrue(geneticCode2.isStopCodon(48));
+        assertTrue(geneticCode2.isStopCodon(50));
     }
 
     @Test

@@ -7,6 +7,7 @@ import beast.evolution.alignment.CodonAlignment;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * The wrapper class to store all node states including tips.
@@ -91,18 +92,60 @@ public class NodesStatesAndTree extends NodesStates {
     // "random", "parsimony"
     public void initINS(String initMethod, long seed) {
         // internal nodes
-        for (int i=getTipsCount(); i < getNodeCount(); i++) {
-            if ("random".equalsIgnoreCase(initMethod)) {
-                nodesStates[i] = new NodeStates(i, codonDataType.getStateCount(), siteCount,
-                        codonDataType.getGeneticCode(), seed);
 
-            } else if ("parsimony".equalsIgnoreCase(initMethod)) {
-                nodesStates[i] = new NodeStates(i, codonDataType.getStateCount(), siteCount);
+        if ("random".equalsIgnoreCase(initMethod)) {
+            int[][] inStates = initINStatesRandom(getInternalNodeCount(),
+                    getStateCount(), getSiteCount(), seed);
 
-            } else {
-                throw new IllegalArgumentException("No method selected to initialise the states at internal node " + i);
+            for (int i=0; i < getInternalNodeCount(); i++) {
+                int nR = i + getTipsCount();
+                nodesStates[nR] = new NodeStates(nR, inStates[i], getStateCount());
+            }
+        } else if ("parsimony".equalsIgnoreCase(initMethod)) {
+            throw new UnsupportedOperationException("in dev");
+
+        } else {
+            throw new IllegalArgumentException("No method selected to initialise the states at internal nodes !");
+        }
+
+    }
+
+
+    /**
+     * random states given genetic code
+     */
+    public int[][] initINStatesRandom(final int internalNodeCount, final int stateCount, final int siteCount, long seed) {
+
+        Log.info("Random generate codon states using " + getGeneticCode().getDescription() +
+                " for " + internalNodeCount + " internal nodes, " + getSiteCount() + " codon, seed = " + seed);
+
+        Random generator;
+        if (seed > 0)
+            generator = new Random(seed);
+        else
+            generator = new Random();
+
+        // states[internal nodes][sites], where i from 0 to internalNodeCount-1
+        int[][] inStates = new int[internalNodeCount][siteCount];
+        for (int i=0; i < inStates.length; i++) {
+            for (int j = 0; j < inStates[0].length; j++) {
+                // 0 - 63
+                inStates[i][j] = (int) (generator.nextDouble() * stateCount);
+                // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
+                while (getGeneticCode().isStopCodon(inStates[i][j]))
+                    inStates[i][j] = (int) (generator.nextDouble() * stateCount);
             }
         }
+        return inStates;
+    }
+
+    /**
+     * Parsimony to init states. Equally to choose a state from the ambiguous set.
+     */
+    public void initINStatesParsimony() {
+        throw new UnsupportedOperationException();
+        //traverse 1
+        //traverse 2
     }
 
     /**
@@ -157,15 +200,20 @@ public class NodesStatesAndTree extends NodesStates {
     }
 
     /**
-     * Set the states to an internal node.
-     * The node index has to convert to the array index before setValue.
+     * Set the states to an internal node given its node index.
+     * If {@link NodeStates} not init, then create with the given states.
      *
      * @param nodeIndex the node index :<br>
      *      *                Leaf nodes are number 0 to <code>(nodeIndex+1)/2</code>;
      *      *                The root node is always numbered <code>nodeIndex-1</code>.
-     * @param states int[]
+     * @param states int[] states
      */
     public void setNodeStates(final int nodeIndex, final int[] states) {
+        if (nodesStates[nodeIndex] == null) {
+            // internal node not init
+            nodesStates[nodeIndex] = new NodeStates(nodeIndex, states, getStateCount());
+        }
+
         // internal node index starts from getTipsCount();
         setValue(nodeIndex, states);
     }
