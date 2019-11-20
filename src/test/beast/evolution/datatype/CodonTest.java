@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.*;
 
 /**
  * @author Walter Xie
@@ -28,7 +28,11 @@ public class CodonTest {
     public void testCodeMap(){
         int stateCount = codon.getStateCount();
         System.out.println("stateCount = " + stateCount);
-        assertEquals("Codon stateCount : ", 64, stateCount);
+        assertEquals("Codon stateCount : ", 61, stateCount);
+
+        stateCount = codon.getStateCountAmbiguous();
+        System.out.println("Max stateCount including ambiguous = " + stateCount);
+        assertEquals("Max stateCount including ambiguous : ", 122, stateCount);
 
         int codeLength = codon.getCodeLength();
         System.out.println("codeLength = " + codeLength);
@@ -36,26 +40,8 @@ public class CodonTest {
 
         String codeMap = codon.getCodeMap();
         System.out.println("codeMap = " + codeMap);
-        assertEquals("Codon codeMap : ", CodonData.getTriplets(), codeMap);
+        assertEquals("Codon codeMap : ", codon.getCodonTripletsNoStopCodon(), codeMap);
     }
-
-//    @Test
-//    public void testGetStatesForCode() {
-//        for (int i = 0; i < codon.getStateCountAmbiguous(); i++) {
-//            int[] stateSet = codon.getStatesForCode(i);
-//            System.out.println("mapCodeToStateSet " + i + " = " + Arrays.toString(stateSet));
-//        }
-//        assertEquals("Codon mapCodeToStateSet : ", 0, codon.getStatesForCode(0)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 10, codon.getStatesForCode(10)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 49, codon.getStatesForCode(48)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 51, codon.getStatesForCode(49)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 57, codon.getStatesForCode(54)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 63, codon.getStatesForCode(60)[0]);
-//        // stop codon
-//        assertEquals("Codon mapCodeToStateSet : ", 48, codon.getStatesForCode(61)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 50, codon.getStatesForCode(62)[0]);
-//        assertEquals("Codon mapCodeToStateSet : ", 56, codon.getStatesForCode(63)[0]);
-//    }
 
     @SafeVarargs
     private final <T> List<T> toList(T... a) {
@@ -64,33 +50,60 @@ public class CodonTest {
 
     @Test
     public void testStringToEncoding() {
-        String data = CodonData.getTriplets();
+        String data = codon.getCodonTripletsNoStopCodon();
         List<Integer> states = codon.stringToEncoding(data);
         System.out.println("StringToEncoding : " + data);
         System.out.println("StringToEncoding : " + states);
 
+        // 1st and last
         data = "AAATTT";
         states = codon.stringToEncoding(data);
-        assertEquals("StringToEncoding : ", toList(0, 63), states);
+        assertEquals("StringToEncoding : ", toList(0, 60), states);
 
         // stop codon
-        data = "TAATAGTGA";
-        states = codon.stringToEncoding(data);
-        assertEquals("StringToEncoding : ", toList(48, 50, 56), states);
+        Throwable caught = null;
+        try {
+            data = "TAA";
+            codon.stringToEncoding(data);
+        } catch (Throwable t) {
+            caught = t;
+        }
+        assertNotNull(caught);
+        assertSame(IllegalArgumentException.class, caught.getClass());
+
+        caught = null;
+        try {
+            data = "TAG";
+            codon.stringToEncoding(data);
+        } catch (Throwable t) {
+            caught = t;
+        }
+        assertNotNull(caught);
+        assertSame(IllegalArgumentException.class, caught.getClass());
+
+        caught = null;
+        try {
+            data = "TGA";
+            codon.stringToEncoding(data);
+        } catch (Throwable t) {
+            caught = t;
+        }
+        assertNotNull(caught);
+        assertSame(IllegalArgumentException.class, caught.getClass());
 
         // ambiguous
         data = "AA-A-----";
         states = codon.stringToEncoding(data);
-        assertEquals("StringToEncoding : ", toList(64, 112, 124), states);
+        assertEquals("StringToEncoding : ", toList(61, 109, 121), states);
     }
 
     @Test
     public void testEncodingToString() {
-        String data = codon.encodingToString(toList(0, 63));
+        String data = codon.encodingToString(toList(0, 60));
         assertEquals("StringToEncoding : ", "AAATTT", data);
         data = codon.encodingToString(toList(48, 50, 56));
-        assertEquals("StringToEncoding : ", "TAATAGTGA", data);
-        data = codon.encodingToString(toList(64, 112, 124));
+        assertNotSame("StringToEncoding : ", "TAATAGTGA", data);
+        data = codon.encodingToString(toList(61, 109, 121));
         assertEquals("StringToEncoding : ", "AA-A-----", data);
     }
 
@@ -105,40 +118,56 @@ public class CodonTest {
 
     @Test
     public void testGetTriplet() {
-        int[] states = CodonData.getTestStates();
+        int[] states = CodonData.getIntegers();
+        System.out.println("Codon states : " + Arrays.toString(states));
+        String[] triExpected = new String[]{"AAA","CCA","GGA","TTG","TTT","AG-","AT-","---"};
+        System.out.println("Expecting triplets : " + Arrays.toString(triExpected));
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
             String triplet = codon.getTriplet(state);
             System.out.println(state + "  " + triplet);
-            assertEquals("Triplet : ", Codon.CODON_TRIPLETS[state], triplet);
+            assertEquals("Triplet : ", triExpected[i], triplet);
         }
     }
 
     @Test(expected = RuntimeException.class)
     public void testGetTripletException1() {
-        String triplet = codon.getTriplet(-1);
+        codon.getTriplet(-1);
     }
 
+    // last state = getStateCountAmbiguous()-1
     @Test(expected = RuntimeException.class)
     public void testGetTripletException2() {
-        String triplet = codon.getTriplet(125);
+        codon.getTriplet(codon.getStateCountAmbiguous());
     }
 
     @Test
     public void testStateToAminoAcid() {
-        int[] states = new int[]{0, 8, 63};
+        int[] states = new int[]{0, 8, 60};
         String aa = codon.stateToAminoAcid(states);
-        System.out.println("StateToAminoAcid : 0, 8, 63 => " + aa);
+        System.out.println("StateToAminoAcid : 0, 8, 60 => " + aa);
         assertEquals("StateToAminoAcid : ", "KRF", aa);
 
+        // no stop codons
         states = new int[]{48, 50, 56};
         aa = codon.stateToAminoAcid(states);
         System.out.println("StateToAminoAcid : 48, 50, 56 => " + aa);
-        assertEquals("StateToAminoAcid : ", "***", aa);
+        assertEquals("StateToAminoAcid : ", "YSC", aa);
 
-        states = new int[]{64, 124};
+        // ambiguous states
+        states = new int[]{61, 121};
         aa = codon.stateToAminoAcid(states);
-        System.out.println("StateToAminoAcid : 64, 124 => " + aa);
+        System.out.println("StateToAminoAcid : 61, 121 => " + aa);
         assertEquals("StateToAminoAcid : ", "--", aa);
+
+        states = new int[]{125};
+        Throwable caught = null;
+        try {
+            codon.stateToAminoAcid(states);
+        } catch (Throwable t) {
+            caught = t;
+        }
+        assertNotNull(caught);
+        assertSame(IllegalArgumentException.class, caught.getClass());
     }
 }

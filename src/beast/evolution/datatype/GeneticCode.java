@@ -150,13 +150,29 @@ public final class GeneticCode {
     public GeneticCode(int geneticCodeId) {
         this.geneticCodeId = geneticCodeId;
         codeTable = GENETIC_CODE_TABLES[geneticCodeId];
+
+        assert getCodeTableNoStopCodons().length() == getStateCount();
+    }
+
+    // rm stop codons from states
+    public int getStateCount() {
+        return getCodeTableLength() - getStopCodonCount();
     }
 
     /**
      * Return the genetic code table currently used
+     * including stop codons
      */
     public String getCodeTable() {
         return codeTable;
+    }
+
+    /**
+     * Return the genetic code table currently used
+     * excluding stop codons
+     */
+    public String getCodeTableNoStopCodons() {
+        return codeTable.replaceAll("\\*", "");
     }
 
     /**
@@ -169,20 +185,6 @@ public final class GeneticCode {
     public int getCodeTableLength() {
         return codeTable.length();
     }
-
-
-    /**
-     * @param codeState the character index from the string of
-     *                  the currently used genetic code table.
-     * @return an Amino Acid character in codeTable.
-     *         if codeState >= codeTable.length, return -.
-     */
-    public char getAChar(int codeState) {
-        if (codeState >= getCodeTableLength())
-            return DataType.GAP_CHAR;
-        return codeTable.charAt(codeState);
-    }
-
 
     /**
      * Returns the name of the genetic code
@@ -301,6 +303,20 @@ public final class GeneticCode {
         return AMINOACID_CHARS[aaState];
     }
 
+
+    /**
+     * @param codeState the character index from the string of
+     *                  the currently used genetic code table.
+     *                  Note: after excluding stop codons.
+     * @return an Amino Acid character in codeTableNoStopCodons.
+     *         if codeState >= getStateCount(), return -.
+     */
+    public char getAminoAcidNoStopCodons(int codeState) {
+        if (codeState >= getStateCount())
+            return DataType.GAP_CHAR;
+        return getCodeTableNoStopCodons().charAt(codeState);
+    }
+
     /**
      * Return the Amino Acid state ({@link #AMINOACID_STATES AMINOACID_STATES})
      * corresponding to a given codon (triplet) state.
@@ -317,25 +333,26 @@ public final class GeneticCode {
 //        else if (codeState == Codon.GAP_STATE)
 //            return AMINOACID_STATES[Aminoacid.GAP_CHAR];
 
-        char aa = getAChar(codeState);
+        char aa = getAminoAcidNoStopCodons(codeState);
         return AMINOACID_STATES[aa];
     }
 
-    /**
-     * Get amino acid corresponding to corresponding to a given codon (triplet) state.
-     * @see #GENETIC_CODE_TABLES
-     * @param codeState the code index in the currently used genetic code table,
-     * also the same index to the {@link Codon Codon} triplets.
-     * @return Amino Acid
-     */
-    public char getAminoAcid(int codeState) {
-//        if (codeState == Codon.UNKNOWN_STATE)
-//            return Aminoacid.MISSING_CHAR;
-//        else if (codeState == Codon.GAP_STATE)
-//            return Aminoacid.GAP_CHAR;
+    //++++++++ Note: codeState != index +++++++++
 
-        return getAChar(codeState);
+    /**
+     * Get amino acid corresponding to corresponding to a given index which includes stop codons.
+     * @see #GENETIC_CODE_TABLES
+     * @param index the Amino Acid character index in the currently used genetic code table
+     *              including stop codons, also the same index to the {@link Codon Codon} triplets.
+     * @return an Amino Acid character in codeTable.
+     *         if codeState >= codeTable.length, return -.
+     */
+    public char getAminoAcidFromCodeTable(int index) {
+        if (index >= getCodeTableLength()) // Ambiguous handled in Codon TODO >= 64
+            return DataType.GAP_CHAR;
+        return codeTable.charAt(index);
     }
+
 
 //    /**
 //     * Note that the state is the canonical state (generated combinatorially)
@@ -346,22 +363,24 @@ public final class GeneticCode {
 //    }
 
     /**
-     * treat ? and - as not stop-codon
+     * @param index the Amino Acid character index in the currently used genetic code table
+     *        including stop codons, also the same index to the {@link Codon Codon} triplets.
      */
-    public boolean isStopCodon(int codeState) {
-        if (codeState >= getCodeTableLength()) // >= 64
-            return false;
-        return (getAChar(codeState) == Codon.STOP_CHARACTER);
+    public boolean isStopCodonIndex(int index) {
+        if (index >= getCodeTableLength()) // TODO >= 64
+            throw new UnsupportedOperationException("Uncertain codon index >= 64 is not supported !");
+//            return false;
+        return (getAminoAcidFromCodeTable(index) == Codon.STOP_CHARACTER);
     }
 
     /**
      * Return the codon states of all stop codon in
      * the currently used genetic code table.
      */
-    public int[] getStopCodonStates() {
+    public int[] getStopCodonIndices() {
         List<Integer> indices = new ArrayList<>();
         for (int i = 0; i < getCodeTableLength(); i++) {
-            if (getAChar(i) == Codon.STOP_CHARACTER) {
+            if (getAminoAcidFromCodeTable(i) == Codon.STOP_CHARACTER) {
                 indices.add(i);
             }
         }
@@ -376,7 +395,7 @@ public final class GeneticCode {
     public int getStopCodonCount() {
         int count = 0;
         for (int i = 0; i < getCodeTableLength(); i++) {
-            if (getAChar(i) == Codon.STOP_CHARACTER)
+            if (getAminoAcidFromCodeTable(i) == Codon.STOP_CHARACTER)
                 count++;
         }
         return count;

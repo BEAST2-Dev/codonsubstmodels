@@ -191,7 +191,7 @@ public class NodesStatesOld extends StateNode {
                 // 0 - 63
                 inStates[j] = (int)(generator.nextDouble() * stateCount);
                 // skip stop codon states
-                while(geneticCode.isStopCodon(inStates[j]))
+                while(geneticCode.isStopCodonIndex(inStates[j]))
                     inStates[j] = (int)(generator.nextDouble() * stateCount);
             }
         }// end i loop

@@ -82,10 +82,10 @@ public class CodonFrequencies extends Frequencies {
     private void validate(double[] freqs) {
 
         for (int s=0; s < freqs.length; s++) {
-            if (geneticCode.isStopCodon(s) && freqs[s] > 0)
+            if (geneticCode.isStopCodonIndex(s) && freqs[s] > 0)
                 throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
                         " at stop code state " + s + " !");
-            if ( (!geneticCode.isStopCodon(s)) && freqs[s] <= 0)
+            if ( (!geneticCode.isStopCodonIndex(s)) && freqs[s] <= 0)
                 throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
                         " at non-stop code state " + s + " !");
         }
@@ -118,7 +118,7 @@ public class CodonFrequencies extends Frequencies {
                 //  Log.info.println("equalFreq = " + equalFreq);
 
                 for (int i = 0; i < freqs.length; i++) {
-                    if (! geneticCode.isStopCodon(i))
+                    if (! geneticCode.isStopCodonIndex(i))
                         freqs[i] = equalFreq;
                 }
 
@@ -162,7 +162,7 @@ public class CodonFrequencies extends Frequencies {
         double[] freqs = new double[codonStateCount];
         double sum = 0;
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
-            if (! geneticCode.isStopCodon(i)) {
+            if (! geneticCode.isStopCodonIndex(i)) {
                 // convert codon state i into 3 nuc states
                 int[] necStates = codonDataType.getTripletNucStates(i);
                 for (int t = 0; t < necStates.length; t++) {

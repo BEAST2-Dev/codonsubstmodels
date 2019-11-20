@@ -249,7 +249,7 @@ public class CodonAlignment extends Alignment {
     protected int findStopCodon(List<Integer> seqStates) {
         for (int i = 0; i < seqStates.size(); i++) {
             int codonState = seqStates.get(i);
-            if (getGeneticCode().isStopCodon(codonState))
+            if (getGeneticCode().isStopCodonIndex(codonState))
                 return i;
         }
         return -1;
@@ -424,7 +424,7 @@ public class CodonAlignment extends Alignment {
         // header AminoAcid
         Log.info.print(spaceN);
         for (int j = 0; j < colMax; j++)
-            Log.info.print("\t" + getGeneticCode().getAminoAcid(j));
+            Log.info.print("\t" + getGeneticCode().getAminoAcidFromCodeTable(j));
         Log.info.println();
 
         // Codon Usage

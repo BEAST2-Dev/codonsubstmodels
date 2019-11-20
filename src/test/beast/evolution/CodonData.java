@@ -6,7 +6,6 @@ import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Tree;
-import beast.util.StringUtils;
 import beast.util.TreeParser;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
@@ -18,18 +17,14 @@ public class CodonData {
 
     public static final Codon codonUNIVERSAL = new Codon();
 
-    // concatenate Codon.CODON_TRIPLETS to a string
-    public static String getTriplets() {
-        return StringUtils.concatenateToString(Codon.CODON_TRIPLETS);
-    }
 
     // create a Sequence obj using Codon.codeMap
     public static Sequence getSeqCodeMap() {
         return new Sequence("codemap", codonUNIVERSAL.getCodeMap());
     }
 
-    public static int[] getTestStates() {
-        return new int[]{0, 20, 40, 60, 63, 64, 124};
+    public static int[] getIntegers() {
+        return new int[]{0, 20, 40, 59, 60, 63, 64, 121};
     }
 
 

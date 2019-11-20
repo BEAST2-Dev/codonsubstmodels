@@ -132,7 +132,7 @@ public class NodesStatesAndTree extends NodesStates {
                 // 0 - 63
                 inStates[i][j] = (int) (generator.nextDouble() * stateCount);
                 // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
-                while (getGeneticCode().isStopCodon(inStates[i][j]))
+                while (getGeneticCode().isStopCodonIndex(inStates[i][j]))
                     inStates[i][j] = (int) (generator.nextDouble() * stateCount);
             }
         }
