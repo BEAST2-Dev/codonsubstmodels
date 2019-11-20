@@ -27,8 +27,6 @@ public class DALikelihoodTest {
 
     TreeLikelihood treeLikelihood;
     DACodonTreeLikelihood2 daTreeLikelihood;
-//    int rootNr;
-//    NodesStatesAndTree nodesStatesAndTree;
 
 //    DecimalFormat df = new DecimalFormat("#.00");
 

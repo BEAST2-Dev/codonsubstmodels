@@ -143,4 +143,8 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
     public Node getNode() {
         return node;
     }
+
+    public int getNodeNr() {
+        return node.getNr();
+    }
 }

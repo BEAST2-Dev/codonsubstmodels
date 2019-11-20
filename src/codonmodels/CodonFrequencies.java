@@ -74,6 +74,22 @@ public class CodonFrequencies extends Frequencies {
             printCodonFrequencies(freqs, "Codon frequencies passed to CodonSubstitutionModel");
             Log.info.println();
         }
+
+        validate(freqs);
+    }
+
+    // stop codon freq has to be 0, non-stop code freq has to > 0.
+    private void validate(double[] freqs) {
+
+        for (int s=0; s < freqs.length; s++) {
+            if (geneticCode.isStopCodon(s) && freqs[s] > 0)
+                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
+                        " at stop code state " + s + " !");
+            if ( (!geneticCode.isStopCodon(s)) && freqs[s] <= 0)
+                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
+                        " at non-stop code state " + s + " !");
+        }
+
     }
 
     @Override

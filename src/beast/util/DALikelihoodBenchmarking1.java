@@ -43,8 +43,15 @@ public class DALikelihoodBenchmarking1 {
 
     String[] test;
     final boolean[] symmetric = new boolean[]{true,true,false,true,false,true,true,true,true,true,true,true};
-    final int[] nTaxa = new int[]{2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024};
-    final int[] nCodons = new int[]{100,200,500,1000};
+    final int[] nTaxa = new int[]{1024};//2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512,
+    final int[] nCodons = new int[]{200,500,1000};//100,
+
+    public DALikelihoodBenchmarking1(String fileName) throws IOException, XMLParserException {
+        this.origAlig = getAligFrom(fileName);
+        this.MAX_TIPS = 0;
+        this.MAX_CODONS = 0;
+        this.states = null;
+    }
 
     public DALikelihoodBenchmarking1(String fileName, int MAX_TIPS, int MAX_CODONS) throws IOException, XMLParserException {
         this.MAX_TIPS = MAX_TIPS;
@@ -186,7 +193,7 @@ public class DALikelihoodBenchmarking1 {
     }
 
     // seq length = nCodon * 3
-    private BEASTObject[] initF3X4(int nTaxa, int nCodon, boolean symmetric, boolean verbose) {
+    public BEASTObject[] initF3X4(int nTaxa, int nCodon, boolean symmetric, boolean verbose) {
         Alignment data = null;
 
         try {

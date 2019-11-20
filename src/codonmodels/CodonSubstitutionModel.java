@@ -214,11 +214,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         return rateClass;
     }
 
-    @Override
-    protected void setupRelativeRates() {
-        throw new UnsupportedOperationException("setupRelativeRates needs to be overridden " +
-                "in the child class of CodonSubstitutionModel !");
-    }
+//    @Override
+//    protected void setupRelativeRates() {
+//        throw new UnsupportedOperationException("setupRelativeRates needs to be overridden " +
+//                "in the child class of CodonSubstitutionModel !");
+//    }
 
 
     @Override

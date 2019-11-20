@@ -393,6 +393,13 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
                         jointBranchRate, probabilities);
                 //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
+                for (int j=0; j < probabilities.length; j++)
+                    if (probabilities[j] <= 0) {
+                        System.out.println(Arrays.toString(probabilities));
+                        throw new RuntimeException("P(t) cannot be 0 !\n" +
+                                "index = " + j + ", node = " + nodeIndex + ", branchTime = " + branchTime);
+                    }
+
                 daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy
             }
             nodeUpdate |= Tree.IS_DIRTY;
