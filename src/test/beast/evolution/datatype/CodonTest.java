@@ -40,7 +40,7 @@ public class CodonTest {
 
         String codeMap = codon.getCodeMap();
         System.out.println("codeMap = " + codeMap);
-        assertEquals("Codon codeMap : ", codon.getCodonTripletsNoStopCodon(), codeMap);
+        assertEquals("Codon codeMap : ", codon.getTripletsNoStopCodon(), codeMap);
     }
 
     @SafeVarargs
@@ -50,7 +50,7 @@ public class CodonTest {
 
     @Test
     public void testStringToEncoding() {
-        String data = codon.getCodonTripletsNoStopCodon();
+        String data = codon.getTripletsNoStopCodon();
         List<Integer> states = codon.stringToEncoding(data);
         System.out.println("StringToEncoding : " + data);
         System.out.println("StringToEncoding : " + states);
@@ -124,7 +124,7 @@ public class CodonTest {
         System.out.println("Expecting triplets : " + Arrays.toString(triExpected));
         for (int i = 0; i < states.length; i++) {
             int state = states[i];
-            String triplet = codon.getTriplet(state);
+            String triplet = codon.stateToTriplet(state);
             System.out.println(state + "  " + triplet);
             assertEquals("Triplet : ", triExpected[i], triplet);
         }
@@ -132,13 +132,13 @@ public class CodonTest {
 
     @Test(expected = RuntimeException.class)
     public void testGetTripletException1() {
-        codon.getTriplet(-1);
+        codon.stateToTriplet(-1);
     }
 
     // last state = getStateCountAmbiguous()-1
     @Test(expected = RuntimeException.class)
     public void testGetTripletException2() {
-        codon.getTriplet(codon.getStateCountAmbiguous());
+        codon.stateToTriplet(codon.getStateCountAmbiguous());
     }
 
     @Test

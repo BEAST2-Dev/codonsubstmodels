@@ -133,7 +133,11 @@ public class CodonAlignment extends Alignment {
         // include calcPatterns and setup Ascertainment
         sanityCheckCalcPatternsSetUpAscertainment(true);
 
-        Log.info.println("\nGenetic code is " + getGeneticCode().getDescription());
+        Log.info.println("\nState count = " + getDataType().getStateCount() +
+                ", using " + getGeneticCode().getDescription() + " genetic code, ");
+        Log.info.println("ambiguous states start from " + getDataType().getStateCount() +
+                " end at " + (getDataType().getStateCountAmbiguous()-1) );
+
 
         if (verboseInput.get()) {
             int[][] usage = getCodonUsage();
@@ -160,16 +164,24 @@ public class CodonAlignment extends Alignment {
                 String data = seq.getData().replaceAll("\\?", "-");
                 seq.dataInput.setValue(data, seq);
 
+                // no stop codon
+                List<Integer> codonStates = null;
+                try {
                 // return mapCodeToStateSet indices i, also indices in Codon.CODON_TRIPLETS
-                List<Integer> codonStates = seq.getSequence(getDataType());
+                codonStates = seq.getSequence(getDataType());
                 // unknownCodeException false to treat codons with partial ambiguities (-TA) as missing data
 //                List<Integer> codonStates = getCodonStates(seq, getDataType(), unknownCodeException);
+                } catch (IllegalArgumentException e) {
+                    Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at triplets ! \n" +
+                            "Please use either the codon alignment or the correct genetic code.");
+                    e.printStackTrace();
+                }
 
-                int stopCodon = findStopCodon(codonStates);
-                if (stopCodon > -1)
-                    Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
-                            (stopCodon+1) + "th triplets ! \n" +
-                            "Please either use a codon alignment or the correct genetic code.");
+//                int stopCodon = findStopCodon(codonStates);
+//                if (stopCodon > -1)
+//                    Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at " +
+//                            (stopCodon+1) + "th triplets ! \n" +
+//                            "Please either use a codon alignment or the correct genetic code.");
 
                 counts.add(codonStates);
                 if (taxaNames.contains(seq.getTaxon())) {
@@ -246,14 +258,15 @@ public class CodonAlignment extends Alignment {
 //        return codonStates;
 //    }
 
-    protected int findStopCodon(List<Integer> seqStates) {
-        for (int i = 0; i < seqStates.size(); i++) {
-            int codonState = seqStates.get(i);
-            if (getGeneticCode().isStopCodonIndex(codonState))
-                return i;
-        }
-        return -1;
-    }
+//    @Deprecated
+//    protected int findStopCodon(List<Integer> seqStates) {
+//        for (int i = 0; i < seqStates.size(); i++) {
+//            int codonState = seqStates.get(i);
+//            if (getGeneticCode().isStopCodonIndex(codonState))
+//                return i;
+//        }
+//        return -1;
+//    }
 
     @Override
     public Codon getDataType() {
@@ -267,11 +280,11 @@ public class CodonAlignment extends Alignment {
     }
 
     public void setGeneticCode(GeneticCode geneticCode) {
-        GeneticCode geneticCode2 = getGeneticCode();
-        if (! geneticCode.getName().equals( geneticCode2.getName() ) ) {
+        GeneticCode currentCode = getGeneticCode();
+        if (! geneticCode.getName().equals( currentCode.getName() ) ) {
+            Log.info.println("Change genetic code from " + currentCode.getName() + " to " + geneticCode.getName());
             ((Codon) m_dataType).setGeneticCode(geneticCode);
             geneticCodeInput.setValue(geneticCode.getName(), this);
-            Log.info.println("Change genetic code from " + geneticCode2.getName() + " to " + geneticCode.getName());
         }
     }
 
@@ -318,8 +331,8 @@ public class CodonAlignment extends Alignment {
     /**
      * The usage (counts) table of triplets
      * Use {@link Alignment#taxaNames taxaNames} as row indices, and
-     * {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} as column indices.
-     * The current columns = 64 + 2 ambiguous.
+     * {@link Codon} states as column indices.
+     * The current columns include ambiguous states.
      * @return matrix int[taxaNames.size()][getStateCountAmbiguous()]
      */
     public int[][] getCodonUsage() {
@@ -331,6 +344,7 @@ public class CodonAlignment extends Alignment {
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
+                // states as column indices
                 int state = codonStates.get(j);
                 usage[i][state] += 1;
             }
@@ -390,39 +404,40 @@ public class CodonAlignment extends Alignment {
      * Codon usage in sequences
      */
     protected void printCodonUsage(int[][] usage) {
-        int colMax = getDataType().getStateCountAmbiguous();
-        assert colMax == usage[0].length;
-        final int stateMax = getDataType().getStateCount(); // 64
-        assert stateMax == 64;
+
+        Log.info.println("\n============ Codon usage in sequences ============");
 
         List<String> taxaNames = getTaxaNames();
-
-        Log.info.println("\n============ Codon Usage ============");
         // header 1st cell to fill in spaces
         String firstTN = taxaNames.get(0);
         String spaceN = new String(new char[firstTN.length()+1]).replace('\0', ' ');
 
+        final int stateCount = getDataType().getStateCount(); // 60/61
+
         // ambiguous check
         int ambiguous = 0;
         for (int i = 0; i < taxaNames.size(); i++) {
-            for (int j = 0; j < colMax; j++) {
-                if (j >= stateMax)
-                    ambiguous += usage[i][j];
+            for (int state = 0; state < usage[0].length; state++) {
+                if (state >= stateCount)
+                    ambiguous += usage[i][state];
             }
         }
 
+        int colMax = getGeneticCode().getCodeTableLength();
         // not print ambiguous if no ambiguous
-        if (ambiguous == 0)
-            colMax = stateMax;
+        if (ambiguous > 0)
+            colMax += usage[0].length - stateCount;
 
         // header triplets
         Log.info.print(spaceN);
+        // j is index not state
         for (int j = 0; j < colMax; j++)
-            Log.info.print("\t" + getDataType().encodingToString(new int[]{j}));
+            Log.info.print("\t" + getDataType().getTriplet(j));
         Log.info.println();
 
         // header AminoAcid
         Log.info.print(spaceN);
+        // j is index not state
         for (int j = 0; j < colMax; j++)
             Log.info.print("\t" + getGeneticCode().getAminoAcidFromCodeTable(j));
         Log.info.println();
@@ -432,9 +447,17 @@ public class CodonAlignment extends Alignment {
         for (int i = 0; i < taxaNames.size(); i++) {
             Log.info.print(taxaNames.get(i));
 
+            int state = 0;
+            // j is index not state
             for (int j = 0; j < colMax; j++) {
-                colSums[j] += usage[i][j];
-                Log.info.print("\t" + usage[i][j]);
+                if (getGeneticCode().isStopCodonIndex(j)) {
+                    Log.info.print("\t0");
+                } else {
+                    // usage[][state] not index
+                    Log.info.print("\t" + usage[i][state]);
+                    colSums[j] += usage[i][state];
+                    state++;
+                }
             }
             Log.info.println();
         }

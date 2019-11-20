@@ -55,7 +55,7 @@ public class NodeStates extends StateNode {
 //        this.geneticCode = null;
 
         // init from constructor
-        assert stateCount == 64;
+//        assert stateCount == 64;
         initParam(stateCount, states.length);
         // set tips states after initParam
         setNodeStates(states);
@@ -67,7 +67,7 @@ public class NodeStates extends StateNode {
 //        this.geneticCode = codonAlignment.getDataType().getGeneticCode();
 
         final int stateCount = codonAlignment.getDataType().getStateCount();
-        assert stateCount == 64;
+//        assert stateCount == 64;
 
         // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
         final int siteCount = codonAlignment.getSiteCount();

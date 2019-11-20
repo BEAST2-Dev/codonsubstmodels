@@ -42,7 +42,7 @@ public class NodesStates extends StateNode {
     public NodesStates(CodonAlignment codonAlignment) {
         this.codonDataType = codonAlignment.getDataType();
         final int stateCount = getStateCount();
-        assert stateCount == 64;
+//        assert stateCount == 64;
         // 0 - 63, ignore lowerValueInput upperValueInput
         lower = 0;
         upper = stateCount - 1; // not deal unknown codon

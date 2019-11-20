@@ -112,7 +112,7 @@ public class NodesStatesAndTree extends NodesStates {
 
 
     /**
-     * random states given genetic code
+     * Random states given genetic code. Stop codons are not converted to states.
      */
     public int[][] initINStatesRandom(final int internalNodeCount, final int stateCount, final int siteCount, long seed) {
 
@@ -129,11 +129,11 @@ public class NodesStatesAndTree extends NodesStates {
         int[][] inStates = new int[internalNodeCount][siteCount];
         for (int i=0; i < inStates.length; i++) {
             for (int j = 0; j < inStates[0].length; j++) {
-                // 0 - 63
+                // 0 - 60/61, no stop codon
                 inStates[i][j] = (int) (generator.nextDouble() * stateCount);
                 // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
-                while (getGeneticCode().isStopCodonIndex(inStates[i][j]))
-                    inStates[i][j] = (int) (generator.nextDouble() * stateCount);
+//                while (getGeneticCode().isStopCodonIndex(inStates[i][j]))
+//                    inStates[i][j] = (int) (generator.nextDouble() * stateCount);
             }
         }
         return inStates;

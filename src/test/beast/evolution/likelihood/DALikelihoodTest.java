@@ -69,34 +69,31 @@ public class DALikelihoodTest {
         final double freq = 1.0/60.0;
         double daLogP = 0;
         double daLogP2 = 0; // nodeLd * freq
-        // 0 - 63
-        for (int s=0; s < 64; s++) {
-            // stop codon states in vertebrateMitochondrial
-            if (s != 8 && s != 10 && s != 48 && s != 50) {
-                // internal nodes
-                nodesStatesAndTree.setNodeStates(rootNr, new int[]{s});
-                System.out.println("\nSet internal node state to " + s);
+        // 0 - 59
+        for (int s=0; s < 60; s++) {
+            // internal nodes
+            nodesStatesAndTree.setNodeStates(rootNr, new int[]{s});
+            System.out.println("\nSet internal node state to " + s);
 
-                double logPDA = daTreeLikelihood.calculateLogP();
-                System.out.println(" DA logP = " + logPDA);
+            double logPDA = daTreeLikelihood.calculateLogP();
+            System.out.println(" DA logP = " + logPDA);
 
-                daLogP += Math.exp(logPDA);
+            daLogP += Math.exp(logPDA);
 
-                // [branch][site]
-                double[][] branchLd = new double[2][1];
-                daTreeLikelihood.getBranchLdFromCore(0, branchLd[0]); // child 1
-                daTreeLikelihood.getBranchLdFromCore(1, branchLd[1]); // child 2
-                System.out.println("Branch likelihood child1 child2 without freqs = " +
-                        Arrays.toString(branchLd[0]) + ", " + Arrays.toString(branchLd[1]));
+            // [branch][site]
+            double[][] branchLd = new double[2][1];
+            daTreeLikelihood.getBranchLdFromCore(0, branchLd[0]); // child 1
+            daTreeLikelihood.getBranchLdFromCore(1, branchLd[1]); // child 2
+            System.out.println("Branch likelihood child1 child2 without freqs = " +
+                    Arrays.toString(branchLd[0]) + ", " + Arrays.toString(branchLd[1]));
 
-                double nodeLd = branchLd[0][0] * branchLd[1][0];
-                System.out.println("Root likelihood without freqs = " + nodeLd);
-                System.out.println("Root partial without freqs = " + partial[s]);
+            double nodeLd = branchLd[0][0] * branchLd[1][0];
+            System.out.println("Root likelihood without freqs = " + nodeLd);
+            System.out.println("Root partial without freqs = " + partial[s]);
 
-                assertEquals(partial[s], nodeLd, 1e-16);
+            assertEquals(partial[s], nodeLd, 1e-15);
 
-                daLogP2 += nodeLd * freq; // frequencies prior on the root
-            }
+            daLogP2 += nodeLd * freq; // frequencies prior on the root
         }
         daLogP = Math.log(daLogP);
         daLogP2 = Math.log(daLogP2);

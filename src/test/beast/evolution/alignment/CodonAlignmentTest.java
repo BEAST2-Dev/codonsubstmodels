@@ -1,6 +1,9 @@
 package test.beast.evolution.alignment;
 
+import beast.evolution.alignment.Alignment;
+import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
+import beast.evolution.datatype.Codon;
 import org.junit.Test;
 import test.beast.evolution.CodonData;
 
@@ -28,5 +31,24 @@ public class CodonAlignmentTest {
         }
     }
 
+    @Test
+    public void testCodonUsage() {
+        Alignment data = CodonData.getAlig6T333();
+        // create Codon Alignment
+        CodonAlignment codonAlignment = new CodonAlignment();
+        codonAlignment.initByName("data", data, "dataType", "codon", "geneticCode", "vertebrateMitochondrial");
 
+        Codon codon = codonAlignment.getDataType();
+        int[][] usage = codonAlignment.getCodonUsage();
+
+        int state = codon.stringToEncoding("ATC").get(0);
+        int[] expectedUsage = new int[]{21,22,16,16,18,19};
+        for (int i=0; i < usage.length; i++)
+            assertEquals("ATC frequency at taxon " + i, expectedUsage[i], usage[i][state]);
+
+        state = codon.stringToEncoding("TTA").get(0);
+        expectedUsage = new int[]{7,6,9,9,10,10};
+        for (int i=0; i < usage.length; i++)
+            assertEquals("ATC frequency at taxon " + i, expectedUsage[i], usage[i][state]);
+    }
 }

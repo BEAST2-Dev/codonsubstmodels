@@ -4,6 +4,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.substitutionmodel.Frequencies;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 import beast.evolution.tree.Node;
+import beast.util.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,15 +36,19 @@ public class GeneralSubstitutionModelTest {
 
     @Test
     public void getTransitionProbabilities() {
-        double startTime = 1;
+        double startTime = 1E-5;
         double endTime = 0;
         double rate = 1;
+
+        System.out.println("freqs = \n" + Arrays.toString(geneSubstModel.getFrequencies()) + "\n");
 
         int len = geneSubstModel.getStateCount();
         double[] prob = new double[len*len];
         geneSubstModel.getTransitionProbabilities(new Node(), startTime, endTime, rate, prob, true);
 
-        System.out.println(Arrays.toString(prob));
+        System.out.println("rate matrix :\n" + StringUtils.get2DMatrixString(geneSubstModel.getRateMatrix(), null));
+        System.out.println("transition prob :\n" + StringUtils.get2DMatrixString(prob, null));
+
         for (int i=0; i < prob.length; i++)
             assertTrue(prob[i] > 0);
     }

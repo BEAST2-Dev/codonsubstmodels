@@ -49,7 +49,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     final public Input<Boolean> verboseInput = new Input<>("verbose",
             "Print the rate classes in the rate matrix, etc.",
-            Boolean.FALSE);
+            Boolean.TRUE);
 
     protected byte[] rateMap;
 
@@ -74,6 +74,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         updateMatrix = true;
         double[] freqs = frequencies.getFreqs();
         nrOfStates = freqs.length;
+
+        if (verboseInput.get()) {
+            ((CodonFrequencies) frequencies).printCodonFrequencies(freqs,
+                    "Codon frequencies used in CodonSubstitutionModel");
+        }
 
         try {
             eigenSystem = createEigenSystem();

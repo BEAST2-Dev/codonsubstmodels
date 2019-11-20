@@ -143,13 +143,12 @@ public class Codon extends DataType.Base {
         codeLength = 3;
         // removing stop codon
         stateCount = geneticCode.getStateCount();
-        Log.info.println("State count = " + stateCount + ", using genetic code " + geneticCode.getName());
+//        Log.info.print("State count = " + stateCount + ", using " + geneticCode.getName() + " genetic code, ");
+//        Log.info.println("ambiguous states start from " + stateCount + " end at " + (getStateCountAmbiguous()-1) );
 
         // use triplets index in CODON_TRIPLETS as codon states
         // Universal: 0-60 triplets, 61-63 *,
-        codeMap = getCodonTripletsNoStopCodon();
-
-        Log.info.println("Ambiguous state starts from " + stateCount + " and ends at " + (getStateCountAmbiguous()-1) );
+        codeMap = getTripletsNoStopCodon();
         assert codeMap.length()/codeLength == getStateCountAmbiguous();
 
         // getStateCountAmbiguous() == 125, last is ---
@@ -235,8 +234,8 @@ public class Codon extends DataType.Base {
 
     // print ambiguous state [64,124] map code to non-ambiguous states
     public void printAmbiguousState(int state) {
-        Log.info.print(state + " " + getTriplet(state) + " : " + Arrays.toString(mapCodeToStateSet[state]) + " ");
-        Arrays.stream(mapCodeToStateSet[state]).mapToObj(this::getTriplet).
+        Log.info.print(state + " " + stateToTriplet(state) + " : " + Arrays.toString(mapCodeToStateSet[state]) + " ");
+        Arrays.stream(mapCodeToStateSet[state]).mapToObj(this::stateToTriplet).
                 map(triplet -> triplet + " ").forEach(Log.info::print);
         Log.info.println();
     }
@@ -245,7 +244,7 @@ public class Codon extends DataType.Base {
         return mapCodeToStateSet[state][0];
     }
 
-    public String getCodonTripletsNoStopCodon(){
+    public String getTripletsNoStopCodon(){
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < geneticCode.getCodeTableLength(); i++) {
             if (!geneticCode.isStopCodonIndex(i))
@@ -268,6 +267,14 @@ public class Codon extends DataType.Base {
 
     public int getTripletIndex(String triplet) {
         return Arrays.asList(CODON_TRIPLETS).indexOf(triplet);
+    }
+
+    /**
+     * @param index  the index matches the index in the code table, != state
+     * @return       the triplet in CODON_TRIPLETS[]
+     */
+    public String getTriplet(int index) {
+        return CODON_TRIPLETS[index];
     }
 
     @Override
@@ -336,13 +343,14 @@ public class Codon extends DataType.Base {
      * @param state codon state, same as {@link Codon#CODON_TRIPLETS CODON_TRIPLETS} index
      * @return the corresponding triplet string
      */
-    public final String getTriplet(int state) {
+    public final String stateToTriplet(int state) {
         String triplet;
         try {
             triplet = encodingToString(new int[]{state}); // states from codeMap
         } catch (IndexOutOfBoundsException e) {
-            Log.err.println("Invalid triplet state : " + state + ", should be between 0 and " + (getStateCountAmbiguous()-1) + " !");
-            throw new RuntimeException(e.getLocalizedMessage());
+            Log.err.println("Invalid triplet state : " + state +
+                    ", should be between 0 and " + (getStateCountAmbiguous()-1) + " !");
+            throw new IllegalArgumentException(e.getLocalizedMessage());
         }
         return triplet;
     }
@@ -358,9 +366,9 @@ public class Codon extends DataType.Base {
     public final int[] getTripletNucStates(int state) {
         int[] triplet = new int[3];
 
-        triplet[0] = geneticCode.getNucleotideState(getTriplet(state).charAt(0));
-        triplet[1] = geneticCode.getNucleotideState(getTriplet(state).charAt(1));
-        triplet[2] = geneticCode.getNucleotideState(getTriplet(state).charAt(2));
+        triplet[0] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(0));
+        triplet[1] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(1));
+        triplet[2] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(2));
 
         return triplet;
     }
@@ -388,7 +396,8 @@ public class Codon extends DataType.Base {
             // produce a comma separated string of integers
         for (int state : states) {
             if (state >= getStateCountAmbiguous())
-                throw new IllegalArgumentException("Invalid state " + state + " > max state " + (getStateCountAmbiguous()-1));
+                throw new IllegalArgumentException("Invalid state " + state +
+                        ", which should > max state " + (getStateCountAmbiguous()-1));
             strB.append(geneticCode.getAminoAcidNoStopCodons(state));
         }
         return strB.toString();
