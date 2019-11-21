@@ -149,7 +149,7 @@ public class M0TreeLikelihoodTest {
         assertEquals(-1960.7661713238033, logP, 1e-6);
     }
 
-    // get logP
+    // M0 get logP
     protected double getLogTreeLikelihood(String omegaValue, String kappaValue, CodonFrequencies codonFreq,
                                           Alignment data, String newickTree) {
         RealParameter omega = new RealParameter(omegaValue);

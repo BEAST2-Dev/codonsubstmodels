@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
 
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +23,7 @@ public class GeneralSubstitutionModelTest {
 
     @Before
     public void setUp() {
-        RealParameter f = new RealParameter(new Double[]{0.5, 0.25, 0.25});
+        RealParameter f = new RealParameter(new Double[]{0.3333333, 0.3333333, 0.3333333});
         Frequencies freqs = new Frequencies();
         freqs.initByName("frequencies", f, "estimate", false);
 
@@ -46,8 +47,17 @@ public class GeneralSubstitutionModelTest {
         double[] prob = new double[len*len];
         geneSubstModel.getTransitionProbabilities(new Node(), startTime, endTime, rate, prob, true);
 
-        System.out.println("rate matrix :\n" + StringUtils.get2DMatrixString(geneSubstModel.getRateMatrix(), null));
+        System.out.println("relative rates :\n" + Arrays.toString(geneSubstModel.getRelativeRates()) + "\n");
+        System.out.println("renormalised rate matrix :\n" + StringUtils.get2DMatrixString(geneSubstModel.getRateMatrix(), null));
         System.out.println("transition prob :\n" + StringUtils.get2DMatrixString(prob, null));
+
+        // P(t) row sum to 1
+        for (int i=0; i < len; i++) {
+            double[] row = new double[len];
+            System.arraycopy(prob, i*len, row, 0, len);
+            double sum = DoubleStream.of(row).sum();
+            System.out.println("row " + i + " prob sum = " + sum);
+        }
 
         for (int i=0; i < prob.length; i++)
             assertTrue(prob[i] > 0);

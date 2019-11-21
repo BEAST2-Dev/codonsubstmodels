@@ -81,7 +81,7 @@ public class M0Model extends CodonSubstitutionModel {//implements Loggable {
 
 //        this.synonymousRate = getSynonymousRate(kappa, omega);//not here
 
-        // multiply pi in GeneralSubstitutionModel#setupRateMatrix()
+        // multiply pi_j (equilibrium frequency of codon j) in GeneralSubstitutionModel#setupRateMatrix()
         for (int i = 0; i < rateCount; i++) {
             switch (rateMap[i]) {
                 case 0:
