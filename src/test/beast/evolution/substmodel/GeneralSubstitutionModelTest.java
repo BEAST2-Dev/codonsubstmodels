@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -37,7 +38,8 @@ public class GeneralSubstitutionModelTest {
 
     @Test
     public void getTransitionProbabilities() {
-        double startTime = 1E-10;
+//        double startTime = 1E-10; // when genetic distance -> 1E-10, P(t) may has 0.
+        double startTime = 1;
         double endTime = 0;
         double rate = 1;
 
@@ -57,6 +59,7 @@ public class GeneralSubstitutionModelTest {
             System.arraycopy(prob, i*len, row, 0, len);
             double sum = DoubleStream.of(row).sum();
             System.out.println("row " + i + " prob sum = " + sum);
+            assertEquals(1, sum, 1e-15);
         }
 
         for (int i=0; i < prob.length; i++)
