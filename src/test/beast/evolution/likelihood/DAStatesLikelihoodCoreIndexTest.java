@@ -29,7 +29,7 @@ public class DAStatesLikelihoodCoreIndexTest {
 
     @Before
     public void setUp() throws Exception {
-        final int nrOfState = 64;
+        final int nrOfState = 61;
 
         // ======= transition probability matrix =======
         int matrixSize = nrOfState * nrOfState;
@@ -67,20 +67,20 @@ public class DAStatesLikelihoodCoreIndexTest {
         daLdCoreBr2 = new DABranchLikelihoodCore(tree.getNode(0), nrOfState, 2, 4);
         for (int i = 0; i < daLdCoreBr2.getNrOfCategories(); i++)
             daLdCoreBr2.setNodeMatrix(i, p1);
-        daLdCoreBr2.calculateBranchLdOverCategories(new int[]{60,61},new int[]{8,9}, proportions);
+        daLdCoreBr2.calculateBranchLdOverCategories(new int[]{60,59},new int[]{8,9}, proportions);
     }
 
     @Test
     public void testInit() {
-        assertEquals(64, daLdCore1siteBr1.getNrOfStates());
+        assertEquals(61, daLdCore1siteBr1.getNrOfStates());
         assertEquals(1, daLdCore1siteBr1.getNrOfSites());
         assertEquals(1, daLdCore1siteBr1.getNrOfCategories()); // nrOfCategories
-        assertEquals(4096, daLdCore1siteBr1.getMatrixSize()); // nrOfStates^2
+        assertEquals(3721, daLdCore1siteBr1.getMatrixSize()); // nrOfStates^2
         assertEquals(1, daLdCore1siteBr1.getBranchLdSize()); // = nrOfSites
 
         assertEquals(2, daLdCoreBr1.getNrOfSites());
         assertEquals(4, daLdCoreBr1.getNrOfCategories());
-        assertEquals(4096, daLdCoreBr1.getMatrixSize());
+        assertEquals(3721, daLdCoreBr1.getMatrixSize());
         assertEquals(2, daLdCoreBr1.getBranchLdSize());
     }
 
@@ -92,13 +92,13 @@ public class DAStatesLikelihoodCoreIndexTest {
         double[] brLd = new double[daLdCore1siteBr1.getBranchLdSize()];
         daLdCore1siteBr1.getBranchLikelihoods(brLd);
         System.out.println("branchLd = " + Arrays.toString(brLd));
-        // 1 site: p0_1_8 = 6.4 + 0.8 = 7.2
-        assertEquals(7.2, brLd[0], 1e-6);
+        // 1 site: p0_1_8 = 1*(61*0.1) + 8*0.1 = 6.9
+        assertEquals(6.9, brLd[0], 1e-6);
 
         daLdCore1siteBr2.getBranchLikelihoods(brLd);
         System.out.println("branchLd = " + Arrays.toString(brLd));
-        // 1 site : p1_60_8 = 60 * 0.64 + 0.08 = 38.48
-        assertEquals(38.48, brLd[0], 1e-6);
+        // 1 site : p1_60_8 = 60 * (61*0.01) + 8*0.01 = 36.68
+        assertEquals(36.68, brLd[0], 1e-6);
     }
 
     @Test
@@ -107,17 +107,17 @@ public class DAStatesLikelihoodCoreIndexTest {
         double[] integratedBrLd = new double[daLdCoreBr1.getBranchLdSize()];
         daLdCoreBr1.getBranchLikelihoods(integratedBrLd);
         System.out.println("branchLd = " + Arrays.toString(integratedBrLd));
-        // p0_1_8 = 6.4 + 0.8 = 7.2, p0_2_9 = 6.4 * 2 + 0.9 = 13.7
+        // p0_1_8 = 6.1 + 0.8 = 6.9, p0_2_9 = 6.1 * 2 + 0.9 = 13.1
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
-        assertEquals(7.2 * 0.7, integratedBrLd[0], 1e-6);
-        assertEquals(13.7 * 0.7, integratedBrLd[1], 1e-6);
+        assertEquals(6.9 * 0.7, integratedBrLd[0], 1e-6);
+        assertEquals(13.1 * 0.7, integratedBrLd[1], 1e-6);
 
         daLdCoreBr2.getBranchLikelihoods(integratedBrLd);
         System.out.println("branchLd = " + Arrays.toString(integratedBrLd));
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
-        // p1_60_8 = 60 * 0.64 + 0.08 = 38.48, p1_61_9 = 61 * 0.64 + 0.09 = 39.13
-        assertEquals(38.48 * 0.7, integratedBrLd[0], 1e-6);
-        assertEquals(39.13 * 0.7, integratedBrLd[1], 1e-6);
+        // p1_60_8 = 60 * 0.61 + 0.08 = 36.68, p1_59_9 = 59 * 0.61 + 0.09 = 36.08
+        assertEquals(36.68 * 0.7, integratedBrLd[0], 1e-6);
+        assertEquals(36.08 * 0.7, integratedBrLd[1], 1e-6);
     }
 
 }

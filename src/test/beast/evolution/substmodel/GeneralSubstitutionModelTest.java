@@ -37,7 +37,7 @@ public class GeneralSubstitutionModelTest {
 
     @Test
     public void getTransitionProbabilities() {
-        double startTime = 1E-5;
+        double startTime = 1E-10;
         double endTime = 0;
         double rate = 1;
 

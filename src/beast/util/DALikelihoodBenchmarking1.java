@@ -42,9 +42,9 @@ public class DALikelihoodBenchmarking1 {
     DecimalFormat df = new DecimalFormat("#.00");
 
     String[] test;
-    final boolean[] symmetric = new boolean[]{true,true,false,true,false,true,true,true,true,true,true,true};
-    final int[] nTaxa = new int[]{1024};//2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512,
-    final int[] nCodons = new int[]{200,500,1000};//100,
+    final boolean[] symmetric = new boolean[]{true,true,false,true,false,true,true,true,true,true,true};//,true
+    final int[] nTaxa = new int[]{2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512};//, 1024
+    final int[] nCodons = new int[]{100,200,500,1000};//
 
     public DALikelihoodBenchmarking1(String fileName) throws IOException, XMLParserException {
         this.origAlig = getAligFrom(fileName);
@@ -258,7 +258,7 @@ public class DALikelihoodBenchmarking1 {
         nodesStatesAndTree.initINS("random", 777);
 
         DACodonTreeLikelihood2 daLikelihood = new DACodonTreeLikelihood2();
-        daLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
+        daLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel, "threads", 4);
 
         long daInit = System.nanoTime() - start;
 

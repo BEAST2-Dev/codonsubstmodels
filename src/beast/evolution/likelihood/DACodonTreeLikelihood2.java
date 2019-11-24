@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
  * No pattern, use site count.
  *
  * TODO 1: make it working in MCMC
- * TODO 2: try only log the cell of trans prob matrix once
+ * TODO 2: multi-threading process not terminate after finish
  */
 public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 
@@ -129,7 +129,7 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
         threadCount = BeastMCMC.m_nThreads;
         // threadCount is overwritten by TreeLikelihood threads
         if (maxNrOfThreadsInput.get() > 0) {
-            threadCount = Math.min(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
+            threadCount = Math.max(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
         }
         // threadCount is overwritten by instanceCount
         String instanceCount = System.getProperty("beast.instance.count");
@@ -295,7 +295,7 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 //        executor.shutdown();
         } // end if
         // at root, TODO check the dirty condition
-        if (tree.getRoot().isDirty() != Tree.IS_CLEAN || siteModel.isDirtyCalculation()) {
+        if (tree.getRoot().isDirty() != Tree.IS_CLEAN || !siteModel.isDirtyCalculation()) {
             final double[] frequencies = substitutionModel.getFrequencies();
             branchLogLikelihoods[rootIndex] = calculateRootLogLikelihood(rootIndex, frequencies);
         }
@@ -450,7 +450,7 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
                 e.printStackTrace();
                 System.exit(0);
             }
-            System.out.println("Branch likelihood logP = " + branchLogLikelihoods[nodeNr] + " above node " + nodeNr);
+//            System.out.println("Branch likelihood logP = " + branchLogLikelihoods[nodeNr] + " above node " + nodeNr);
             return branchLogLikelihoods[nodeNr];
         }
 
