@@ -15,7 +15,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
     protected double[][] scalingFactors; //TODO
 
-    final private double scalingThreshold = 1.0E-150;
+    static final public double scalingThreshold = 1.0E-150;
     double SCALE = 2;
 
     /**
@@ -274,31 +274,31 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 //        }
     }
 
-
-
     /**
-     * Calculates site log likelihoods at branches excluding root frequency prior.
-     * The input branch likelihoods here have been integrated across categories.
-     * frequency[] need to be added later in DATreeLikelihood
+     * static calculation engine.
+     * Multiple site likelihoods at this branch, if at root, then multiple frequencies.
+     * Log the product.
+     * The input likelihoods here have been integrated across categories.
+     * @param siteLd     likelihoods (not logged), which can be either site likelihoods or frequencies at root.
+     * @return           logged likelihood
      */
-    @Override
-    public double calculateBranchLogLikelihood() {
+    public static double integrateLogLikelihood(double[] siteLd, double scalingThreshold) {
 
         double product = 1.0;
         double logP = 0;
 
         // exclude root frequency prior
 //TODO review
-        for (int k = 0; k < getNrOfSites(); k++) {
+        for (int k = 0; k < siteLd.length; k++) { // siteLd.length == getNrOfSites()
             // internal nodes, excl root
-            product *= branchLd[currentBrLdIndex][k];
+            product *= siteLd[k];
 
             // hard code to log when product is too small, Double.MAX_VALUE 1.79...e+308
-            if (product < scalingThreshold || branchLd[currentBrLdIndex][k] < scalingThreshold) {
+            if (product < scalingThreshold || siteLd[k] < scalingThreshold) {
                 // important check before implement log scaling
                 if (product == 0)
-                    throw new RuntimeException("Likelihood -Inf at site " + k + " ! " +
-                            "\nbranch likelihood = " + branchLd[currentBrLdIndex][k]);
+                    throw new RuntimeException("Likelihood product -Inf ! " +
+                            "\nlikelihood = " + siteLd[k] + " at site " + k);
 
                 logP += Math.log(product); //+ getLogScalingFactor(k); TODO
                 product = 1.0;
@@ -311,6 +311,18 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
             logP += Math.log(product); //+ getLogScalingFactor(k); TODO
 
         return logP;
+    }
+
+
+    /**
+     * Calculates log likelihood at this branch, excluding root frequency prior.
+     * The input branch likelihoods here have been integrated across categories.
+     * frequency[] need to be added later in DATreeLikelihood
+     */
+    @Override
+    public double calculateBranchLogLikelihood() {
+        return DABranchLikelihoodCore.
+                integrateLogLikelihood(branchLd[currentBrLdIndex], scalingThreshold);
     }
 
 

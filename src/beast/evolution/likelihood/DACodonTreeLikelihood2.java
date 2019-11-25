@@ -337,18 +337,16 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
 
     // log likelihood for frequencies prior at root
     protected double calculateRootLogLikelihood(int rootIndex, double[] frequencies) {
-        double product = 1.0;
-        for (int k = 0; k < nodesStatesAndTree.getSiteCount(); k++) {
+        int siteCount = nodesStatesAndTree.getSiteCount();
+        double[] rootPrior = new double[siteCount];
+        for (int k = 0; k < siteCount; k++) {
             // hard code for root node
             int state = nodesStatesAndTree.getASite(rootIndex, k); // 0-63
-
-            if (frequencies[state] == 0)
-                throw new RuntimeException("frequencies[" + state + "] == 0 refers to stop codon, " +
-                        "check the state or frequencies !");
-
-            product *= frequencies[state];
+            rootPrior[k] = frequencies[state];
         }
-        return Math.log(product); //+ getLogScalingFactor(k); TODO
+
+        return DABranchLikelihoodCore.integrateLogLikelihood(rootPrior,
+                DABranchLikelihoodCore.scalingThreshold); //+ getLogScalingFactor(k); TODO
     }
 
     //    protected synchronized void sumLogP(double logPBr) {
