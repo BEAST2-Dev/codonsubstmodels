@@ -44,7 +44,7 @@ public class DALikelihoodBenchmarking1 {
     String[] test;
     final boolean[] symmetric = new boolean[]{true,true,false,true,false,true,true,true,true,true,true,true};//
     final int[] nTaxa = new int[]{2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024};//
-    final int[] nCodons = new int[]{200,500,1000};//100,
+    final int[] nCodons = new int[]{100,200,500,1000};//
 
     final int threads = 4;
 
