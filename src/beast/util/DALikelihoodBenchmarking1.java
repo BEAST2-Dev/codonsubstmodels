@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 /**
@@ -77,14 +76,16 @@ public class DALikelihoodBenchmarking1 {
         else
             origAlig = getAligFrom(fileName);
 
-        Random generator = new Random(777);
         // use same states each run
-        states = generateInternalNodeStatesVertMT(generator, MAX_TIPS, MAX_CODONS);
+        states = generateInternalNodeStatesVertMT(MAX_TIPS, MAX_CODONS);
 
     }
 
 
     public long[][] run(int iteration, boolean isDA, boolean verbose){
+        // Fix BEAST seed.
+        Randomizer.setSeed(777);
+
         long[][] time = new long[nCodons.length][test.length];
         long[][] initime = new long[nCodons.length][test.length];
 
@@ -257,7 +258,7 @@ public class DALikelihoodBenchmarking1 {
 
         NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
         // internal nodes
-        nodesStatesAndTree.initINS("random", 777);
+        nodesStatesAndTree.initINS("random", Randomizer.getSeed());
 
         DACodonTreeLikelihood2 daLikelihood = new DACodonTreeLikelihood2();
         daLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel, "threads", threads);
@@ -301,7 +302,7 @@ public class DALikelihoodBenchmarking1 {
     }
 
     // vertebrateMitochondrial
-    private int[][] generateInternalNodeStatesVertMT(Random generator, int tipCount, int siteCount) {
+    private int[][] generateInternalNodeStatesVertMT(int tipCount, int siteCount) {
         System.out.println("Generate internal node states using VertMT : tips = " + tipCount + ", codon = " + siteCount );
         // internal nodes
         int[][] states = new int[tipCount-1][siteCount];
@@ -310,10 +311,10 @@ public class DALikelihoodBenchmarking1 {
 //            states[i] = new int[siteCount];
             // 0 - 63
             for (int j=0; j < states[0].length; j++) {
-                states[i][j] = (int)(generator.nextDouble() * 64);
+                states[i][j] = (int)(Randomizer.nextDouble() * 64);
                 // stop codon states in vertebrateMitochondrial
                 while(states[i][j] == 8 || states[i][j] == 10 || states[i][j] == 48 || states[i][j] == 50)
-                    states[i][j] = (int)(generator.nextDouble() * 64);
+                    states[i][j] = (int)(Randomizer.nextDouble() * 64);
             }
         }
         return states;

@@ -7,11 +7,11 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
+import beast.util.Randomizer;
 
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Code to deal with node states without requiring tree.
@@ -83,21 +83,18 @@ public class NodesStates extends StateNode {
      */
     public int[][] initINStatesRandom(final int internalNodeCount, final int stateCount, final int siteCount, long seed) {
 
-        Log.info("Random generate codon states using " + getGeneticCode().getDescription() +
-                " for " + internalNodeCount + " internal nodes, " + getSiteCount() + " codon, seed = " + seed);
+        // Fix BEAST seed.
+        if (seed > 0) Randomizer.setSeed(seed);
 
-        Random generator;
-        if (seed > 0)
-            generator = new Random(seed);
-        else
-            generator = new Random();
+        Log.info("Random generate codon states using " + getGeneticCode().getDescription() + " for " +
+                internalNodeCount + " internal nodes, " + getSiteCount() + " codon, seed = " + Randomizer.getSeed());
 
         // states[internal nodes][sites], where i from 0 to internalNodeCount-1
         int[][] inStates = new int[internalNodeCount][siteCount];
         for (int i=0; i < inStates.length; i++) {
             for (int j = 0; j < inStates[0].length; j++) {
                 // 0 - 60/61, no stop codon
-                inStates[i][j] = (int) (generator.nextDouble() * stateCount);
+                inStates[i][j] = (int) (Randomizer.nextDouble() * stateCount);
                 // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
 //                while (getGeneticCode().isStopCodonIndex(inStates[i][j]))
 //                    inStates[i][j] = (int) (generator.nextDouble() * stateCount);
