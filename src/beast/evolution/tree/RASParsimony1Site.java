@@ -5,8 +5,7 @@ import beast.util.RandomUtils;
 import java.util.*;
 
 /**
- * Reconstructing ancestral states using Wagner parsimony.
- * Cunningham et. al. 1998, Swofford & Maddison 1987, Kluge & Farris 1969.
+ * Reconstructing ancestral states using parsimony Fitch (1971) algorithm.
  * Equally to choose a state from the ambiguous set.
  *
  * @author Walter Xie
@@ -20,7 +19,8 @@ public class RASParsimony1Site {
     private Map<Integer, Set<Integer>> ancestralStatesMap;
 
     /**
-     * Reconstructing ancestral states using parsimony given tip states and tree.
+     * Reconstructing ancestral states using parsimony
+     * Fitch (1971) algorithm, given tip states and tree.
      * Use {@link Node#getNr()} as the index of rows in the array.
      * @param tipStates   int[] tip states, [] is nodeNr
      * @param tree        {@link TreeInterface}
@@ -33,7 +33,22 @@ public class RASParsimony1Site {
         ancestralStatesMap = new HashMap<>();
     }
 
-    // when RASParsimony1Site is using traverseMPR()
+    /**
+     * used to check if the tip state has been assigned to the correct tip.
+     */
+    public void printTipStates() {
+        System.out.println("====== " + tipStates.length + " Tips States (ordered by node index) ======");
+        for (int i=0; i < tipStates.length; i++) {
+            String taxon = tree.getNode(i).getID();
+            System.out.println(taxon + " (" + i + ")\t" + tipStates[i]);
+        }
+        System.out.println();
+    }
+
+    /**
+     * the method to run Fitch (1971) algorithm.
+     * @return   array of ancestral states, index = nodeNr - tipsCount.
+     */
     public int[] reconstructAncestralStates() {
         //traverse 1: down pass optimization towards the root
         RASParsimony1Site downpass = new RASParsimony1Site(tipStates, tree);
@@ -44,26 +59,63 @@ public class RASParsimony1Site {
         RASParsimony1Site uppass = new RASParsimony1Site(tipStates, tree);
         uppass.traverseAwayRoot(tree.getRoot(), downpass.getAncestralStates());
 
-        //final optimization, choose the state having greatest number
+        //3. final optimization, choose the state having greatest number
         int[] aS = new int[getInternalNodeCount()];
         traverseMPR(tree.getRoot(), downpass.getAncestralStates(), uppass.getAncestralStates(), aS);
 
-        validateScore(aS, score);
+        // 4. validate AS change == parsimony score
+        int change = 0;
+        countASChanges(tree.getRoot(), aS, change);
+        if (change != score)
+            System.err.println("Parsimony changes" + change + "in ancestral states should = " + score + " ! ");
         return aS;
     }
 
-    // Parsimony changes in aS[] == parsimony score
-    public void validateScore(int[] aS, int score) {
-        int change = 0;
+    /**
+     * Recursively count the state change in the tree.
+     * It should equal to the parsimony score.
+     * @param node             start from root.
+     * @param ancestralStates  array of ancestral states, index = nodeNr - tipsCount.
+     * @param change           plus 1 if the parent node state != its child node state.
+     */
+    public void countASChanges(Node node, final int[] ancestralStates, int change) {
 
+        int nr = node.getNr();
+        assert nr >= getTipsCount();
+        int idx = nr - getTipsCount();
+        final int state = ancestralStates[idx];
 
-        if (change != score)
-            throw new RuntimeException("Parsimony changes" + change + "in ancestral states should = " + score + " ! ");
+        // Traverse down the two child nodes
+        final Node child1 = node.getChild(0);
+        if (child1.isLeaf()) {
+            nr = child1.getNr();
+            assert nr < getTipsCount();
+            int childS = tipStates[nr];
+            if (state != childS)
+                change++;
+        } else {
+            countASChanges(child1, ancestralStates, change);
+        }
+
+        final Node child2 = node.getChild(1);
+        if (child2.isLeaf()) {
+            nr = child2.getNr();
+            assert nr < getTipsCount();
+            int childS = tipStates[nr];
+            if (state != childS)
+                change++;
+        } else {
+            countASChanges(child2, ancestralStates, change);
+        }
+
     }
 
-    // downpass optimization towards the root.
-    // input nodes are children nodes of the ancestral node which the optimized state is assigned to.
-    // add parsimony score in assignASAwayRoot().
+    /**
+     * 1. Downpass optimization towards the root.
+     * Add parsimony score in assignASAwayRoot().
+     * @param node     start from root.
+     * @param score    parsimony score
+     */
     public void traverseTowardsRoot(Node node, int score) {
         // Traverse down the two child nodes
         final Node child1 = node.getChild(0);
@@ -75,8 +127,11 @@ public class RASParsimony1Site {
         assignASTowardsRoot(node, child1, child2, score);
     }
 
-    // uppass optimization away from the root
-    // input nodes are the ancestor and its sister node.
+    /**
+     * 2. uppass optimization away from the root.
+     * @param node          start from root.
+     * @param downpassMap   ancestral states from 1st step downpass
+     */
     public void traverseAwayRoot(Node node, final Map<Integer, Set<Integer>> downpassMap) {
         final Node child1 = node.getChild(0);
         final Node child2 = node.getChild(1);
@@ -94,10 +149,16 @@ public class RASParsimony1Site {
         if (!child2.isLeaf()) traverseAwayRoot(child2, downpassMap);
     }
 
-    // MPR: Most Parsimonious Reconstruction
-    // randomly select 1 state if there are multiple transitions in MPR
-    // fill in ancestralStates[], index is node.getNr() - getTipsCount().
-    protected void traverseMPR(Node node, final Map<Integer, Set<Integer>> downpassMap,
+    /**
+     * 3. select final state using MPR: Most Parsimonious Reconstruction.
+     * Randomly select 1 state if there are multiple transitions in MPR.
+     * Fill in ancestralStates[], index is node.getNr() - getTipsCount().
+     * @param node             start from root.
+     * @param downpassMap      ancestral states from 1st step downpass
+     * @param uppassMap        ancestral states from 2nd step uppass
+     * @param ancestralStates  final ancestral states, index = nodeNr - tipsCount.
+     */
+    public void traverseMPR(Node node, final Map<Integer, Set<Integer>> downpassMap,
                             final Map<Integer, Set<Integer>> uppassMap, int[] ancestralStates) {
         // start from root
         int nr = node.getNr();
