@@ -1,7 +1,6 @@
-package beast.evolution.tree.parsimony;
+package beast.evolution.tree;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.TreeInterface;
+import beast.util.RandomUtils;
 
 import java.util.*;
 
@@ -20,8 +19,6 @@ public class RASParsimony1Site {
     // <nodeNr, Set<states>>
     private Map<Integer, Set<Integer>> ancestralStatesMap;
 
-
-
     /**
      * Reconstructing ancestral states using parsimony given tip states and tree.
      * Use {@link Node#getNr()} as the index of rows in the array.
@@ -32,24 +29,36 @@ public class RASParsimony1Site {
         this.tipStates = tipStates;
         this.tree = tree;
         assert tree.getLeafNodeCount() == getTipsCount();
+
+        ancestralStatesMap = new HashMap<>();
     }
 
-    public int[] reconstructAncestralStates(int[] tipStates, TreeInterface tree) {
-        int[] ancestralStates = new int[getInternalNodeCount()];
-
-            //traverse 1: down pass optimization towards the root
+    // when RASParsimony1Site is using traverseMPR()
+    public int[] reconstructAncestralStates() {
+        //traverse 1: down pass optimization towards the root
         RASParsimony1Site downpass = new RASParsimony1Site(tipStates, tree);
         int score = 0;
         downpass.traverseTowardsRoot(tree.getRoot(), score);
 
-            //traverse 2: up pass optimization away from the root
+        //traverse 2: up pass optimization away from the root
         RASParsimony1Site uppass = new RASParsimony1Site(tipStates, tree);
         uppass.traverseAwayRoot(tree.getRoot(), downpass.getAncestralStates());
 
-            //final optimization, choose the state having greatest number
+        //final optimization, choose the state having greatest number
+        int[] aS = new int[getInternalNodeCount()];
+        traverseMPR(tree.getRoot(), downpass.getAncestralStates(), uppass.getAncestralStates(), aS);
+
+        validateScore(aS, score);
+        return aS;
+    }
+
+    // Parsimony changes in aS[] == parsimony score
+    public void validateScore(int[] aS, int score) {
+        int change = 0;
 
 
-        return ancestralStates;
+        if (change != score)
+            throw new RuntimeException("Parsimony changes" + change + "in ancestral states should = " + score + " ! ");
     }
 
     // downpass optimization towards the root.
@@ -73,8 +82,8 @@ public class RASParsimony1Site {
         final Node child2 = node.getChild(1);
 
         if (node.isRoot()) {
-            // use the root state assigned in down pass to start
             int nr = node.getNr();
+            // use the root state assigned in down pass to start
             ancestralStatesMap.put(nr, downpassMap.get(nr));
         } else {
             final Node parent = node.getParent();
@@ -83,6 +92,41 @@ public class RASParsimony1Site {
 
         if (!child1.isLeaf()) traverseAwayRoot(child1, downpassMap);
         if (!child2.isLeaf()) traverseAwayRoot(child2, downpassMap);
+    }
+
+    // MPR: Most Parsimonious Reconstruction
+    // randomly select 1 state if there are multiple transitions in MPR
+    // fill in ancestralStates[], index is node.getNr() - getTipsCount().
+    protected void traverseMPR(Node node, final Map<Integer, Set<Integer>> downpassMap,
+                            final Map<Integer, Set<Integer>> uppassMap, int[] ancestralStates) {
+        // start from root
+        int nr = node.getNr();
+        assert nr >= getTipsCount();
+        int idx = nr - getTipsCount();
+
+        if (node.isRoot()) {
+            assert downpassMap.size() == getInternalNodeCount() && uppassMap.size() == getInternalNodeCount();
+            assert nr == getNodeCount() - 1;
+            // downpass and uppass is same at root
+            Set<Integer> states = downpassMap.get(nr);
+            ancestralStates[idx] = RandomUtils.randomSelect(states);
+
+        } else {
+            final Node parent = node.getParent();
+            int idxP = parent.getNr() - getTipsCount();
+            int parentState = ancestralStates[idxP];
+            if (parentState < 0)
+                throw new IllegalArgumentException("parent state < 0 : " + parentState);
+
+            Set<Integer> downpass = downpassMap.get(nr);
+            Set<Integer> uppass = uppassMap.get(nr);
+            ancestralStates[idx] = finalState(parentState, downpass, uppass);
+        }
+
+        final Node child1 = node.getChild(0);
+        final Node child2 = node.getChild(1);
+        if (!child1.isLeaf()) traverseMPR(child1, downpassMap, uppassMap, ancestralStates);
+        if (!child2.isLeaf()) traverseMPR(child2, downpassMap, uppassMap, ancestralStates);
     }
 
 
@@ -174,7 +218,63 @@ public class RASParsimony1Site {
                 ancestralStatesMap.put(nr, tmpSet);
             }
         }
+    }
 
+    // select final state in MPR (Most Parsimonious Reconstruction) per branch given a state in parent node.
+    // Set<Integer> downpass, Set<Integer> uppass for the child node of the branch.
+    protected int finalState(int parentState, final Set<Integer> downpass, final Set<Integer> uppass) {
+        // if parentState in the up-pass set of parent is in the down-pass set of child
+        if (downpass.contains(parentState)) {
+            return parentState;
+        } else {
+            // add all states in the down-pass set of child
+            Set<Integer> tmpSet = new HashSet<>(downpass);
+            // add parentState if parentState is in the up-pass set of child
+            if (uppass.contains(parentState))
+                tmpSet.add(parentState);
+
+            int rand = RandomUtils.randomSelect(tmpSet);
+            return rand;
+        } // end if else
+    }
+
+    public String toString() {
+        ArrayList<String>[] lineages = (ArrayList<String>[]) new ArrayList[getTipsCount()];
+        nodeToState(tree.getRoot(), lineages, 0);
+
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < lineages.length; i++) {
+            ArrayList<String> lin = lineages[i];
+            str.append(String.join("\t", lin));
+            str.append("\n");
+        }
+        return str.toString();
+    }
+
+    protected void nodeToState(Node node, ArrayList<String>[] lineages, int row) {
+        final int nr = node.getNr();
+        if (node.isLeaf()) {
+            lineages[row].add(nr + ":{" + tipStates[nr] + "}");
+            row++;
+        } else {
+            String set = nr + ":{";
+            for(Integer state : ancestralStatesMap.get(nr))
+                set += state.toString() + ",";
+            set += "}";
+            lineages[row].add(set);
+            int nrOfParents = lineages[row].size();
+
+            // full lineage always in child 1
+            final Node child1 = node.getChild(0);
+            nodeToState(child1, lineages, row);
+
+            // row will ++ when reach to leaf from child 1 traverse
+            // add spaces for child 2
+            for (int i = 0; i < nrOfParents; i++)
+                lineages[row].add(set);
+            final Node child2 = node.getChild(0);
+            nodeToState(child2, lineages, row);
+        }
     }
 
 
@@ -241,22 +341,5 @@ public class RASParsimony1Site {
 //        return anceStates1Site;
 //    }
 //
-//    /**
-//     * Randomly select the final state from a set of states.
-//     * @param candidateStates   a set of states to choose
-//     * @param seed              for {@link Random}
-//     * @return
-//     */
-//    public int chooseStateRandom(Set<Integer> candidateStates, long seed) {
-//        int size = candidateStates.size();
-//        int item = new Random(seed).nextInt(size);
-//        int s = 0;
-//        for(Integer state : candidateStates) {
-//            if (s == item)
-//                return state;
-//            s++;
-//        }
-//        return -1;
-//    }
 
 }
