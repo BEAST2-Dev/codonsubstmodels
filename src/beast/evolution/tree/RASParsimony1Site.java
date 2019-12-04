@@ -1,5 +1,6 @@
 package beast.evolution.tree;
 
+import beast.core.util.Log;
 import beast.util.RandomUtils;
 
 import java.util.*;
@@ -34,26 +35,14 @@ public class RASParsimony1Site {
     }
 
     /**
-     * used to check if the tip state has been assigned to the correct tip.
-     */
-    public void printTipStates() {
-        System.out.println("====== " + tipStates.length + " Tips States (ordered by node index) ======");
-        for (int i=0; i < tipStates.length; i++) {
-            String taxon = tree.getNode(i).getID();
-            System.out.println(taxon + " (" + i + ")\t" + tipStates[i]);
-        }
-        System.out.println();
-    }
-
-    /**
      * the method to run Fitch (1971) algorithm.
      * @return   array of ancestral states, index = nodeNr - tipsCount.
      */
     public int[] reconstructAncestralStates() {
         //traverse 1: down pass optimization towards the root
         RASParsimony1Site downpass = new RASParsimony1Site(tipStates, tree);
-        int score = 0;
-        downpass.traverseTowardsRoot(tree.getRoot(), score);
+        int score = downpass.traverseTowardsRoot(tree.getRoot());
+        Log.info("Parsimony score = " + score);
 
         //traverse 2: up pass optimization away from the root
         RASParsimony1Site uppass = new RASParsimony1Site(tipStates, tree);
@@ -61,11 +50,11 @@ public class RASParsimony1Site {
 
         //3. final optimization, choose the state having greatest number
         int[] aS = new int[getInternalNodeCount()];
+        Arrays.fill(aS, -1);
         traverseMPR(tree.getRoot(), downpass.getAncestralStates(), uppass.getAncestralStates(), aS);
 
         // 4. validate AS change == parsimony score
-        int change = 0;
-        countASChanges(tree.getRoot(), aS, change);
+        int change = countASChanges(tree.getRoot(), aS);
         if (change != score)
             System.err.println("Parsimony changes" + change + "in ancestral states should = " + score + " ! ");
         return aS;
@@ -76,55 +65,60 @@ public class RASParsimony1Site {
      * It should equal to the parsimony score.
      * @param node             start from root.
      * @param ancestralStates  array of ancestral states, index = nodeNr - tipsCount.
-     * @param change           plus 1 if the parent node state != its child node state.
+     * @return                 plus 1 if the parent node state != its child node state.
      */
-    public void countASChanges(Node node, final int[] ancestralStates, int change) {
+    public int countASChanges(Node node, final int[] ancestralStates) {
 
         int nr = node.getNr();
         assert nr >= getTipsCount();
         int idx = nr - getTipsCount();
-        final int state = ancestralStates[idx];
+        final int as = ancestralStates[idx];
 
+        int change = 0;
         // Traverse down the two child nodes
         final Node child1 = node.getChild(0);
-        if (child1.isLeaf()) {
-            nr = child1.getNr();
-            assert nr < getTipsCount();
-            int childS = tipStates[nr];
-            if (state != childS)
-                change++;
-        } else {
-            countASChanges(child1, ancestralStates, change);
-        }
+        change = getChange(ancestralStates, as, change, child1);
 
         final Node child2 = node.getChild(1);
+        change = getChange(ancestralStates, as, change, child2);
+        return change;
+    }
+
+    private int getChange(int[] ancestralStates, int as, int change, Node child2) {
+        int nr;
+        int idx;
+        nr = child2.getNr();
         if (child2.isLeaf()) {
-            nr = child2.getNr();
             assert nr < getTipsCount();
-            int childS = tipStates[nr];
-            if (state != childS)
+            if (as != tipStates[nr])
                 change++;
         } else {
-            countASChanges(child2, ancestralStates, change);
+            assert nr >= getTipsCount();
+            idx = nr - getTipsCount();
+            if (as != ancestralStates[idx])
+                change++;
+            change += countASChanges(child2, ancestralStates);
         }
-
+        return change;
     }
 
     /**
      * 1. Downpass optimization towards the root.
      * Add parsimony score in assignASAwayRoot().
      * @param node     start from root.
-     * @param score    parsimony score
+     * @return         parsimony score
      */
-    public void traverseTowardsRoot(Node node, int score) {
+    public int traverseTowardsRoot(Node node) {
+        int score = 0;
         // Traverse down the two child nodes
         final Node child1 = node.getChild(0);
-        if (!child1.isLeaf()) traverseTowardsRoot(child1, score);
+        if (!child1.isLeaf()) score += traverseTowardsRoot(child1);
 
         final Node child2 = node.getChild(1);
-        if (!child2.isLeaf()) traverseTowardsRoot(child2, score);
+        if (!child2.isLeaf()) score += traverseTowardsRoot(child2);
 
-        assignASTowardsRoot(node, child1, child2, score);
+        score += assignASTowardsRoot(node, child1, child2);
+        return score;
     }
 
     /**
@@ -153,6 +147,7 @@ public class RASParsimony1Site {
      * 3. select final state using MPR: Most Parsimonious Reconstruction.
      * Randomly select 1 state if there are multiple transitions in MPR.
      * Fill in ancestralStates[], index is node.getNr() - getTipsCount().
+     * ancestralStates[getInternalNodeCount()] and Arrays.fill(aS, -1);
      * @param node             start from root.
      * @param downpassMap      ancestral states from 1st step downpass
      * @param uppassMap        ancestral states from 2nd step uppass
@@ -224,7 +219,7 @@ public class RASParsimony1Site {
     // Ancestral state is the intersection state of child1 and child2, otherwise take the union.
     // anceStates1SiteMap for node should be empty before this process.
     // if there is intersection, assign intersection, otherwise use union.
-    protected void assignASTowardsRoot(Node node, Node child1, Node child2, int score) {
+    protected int assignASTowardsRoot(Node node, Node child1, Node child2) {
         Set<Integer> d1 = getStatesFrom(child1, null);
         final Set<Integer> d2 = getStatesFrom(child2, null);
 
@@ -232,14 +227,16 @@ public class RASParsimony1Site {
         if (ancestralStatesMap.containsKey(nr))
             throw new IllegalArgumentException("States of internal node " + nr + " cannot exist !");
 
-        Set<Integer> intxn = new HashSet<>(d1);
-        if (intxn.retainAll(d2)) // intersection
-            ancestralStatesMap.put(nr, intxn);
-        else { // union
-            d1.addAll(d2);
+        int score = 0;
+        Set<Integer> tmpSet = new HashSet<>(d1);
+        tmpSet.retainAll(d2); // intersection
+        if (tmpSet.isEmpty()) { // union
+            tmpSet = new HashSet<>(d1);
+            tmpSet.addAll(d2);
             score++;
         }
-        ancestralStatesMap.put(nr, d1);
+        ancestralStatesMap.put(nr, tmpSet);
+        return score;
     }
 
     // Input child1, child2, assign ancestral states to node in Map<Integer, Set<Integer>>.
@@ -299,43 +296,75 @@ public class RASParsimony1Site {
         } // end if else
     }
 
-    public String toString() {
-        ArrayList<String>[] lineages = (ArrayList<String>[]) new ArrayList[getTipsCount()];
-        nodeToState(tree.getRoot(), lineages, 0);
 
-        StringBuilder str = new StringBuilder();
-        for (int i = 0; i < lineages.length; i++) {
-            ArrayList<String> lin = lineages[i];
-            str.append(String.join("\t", lin));
-            str.append("\n");
+    /**
+     * used to check if the tip state has been assigned to the correct tip.
+     */
+    public void printTipStates() {
+        System.out.println("====== " + tipStates.length + " Tips States (ordered by node index) ======");
+        for (int i=0; i < tipStates.length; i++) {
+            String taxon = tree.getNode(i).getID();
+            System.out.println(taxon + " (" + i + ")\t" + tipStates[i]);
         }
-        return str.toString();
+        System.out.println();
     }
 
-    protected void nodeToState(Node node, ArrayList<String>[] lineages, int row) {
+    public String toString() {
+//        int row = 0;
+        List<String> lineages = new ArrayList<>();
+        addNodeStateByLineage(tree.getRoot(), lineages);
+
+        StringBuilder sb = new StringBuilder();
+        List<String> lin = new ArrayList<>();
+        for (String str : lineages) {
+            if ("\n".equals(str)) {
+                sb.append(String.join("\t", lin));
+                sb.append("\n");
+                lin.clear();
+            } else
+                lin.add(str);
+        }
+        return sb.toString();
+    }
+
+
+//    private void print(StringBuilder buffer, String prefix, String childrenPrefix) {
+//        buffer.append(prefix);
+//        buffer.append(name);
+//        buffer.append('\n');
+//        for (Iterator<TreeNode> it = children.iterator(); it.hasNext();) {
+//            TreeNode next = it.next();
+//            if (it.hasNext()) {
+//                next.print(buffer, childrenPrefix + "├── ", childrenPrefix + "│   ");
+//            } else {
+//                next.print(buffer, childrenPrefix + "└── ", childrenPrefix + "    ");
+//            }
+//        }
+//    }
+
+    // add all nodes states by lineage into 1 list
+    protected void addNodeStateByLineage(Node node, List<String> lineages) {
         final int nr = node.getNr();
         if (node.isLeaf()) {
-            lineages[row].add(nr + ":{" + tipStates[nr] + "}");
-            row++;
+            lineages.add(nr + ":{" + tipStates[nr] + "}");
+            lineages.add("\n");
+//            row++;
         } else {
             String set = nr + ":{";
+            StringJoiner joiner = new StringJoiner(",");
+            // for loop Set<Integer>
             for(Integer state : ancestralStatesMap.get(nr))
-                set += state.toString() + ",";
-            set += "}";
-            lineages[row].add(set);
-            int nrOfParents = lineages[row].size();
+                joiner.add(Integer.toString(state));
+            set += joiner.toString() + "}";
+            lineages.add(set);
 
-            // full lineage always in child 1
             final Node child1 = node.getChild(0);
-            nodeToState(child1, lineages, row);
+            addNodeStateByLineage(child1, lineages);
 
-            // row will ++ when reach to leaf from child 1 traverse
-            // add spaces for child 2
-            for (int i = 0; i < nrOfParents; i++)
-                lineages[row].add(set);
-            final Node child2 = node.getChild(0);
-            nodeToState(child2, lineages, row);
+            final Node child2 = node.getChild(1);
+            addNodeStateByLineage(child2, lineages);
         }
+
     }
 
 
@@ -343,6 +372,10 @@ public class RASParsimony1Site {
 
     public Map<Integer, Set<Integer>> getAncestralStates() {
         return ancestralStatesMap;
+    }
+
+    public void clearAncestralStates() {
+        ancestralStatesMap.clear();
     }
 
     public int getTipsCount() {
