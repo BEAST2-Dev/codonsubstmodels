@@ -3,7 +3,7 @@ package test.beast.evolution.likelihood;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.likelihood.DACodonTreeLikelihood2;
+import beast.evolution.likelihood.DACodonTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodesStatesAndTree;
@@ -26,7 +26,7 @@ import static junit.framework.Assert.assertEquals;
 public class DALikelihoodTest {
 
     TreeLikelihood treeLikelihood;
-    DACodonTreeLikelihood2 daTreeLikelihood;
+    DACodonTreeLikelihood daTreeLikelihood;
 
 //    DecimalFormat df = new DecimalFormat("#.00");
 
@@ -124,7 +124,7 @@ public class DALikelihoodTest {
     }
 
     // need to set internal node states after this
-    private DACodonTreeLikelihood2 getDATreeLikelihood(String pi, String newickTree, boolean adjustTipHeights) {
+    private DACodonTreeLikelihood getDATreeLikelihood(String pi, String newickTree, boolean adjustTipHeights) {
 
         CodonAlignment codonAlignment = getAlig2Tips1Site();
 
@@ -142,7 +142,7 @@ public class DALikelihoodTest {
         NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
         // set internal node states on the fly
 
-        DACodonTreeLikelihood2 daTreeLikelihood = new DACodonTreeLikelihood2();
+        DACodonTreeLikelihood daTreeLikelihood = new DACodonTreeLikelihood();
         daTreeLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
         return daTreeLikelihood;
     }

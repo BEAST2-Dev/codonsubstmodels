@@ -7,7 +7,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.likelihood.DACodonTreeLikelihood2;
+import beast.evolution.likelihood.DACodonTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodesStatesAndTree;
@@ -29,7 +29,7 @@ import java.util.List;
  * <b>Benchmarking1: brute testing</b>
  * <p>
  * Record the time of 100 iterations to call either {@link TreeLikelihood#calculateLogP()}
- * or {@link DACodonTreeLikelihood2#calculateLogP()}.
+ * or {@link DACodonTreeLikelihood#calculateLogP()}.
  * <p>
  * The tests cover the following of scenarios:
  * <ol>
@@ -271,7 +271,7 @@ public class DALikelihoodBenchmarking1 {
         // internal nodes
         nodesStatesAndTree.initINS("parsimony");//random
 
-        DACodonTreeLikelihood2 daLikelihood = new DACodonTreeLikelihood2();
+        DACodonTreeLikelihood daLikelihood = new DACodonTreeLikelihood();
         daLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel, "threads", threads);
 
         long daInit = System.nanoTime() - start;

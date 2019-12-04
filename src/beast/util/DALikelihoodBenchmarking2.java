@@ -5,7 +5,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.likelihood.DACodonTreeLikelihood2;
+import beast.evolution.likelihood.DACodonTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.operators.ScaleOperator;
 import beast.evolution.sitemodel.SiteModel;
@@ -258,7 +258,7 @@ public class DALikelihoodBenchmarking2 {
         // internal nodes
         nodesStatesAndTree.initINS("parsimony");//random
 
-        DACodonTreeLikelihood2 likelihood = new DACodonTreeLikelihood2();
+        DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
         likelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
 
         MCMC mcmc = initMCMC(tree, likelihood, chainLength, logEvery);

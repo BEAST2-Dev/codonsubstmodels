@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  * TODO 1: make it working in MCMC
  * TODO 2: multi-threading process not terminate after finish
  */
-public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
+public class DACodonTreeLikelihood extends GenericDATreeLikelihood {
 
 //    final public Input<Boolean> m_useAmbiguities = new Input<>("useAmbiguities",
 //            "flag to indicate that sites containing ambiguous states should be handled instead of ignored (the default)",
@@ -108,10 +108,10 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
     double proportionInvariant = 0;
 
 
-    public DACodonTreeLikelihood2(){}
+    public DACodonTreeLikelihood(){}
 
-    public DACodonTreeLikelihood2(CodonAlignment codonAlignment, TreeInterface tree, SiteModel.Base siteModel,
-                                  BranchRateModel.Base branchRateModel, String initMethod, int threadCount) {
+    public DACodonTreeLikelihood(CodonAlignment codonAlignment, TreeInterface tree, SiteModel.Base siteModel,
+                                 BranchRateModel.Base branchRateModel, String initMethod, int threadCount) {
         this.siteModel = siteModel;
         this.substitutionModel = siteModel.getSubstitutionModel();
         this.branchRateModel = branchRateModel;
