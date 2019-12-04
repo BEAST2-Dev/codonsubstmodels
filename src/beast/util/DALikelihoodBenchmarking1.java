@@ -24,9 +24,20 @@ import java.util.List;
 
 
 /**
- * benchmarking performance between standard TreeLikelihood
- * and DACodonTreeLikelihood.
- *
+ * Performance benchmarking between standard TreeLikelihood and DACodonTreeLikelihood.
+ * <p>
+ * <b>Benchmarking1: brute testing</b>
+ * <p>
+ * Record the time of 100 iterations to call either {@link TreeLikelihood#calculateLogP()}
+ * or {@link DACodonTreeLikelihood2#calculateLogP()}.
+ * <p>
+ * The tests cover the following of scenarios:
+ * <ol>
+ *     <li>Increasing the number of taxa</li>
+ *     <li>Increasing the number of codon</li>
+ *     <li>Symmetric or extremely asymmetric tree topology in 4 and 8 taxa</li>
+ *     <li>TODO Increasing the number of threads</li>
+ * </ol>
  * @author Walter Xie
  */
 public class DALikelihoodBenchmarking1 {

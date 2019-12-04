@@ -26,9 +26,19 @@ import java.util.List;
 
 
 /**
- * benchmarking performance between standard TreeLikelihood
- * and DACodonTreeLikelihood.
- *
+ * Performance benchmarking between standard TreeLikelihood and DACodonTreeLikelihood.
+ * <p>
+ * <b>Benchmarking2: fixed tree testing</b>
+ * <p>
+ * Fix the tree and run MCMC only apply ? operator to move branch lengths.
+ * <p>
+ * The tests cover the following of scenarios:
+ * <ol>
+ *     <li>Increasing the number of taxa</li>
+ *     <li>Increasing the number of codon</li>
+ *     <li>Symmetric or extremely asymmetric tree topology in 4 and 8 taxa</li>
+ *     <li>TODO Increasing the number of threads</li>
+ * </ol>
  * @author Walter Xie
  */
 public class DALikelihoodBenchmarking2 {
