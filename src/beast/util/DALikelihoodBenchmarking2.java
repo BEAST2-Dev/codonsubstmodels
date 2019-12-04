@@ -58,6 +58,8 @@ public class DALikelihoodBenchmarking2 {
     final int[] nTaxa = new int[]{4};//, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024};
     final int[] nCodons = new int[]{100};//,200,500,1000};
 
+    final int threads = 4; //TODO
+
     public DALikelihoodBenchmarking2(String fileName, int MAX_TIPS, int MAX_CODONS) throws IOException, XMLParserException {
         this.MAX_TIPS = MAX_TIPS;
         this.MAX_CODONS = MAX_CODONS;
@@ -175,7 +177,7 @@ public class DALikelihoodBenchmarking2 {
 
         System.out.print("\n\n=============== Summary of ");
         if (isDA)
-            System.out.print("DA tree likelihood ");
+            System.out.print("DA tree likelihood " + threads + " thread(s) ");
         else
             System.out.print("standard tree likelihood ");
         System.out.print(", MCMC " + chainLength + " iterations, log every " + logEvery + " ===============\n\n");
@@ -270,6 +272,8 @@ public class DALikelihoodBenchmarking2 {
         // Run MCMC:
         mcmc.run();
         long timeMCMC = System.currentTimeMillis() - start;
+
+        likelihood.shutdown(); // shut down ExecutorService
 
         return new long[]{timeInit, timeMCMC};
     }

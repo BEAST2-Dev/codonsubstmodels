@@ -186,7 +186,7 @@ public class DALikelihoodBenchmarking1 {
 
         System.out.print("\n\n=============== Summary of ");
         if (isDA)
-            System.out.print("DA tree likelihood ");
+            System.out.print("DA tree likelihood " + threads + " thread(s) ");
         else
             System.out.print("standard tree likelihood ");
         System.out.print(iteration + " iteration(s) ===============\n\n");
@@ -285,6 +285,8 @@ public class DALikelihoodBenchmarking1 {
         // Get elapsed time in nanoseconds
         long timeDA = System.nanoTime() - start;
         System.out.println("DA tree likelihood: DA logP = " + logPDA);
+
+        daLikelihood.shutdown(); // shut down ExecutorService
 
         return new long[]{daInit, timeDA};
     }

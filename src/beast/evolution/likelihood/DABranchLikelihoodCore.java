@@ -15,7 +15,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
     protected double[][] scalingFactors; //TODO
 
-    static final public double scalingThreshold = 1.0E-150;
+    static final public double scalingThreshold = 1.0E-150; // MAX_VALUE 1.7*10^308
     double SCALE = 2;
 
     /**

@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
  * No pattern, use site count.
  *
  * TODO 1: make it working in MCMC
- * TODO 2: multi-threading process not terminate after finish
  */
 public class DACodonTreeLikelihood extends GenericDATreeLikelihood {
 
@@ -238,6 +237,13 @@ public class DACodonTreeLikelihood extends GenericDATreeLikelihood {
 
     }
 
+    /**
+     * Be careful to use.
+     * @see ExecutorService#shutdown()
+     */
+    public void shutdown() {
+        executor.shutdown();
+    }
 
     /**
      * This method samples the sequences based on the tree and site model.
@@ -291,7 +297,6 @@ public class DACodonTreeLikelihood extends GenericDATreeLikelihood {
                 e.printStackTrace();
             }
 
-//        executor.shutdown();
         } // end if
         // at root, TODO check the dirty condition
         if (tree.getRoot().isDirty() != Tree.IS_CLEAN || !siteModel.isDirtyCalculation()) {
