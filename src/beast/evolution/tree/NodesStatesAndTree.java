@@ -4,6 +4,7 @@ import beast.core.Input;
 import beast.core.StateNode;
 import beast.core.util.Log;
 import beast.evolution.alignment.CodonAlignment;
+import beast.util.Randomizer;
 
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -24,11 +25,11 @@ public class NodesStatesAndTree extends NodesStates {
 
     final public Input<String> initINSInput = new Input<>("initINS",
             "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
-            Input.Validate.OPTIONAL);
+            "parsimony", Input.Validate.OPTIONAL);
 
-    final public Input<Long> initINSRandomSeedInput = new Input<>("seed",
-            "seed to initialise the states of internal nodes if choosing 'random' method",
-            new Long(777));
+//    final public Input<Long> initINSRandomSeedInput = new Input<>("seed",
+//            "seed to initialise the states of internal nodes if choosing 'random' method",
+//            Input.Validate.OPTIONAL);
 
 
     protected TreeInterface tree;
@@ -71,8 +72,10 @@ public class NodesStatesAndTree extends NodesStates {
         // init params
         NodesStatesAndTree ns = new NodesStatesAndTree(codonAlignment, tree);
 
-        // internal nodes
-        initINS(initINSInput.get(), initINSRandomSeedInput.get());
+        // get BEAST seed
+//        long seed = Randomizer.getSeed();
+        String initMethod = initINSInput.get();
+        initINS(initMethod);
     }
 
     // set tips states to nodesStates[] by nodeNr indexing
@@ -85,35 +88,72 @@ public class NodesStatesAndTree extends NodesStates {
         }
     }
 
-    // "random", "parsimony"
-    public void initINS(String initMethod, long seed) {
+    /**
+     * Initialise states at internal nodes by the "random" or "parsimony" method.
+     * The seed can be fixed by {@link Randomizer#setSeed(long)}.
+     * @param initMethod   "random" or "parsimony"
+     */
+    public void initINS(String initMethod) {
         // internal nodes
-
+        int[][] inStates;
         if ("random".equalsIgnoreCase(initMethod)) {
-            int[][] inStates = initINStatesRandom(getInternalNodeCount(),
-                    getStateCount(), getSiteCount(), seed);
+            inStates = initINStatesRandom(getInternalNodeCount(), getSiteCount(), getStateCount());
 
-            for (int i=0; i < getInternalNodeCount(); i++) {
-                int nR = i + getTipsCount();
-                nodesStates[nR] = new NodeStates(nR, inStates[i], getStateCount());
-            }
         } else if ("parsimony".equalsIgnoreCase(initMethod)) {
-            throw new UnsupportedOperationException("in dev");
+            inStates = initINStatesParsimony();
 
         } else {
             throw new IllegalArgumentException("No method selected to initialise the states at internal nodes !");
+        }
+        assert inStates.length == getInternalNodeCount() && inStates[0].length == getSiteCount();
+
+        for (int i=0; i < getInternalNodeCount(); i++) {
+            int nR = i + getTipsCount();
+            nodesStates[nR] = new NodeStates(nR, inStates[i], getStateCount());
         }
 
     }
 
     /**
-     * Parsimony to init states Snell & Childress 1987.
+     * Init states using parsimony Fitch (1971) algorithm.
      * Equally to choose a state from the ambiguous set.
+     * The seed can be fixed by {@link Randomizer#setSeed(long)}.
+     * @return   states[internal nodes][sites], where i from 0 to internalNodeCount-1
+     * @see RASParsimony1Site
      */
-    public void initINStatesParsimony() {
-        throw new UnsupportedOperationException();
+    public int[][] initINStatesParsimony() {
+        // states[internal nodes][sites], where i from 0 to internalNodeCount-1
+        int[][] inStates = new int[getInternalNodeCount()][getSiteCount()];
 
+        int[] tipsStates = new int[getTipsCount()];
+        for (int k=0; k < getSiteCount(); k++) {
+            getTipsStates(k, tipsStates);
+            RASParsimony1Site ras1Site = new RASParsimony1Site(tipsStates, tree);
+
+            int[] as = ras1Site.reconstructAncestralStates();
+            // internal nodes i from 0 to internalNodeCount-1
+            for (int i=0; i < getInternalNodeCount(); i++)
+                inStates[i][k] = as[i];
+        }
+        return inStates;
     }
+
+
+    /**
+     * Get tips states at given 1 site (codon).
+     * @param nrOfSite      The codon site index in the alignment
+     * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
+     */
+    public void getTipsStates(int nrOfSite, int[] tipsStates) {
+        assert tipsStates.length == getTipsCount();
+        int state;
+        // BEAST tips nr = [0, TipsCount-1]
+        for (int i=0; i < getTipsCount() ; i++) {
+            state = getASite(i, nrOfSite);
+            tipsStates[i] = state;
+        }
+    }
+
 
     /**
      * Assuming rootIndex = tree.getNodeCount() - 1,

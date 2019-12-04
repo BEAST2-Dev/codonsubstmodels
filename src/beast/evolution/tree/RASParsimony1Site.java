@@ -1,6 +1,5 @@
 package beast.evolution.tree;
 
-import beast.core.util.Log;
 import beast.util.RandomUtils;
 
 import java.util.*;
@@ -42,7 +41,7 @@ public class RASParsimony1Site {
         //traverse 1: down pass optimization towards the root
         RASParsimony1Site downpass = new RASParsimony1Site(tipStates, tree);
         int score = downpass.traverseTowardsRoot(tree.getRoot());
-        Log.info("Parsimony score = " + score);
+//        Log.info("Parsimony score = " + score);
 
         //traverse 2: up pass optimization away from the root
         RASParsimony1Site uppass = new RASParsimony1Site(tipStates, tree);

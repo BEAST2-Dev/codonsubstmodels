@@ -246,7 +246,7 @@ public class DALikelihoodBenchmarking2 {
 
         NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
         // internal nodes
-        nodesStatesAndTree.initINS("random", Randomizer.getSeed());
+        nodesStatesAndTree.initINS("parsimony");//random
 
         DACodonTreeLikelihood2 likelihood = new DACodonTreeLikelihood2();
         likelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);

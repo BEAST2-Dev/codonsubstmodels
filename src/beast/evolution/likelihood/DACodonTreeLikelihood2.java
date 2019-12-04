@@ -12,7 +12,6 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.NodesStatesAndTree;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
-import beast.util.Randomizer;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -112,15 +111,15 @@ public class DACodonTreeLikelihood2 extends GenericDATreeLikelihood {
     public DACodonTreeLikelihood2(){}
 
     public DACodonTreeLikelihood2(CodonAlignment codonAlignment, TreeInterface tree, SiteModel.Base siteModel,
-                                  BranchRateModel.Base branchRateModel, int threadCount) {
+                                  BranchRateModel.Base branchRateModel, String initMethod, int threadCount) {
         this.siteModel = siteModel;
         this.substitutionModel = siteModel.getSubstitutionModel();
         this.branchRateModel = branchRateModel;
         this.threadCount = threadCount;
 
         this.nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
-        nodesStatesAndTree.initINS("random", Randomizer.getSeed());
-
+        nodesStatesAndTree.initINS(initMethod);
+//TODO
     }
 
     @Override

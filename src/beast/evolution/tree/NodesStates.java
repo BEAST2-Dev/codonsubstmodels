@@ -79,14 +79,16 @@ public class NodesStates extends StateNode {
     }
 
     /**
-     * Random states given genetic code. Stop codons are not converted to states.
+     * Randomly generate states at internal nodes given genetic code.
+     * The seed can be fixed by {@link Randomizer#setSeed(long)}.
+     * @param internalNodeCount  the number of internal nodes at the rows of 2d array.
+     * @param siteCount          the number of codon sites at the columns of 2d array.
+     * @param stateCount         the maximum state to generate.
+     * @return    states[internal nodes][sites], where i from 0 to internalNodeCount-1
      */
-    public int[][] initINStatesRandom(final int internalNodeCount, final int stateCount, final int siteCount, long seed) {
+    public int[][] initINStatesRandom(final int internalNodeCount, final int siteCount, final int stateCount) {
 
-        // Fix BEAST seed.
-        if (seed > 0) Randomizer.setSeed(seed);
-
-        Log.info("Random generate codon states using " + getGeneticCode().getDescription() + " for " +
+        Log.info("Randomly generate codon states using " + getGeneticCode().getDescription() + " for " +
                 internalNodeCount + " internal nodes, " + getSiteCount() + " codon, seed = " + Randomizer.getSeed());
 
         // states[internal nodes][sites], where i from 0 to internalNodeCount-1
@@ -95,9 +97,6 @@ public class NodesStates extends StateNode {
             for (int j = 0; j < inStates[0].length; j++) {
                 // 0 - 60/61, no stop codon
                 inStates[i][j] = (int) (Randomizer.nextDouble() * stateCount);
-                // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
-//                while (getGeneticCode().isStopCodonIndex(inStates[i][j]))
-//                    inStates[i][j] = (int) (generator.nextDouble() * stateCount);
             }
         }
         return inStates;
