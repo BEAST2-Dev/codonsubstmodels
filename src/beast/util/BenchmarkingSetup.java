@@ -69,9 +69,54 @@ public abstract class BenchmarkingSetup {
     }
 
 
-    public abstract long[][] run(boolean isDA, boolean verbose);
+    public long[][] run(boolean isDA, boolean verbose) {
+        // Fix BEAST seed.
+        Randomizer.setSeed(777);
 
-    public abstract void report(long[][] time, boolean isDA);
+        long[][] time = new long[nCodons.length][test.length];
+        long[][] initime = new long[nCodons.length][test.length];
+
+        for (int i=0; i<nCodons.length; i++) {
+            int nCodon = nCodons[i];
+            System.out.println("\nSummary time of " + nCodon + " codons :\n");
+
+            for (int j = 0; j < test.length; j++) {
+                BEASTObject[] models = initF3X4(nTaxa[j], nCodon, symmetric[j], verbose);
+                CodonAlignment codonAlignment = (CodonAlignment) models[0];
+                SiteModel siteModel = (SiteModel) models[1];
+                Tree tree = (Tree) models[2];
+
+                System.out.println("test " + test[j] + " : ");
+
+                long[] tm = timeTest(isDA, codonAlignment, siteModel, tree);
+
+                time[i][j] = tm[1];
+                initime[i][j] = tm[0];
+            }
+        } // end i
+        return time;
+    }
+
+    // 1st is init time, 2nd is the experiment time that we need
+    protected abstract long[] timeTest(boolean isDA, CodonAlignment codonAlignment, SiteModel siteModel, Tree tree);
+
+    public abstract void report(final long[][] time, boolean isDA);
+
+    protected void printTime(long[][] time, String unit) {
+        System.out.print(unit);
+        for (int j = 0; j < test.length; j++) {
+            System.out.print("\t" + test[j]);
+        }
+        System.out.print("\n");
+
+        for (int i=0; i<time.length; i++) {
+            System.out.print(nCodons[i]);
+            for (int j = 0; j < time[i].length; j++) {
+                System.out.print("\t" + time[i][j]);
+            }
+            System.out.print("\n");
+        }
+    }
 
     // =============== trees ===============
 
@@ -176,26 +221,27 @@ public abstract class BenchmarkingSetup {
         BEASTInterface beastObject = parser.parseFragment(xml, true);
 
 // find relevant objects from the model
-        Alignment data = getTreeLikelihood(beastObject);
-        if (data == null) {
+        Alignment data = getAlignment(beastObject);
+        if (data == null)
             throw new IllegalArgumentException("No alignment found in file. Giving up now.");
-        }
+
 //        Alignment data = ((Input<Alignment>) treeLikelihood.getInput("data")).get();
         int tipCount = data.getTaxonCount();
         int siteCount = data.getSiteCount();
-        System.out.println("Load original alignment: tips = " + tipCount + ", nucleotides = " + siteCount);
+        System.out.println("Load original alignment from " + fileName +
+                " : tips = " + tipCount + ", nucleotides = " + siteCount);
 
         return data;
     }
-    //find a treelikelihood object among the plug-ins by recursively inspecting plug-ins *
-    private Alignment getTreeLikelihood(BEASTInterface beastObject)  {
+    //find a Alignment object among the plug-ins by recursively inspecting plug-ins *
+    private Alignment getAlignment(BEASTInterface beastObject)  {
         for (BEASTInterface beastObject2 : beastObject.listActiveBEASTObjects()) {
             if (beastObject2 instanceof Alignment) {
                 return (Alignment) beastObject2;
             } else {
-                Alignment likelihood = getTreeLikelihood(beastObject2);
-                if (likelihood != null) {
-                    return likelihood;
+                Alignment alignment = getAlignment(beastObject2);
+                if (alignment != null) {
+                    return alignment;
                 }
             }
         }

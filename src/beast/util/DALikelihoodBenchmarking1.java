@@ -1,6 +1,5 @@
 package beast.util;
 
-import beast.core.BEASTObject;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DACodonTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
@@ -47,44 +46,30 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
     @Override
     public long[][] run(boolean isDA, boolean verbose){
-        // Fix BEAST seed.
-        Randomizer.setSeed(777);
-
-        long[][] time = new long[nCodons.length][test.length];
-        long[][] initime = new long[nCodons.length][test.length];
-
         if (isDA)
             System.out.println("\n=============== DA tree likelihood ===============\n");
         else
             System.out.println("\n=============== Standard tree likelihood ===============\n");
 
-        for (int i=0; i<nCodons.length; i++) {
-            int nCodon = nCodons[i];
-            System.out.println("\nSummary time of " + nCodon + " codons :\n");
+        return super.run(isDA, verbose);
+    }
 
-            for (int j = 0; j < test.length; j++) {
-                BEASTObject[] models = initF3X4(nTaxa[j], nCodon, symmetric[j], verbose);
-                CodonAlignment codonAlignment = (CodonAlignment) models[0];
-                SiteModel siteModel = (SiteModel) models[1];
-                Tree tree = (Tree) models[2];
-                long[] tm;
-                if (isDA) {
-                    tm = benchmarkingDA(codonAlignment, siteModel, tree);
-                } else {
-                    tm = benchmarkingStandard(codonAlignment, siteModel, tree);
-                }
-                time[i][j] = tm[1];
-                initime[i][j] = tm[0];
+    @Override
+    protected long[] timeTest(boolean isDA, CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
+        long[] tm;
+        if (isDA) {
+            tm = benchmarkingDA(codonAlignment, siteModel, tree);
+        } else {
+            tm = benchmarkingStandard(codonAlignment, siteModel, tree);
+        }
 
-                System.out.println("test " + test[j] + " : ");
-                System.out.println("Init time " + initime[i][j] + " nanoseconds");
-                System.out.println(iteration + " iteration(s) " + time[i][j] + " nanoseconds");
-                System.out.println("Calculation time = " +  (double) time[i][j] / (double)iteration +
-                        " nanoseconds per iteration in average.");
-                System.out.println();
-            }
-        } // end i
-        return time;
+        System.out.println("Init time " + tm[0] + " nanoseconds");
+        System.out.println(iteration + " iteration(s) " + tm[1] + " nanoseconds");
+        System.out.println("Calculation time = " +  (double) tm[1] / (double)iteration +
+                " nanoseconds per iteration in average.");
+        System.out.println();
+
+        return tm;
     }
 
     public static void main(final String[] args) {
@@ -147,20 +132,7 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
             System.out.print("standard tree likelihood ");
         System.out.print(iteration + " iteration(s) ===============\n\n");
 
-        System.out.print("nanoseconds");
-        for (int j = 0; j < test.length; j++) {
-            System.out.print("\t" + test[j]);
-        }
-        System.out.print("\n");
-
-        for (int i=0; i<time.length; i++) {
-            System.out.print(nCodons[i]);
-            for (int j = 0; j < time[i].length; j++) {
-                System.out.print("\t" + time[i][j]);
-            }
-            System.out.print("\n");
-        }
-
+        super.printTime(time, "nanoseconds");
     }
 
     // =============== Standard likelihood ===============
