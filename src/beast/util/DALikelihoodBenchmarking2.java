@@ -67,9 +67,9 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         long[] tm = new long[0];
         try {
             if (isDA)
-                tm = benchmarkingDA(codonAlignment, siteModel, tree, chainLength, logEvery);
+                tm = benchmarkingDA(codonAlignment, siteModel, tree);
             else
-                tm = benchmarkingStandard(codonAlignment, siteModel, tree, chainLength, logEvery);
+                tm = benchmarkingStandard(codonAlignment, siteModel, tree);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -128,15 +128,14 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
 
     // =============== Standard likelihood ===============
     // return milliseconds
-    private long[] benchmarkingStandard(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree,
-                                        String chainLength, String logEvery) throws Exception {
+    protected long[] benchmarkingStandard(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) throws Exception {
         // init time
         long startInit = System.currentTimeMillis();
 
         // Assemble model:
         TreeLikelihood likelihood = new TreeLikelihood();
         likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
-        likelihood.setID("treeLd");
+        likelihood.setID("tree.likelihood");
 
         MCMC mcmc = initMCMC(tree, likelihood, chainLength, logEvery);
 
@@ -153,8 +152,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
  
     // =============== DA likelihood ===============
     // return milliseconds
-    private long[] benchmarkingDA(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree,
-                                  String chainLength, String logEvery) throws Exception {
+    protected long[] benchmarkingDA(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) throws Exception {
         // init time
         long startInit = System.currentTimeMillis();
 

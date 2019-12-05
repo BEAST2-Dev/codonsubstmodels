@@ -97,9 +97,18 @@ public abstract class BenchmarkingSetup {
         return time;
     }
 
-    // 1st is init time, 2nd is the experiment time that we need
+    // return time: 1st is init time, 2nd is the experiment time that we need
     protected abstract long[] timeTest(boolean isDA, CodonAlignment codonAlignment, SiteModel siteModel, Tree tree);
 
+    // =============== Standard likelihood ===============
+    // return time: 1st is init time, 2nd is the experiment time that we need
+    protected abstract long[] benchmarkingStandard(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) throws Exception;
+
+    // =============== DA likelihood ===============
+    // return time: 1st is init time, 2nd is the experiment time that we need
+    protected abstract long[] benchmarkingDA(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) throws Exception;
+
+    // =============== report ===============
     public abstract void report(final long[][] time, boolean isDA);
 
     protected void printTime(long[][] time, String unit) {
@@ -157,6 +166,7 @@ public abstract class BenchmarkingSetup {
 
         TreeParser t = new TreeParser();
         t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true, "adjustTipHeights", adjustTipHeights);
+        t.setID("T"+nTaxa);
         return t;
     }
 

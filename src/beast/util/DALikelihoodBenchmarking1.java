@@ -137,7 +137,8 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
     // =============== Standard likelihood ===============
     // return nano seconds
-    private long[] benchmarkingStandard(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
+    @Override
+    protected long[] benchmarkingStandard(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
         // init time
         long start = System.nanoTime();
 
@@ -161,7 +162,8 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
     // =============== DA likelihood ===============
     // return nano seconds
-    private long[] benchmarkingDA(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
+    @Override
+    protected long[] benchmarkingDA(CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
         // init time
         long start = System.nanoTime();
 
