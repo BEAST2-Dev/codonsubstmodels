@@ -1,10 +1,13 @@
 package beast.util;
 
-import beast.core.*;
+import beast.core.Distribution;
+import beast.core.Logger;
+import beast.core.MCMC;
+import beast.core.State;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DACodonTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.operators.ScaleOperator;
+import beast.evolution.operators.Uniform;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodesStatesAndTree;
 import beast.evolution.tree.Tree;
@@ -64,13 +67,15 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
 
     @Override
     protected long[] timeTest(boolean isDA, CodonAlignment codonAlignment, SiteModel siteModel, Tree tree) {
-        long[] tm = new long[0];
+        long[] tm = new long[2];
         try {
             if (isDA)
                 tm = benchmarkingDA(codonAlignment, siteModel, tree);
             else
                 tm = benchmarkingStandard(codonAlignment, siteModel, tree);
         } catch (Exception e) {
+            tm[0] = -1;
+            tm[1] = -1;
             e.printStackTrace();
         }
 
@@ -187,9 +192,12 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         State state = new State();
         state.initByName("stateNode", tree);
 
-        // Set up operator:
-        ScaleOperator operator = new ScaleOperator();
-        operator.initByName("tree", tree, "scaleFactor", 0.5, "weight", 1.0, "rootOnly", true); // scale root height
+        // Set up operator: TODO add flag to determine which operator is used
+        Uniform operator = new Uniform();
+        // Randomly select internal node (not root) and move node height uniformly in [children, parent].
+        operator.initByName("tree", tree, "weight", 10.0);
+//        ScaleOperator operator = new ScaleOperator();
+//        operator.initByName("tree", tree, "scaleFactor", 0.5, "weight", 1.0, "rootOnly", true); // scale root height
 //        operator.initByName("tree", tree, "scaleFactor", 0.7, "weight", 1.0); // scale tree
 
 //        Uniform operator = new Uniform();
@@ -199,7 +207,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         TreeStatLogger treeStatLogger = new TreeStatLogger();
         treeStatLogger.initByName("tree", tree);
         Logger logger = new Logger();
-        logger.initByName("fileName", "", "logEvery", logEvery,
+        logger.initByName("fileName", "", "logEvery", logEvery, "log", likelihood,
                 "log", likelihood, "log", treeStatLogger);
 
         // Set up MCMC:
