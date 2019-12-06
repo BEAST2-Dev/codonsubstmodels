@@ -1,10 +1,10 @@
 package beast.util;
 
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.likelihood.DACodonTreeLikelihood;
+import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStatesAndTree;
+import beast.evolution.tree.NodesStates;
 import beast.evolution.tree.Tree;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.io.IOException;
  * <b>Benchmarking1: brute testing</b>
  * <p>
  * Record the time of 100 iterations to call either {@link TreeLikelihood#calculateLogP()}
- * or {@link DACodonTreeLikelihood#calculateLogP()}.
+ * or {@link DataAugTreeLikelihood#calculateLogP()}.
  * <p>
  * The tests cover the following of scenarios:
  * <ol>
@@ -167,12 +167,10 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
         // init time
         long start = System.nanoTime();
 
-        NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
-        // internal nodes
-        nodesStatesAndTree.initINS("parsimony");//random
+        NodesStates nodesStates = new NodesStates(codonAlignment, tree, "parsimony");
 
-        DACodonTreeLikelihood daLikelihood = new DACodonTreeLikelihood();
-        daLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel, "threads", threads);
+        DataAugTreeLikelihood daLikelihood = new DataAugTreeLikelihood();
+        daLikelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel, "threads", threads);
 
         long daInit = System.nanoTime() - start;
 

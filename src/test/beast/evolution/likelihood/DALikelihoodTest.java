@@ -3,10 +3,10 @@ package test.beast.evolution.likelihood;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.likelihood.DACodonTreeLikelihood;
+import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStatesAndTree;
+import beast.evolution.tree.NodesStates;
 import beast.evolution.tree.Tree;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
@@ -26,7 +26,7 @@ import static junit.framework.Assert.assertEquals;
 public class DALikelihoodTest {
 
     TreeLikelihood treeLikelihood;
-    DACodonTreeLikelihood daTreeLikelihood;
+    DataAugTreeLikelihood daTreeLikelihood;
 
 //    DecimalFormat df = new DecimalFormat("#.00");
 
@@ -61,8 +61,8 @@ public class DALikelihoodTest {
 
         System.out.println("\n=============== DA tree likelihood ===============");
 
-        NodesStatesAndTree nodesStatesAndTree = daTreeLikelihood.getNodesStatesAndTree();
-        int rootNr = nodesStatesAndTree.getValidTree().getRoot().getNr();
+        NodesStates nodesStates = daTreeLikelihood.getNodesStates();
+        int rootNr = daTreeLikelihood.getRootIndex();
         System.out.println("Root index = " + rootNr);
 
         // assume vertebrateMitochondrial
@@ -72,7 +72,7 @@ public class DALikelihoodTest {
         // 0 - 59
         for (int s=0; s < 60; s++) {
             // internal nodes
-            nodesStatesAndTree.setNodeStates(rootNr, new int[]{s});
+            nodesStates.setNodeStates(rootNr, new int[]{s});
             System.out.println("\nSet internal node state to " + s);
 
             double logPDA = daTreeLikelihood.calculateLogP();
@@ -124,7 +124,7 @@ public class DALikelihoodTest {
     }
 
     // need to set internal node states after this
-    private DACodonTreeLikelihood getDATreeLikelihood(String pi, String newickTree, boolean adjustTipHeights) {
+    private DataAugTreeLikelihood getDATreeLikelihood(String pi, String newickTree, boolean adjustTipHeights) {
 
         CodonAlignment codonAlignment = getAlig2Tips1Site();
 
@@ -139,11 +139,11 @@ public class DALikelihoodTest {
 
         // =============== DA tree likelihood ===============
         // this only init NodeStates for tips
-        NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
+        NodesStates nodesStates = new NodesStates(codonAlignment, tree);
         // set internal node states on the fly
 
-        DACodonTreeLikelihood daTreeLikelihood = new DACodonTreeLikelihood();
-        daTreeLikelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
+        DataAugTreeLikelihood daTreeLikelihood = new DataAugTreeLikelihood();
+        daTreeLikelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel);
         return daTreeLikelihood;
     }
 

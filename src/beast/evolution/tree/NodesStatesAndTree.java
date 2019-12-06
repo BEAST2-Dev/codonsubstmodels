@@ -13,11 +13,11 @@ import java.util.Arrays;
  * The wrapper class to store all node states including tips.
  * {@link NodeStates} is referred to a node, and its array are sites.
  * and the state starts from 0. <br>
- *
  * <code>nodeNr</code> is the node index number starting from 0,
  * and for internal nodes, they are ranged from the number of leaf nodes
  * to the total nodes - 1.<br>
  */
+@Deprecated
 public class NodesStatesAndTree extends NodesStates {
 
     final public Input<TreeInterface> treeInput = new Input<>("tree",
@@ -40,9 +40,13 @@ public class NodesStatesAndTree extends NodesStates {
      * @param codonAlignment
      */
     public NodesStatesAndTree(CodonAlignment codonAlignment, TreeInterface tree) {
-        super(codonAlignment);
-        this.tree = tree;
+        super(codonAlignment, tree);
+//        this.tree = tree;
+//
+//        initTipsStates(codonAlignment, tree);
+    }
 
+    public void initTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
         // sanity check: alignment should have same #taxa as tree
         if (codonAlignment.getTaxonCount() != tree.getLeafNodeCount())
             throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
@@ -60,7 +64,7 @@ public class NodesStatesAndTree extends NodesStates {
         nodesStates = new NodeStates[nodeCount];
 
         // set tips states
-        initTipStates(codonAlignment, tree);
+        setTipsStates(codonAlignment, tree);
         // call initINS
     }
 
@@ -75,16 +79,16 @@ public class NodesStatesAndTree extends NodesStates {
         // get BEAST seed
 //        long seed = Randomizer.getSeed();
         String initMethod = initINSInput.get();
-        initINS(initMethod);
+        initInternalNodesStates(initMethod, tree);
     }
 
     // set tips states to nodesStates[] by nodeNr indexing
-    protected void initTipStates(CodonAlignment codonAlignment, TreeInterface tree) {
+    protected void setTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
         // tips
-        for (int i=0; i < getTipsCount() ; i++) {
-            Node tip = tree.getNode(i);
+        for (Node tip : tree.getExternalNodes()) {
+            int nr = tip.getNr();
             // use nodeNr to map the index of nodesStates[]
-            nodesStates[i] = new NodeStates(tip, codonAlignment);
+            nodesStates[nr] = new NodeStates(nr, tip.getID(), codonAlignment);
         }
     }
 
@@ -92,8 +96,9 @@ public class NodesStatesAndTree extends NodesStates {
      * Initialise states at internal nodes by the "random" or "parsimony" method.
      * The seed can be fixed by {@link Randomizer#setSeed(long)}.
      * @param initMethod   "random" or "parsimony"
+     * @param tree
      */
-    public void initINS(String initMethod) {
+    public void initInternalNodesStates(String initMethod, TreeInterface tree) {
         // internal nodes
         int[][] inStates;
         if ("random".equalsIgnoreCase(initMethod)) {
@@ -160,7 +165,7 @@ public class NodesStatesAndTree extends NodesStates {
      * and then validate rootIndex == tree.getRoot().getNr()
      * @return {@link TreeInterface}
      */
-    public TreeInterface getValidTree() {
+    public TreeInterface getTree() {
         // exclude root node, branches = nodes - 1
         final int rootIndex = tree.getNodeCount() - 1;
         if (rootIndex != tree.getRoot().getNr())

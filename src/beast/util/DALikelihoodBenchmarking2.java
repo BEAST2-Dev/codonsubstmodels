@@ -5,16 +5,14 @@ import beast.core.Logger;
 import beast.core.MCMC;
 import beast.core.State;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.likelihood.DACodonTreeLikelihood;
+import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.operators.Uniform;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStatesAndTree;
+import beast.evolution.tree.NodesStates;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeStatLogger;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
@@ -142,7 +140,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
         likelihood.setID("tree.likelihood");
 
-        MCMC mcmc = initMCMC(tree, likelihood, chainLength, logEvery);
+        MCMC mcmc = initMCMC(tree, null, likelihood, chainLength, logEvery);
 
         long timeInit = System.currentTimeMillis() - startInit;
 
@@ -161,15 +159,13 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         // init time
         long startInit = System.currentTimeMillis();
 
-        NodesStatesAndTree nodesStatesAndTree = new NodesStatesAndTree(codonAlignment, tree);
-        // internal nodes
-        nodesStatesAndTree.initINS("parsimony");//random
+        NodesStates nodesStates = new NodesStates(codonAlignment, tree, "parsimony");//random
 
-        DACodonTreeLikelihood likelihood = new DACodonTreeLikelihood();
-        likelihood.initByName("dataAndTree", nodesStatesAndTree, "siteModel", siteModel);
+        DataAugTreeLikelihood likelihood = new DataAugTreeLikelihood();
+        likelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel);
         likelihood.setID("DA.tree.likelihood");
 
-        MCMC mcmc = initMCMC(tree, likelihood, chainLength, logEvery);
+        MCMC mcmc = initMCMC(tree, nodesStates, likelihood, chainLength, logEvery);
 
         long timeInit = System.currentTimeMillis() - startInit;
 
@@ -185,12 +181,14 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
     }
 
 
-    private MCMC initMCMC(Tree tree, Distribution likelihood, String chainLength, String logEvery) 
-            throws IOException, SAXException, ParserConfigurationException {
+    private MCMC initMCMC(Tree tree, NodesStates nodesStates, Distribution likelihood,
+                          String chainLength, String logEvery) {
 
         // Set up state: TODO omega kappa ?
         State state = new State();
-        state.initByName("stateNode", tree);
+        if (nodesStates == null) state.initByName("stateNode", tree);
+        else state.initByName("stateNode", tree, "stateNode", nodesStates);
+
 
         // Set up operator: TODO add flag to determine which operator is used
         Uniform operator = new Uniform();

@@ -14,15 +14,27 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Code to deal with node states without requiring tree.
- *
+ * Store states for all nodes including tips at the array of {@link NodeStates}.
+ * It is referred to each node, and contains an array of states at all sites.
+ * The state starts from 0. <br>
+ * The array index is <code>nodeNr</code> which is the node index number
+ * starting from 0, and for internal nodes, they are ranged
+ * from the number of leaf nodes to the total nodes - 1.<br>
+ * {@link TreeInterface} is used to provide <code>nodeNr</code>.
  * @author Walter Xie
  */
 public class NodesStates extends StateNode {
 
-    final public Input<CodonAlignment> codonAlignmentInput = new Input<>("codon",
+    final public Input<CodonAlignment> codonAlignmentInput = new Input<>("data",
             "codon alignment to initialise the 2-d matrix of nodes (including tips) states",
             Input.Validate.REQUIRED);
+
+    final public Input<TreeInterface> treeInput = new Input<>("tree",
+            "phylogenetic beast.tree to map sequence data correctly to the tips", Input.Validate.REQUIRED);
+
+    final public Input<String> initINSInput = new Input<>("initINS",
+            "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
+            "parsimony", Input.Validate.OPTIONAL);
 
     /**
      * upper & lower bound These are located before the inputs (instead of
@@ -44,7 +56,7 @@ public class NodesStates extends StateNode {
     protected boolean[] nodeIsDirty;
 
 
-    public NodesStates(CodonAlignment codonAlignment) {
+    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree) {
         this.codonDataType = codonAlignment.getDataType();
         final int stateCount = getStateCount();
 //        assert stateCount == 64;
@@ -65,18 +77,161 @@ public class NodesStates extends StateNode {
         // fix ID
         if (getID() == null || getID().length() < 1)
             setID(codonAlignment.getID());
+
+        initTipsStates(codonAlignment, tree);
     }
 
+    /**
+     * Init class and states in tips given {@link CodonAlignment},
+     * and generate states for internal nodes.
+     * @param codonAlignment   data
+     * @param tree             tree
+     * @param initMethod       method to generate states for internal nodes.
+     *                         see {@link #initInternalNodesStates(String, TreeInterface)}
+     */
+    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
+        this(codonAlignment, tree);
+
+        initInternalNodesStates(initMethod, tree);
+    }
+
+    protected void initTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
+        // sanity check: alignment should have same #taxa as tree
+        if (codonAlignment.getTaxonCount() != tree.getLeafNodeCount())
+            throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
+        // nodeCount == tree.getNodeCount()
+        if (getNodeCount() != tree.getNodeCount())
+            throw new IllegalArgumentException("The dimension of nodes states should equal to " +
+                    "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
+        // get***Count uses nodeCount
+        assert getTipsCount() == tree.getLeafNodeCount();
+        assert getInternalNodeCount() == tree.getInternalNodeCount();
+
+        Log.info.println("  " + codonAlignment.toString(true));
+
+        // init from constructor
+        nodesStates = new NodeStates[nodeCount];
+
+        // set tips states
+        setTipsStates(codonAlignment, tree);
+        // call initINS
+    }
 
     @Override
     public void initAndValidate() {
-        // init in NodesStatesAndTree using its constructor
-        throw new IllegalArgumentException("Not used");
-//        // need data type, site count, taxa count
-//        CodonAlignment codonAlignment = codonAlignmentInput.get();
-//        // initParam
-//        NodesStates nodesStates = new NodesStates(codonAlignment);
+        // need data type, site count, taxa count
+        CodonAlignment codonAlignment = codonAlignmentInput.get();
+        TreeInterface tree = treeInput.get();
+        // get BEAST seed
+//        long seed = Randomizer.getSeed();
+        String initMethod = initINSInput.get();
+
+        // init params by constructor
+        NodesStates ns = new NodesStates(codonAlignment, tree, initMethod);
     }
+
+    // set tips states to nodesStates[] by nodeNr indexing
+    protected void setTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
+        // tips
+        for (Node tip : tree.getExternalNodes()) {
+            int nr = tip.getNr();
+            // use nodeNr to map the index of nodesStates[]
+            nodesStates[nr] = new NodeStates(nr, tip.getID(), codonAlignment);
+        }
+    }
+
+    /**
+     * Initialise states at internal nodes by the "random" or "parsimony" method.
+     * The seed can be fixed by {@link Randomizer#setSeed(long)}.
+     * @param initMethod   "random" or "parsimony"
+     * @param tree         used for parsimony Fitch (1971) algorithm.
+     */
+    public void initInternalNodesStates(String initMethod, TreeInterface tree) {
+        // internal nodes
+        int[][] inStates;
+        if ("random".equalsIgnoreCase(initMethod)) {
+            inStates = initINStatesRandom(getInternalNodeCount(), getSiteCount(), getStateCount());
+
+        } else if ("parsimony".equalsIgnoreCase(initMethod)) {
+            inStates = initINStatesParsimony(tree);
+
+        } else {
+            throw new IllegalArgumentException("No method selected to initialise the states at internal nodes !");
+        }
+        assert inStates.length == getInternalNodeCount() && inStates[0].length == getSiteCount();
+
+        for (int i=0; i < getInternalNodeCount(); i++) {
+            int nR = i + getTipsCount();
+            nodesStates[nR] = new NodeStates(nR, inStates[i], getStateCount());
+        }
+
+    }
+
+    /**
+     * Init states using parsimony Fitch (1971) algorithm.
+     * Equally to choose a state from the ambiguous set.
+     * The seed can be fixed by {@link Randomizer#setSeed(long)}.
+     * @param tree         used for parsimony Fitch (1971) algorithm.
+     * @return   states[internal nodes][sites], where i from 0 to internalNodeCount-1
+     * @see RASParsimony1Site
+     */
+    public int[][] initINStatesParsimony(TreeInterface tree) {
+        // states[internal nodes][sites], where i from 0 to internalNodeCount-1
+        int[][] inStates = new int[getInternalNodeCount()][getSiteCount()];
+
+        int[] tipsStates = new int[getTipsCount()];
+        for (int k=0; k < getSiteCount(); k++) {
+            getTipsStates(k, tipsStates);
+            RASParsimony1Site ras1Site = new RASParsimony1Site(tipsStates, tree);
+
+            int[] as = ras1Site.reconstructAncestralStates();
+            // internal nodes i from 0 to internalNodeCount-1
+            for (int i=0; i < getInternalNodeCount(); i++)
+                inStates[i][k] = as[i];
+        }
+        return inStates;
+    }
+
+
+    /**
+     * Get tips states at given 1 site (codon).
+     * @param nrOfSite      The codon site index in the alignment
+     * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
+     */
+    public void getTipsStates(int nrOfSite, int[] tipsStates) {
+        assert tipsStates.length == getTipsCount();
+        int state;
+        // BEAST tips nr = [0, TipsCount-1]
+        for (int i=0; i < getTipsCount() ; i++) {
+            state = getASite(i, nrOfSite);
+            tipsStates[i] = state;
+        }
+    }
+
+
+    /**
+     * Assuming rootIndex = tree.getNodeCount() - 1,
+     * and then validate rootIndex == tree.getRoot().getNr()
+     * @return {@link TreeInterface}
+     */
+//    public TreeInterface getTree() {
+//        // exclude root node, branches = nodes - 1
+//        final int rootIndex = tree.getNodeCount() - 1;
+//        if (rootIndex != tree.getRoot().getNr())
+//            throw new RuntimeException("Invalid root index " + tree.getRoot().getNr() + " != " + rootIndex);
+//
+//        return tree;
+//    }
+
+//    public int getRootIndex() {
+//        int rootIndex = tree.getNodeCount() - 1;
+//        assert rootIndex == tree.getRoot().getNr();
+//        return rootIndex;
+//    }
+
+//    public TreeInterface getTree() {
+//        return tree;
+//    }
 
     /**
      * Randomly generate states at internal nodes given genetic code.
@@ -275,6 +430,11 @@ public class NodesStates extends StateNode {
 
     //******* MCMC StateNode *******
     @Override
+    public void log(long sampleNr, PrintStream out) {
+        super.log(sampleNr, out);
+    }
+
+    @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder();
         buf.append(getID()).append("[").
@@ -351,24 +511,58 @@ public class NodesStates extends StateNode {
 
     //******* use those in NodesStatesAndTree not these below *******
 
+    //TODO full copy or just currentMatrixIndex?
     @Override
     public StateNode copy() {
-        throw new UnsupportedOperationException("Unsupported");
+        try {
+            @SuppressWarnings("unchecked")
+            final NodesStatesAndTree copy = (NodesStatesAndTree) this.clone();
+            for (int i = 0; i < nodesStates.length; i++)
+                copy.nodesStates[i] = (NodeStates) nodesStates[i].copy();
+
+            //storedStates = copy.storedStates.clone();
+            copy.nodeIsDirty = new boolean[getNodeCount()];
+            return copy;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 
     @Override
     public void assignTo(StateNode other) {
-        throw new UnsupportedOperationException("Unsupported");
+        @SuppressWarnings("unchecked")
+        final NodesStates copy = (NodesStates) other;
+        copy.setID(getID());
+        copy.index = index;
+        for (int i = 0; i < nodesStates.length; i++)
+            nodesStates[i].assignTo(copy.nodesStates[i]);
+        //storedStates = copy.storedStates.clone();
+        copy.lower = lower;
+        copy.upper = upper;
+        copy.nodeIsDirty = new boolean[getNodeCount()];
     }
 
     @Override
     public void assignFrom(StateNode other) {
-        throw new UnsupportedOperationException("Unsupported");
+        @SuppressWarnings("unchecked")
+        final NodesStates source = (NodesStates) other;
+        setID(source.getID());
+        for (int i = 0; i < nodesStates.length; i++)
+            nodesStates[i].assignFrom(source.nodesStates[i]);
+        lower = source.lower;
+        upper = source.upper;
+        nodeIsDirty = new boolean[source.getNodeCount()];
     }
 
     @Override
     public void assignFromFragile(StateNode other) {
-        throw new UnsupportedOperationException("Unsupported");
+        @SuppressWarnings("unchecked")
+        final NodesStates source = (NodesStates) other;
+        for (int i = 0; i < nodesStates.length; i++)
+            nodesStates[i].assignFromFragile(source.nodesStates[i]);
+        Arrays.fill(nodeIsDirty, false);
     }
 
     @Override

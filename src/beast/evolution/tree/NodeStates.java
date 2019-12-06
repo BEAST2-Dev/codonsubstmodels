@@ -25,7 +25,7 @@ import java.util.List;
 public class NodeStates extends StateNode {
 
     private final int nodeNr; // used to map to index of DABranchLikelihoodCore[]
-
+    private final String tipID;
 //    final GeneticCode geneticCode;
 
     // 1st dimension is matrix index (current, stored),
@@ -49,32 +49,42 @@ public class NodeStates extends StateNode {
     protected boolean[] siteIsDirty;
 
 
-
+    /**
+     * Set states to internal nodes and initialise parameters.
+     * Call {@link #setNodeStates(int[])}.
+     * @param nodeNr       nr from {@link Node#getNr()}
+     * @param states       states[]
+     * @param stateCount   maximum state, e.g. 60
+     */
     public NodeStates(int nodeNr, int[] states, int stateCount) {
         this.nodeNr = nodeNr;
-//        this.geneticCode = null;
+        this.tipID = null;
 
         // init from constructor
-//        assert stateCount == 64;
         initParam(stateCount, states.length);
-        // set tips states after initParam
+        // set internal nodes or tips states after initParam
         setNodeStates(states);
     }
 
-    // for tips, where nodeNr != taxonIndex
-    public NodeStates(Node tip, CodonAlignment codonAlignment) {
-        this.nodeNr = tip.getNr();
-//        this.geneticCode = codonAlignment.getDataType().getGeneticCode();
+    /**
+     * set states to tips given {@link CodonAlignment}.
+     * Because nodeNr != taxonIndex, call {@link #setTipStates(String, CodonAlignment)}.
+     * @param nodeNr       nr from {@link Node#getNr()}
+     * @param tipID              Leaf {@link Node#getID()}, also taxon name
+     * @param codonAlignment    {@link CodonAlignment}
+     */
+    public NodeStates(int nodeNr, String tipID, CodonAlignment codonAlignment) {
+        this.nodeNr = nodeNr;
+        this.tipID = tipID;
 
         final int stateCount = codonAlignment.getDataType().getStateCount();
-//        assert stateCount == 64;
 
         // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
         final int siteCount = codonAlignment.getSiteCount();
 
         initParam(stateCount, siteCount);
         // Note: nodeNr != taxonIndex
-        setTipStates(tip, codonAlignment);
+        setTipStates(tipID, codonAlignment);
     }
 
 //    // for internal nodes, initINStatesRandom
@@ -109,7 +119,7 @@ public class NodeStates extends StateNode {
 //        currentMatrixIndex = 0;
 //        storedMatrixIndex = 0;
 
-        // 0 - 63, ignore lowerValueInput upperValueInput
+        // 0 - 60/61, ignore lowerValueInput upperValueInput
         lower = 0;
         upper = stateCount - 1; // not deal unknown codon
 
@@ -125,12 +135,12 @@ public class NodeStates extends StateNode {
      * The sequence index (taxonIndex) in {@link CodonAlignment} is different to
      * the node index (nodeNr) in {@link Tree}.
      *
-     * @param tip               Leaf {@link Node}
+     * @param tipID              Leaf {@link Node#getID()}, also taxon name
      * @param codonAlignment    {@link CodonAlignment}
      */
-    public void setTipStates(Node tip, CodonAlignment codonAlignment) {
+    public void setTipStates(String tipID, CodonAlignment codonAlignment) {
         // make sure to use taxonIndex to getCounts, nodeNr not mapping to the order in List<Sequence>
-        int taxonIndex = getTaxonIndex(tip.getID(), codonAlignment);
+        int taxonIndex = getTaxonIndex(tipID, codonAlignment);
 
         // no patterns
         List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
@@ -158,48 +168,6 @@ public class NodeStates extends StateNode {
         }
         return taxonIndex;
     }
-
-//    /**
-//     * random states given genetic code
-//     */
-//    public void initINStatesRandom(final int stateCount, final long seed) {
-//
-//        Log.info("Random generate codon states using " + geneticCode.getDescription() +
-//                " for internal node " + nodeNr + ", " + getSiteCount() + " codon, seed = " + seed);
-//
-//        Random generator;
-//        if (seed > 0)
-//            generator = new Random(seed);
-//        else
-//            generator = new Random();
-//
-//        // internal nodes, i from NrTips to NrRoot
-//        // states[matrix index][sites]
-//        int[] inStates = states[currentMatrixIndex];
-//        for (int j=0; j < inStates.length; j++) {
-//            // 0 - 63
-//            inStates[j] = (int)(generator.nextDouble() * stateCount);
-//            // skip stop codon states, such as vertebrateMitochondrial: 8  10  48  50
-//            while(geneticCode.isStopCodon(inStates[j]))
-//                inStates[j] = (int)(generator.nextDouble() * stateCount);
-//        }
-//
-//    }
-//
-//    /**
-//     * Parsimony to init states. Equally to choose a state from the ambiguous set.
-//     */
-//    public void initINStatesParsimony() {
-//
-//        throw new UnsupportedOperationException();
-//
-//        //traverse 1
-//
-//
-//        //traverse 2
-//
-//
-//    }
 
     @Override
     public String getID() {
