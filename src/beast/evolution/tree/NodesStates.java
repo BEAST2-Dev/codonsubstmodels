@@ -509,14 +509,14 @@ public class NodesStates extends StateNode {
 //        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
 //    }
 
-    //******* use those in NodesStatesAndTree not these below *******
+    //******* use those in NodesStates not these below *******
 
     //TODO full copy or just currentMatrixIndex?
     @Override
     public StateNode copy() {
         try {
             @SuppressWarnings("unchecked")
-            final NodesStatesAndTree copy = (NodesStatesAndTree) this.clone();
+            final NodesStates copy = (NodesStates) this.clone();
             for (int i = 0; i < nodesStates.length; i++)
                 copy.nodesStates[i] = (NodeStates) nodesStates[i].copy();
 

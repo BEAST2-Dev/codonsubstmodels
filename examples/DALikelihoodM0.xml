@@ -1,0 +1,282 @@
+<beast version="2.6" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree:beast.core.util:
+beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:
+beast.evolution.likelihood">
+
+    <!-- ntax=6                                                                  -->
+    <!--<taxon id="Human_Horai"/>-->
+    <!--<taxon id="Human_Arnason"/>-->
+    <!--<taxon id="Chimp_Horai"/>-->
+    <!--<taxon id="Chimp_Arnason"/>-->
+    <!--<taxon id="Gorilla_Horai"/>-->
+    <!--<taxon id="Gorilla_Arnason"/>-->
+
+    <!-- The sequence alignment (each sequence refers to a taxon above).         -->
+    <!-- ntax=6 nchar=768                                                        -->
+    <data id="alignment" dataType="nucleotide">
+        <sequence taxon="Human_Horai">
+            CTACCCGCCGCAGTACTGATCATTCTATTTCCCCCTCTATTGATCCCCACCTCCAAATAT
+            CTCATCAACAACCGACTAATTACCACCCAACAATGACTAATCAAACTAACCTCAAAACAA
+            ATGATAGCCATACACAACACTAAAGGACGAACCTGATCTCTTATACTAGTATCCTTAATC
+            ATTTTTATTGCCACAACTAACCTCCTCGGACTCCTGCCTCACTCATTTACACCAACCACC
+            CAACTATCTATAAACCTAGCCATGGCCATCCCCTTATGAGCGGGCGCAGTGATTATAGGC
+            TTTCGCTCTAAGATTAAAAATGCCCTAGCCCACTTCTTACCACAAGGCACACCTACACCC
+            CTTATCCCCATACTAGTTATTATCGAAACCATCAGCCTACTCATTCAACCAATAGCCCTG
+            GCCGTACGCCTAACCGCTAACATTACTGCAGGCCACCTACTCATGCATCTAATTGGAAGC
+            GCCACCCTAGCAATATCAACCATTAACCTTCCCTCTACACTTATCATCTTCACAATTCTA
+            ATTCTACTGACTATCCTAGAAATCGCTGTCGCCTTAATCCAAGCCTACGTTTTCACACTT
+            CTAGTAAGCCTCTACCTGCACGACAACACACCCCAACTAAATACTACCGTATGGCCCACC
+            ATAATTACCCCCATACTCCTTACACTATTTCTCATCACCCAACTAAAAATATTAAACACA
+            AGCTACCACTTACCTCCCTCACCAAAGCCCATAAAAATAAAAAATTATAACAAACCCTGA
+            GAACCAACCCCAATACGCAAAATTAACCCCCTAATAAAATTAATTAACCACTCATTCATC
+            GACCTCCCCACCCCATCCAACATCTCCGCATGATGAAACTTCGGCTCACTCCTTGGCGCC
+            TGCCTGATCCTCCAAATCACCACAGGACTATTCCTAGCCATGCACTACTCACCAGACGCC
+            TCAACCGCCTTTTCATCAATCGCCCACATCACTCGAGAC
+        </sequence>
+        <sequence taxon="Human_Arnason">
+            CTACCCGCCGCAGTACTGATCATTCTATTTCCCCCTCTATTGATCCCCACCTCCAAATAT
+            CTCATCAACAACCGACTAATCACCACCCAACAATGACTAATCAAACTAACCTCAAAACAA
+            ATGATAACCATACACAACACTAAAGGACGAACCTGATCTCTTATACTAGTATCCTTAATC
+            ATTTTTATTGCCACAACTAACCTCCTCGGACTCCTGCCTCACTCATTTACACCAACCACC
+            CAACTATCTATAAACCTAGCCATGGCCATCCCCTTATGAGCGGGCGCAGTGATTATAGGC
+            TTTCGCTCTAAGATTAAAAATGCCCTAGCCCACTTCTTACCACAAGGCACACCTACACCC
+            CTTATCCCCATACTAGTTATTATCGAAACCATCAGCCTACTCATTCAACCAATAGCCCTG
+            GCCGTACGCCTAACCGCTAACATTACTGCAGGCCACCTACTCATGCACCTAATTGGAAGC
+            GCCACCCTAGCAATATCAACCATTAACCTTCCCTCTACACTTATCATCTTCACAATTCTA
+            ATTCTACTGACTATCCTAGAAATCGCTGTCGCCTTAATCCAAGCCTACGTTTTCACACTT
+            CTAGTAAGCCTCTACCTGCACGACAACACACCCCAACTAAATACTACCGTATGGCCCACC
+            ATAATTACCCCCATACTCCTTACACTATTCCTCATCACCCAACTAAAAATATTAAACACA
+            AACTACCACCTACCTCCCTCACCAAAGCCCATAAAAATAAAAAATTATAACAAACCCTGA
+            GAACCAACCCCAATACGCAAAATTAACCCCCTAATAAAATTAATTAACCGCTCATTCATC
+            GACCTCCCCACCCCATCCAACATCTCCGCATGATGAAACTTCGGCTCACTCCTTGGCACC
+            TGCCTGATCCTCCAAATCACCACAGGACTATTCCTAGCCATGCACTACTCACCAGACGCC
+            TCAACCGCCTTTTCATCAATCGCCCACATCACTCGAGAC
+        </sequence>
+        <sequence taxon="Chimp_Horai">
+            TTACCCGCCGCAGTACTAATCATTCTATTCCCCCCTCTACTGGTCCCCACTTCTAAACAT
+            CTCATCAACAACCGACTAATTACCACCCAACAATGACTAATTCAACTGACCTCAAAACAA
+            ATAATAACTATACACAGCACTAAAGGACGAACCTGATCTCTCATACTAGTATCCTTAATC
+            ATTTTTATTACCACAACCAATCTTCTTGGGCTTCTACCCCACTCATTCACACCAACCACC
+            CAACTATCTATAAACCTAGCCATGGCTATCCCCCTATGAGCAGGCGCAGTAGTCATAGGC
+            TTTCGCTTTAAGACTAAAAATGCCCTAGCCCACTTCTTACCGCAAGGCACACCTACACCC
+            CTTATCCCCATACTAGTTATCATCGAAACTATTAGCCTACTCATTCAACCAATAGCCTTA
+            GCCGTACGTCTAACCGCTAACATTACTGCAGGCCACCTACTCATGCACCTAATTGGAAGC
+            GCCACACTAGCATTATCAACTATCAATCTACCCTATGCACTCATTATCTTCACAATTCTA
+            ATCCTACTGACTATTCTAGAGATCGCCGTCGCCTTAATCCAAGCCTACGTTTTTACACTT
+            CTAGTGAGCCTCTACCTGCACGACAACACACCCCAACTAAATACCGCCGTATGACCCACC
+            ATAATTACCCCCATACTCCTGACACTATTTCTCGTCACCCAACTAAAAATATTAAATTCA
+            AATTACCATCTACCCCCCTCACCAAAACCCATAAAAATAAAAAACTACAATAAACCCTGA
+            GAACCAACCCCGACACGCAAAATTAACCCACTAATAAAATTAATTAATCACTCATTTATC
+            GACCTCCCCACCCCATCCAACATTTCCGCATGATGGAACTTCGGCTCACTTCTCGGCGCC
+            TGCCTAATCCTTCAAATTACCACAGGATTATTCCTAGCTATACACTACTCACCAGACGCC
+            TCAACCGCCTTCTCGTCGATCGCCCACATCACCCGAGAC
+        </sequence>
+        <sequence taxon="Chimp_Arnason">
+            TTACCCGCCGCAGTACTAATCATTCTATTCCCCCCTCTACTGGTCCCCACTTCTAAACAT
+            CTCATCAACAACCGACTAATTACCACCCAACAATGACTAATTCAACTGACCTCAAAACAA
+            ATAATAACTATACACAGCACTAAAGGACGAACCTGATCTCTCATACTAGTATCCTTAATC
+            ATTTTTATTACCACAACCAATCTTCTTGGACTTCTACCCCACTCATTCACACCAACCACC
+            CAACTATCTATAAACCTAGCCATGGCTATCCCCCTATGAGCAGGCGCAGTAGTCATAGGC
+            TTTCGCTTTAAGACTAAAAATGCCCTAGCCCACTTCTTACCGCAAGGCACACCTACACCC
+            CTTATCCCCATACTAGTTATCATCGAAACTATTAGCCTACTCATTCAACCAATAGCCTTA
+            GCCGTACGTCTAACCGCTAACATTACTGCAGGCCACCTACTCATGCACCTAATTGGAAGC
+            GCCACACTAGCATTATCAACTATCAATCTACCCTCTGCACTCATTATCTTCACAATTCTA
+            ATCCTACTGACTATTCTAGAGATCGCCGTCGCCTTAATCCAAGCCTACGTTTTTACACTT
+            CTAGTGAGCCTCTACCTGCACGACAACACACCCCAACTAAATACCGCCGTATGACCCACC
+            ATAATTACCCCCATACTCCTGACACTATTTCTCGTCACCCAACTAAAAATATTAAATTCA
+            AATTACCATCTACCCCCCTCACCAAAACCCATAAAAATAAAAAACTACAATAAACCCTGA
+            GAACCAACCCCGACACGCAAAATTAACCCACTAATAAAATTAATTAATCACTCATTTATC
+            GACCTCCCCACCCCATCCAACATTTCCGCATGATGGAACTTCGGCTCACTTCTCGGCGCC
+            TGCCTAATCCTTCAAATTACCACAGGATTATTCCTAGCTATACACTACTCACCAGACGCC
+            TCAACCGCCTTCTCGTCGATCGCCCACATCACCCGAGAC
+        </sequence>
+        <sequence taxon="Gorilla_Horai">
+            TTACCCGCCGCAGTATTAATTATCCTACTTCCCCCTCTACTGATCCCCACCTCCAAATAT
+            CTCATCAACAACCGACTGATTGCCACCCAACAGTGACTAATCCAACTAACCTCAAAACAA
+            ATAATAACTATACATAACGCCAAGGGACGAACCTGATCCCTTATGTTAATATGATTAATT
+            ATTTTTATTGCCACAACCAACCTCCTCGGACTCTTGCCCCACTCATTCACACCAACTACC
+            CAGCTATCTATAAACCTGGCCATAGCCATCCCCCTGTGAGCAGGCGCAGTAACTACAGGC
+            TTTCGCTCCAAGACTAAAAATGCCCTAGCCCACCTACTACCACAAGGCACCCCTACACCC
+            CTTATCCCTATACTAGTCATCATTGAAACCATCAGCCTATTCATCCAACCAATAGCCCTA
+            GCTGTACGCCTAACCGCTAACATCACTGCAGGTCACCTACTTATGCACCTAATCGGAAGC
+            GCCACACTAGCAATATCAACTACCAATCTTCCCTCAACACTCATTATCTTTACAGTCCTA
+            ATTTTATTAACTATACTAGAAATCGCTGTCGCCCTCATCCAAGCCTACGTTTTCACACTT
+            TTAGTGAGCCTCTACCTGCACGAGAACACACCCCAGCTAAATACCACCGTATGGCCCACC
+            ATAATTGCCCCAATACTCCTCACACTATTTCTCATTACCCAACTAAAAGTTTTAAACACA
+            AATTACCACCTACCCCCCTTACCAAAAACTATAAAAATAAAAAACTTCTGTAAACCCTGA
+            GAACCAACCCCTATACGCAAAACTAACCCACTAGCAAAACTAATTAACCACTCATTCATT
+            GACCTCCCTACCCCGTCCAACATCTCCACATGATGAAACTTCGGCTCACTCCTTGGTGCC
+            TGCTTAATCCTTCAAATCACCACAGGGCTATTCCTAGCCATACACTACTCACCTGATGCC
+            TCAACCGCCTTCTCATCAATTGCCCACATCACCCGAGAT
+        </sequence>
+        <sequence taxon="Gorilla_Arnason">
+            TTACCCGCCGCAGTATTAATTATCCTACTTCCCCCTCTACTGATCCCCACCTCCAAATAT
+            CTCATCAACAACCGACTGATTGCCACCCAACAGTGACTAATCCAACTAACCTCAAAACAA
+            ATAATAACTATACATAACGCCAAGGGACGAACCTGATCCCTTATGTTAATATCATTAATT
+            ATTTTTATTGCCACAACCAACCTCCTCGGACTCTTGCCCCACTCATTCACACCAACTACC
+            CAGCTATCTATAAACCTGGCCATAGCCATCCCCCTGTGAGCAGGCGCAGTAACTACAGGC
+            TTTCGCTCCAAGACTAAAAATGCCCTAGCCCACCTACTACCACAAGGCACCCCTACACCC
+            CTTATCCCTATACTAGTCATCATTGAAACCATCAGCCTATTCATCCAACCAATAGCCCTA
+            GCTGTACGCCTAACCGCTAACATCACTGCAGGTCACCTACTTATGCACCTAATCGGAAGC
+            GCCACACTAGCAATATCAACTACCAATCTTCCCTCAACACTCATTATCTTTACAGTCCTA
+            ATTTTATTAACTATACTAGAAATCGCTGTCGCCCTCATCCAAGCCTACGTTTTCACACTT
+            TTAGTGAGCCTCTACCTGCACGAGAACACACCCCAGCTAAATACCACCGTATGGCCCACC
+            ATAATTGCCCCAATACTCCTCACACTATTTCTCATTACCCAACTAAAAGTTTTAAACACA
+            AATTACCACCTACCCCCCTTACCAAAAACTATAAAAATAAAAAACTTCTGTAAACCCTGA
+            GAATCAACCCCTATACGCAAAACTAACCCACTAGCAAAACTAATTAACCACTCATTCATT
+            GACCTCCCTACCCCGTCCAACATCTCCACATGATGAAACTTCGGCTCACTCCTTGGTGCC
+            TGCTTAATCCTTCAAATCACCACAGGGCTATTCCTAGCCATACACTACTCACCTGATGCC
+            TCAACCGCCTTCTCATCAATCGCCCACATCACCCGAGAT
+        </sequence>
+    </data>
+
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
+
+    <parameter id="m0.omega" value="0.08"/>
+    <parameter id="m0.kappa" value="15.0"/>
+    <parameter id="popSize" value="1000.0"/>
+    <parameter id="clockRate" name="stateNode">1.0</parameter>
+
+    <substModel spec="codonmodels.M0Model" id="m0">
+        <omega idref="m0.omega"/>
+        <kappa idref="m0.kappa"/>
+        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
+            <data idref="codon.alignment"/>
+        </frequencies>
+    </substModel>
+
+    <!-- site model                                                              -->
+    <siteModel spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+        <!--
+        <parameter id="mutationRate.m0" estimate="false" name="mutationRate">1.0</parameter>
+        <parameter id="gammaShape.m0" estimate="false" name="shape">1.0</parameter>
+        <parameter id="proportionInvariant.m0" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+         -->
+        <substModel idref="m0"/>
+    </siteModel>
+
+    <tree spec="beast.util.TreeParser" id='tree' IsLabelledNewick='true'
+          taxa='@alignment' adjustTipHeights='false'
+          newick="(((Chimp_Arnason:0.003528608772941366,Chimp_Horai:0.003528608772941366):0.17499911842705276,
+                 (Human_Arnason:0.013321860994074786,Human_Horai:0.013321860994074786):0.16520586620591934):0.1256184594076513,
+                 (Gorilla_Arnason:0.004594244137901715,Gorilla_Horai:0.004594244137901715):0.2995519424697437);"/>
+
+    <nodeStates id="nodeStates" name="stateNode" spec="beast.evolution.tree.NodesStates">
+        <data idref="codon.alignment"/>
+        <tree idref="tree"/>
+    </nodeStates>
+
+    <distribution id="daTreeLikelihood" spec="beast.evolution.likelihood.DataAugTreeLikelihood">
+<!--        <data idref="codon.alignment"/>-->
+        <data idref="nodeStates"/>
+        <tree idref="tree"/>
+        <siteModel idref="siteModel"/>
+<!--        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>-->
+    </distribution>
+
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.math.distributions.Normal</map>
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+    <run spec="MCMC" id="mcmc" chainLength="1000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="5000">
+<!--            <input name='stateNode' idref='m0.omega'/>-->
+<!--            <input name='stateNode' idref='m0.kappa'/>-->
+<!--            <input name='stateNode' idref='popSize'/>-->
+            <input name='stateNode' idref='tree'/>
+            <input name='stateNode' idref='nodeStates'/>
+        </state>
+
+        <distribution spec="util.CompoundDistribution" id="posterior">
+            <distribution id="prior" spec="util.CompoundDistribution">
+                <distribution id="coalescent" spec="Coalescent">
+                    <populationModel id="ConstantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
+                    <treeIntervals spec='TreeIntervals' id='TreeIntervals' tree="@tree"/>
+                </distribution>
+                <prior id="OmegaPrior" name="distribution" x="@m0.omega">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <!-- "1.9064e-02" "1.3534e-01" "9.6075e-01" -->
+                        <parameter id="RealParameter.1" estimate="false" name="M">-2</parameter>
+                        <parameter id="RealParameter.2" estimate="false" name="S">1</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="KappaPrior" name="distribution" x="@m0.kappa">
+                    <LogNormal id="LogNormalDistributionModel.1" name="distr">
+                        <!-- 2 to 40  "1.0408e+00" "7.3891e+00" "5.2455e+01" -->
+                        <parameter id="RealParameter.3" estimate="false" name="M">2</parameter>
+                        <parameter id="RealParameter.4" estimate="false" name="S">1</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="PopSizePrior" name="distribution" x="@popSize">
+                    <OneOnX id="OneOnX.1" name="distr"/>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+                <distribution idref="daTreeLikelihood"/>
+            </distribution>
+        </distribution>
+
+        <!-- add this if estimating clock rate, for example, tip dates or MRCA analysis.
+        <operator id="StrictClockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.75" weight="1.0"/>
+
+        <operator id="strictClockUpDownOperator" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">
+            <up idref="clockRate"/>
+            <down idref="tree"/>
+        </operator>
+        -->
+
+<!--        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.5" />-->
+
+<!--        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="3"/>-->
+
+<!--        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="0.5"/>-->
+
+<!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
+
+<!--        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
+
+        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
+
+<!--        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>-->
+
+<!--        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>-->
+
+<!--        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>-->
+
+<!--        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>-->
+
+<!--        <logger logEvery="2000" fileName="test.m0.log" model="@posterior" sanitiseHeaders="true" sort="smart">-->
+<!--            <log idref="posterior"/>-->
+<!--            <log idref="likelihood"/>-->
+<!--            <log idref="prior"/>-->
+<!--            <log idref="coalescent"/>-->
+<!--            <log idref="popSize"/>-->
+<!--            <log idref="m0.omega"/>-->
+<!--            <log idref="m0.kappa"/>-->
+<!--            <log idref="clockRate"/>-->
+<!--        </logger>-->
+
+        <logger logEvery="100">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+<!--            <log idref="popSize"/>-->
+<!--            <log idref="m0.omega"/>-->
+<!--            <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>-->
+<!--            <log idref="m0.kappa"/>-->
+<!--            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>-->
+        </logger>
+
+<!--        <logger logEvery="5000" fileName="test.m0.trees" mode="tree">-->
+<!--            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>-->
+<!--        </logger>-->
+    </run>
+
+</beast>
