@@ -2,15 +2,6 @@
                                 beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
                                 beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
-	<!-- ntax=6                                                                  -->
-    <!--<taxon id="Human_Horai"/>-->
-    <!--<taxon id="Human_Arnason"/>-->
-    <!--<taxon id="Chimp_Horai"/>-->
-    <!--<taxon id="Chimp_Arnason"/>-->
-    <!--<taxon id="Gorilla_Horai"/>-->
-    <!--<taxon id="Gorilla_Arnason"/>-->
-
-	<!-- The sequence alignment (each sequence refers to a taxon above).         -->
 	<!-- ntax=6 nchar=768                                                        -->
     <data id="alignment" dataType="nucleotide">
         <sequence taxon="Human_Horai">

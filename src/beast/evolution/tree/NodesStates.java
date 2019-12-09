@@ -30,7 +30,7 @@ public class NodesStates extends StateNode {
             Input.Validate.REQUIRED);
 
     final public Input<TreeInterface> treeInput = new Input<>("tree",
-            "phylogenetic beast.tree to map sequence data correctly to the tips", Input.Validate.REQUIRED);
+            "phylogenetic beast.tree to map states data correctly to the nodes", Input.Validate.REQUIRED);
 
     final public Input<String> initINSInput = new Input<>("initINS",
             "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
@@ -45,9 +45,9 @@ public class NodesStates extends StateNode {
     protected int lower;
 
 
-    final Codon codonDataType; // getStateCount
-    final int siteCount;
-    final int nodeCount; // == nodesStates.length
+    Codon codonDataType; // getStateCount
+    int siteCount;
+    int nodeCount; // == nodesStates.length
 
     // all nodes, use nodeNr to map the index of nodesStates[]
     protected  NodeStates[] nodesStates;
@@ -55,8 +55,44 @@ public class NodesStates extends StateNode {
     // isDirty flags for each node
     protected boolean[] nodeIsDirty;
 
+    //for XML parser
+    public NodesStates() { }
 
     public NodesStates(CodonAlignment codonAlignment, TreeInterface tree) {
+        initParams(codonAlignment);
+        initTipsStates(codonAlignment, tree);
+    }
+
+    /**
+     * Init class and states in tips given {@link CodonAlignment},
+     * and generate states for internal nodes.
+     * @param codonAlignment   data
+     * @param tree             tree
+     * @param initMethod       method to generate states for internal nodes.
+     *                         see {@link #initInternalNodesStates(String, TreeInterface)}
+     */
+    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
+        this(codonAlignment, tree);
+        initInternalNodesStates(initMethod, tree);
+    }
+
+    @Override
+    public void initAndValidate() {
+        // need data type, site count, taxa count
+        CodonAlignment codonAlignment = codonAlignmentInput.get();
+        // cannot init params by constructor
+        initParams(codonAlignment);
+
+        TreeInterface tree = treeInput.get();
+        initTipsStates(codonAlignment, tree);
+
+        // get BEAST seed long seed = Randomizer.getSeed();
+        String initMethod = initINSInput.get();
+        initInternalNodesStates(initMethod, tree);
+    }
+
+
+    protected void initParams(CodonAlignment codonAlignment) {
         this.codonDataType = codonAlignment.getDataType();
         final int stateCount = getStateCount();
 //        assert stateCount == 64;
@@ -77,22 +113,6 @@ public class NodesStates extends StateNode {
         // fix ID
         if (getID() == null || getID().length() < 1)
             setID(codonAlignment.getID());
-
-        initTipsStates(codonAlignment, tree);
-    }
-
-    /**
-     * Init class and states in tips given {@link CodonAlignment},
-     * and generate states for internal nodes.
-     * @param codonAlignment   data
-     * @param tree             tree
-     * @param initMethod       method to generate states for internal nodes.
-     *                         see {@link #initInternalNodesStates(String, TreeInterface)}
-     */
-    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
-        this(codonAlignment, tree);
-
-        initInternalNodesStates(initMethod, tree);
     }
 
     protected void initTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
@@ -115,19 +135,6 @@ public class NodesStates extends StateNode {
         // set tips states
         setTipsStates(codonAlignment, tree);
         // call initINS
-    }
-
-    @Override
-    public void initAndValidate() {
-        // need data type, site count, taxa count
-        CodonAlignment codonAlignment = codonAlignmentInput.get();
-        TreeInterface tree = treeInput.get();
-        // get BEAST seed
-//        long seed = Randomizer.getSeed();
-        String initMethod = initINSInput.get();
-
-        // init params by constructor
-        NodesStates ns = new NodesStates(codonAlignment, tree, initMethod);
     }
 
     // set tips states to nodesStates[] by nodeNr indexing

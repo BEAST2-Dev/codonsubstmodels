@@ -1,16 +1,8 @@
-<beast version="2.6" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree:beast.core.util:
-beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:
-beast.evolution.likelihood">
+<beast version="2.6" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree:
+beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:
+beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
-    <!-- ntax=6                                                                  -->
-    <!--<taxon id="Human_Horai"/>-->
-    <!--<taxon id="Human_Arnason"/>-->
-    <!--<taxon id="Chimp_Horai"/>-->
-    <!--<taxon id="Chimp_Arnason"/>-->
-    <!--<taxon id="Gorilla_Horai"/>-->
-    <!--<taxon id="Gorilla_Arnason"/>-->
 
-    <!-- The sequence alignment (each sequence refers to a taxon above).         -->
     <!-- ntax=6 nchar=768                                                        -->
     <data id="alignment" dataType="nucleotide">
         <sequence taxon="Human_Horai">
@@ -160,14 +152,14 @@ beast.evolution.likelihood">
                  (Human_Arnason:0.013321860994074786,Human_Horai:0.013321860994074786):0.16520586620591934):0.1256184594076513,
                  (Gorilla_Arnason:0.004594244137901715,Gorilla_Horai:0.004594244137901715):0.2995519424697437);"/>
 
-    <nodeStates id="nodeStates" name="stateNode" spec="beast.evolution.tree.NodesStates">
+    <nodesStates spec="NodesStates" id="nodesStates" >
         <data idref="codon.alignment"/>
         <tree idref="tree"/>
-    </nodeStates>
+    </nodesStates>
 
     <distribution id="daTreeLikelihood" spec="beast.evolution.likelihood.DataAugTreeLikelihood">
 <!--        <data idref="codon.alignment"/>-->
-        <data idref="nodeStates"/>
+        <nodesStates idref="nodesStates"/>
         <tree idref="tree"/>
         <siteModel idref="siteModel"/>
 <!--        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>-->
@@ -191,7 +183,7 @@ beast.evolution.likelihood">
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
 <!--            <input name='stateNode' idref='popSize'/>-->
             <input name='stateNode' idref='tree'/>
-            <input name='stateNode' idref='nodeStates'/>
+            <input name='stateNode' idref='nodesStates'/>
         </state>
 
         <distribution spec="util.CompoundDistribution" id="posterior">
