@@ -119,13 +119,14 @@ public class CodonFrequencies extends Frequencies {
                 Arrays.fill(freqs, equalFreq);
 
             } else if ("F1X4".equals(piInput.get())) {
-
-                double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
+                // observed freq from data
+                double[][] freqsCPB = codonAlignment.getObservedBaseFrequencies();
+                // last row freqs[3] is used to estimate
                 freqs = estimateFrequencies(freqsCPB[3], freqsCPB[3], freqsCPB[3]);
 
             } else if ("F3X4".equals(piInput.get())) { // default
-
-                double[][] freqsCPB = codonAlignment.getCodonPositionBaseFrequencies();
+                // observed freq from data
+                double[][] freqsCPB = codonAlignment.getObservedBaseFrequencies();
                 freqs = estimateFrequencies(freqsCPB[0], freqsCPB[1], freqsCPB[2]);
 
             } else if ("F60/F61".equals(piInput.get())) {
@@ -171,8 +172,10 @@ public class CodonFrequencies extends Frequencies {
 
     /**
      * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT), excluding stop codon.
-     * @param usage i is taxon, j is state. Not include totals, and for j cols > 63 are ambiguous states count.
-     * @return 1d frequency array freqs[64]
+     * @param usage i is taxon, j is state. Not include totals.
+     *              If ambiguous states exit, then their counts are equally distributed to
+     *              possible unambiguous states using {@link Codon#getStatesForCode(int)}.
+     * @return 1d frequency array freqs[60]
      */
     public double[] getCodonFrequenciesByUsage(int[][] usage) {
         final int stateMax = codonStateCount; // 60/61

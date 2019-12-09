@@ -49,10 +49,14 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     /****** calculation engine ******/
 //    protected BeagleTreeLikelihood beagle;
-    // calculation engine for each branch, excl. root index, nrOfNodes-1
+    /**
+     * calculation engine for each branch, excl. root index, nrOfNodes-1
+     */
     private DABranchLikelihoodCore[] daBranchLdCores;
 
-    // number of threads to use, changes when threading causes problems
+    /**
+     * number of threads to use, changes when threading causes problems
+     */
     private int threadCount;
 
     private ExecutorService executor = null;
@@ -92,7 +96,10 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
      * root index is used to store frequencies prior at root
      */
     protected double[] branchLogLikelihoods;
-    //caching probability tables obtained from the SiteModel
+    /**
+     * caching probability tables obtained from substitutionModel,
+     * size = stateCount * stateCount
+     */
     protected double[] probabilities;
 
     /****** TODO rest ******/
@@ -274,6 +281,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                     }
 //            System.out.println("logP = " + logP);
                 } catch (ArithmeticException e) {
+                    System.err.println(e.getMessage());
                     return Double.NEGATIVE_INFINITY;
                 }
             } // end n loop
@@ -386,9 +394,9 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
                 for (int j=0; j < probabilities.length; j++)
                     if (probabilities[j] <= 0) {
-                        System.out.println(Arrays.toString(probabilities));
-                        throw new RuntimeException("P(t) cannot be 0 !\n" +
-                                "index = " + j + ", node = " + nodeIndex + ", branchTime = " + branchTime);
+//                        System.err.println(Arrays.toString(probabilities));
+                        throw new ArithmeticException("Reject proposal because P(t) = 0 ! " +
+                                "node Nr = " + j + ", node Nr = " + nodeIndex + ", branchTime = " + branchTime);
                     }
 
                 daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy

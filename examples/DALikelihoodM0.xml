@@ -121,14 +121,15 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
         </sequence>
     </data>
 
-    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial"
+          spec="CodonAlignment"  verbose="false"/>
 
     <parameter id="m0.omega" value="0.08"/>
     <parameter id="m0.kappa" value="15.0"/>
-    <parameter id="popSize" value="1000.0"/>
+    <parameter id="popSize" value="0.2"/>
     <parameter id="clockRate" name="stateNode">1.0</parameter>
 
-    <substModel spec="codonmodels.M0Model" id="m0">
+    <substModel spec="codonmodels.M0Model" id="m0" verbose="true">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
         <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
@@ -148,16 +149,16 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
     <tree spec="beast.util.TreeParser" id='tree' IsLabelledNewick='true'
           taxa='@alignment' adjustTipHeights='false'
-          newick="(((Chimp_Arnason:0.003528608772941366,Chimp_Horai:0.003528608772941366):0.17499911842705276,
-                 (Human_Arnason:0.013321860994074786,Human_Horai:0.013321860994074786):0.16520586620591934):0.1256184594076513,
-                 (Gorilla_Arnason:0.004594244137901715,Gorilla_Horai:0.004594244137901715):0.2995519424697437);"/>
+          newick="(((Chimp_Arnason:0.00353,Chimp_Horai:0.00353):0.175,
+                 (Human_Arnason:0.0133,Human_Horai:0.01332):0.165):0.1256,
+                 (Gorilla_Arnason:0.0046,Gorilla_Horai:0.0046):0.23);"/>
 
     <nodesStates spec="NodesStates" id="nodesStates" >
         <data idref="codon.alignment"/>
         <tree idref="tree"/>
     </nodesStates>
 
-    <distribution id="daTreeLikelihood" spec="beast.evolution.likelihood.DataAugTreeLikelihood">
+    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="2">
 <!--        <data idref="codon.alignment"/>-->
         <nodesStates idref="nodesStates"/>
         <tree idref="tree"/>
@@ -177,8 +178,8 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="1000"> <!--autoOptimize="true"-->
-        <state id="state" storeEvery="5000">
+    <run spec="MCMC" id="mcmc" chainLength="10000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="10000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
 <!--            <input name='stateNode' idref='popSize'/>-->
@@ -207,7 +208,11 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
                     </LogNormal>
                 </prior>
                 <prior id="PopSizePrior" name="distribution" x="@popSize">
-                    <OneOnX id="OneOnX.1" name="distr"/>
+                    <LogNormal id="LogNormalDistributionModel.2" name="distr">
+                        <!-- "7.1550e-03" "1.3534e-01" "2.5598e+00" -->
+                        <parameter id="PopM" estimate="false" name="M">-2</parameter>
+                        <parameter id="PopS" estimate="false" name="S">1.5</parameter>
+                    </LogNormal>
                 </prior>
             </distribution>
             <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
@@ -232,7 +237,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
-<!--        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>
 
         <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
 

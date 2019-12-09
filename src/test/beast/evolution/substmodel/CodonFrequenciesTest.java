@@ -26,7 +26,7 @@ public class CodonFrequenciesTest {
 
     @Test
     public void testCodonPositionBaseFrequencies(){
-        double[][] freq = codonAlignment.getCodonPositionBaseFrequencies();
+        double[][] freq = codonAlignment.getObservedBaseFrequencies();
         // result from codeml
         // Codon position * base (3x4) table + overall
         // position 1 : A C G T

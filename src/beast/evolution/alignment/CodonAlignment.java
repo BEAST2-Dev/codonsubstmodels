@@ -356,13 +356,14 @@ public class CodonAlignment extends Alignment {
      * Codon position * base (3x4) table, plus "overall" in last row.
      * The base order is "A", "C", "G", "T".
      * If any ambiguous, then add 0.25 to each Nucleotide count in 3 positions.
-     * @return 2d frequency array. position x base (3x4) table + average.
+     * @return 2d frequency array [4][4]. Position is row, base is col. (3x4).
+     *         The last row is sum over nucleotides, which can be used as 1x4.
      */
-    public double[][] getCodonPositionBaseFrequencies() {
+    public double[][] getObservedBaseFrequencies() {
         GeneticCode geneticCode = getGeneticCode();
         // position x base (3x4) table + average
-        final int colMax = 4; // 4 nucleotides
-        double[][] freqs = new double[4][colMax];
+        final int nrOfNuc = 4; // 4 nucleotides
+        double[][] freqs = new double[4][nrOfNuc];
         for (int i = 0; i < counts.size(); i++) {
             List<Integer> codonStates = counts.get(i);
             for (int j = 0; j < codonStates.size(); j++) {
@@ -374,8 +375,8 @@ public class CodonAlignment extends Alignment {
                     // col index = nucState: A,C,G,T,-
                     int nucState = geneticCode.getNucleotideState(triplet.charAt(pos));
                     // if -, add 0.25 to each nucleotide
-                    if (nucState >= colMax) {
-                        for (int n = 0; n < colMax; n++)
+                    if (nucState >= nrOfNuc) {
+                        for (int n = 0; n < nrOfNuc; n++)
                             freqs[pos][n] += 0.25;
                     } else {
                         freqs[pos][nucState] += 1;
@@ -383,16 +384,16 @@ public class CodonAlignment extends Alignment {
                 }
             }
         }
-        // overall
-        for (int col = 0; col < colMax; col++) {
+        // overall at last row
+        for (int col = 0; col < nrOfNuc; col++) {
             freqs[3][col] = freqs[0][col] + freqs[1][col] + freqs[2][col];
         }
         // re-normalise
         for (int row = 0; row < 4; row++) {
             double rowSum = freqs[row][0];
-            for (int col = 1; col < colMax; col++)
+            for (int col = 1; col < nrOfNuc; col++)
                 rowSum += freqs[row][col];
-            for (int col = 0; col < colMax; col++)
+            for (int col = 0; col < nrOfNuc; col++)
                 freqs[row][col] = freqs[row][col] / rowSum;
         }
         return freqs;
@@ -482,7 +483,7 @@ public class CodonAlignment extends Alignment {
     protected void printCodonPositionBaseFrequencies() {
         String[] rowNames = new String[]{"position 1 : ", "position 2 : ", "position 3 : ", "average : "};
         String[] colNames = new String[]{"A", "C", "G", "T"};
-        double[][] freqs = getCodonPositionBaseFrequencies();
+        double[][] freqs = getObservedBaseFrequencies();
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(5);// 5 decimal places
 
