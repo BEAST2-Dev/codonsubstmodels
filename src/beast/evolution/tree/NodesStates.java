@@ -14,13 +14,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Store states for all nodes including tips at the array of {@link NodeStates}.
- * It is referred to each node, and contains an array of states at all sites.
- * The state starts from 0. <br>
- * The array index is <code>nodeNr</code> which is the node index number
- * starting from 0, and for internal nodes, they are ranged
- * from the number of leaf nodes to the total nodes - 1.<br>
- * {@link TreeInterface} is used to provide <code>nodeNr</code>.
+ * Store states for all nodes including tips in the array of {@link NodeStates},
+ * which contains an array of states at all sites.
+ * The state is an integer starting from 0. <br>
+ * The array index is <code>nodeNr</code> which is the node index
+ * used in {@link TreeInterface}.
+ * The tip index starts from 0, and the index of an internal node is ranged
+ * from the number of leaf nodes to the total nodes - 1.
+ * Root index is always the last number.<br>
  * @author Walter Xie
  */
 public class NodesStates extends StateNode {
@@ -53,7 +54,9 @@ public class NodesStates extends StateNode {
     protected  NodeStates[] nodesStates;
 //    protected  NodeStates[] storedNodesStates;
 
-    // isDirty flags for each node
+    /**
+     * isDirty array flags for each node
+     */
     protected boolean[] nodeIsDirty;
 
     //for XML parser
@@ -90,6 +93,14 @@ public class NodesStates extends StateNode {
         // get BEAST seed long seed = Randomizer.getSeed();
         String initMethod = initINSInput.get();
         initInternalNodesStates(initMethod, tree);
+
+        // validation
+        for (int i=0; i < getTipsCount(); i++) {
+            NodeStates tip = getNodeStates(i);
+            // use it to recognise tips in setter
+            if (tip.getTipID() == null)
+                throw new IllegalArgumentException("Tip (" + i + ") requires ID taxon name in NodeStates object !");
+        }
     }
 
 
@@ -212,7 +223,7 @@ public class NodesStates extends StateNode {
         int state;
         // BEAST tips nr = [0, TipsCount-1]
         for (int i=0; i < getTipsCount() ; i++) {
-            state = getASite(i, nrOfSite);
+            state = getState(i, nrOfSite);
             tipsStates[i] = state;
         }
     }
@@ -241,6 +252,7 @@ public class NodesStates extends StateNode {
 //    public TreeInterface getTree() {
 //        return tree;
 //    }
+
 
     /**
      * Randomly generate states at internal nodes given genetic code.
@@ -303,48 +315,36 @@ public class NodesStates extends StateNode {
     /**
      * Get an internal node states. The state starts from 0.
      *
-     * @param nodeIndex the node index :<br>
-     *      *                Leaf nodes are number 0 to <code>(nodeIndex+1)/2</code>;
-     *      *                The root node is always numbered <code>nodeIndex-1</code>.
+     * @param nodeIndex The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
      * @return the codon states of the internal node sequence.
      */
-    public int[] getNodeStates(final int nodeIndex) {
+    public int[] getStates(final int nodeIndex) {
         // internal node index starts from getTipsCount();
-        return nodesStates[nodeIndex].getNodeStates();
+        return nodesStates[nodeIndex].getStates();
     }
 
     /**
      * Set the states to an internal node given its node index.
      * If {@link NodeStates} not init, then create with the given states.
      *
-     * @param nodeIndex the node index :<br>
-     *      *                Leaf nodes are number 0 to <code>(nodeIndex+1)/2</code>;
-     *      *                The root node is always numbered <code>nodeIndex-1</code>.
      * @param states int[] states
+     * @param nodeIndex The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
      */
-    public void setNodeStates(final int nodeIndex, final int[] states) {
+    public void setStates(final int[] states, final int nodeIndex) {
         if (nodesStates[nodeIndex] == null) {
             // internal node not init
             nodesStates[nodeIndex] = new NodeStates(nodeIndex, states, getStateCount());
+        } else {
+            // internal node index starts from getTipsCount();
+            nodesStates[nodeIndex].setStates(states);
         }
-
-        // internal node index starts from getTipsCount();
-        setValue(nodeIndex, states);
-    }
-
-    /**
-     * modify setValue for 2d matrix to take int[].
-     *
-     * @param nodeIndex the start index of parameter to set to the flattened matrix,
-     *                 the values of the parameter is given by an int[].
-     * @param vals     int[] values of the parameter
-     */
-    protected void setValue(final int nodeIndex, final int[] vals) {
-        startEditing(null);
-
-        nodesStates[nodeIndex].setValue(vals);
         nodeIsDirty[nodeIndex] = true;
-//        m_nLastDirty = nodeIndex;
     }
 
     /**
@@ -353,10 +353,10 @@ public class NodesStates extends StateNode {
      * @param codonNr the codon site index.
      * @return
      */
-    public int[] getSites(final int codonNr) {
+    public int[] getStatesAtSite(final int codonNr) {
         int[] col = new int[getNodeCount()];
         for (int i = 0; i < getNodeCount(); i++)
-            col[i] = getASite(i, codonNr);
+            col[i] = getState(i, codonNr);
         return col;
     }
 
@@ -365,37 +365,58 @@ public class NodesStates extends StateNode {
      * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
-     * @param nodeIndex  the node index :<br>
-     *                Leaf nodes are number 0 to <code>(nodeIndex+1)/2</code>;
-     *                The root node is always numbered <code>nodeIndex-1</code>.
+     * @param nodeIndex The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
      * @param codonNr the site index.
      * @return
      */
-    public int getASite(final int nodeIndex, final int codonNr) {
-        return nodesStates[nodeIndex].getASite(codonNr);
+    public int getState(final int nodeIndex, final int codonNr) {
+        return nodesStates[nodeIndex].getState(codonNr);
     }
 
 
-//    /**
-//     * Set a codon state to the site at the internal node.
-//     * The state starts from 0.
-//     * <code>matrix[i,j] = values[i * minorDimension + j]</code>
-//     *
-//     * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
-//     *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
-//     *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
-//     *               The root node is always numbered <code>nodes-1</code>.
-//     * @param codonNr the site index.
-//     */
-//    public void setASite(final int nodeNr, final int codonNr, final int value) {
-//        // internal node index nodeNr starts from getTaxonCount();
-//        assert nodeNr > getInternalNodeCount() && nodeNr < getNodeCount();
-//        // convert nodeNr into 2d matrix row index
-//        int rowIndex = nodeNr - getInternalNodeCount() - 1;
-//
-//        setValue(rowIndex, codonNr, value);
-//    }
+    /**
+     * Set a codon state to the site at the internal node.
+     * The state starts from 0.
+     * <code>matrix[i,j] = values[i * minorDimension + j]</code>
+     *
+     * @param state   new state to set
+     * @param nodeIndex The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
+     * @param codonNr the site index.
+     */
+    public void setState(final int state, final int nodeIndex, final int codonNr) {
+        if (nodesStates[nodeIndex] == null)
+            throw new IllegalArgumentException("Node (" + nodeIndex + ") states are not initiated !");
 
+        // internal node index starts from getTipsCount();
+        nodesStates[nodeIndex].setState(state, codonNr);
+        nodeIsDirty[nodeIndex] = true;
+    }
+
+    /**
+     * @param nodeIndex The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
+     * @return if the states have been changed,
+     *         but always false if node is a tip,
+     *         where <code>nodeIndex < {@link #getTipsCount()}</code>.
+     */
+    public boolean isNodeStatesDirty(final int nodeIndex) {
+        if (nodeIndex < getTipsCount())
+            return false;
+        return nodeIsDirty[nodeIndex];
+    }
+
+
+    public NodeStates getNodeStates(final int nodeIndex) {
+        return nodesStates[nodeIndex];
+    }
 
     public Codon getCodonDataType() {
         return codonDataType;
@@ -484,6 +505,10 @@ public class NodesStates extends StateNode {
         throw new UnsupportedOperationException("Unsupported");
     }
 
+    /**
+     * this will set tips and internal nodes dirty in array {@link #nodeIsDirty}
+     * @param isDirty
+     */
     @Override
     public void setEverythingDirty(boolean isDirty) {
         setSomethingIsDirty(isDirty);
@@ -522,7 +547,7 @@ public class NodesStates extends StateNode {
             nodesStates[i].restore();
         }
 
-
+        hasStartedEditing = false;
     }
 
 //    @Override

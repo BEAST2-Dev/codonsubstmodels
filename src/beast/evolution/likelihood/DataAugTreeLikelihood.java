@@ -342,7 +342,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         double[] rootPrior = new double[siteCount];
         for (int k = 0; k < siteCount; k++) {
             // hard code for root node
-            int state = nodesStates.getASite(rootIndex, k); // 0-63
+            int state = nodesStates.getState(rootIndex, k); // 0-63
             rootPrior[k] = frequencies[state];
         }
 
@@ -356,23 +356,22 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
     //TODO calculateNodeBrLdOverCategories
     // cache per site to avoid recalculation, when only sequence at a site is changed
     protected int updateBranch(final DABranchLikelihoodCore daBranchLdCore) {
-        // the node below this branch
+        // the branch between node and parent
+        // root is excluded from node when creating DABranchLikelihoodCore
         final Node node = daBranchLdCore.getNode();
         final Node parent = node.getParent();
+        final int nodeIndex = node.getNr();
+        final int parentNum = parent.getNr();
 
-        boolean seqUpdate = false; //TODO internal node sequence updated at any site
+        //
+        boolean seqUpdate = nodesStates.isNodeStatesDirty(nodeIndex) || nodesStates.isNodeStatesDirty(parentNum);
 
-//        int update = hasDirt;
-//            if (!node.isRoot()) {
         int nodeUpdate = node.isDirty() | parent.isDirty(); // TODO need to review
 
         final double branchRate = branchRateModel.getRateForBranch(node);
         final double branchTime = node.getLength() * branchRate;
 
 //TODO deal with 0 branch length, such as SA
-
-        final int nodeIndex = node.getNr();
-        final int parentNum = parent.getNr();
         if (branchTime < 1e-6)
             throw new UnsupportedOperationException(
 //                System.err.println(
@@ -415,8 +414,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             // brLD is linked to the child node index down
             daBranchLdCore.setBranchLdForUpdate(); // TODO review
 
-            final int[] nodeStates = nodesStates.getNodeStates(nodeIndex);
-            final int[] parentNodeStates = nodesStates.getNodeStates(parentNum);
+            final int[] nodeStates = nodesStates.getStates(nodeIndex);
+            final int[] parentNodeStates = nodesStates.getStates(parentNum);
             // populate branchLd[][excl. root], nodeIndex is child
             daBranchLdCore.calculateBranchLdOverCategories(nodeStates, parentNodeStates, proportions);
         }

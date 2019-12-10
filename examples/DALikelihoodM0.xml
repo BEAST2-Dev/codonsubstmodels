@@ -158,7 +158,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
         <tree idref="tree"/>
     </nodesStates>
 
-    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="2">
+    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="1">
 <!--        <data idref="codon.alignment"/>-->
         <nodesStates idref="nodesStates"/>
         <tree idref="tree"/>

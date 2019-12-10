@@ -21,11 +21,22 @@ import java.util.List;
  * because of both <code>arraycopy</code> and storing Object are slow.
  * Apple the index trick implemented in {@link beast.evolution.likelihood.BeerLikelihoodCore}
  * to avoid <code>arraycopy</code>.<br>
+ *
+ * No {@link beast.core.Input} here.
+ * Init and validate in {@link NodesStates#initAndValidate()}.
  */
 public class NodeStates extends StateNode {
-
+    /**
+     * The node index :<br>
+     * Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     * Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     * The root node is always indexed <code>nodeCount-1</code>.
+     */
     private final int nodeNr; // used to map to index of DABranchLikelihoodCore[]
-    private final String tipID; // taxon name, null if not tip
+    /**
+     * taxon name, null if not tip. use tipID to recognise tips
+     */
+    private final String tipID;
 //    final GeneticCode geneticCode;
 
     /**
@@ -55,7 +66,7 @@ public class NodeStates extends StateNode {
 
     /**
      * Set states to internal nodes and initialise parameters.
-     * Call {@link #setNodeStates(int[])}.
+     * Call {@link #setStates(int[])}.
      * @param nodeNr       nr from {@link Node#getNr()}
      * @param states       states[]
      * @param stateCount   maximum state, e.g. 60
@@ -67,7 +78,7 @@ public class NodeStates extends StateNode {
         // init from constructor
         initParam(stateCount, states.length);
         // set internal nodes or tips states after initParam
-        setNodeStates(states);
+        setStates(states);
     }
 
     /**
@@ -91,28 +102,9 @@ public class NodeStates extends StateNode {
         setTipStates(tipID, codonAlignment);
     }
 
-//    // for internal nodes, initINStatesRandom
-//    public NodeStates(int nodeNr, int stateCount, int siteCount, GeneticCode geneticCode, long seed) {
-//        this.nodeNr = nodeNr;
-//        this.geneticCode = geneticCode;
-//
-//        initParam(stateCount, siteCount);
-//        initINStatesRandom(stateCount, seed);
-//    }
-//
-//    // for internal nodes, initINStatesParsimony
-//    public NodeStates(int nodeNr, int stateCount, int siteCount) {
-//        this.nodeNr = nodeNr;
-//        this.geneticCode = null;
-//
-//        initParam(stateCount, siteCount);
-//        //TODO
-//        initINStatesParsimony();
-//    }
-
     @Override
     public void initAndValidate() {
-        //do nothing
+        //init validate in NodesStates.
     }
 
     // stateCount -> upper, siteCount -> array
@@ -173,9 +165,19 @@ public class NodeStates extends StateNode {
         return taxonIndex;
     }
 
+    /**
+     * @return   node index in BEAST tree
+     */
     @Override
     public String getID() {
         return Integer.toString(nodeNr);
+    }
+
+    /**
+     * @return  null if not tip, otherwise return taxon name
+     */
+    public String getTipID() {
+        return tipID;
     }
 
     /**
@@ -231,7 +233,7 @@ public class NodeStates extends StateNode {
      *
      * @return the codon states of the internal node sequence.
      */
-    public int[] getNodeStates() {
+    public int[] getStates() {
         // internal node index starts from getTipsCount();
         return states[currentMatrixIndex];
     }
@@ -242,22 +244,12 @@ public class NodeStates extends StateNode {
      *
      * @param states int[]
      */
-    public void setNodeStates(final int[] states) {
+    public void setStates(final int[] states) {
         // internal node index starts from getTipsCount();
-        setValue(states);
-    }
-
-    /**
-     * modify setValue for 2d matrix to take int[].
-     *
-     * @param vals     int[] values of the parameter
-     */
-    protected void setValue(final int[] vals) {
         startEditing(null);
 
-        System.arraycopy(vals, 0, this.states[currentMatrixIndex], 0, vals.length);
+        System.arraycopy(states, 0, this.states[currentMatrixIndex], 0, states.length);
         Arrays.fill(siteIsDirty, true);
-//        m_nLastDirty = nodeIndex;
     }
 
     /**
@@ -267,30 +259,25 @@ public class NodeStates extends StateNode {
      * @param codonNr the site index.
      * @return
      */
-    public int getASite(final int codonNr) {
+    public int getState(final int codonNr) {
         return states[currentMatrixIndex][codonNr];
     }
 
 
-//    /**
-//     * Set a codon state to the site at the internal node.
-//     * The state starts from 0.
-//     * <code>matrix[i,j] = values[i * minorDimension + j]</code>
-//     *
-//     * @param nodeNr the node index <code>i = nodeNr - internalNodeCount - 1</code><br>
-//     *               Leaf nodes are number 0 to <code>leafnodes-1</code>;
-//     *               Internal nodes are numbered  <code>leafnodes</code> up to <code>nodes-1</code>;
-//     *               The root node is always numbered <code>nodes-1</code>.
-//     * @param codonNr the site index.
-//     */
-//    public void setASite(final int nodeNr, final int codonNr, final int value) {
-//        // internal node index nodeNr starts from getTaxonCount();
-//        assert nodeNr > getInternalNodeCount() && nodeNr < getNodeCount();
-//        // convert nodeNr into 2d matrix row index
-//        int rowIndex = nodeNr - getInternalNodeCount() - 1;
-//
-//        setValue(rowIndex, codonNr, value);
-//    }
+    /**
+     * Set a codon state to the site at the internal node.
+     * The state starts from 0.
+     * <code>matrix[i,j] = values[i * minorDimension + j]</code>
+     *
+     * @param state   new state to set.
+     * @param codonNr the site index.
+     */
+    public void setState(final int state, final int codonNr) {
+        startEditing(null);
+
+        states[currentMatrixIndex][codonNr] = state;
+        siteIsDirty[codonNr] = true;
+    }
 
 
     /**

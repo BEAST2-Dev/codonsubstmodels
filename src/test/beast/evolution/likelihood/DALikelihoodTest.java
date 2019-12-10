@@ -72,7 +72,7 @@ public class DALikelihoodTest {
         // 0 - 59
         for (int s=0; s < 60; s++) {
             // internal nodes
-            nodesStates.setNodeStates(rootNr, new int[]{s});
+            nodesStates.setStates(new int[]{s}, rootNr);
             System.out.println("\nSet internal node state to " + s);
 
             double logPDA = daTreeLikelihood.calculateLogP();
