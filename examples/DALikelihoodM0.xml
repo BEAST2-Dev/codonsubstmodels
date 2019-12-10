@@ -129,10 +129,10 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <parameter id="popSize" value="0.2"/>
     <parameter id="clockRate" name="stateNode">1.0</parameter>
 
-    <substModel spec="codonmodels.M0Model" id="m0" verbose="true">
+    <substModel spec="codonmodels.M0Model" id="m0" verbose="false">
         <omega idref="m0.omega"/>
         <kappa idref="m0.kappa"/>
-        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
+        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4" verbose="true">
             <data idref="codon.alignment"/>
         </frequencies>
     </substModel>

@@ -4,9 +4,8 @@ package beast.evolution.likelihood;
 import beast.evolution.tree.Node;
 
 /**
- * data augmentation likelihood core based on a branch
- * for multithreading.
- * the branch is defined above the selected node.
+ * data augmentation likelihood core based on a branch for multithreading.
+ * the branch is defined above the selected child node.
  *
  */
 public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
@@ -164,19 +163,14 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
      * It calculates branch likelihoods at a branch,
      * and integrates branch likelihood across categories.
      *
-     //     * @param nodeChild1  the 'child 1' node
-     //     * @param nodeParent  the 'parent' node
+     * @param childNodeStates   states at one 'child' node
+     * @param parentNodeStates  states at 'parent' node
      * @param proportions the proportions of sites in each category. length = nrOfCategories.
      */
-    // branchLd[] is linked to the branch above the child node 1
     //TODO need to cache per site to avoid recalculation, when only the sequence at a site is changed
     @Override
     public void calculateBranchLdOverCategories(final int[] childNodeStates, final int[] parentNodeStates,
                                                 double[] proportions) {
-//        final int[] node1States = getNodeStates(nodeChild1);
-//        final int[] node3States = getNodeStates(nodeParent);
-
-//        if (node1States.length == getNrOfSites() && node3States.length == getNrOfSites()) {
 
         /**
          * Calculate DA branch likelihood per site per node.
@@ -185,11 +179,10 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
          * i is child state, j is parent state, w is the category index.
          */
 
-//            double[] matrices1 = matrices[currentMatrixIndex[nodeChild1]][nodeChild1];
-        double[] matrices1 = matrices[currentMatrixIndex];
-        //branchLd[][] is linked to the branch above the child node 1
-//            double[] branchLd1 = branchLd[currentBrLdIndex[nodeChild1]][nodeChild1];
-        double[] branchLd1 = branchLd[currentBrLdIndex];
+        // transition probability matrix
+        double[] matrices = this.matrices[currentMatrixIndex];
+        // branch likelihoods
+        double[] branchLd = this.branchLd[currentBrLdIndex];
 
         int state1;
         int state3;
@@ -202,13 +195,12 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
             if (state1 < nrOfStates) { // && state3 < nrOfStates && state2 < nrOfStates
 
                 //branchLd[] is linked to the branch above the child node 1
-                branchLd1[k] = matrices1[state1 * nrOfStates + state3] * proportions[0];
+                branchLd[k] = matrices[state1 * nrOfStates + state3] * proportions[0];
 
                 for (int l = 1; l < nrOfCategories; l++) {
                     int w = l * matrixSize;
-//                    siteLd3 = matrices1[w + state1 * nrOfStates + state3] * matrices2[w + state2 * nrOfStates + state3];
-                    branchLd1[k] += matrices1[w + state1 * nrOfStates + state3] * proportions[l];
-
+                    //n = w + i * state + j
+                    branchLd[k] += matrices[w + state1 * nrOfStates + state3] * proportions[l];
                 } // end l nrOfCategories
 
             } else {
@@ -223,10 +215,10 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 //                    }
             }
 
-            if (branchLd1[k] == 0) {
+            if (branchLd[k] == 0) {
                 for (int l = 0; l < nrOfCategories; l++)
                     System.err.println("Category " + l +  ": transition probability = " +
-                            matrices1[l * matrixSize + state1 * nrOfStates + state3]);
+                            matrices[l * matrixSize + state1 * nrOfStates + state3]);
 //                System.err.println
                 throw new RuntimeException("\nBranch above node " + getNodeNr() + " likelihood = 0 !\n" +
                         "At site " + k + ", child node state = " + state1 + ", parent node state = " + state3);
@@ -409,18 +401,6 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
 
 
     // ======= getters for unit tests =======
-
-//    public int getNrOfTips() {
-//        return tipStates.length;
-//    }
-//
-//    public int getNrOfInterNodes() {
-//        return internalNodeStates.getInternalNodeCount();
-//    }
-//
-//    public int getNrOfNodes() {
-//        return getNrOfTips() + getNrOfInterNodes();
-//    }
 
     // for test, = getNrOfSites();
     public int getBranchLdSize() {

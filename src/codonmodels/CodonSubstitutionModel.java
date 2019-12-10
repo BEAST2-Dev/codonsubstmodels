@@ -75,11 +75,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         double[] freqs = frequencies.getFreqs();
         nrOfStates = freqs.length;
 
-        if (verboseInput.get()) {
-            ((CodonFrequencies) frequencies).printCodonFrequencies(freqs,
-                    "Codon frequencies used in CodonSubstitutionModel");
-        }
-
         try {
             eigenSystem = createEigenSystem();
         } catch (SecurityException | ClassNotFoundException | InstantiationException |

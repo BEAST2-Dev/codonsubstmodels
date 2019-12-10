@@ -393,6 +393,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                 //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
                 for (int j=0; j < probabilities.length; j++)
+                    //TODO P(t) cannot be 0, but short branch causes numeric precision error.
                     if (probabilities[j] <= 0) {
 //                        System.err.println(Arrays.toString(probabilities));
                         throw new ArithmeticException("Reject proposal because P(t) = 0 ! " +

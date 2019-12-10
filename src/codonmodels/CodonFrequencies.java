@@ -65,32 +65,23 @@ public class CodonFrequencies extends Frequencies {
         //====== this includes update()
         super.initAndValidate();
 
-        if (verboseInput.get()) {
-            freqs = getFreqs();
-            Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
-            Log.info.println("Set frequencies dimension = " + freqs.length);
-
-//        Log.info.println("Initial values to codon frequencies = " +
+        freqs = getFreqs();
+        Log.info.println("Use " + piInput.get() + " equilibrium codon frequencies. ");
+        Log.info.println("Set frequencies dimension = " + freqs.length);
+//      Log.info.println("Initial values to codon frequencies = " +
 //                Arrays.toString(StringUtils.roundDoubleArrays(freqs, 8)));
-            Log.info.println();
+
+        // non-stop code freq has to > 0.
+        for (int s=0; s < freqs.length; s++) {
+            if ( freqs[s] <= 0 )
+                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
+                        " at non-stop code state " + s + " !");
         }
 
-//        validate(freqs);
+        if (verboseInput.get())
+            printCodonFrequencies(freqs, "Codon frequencies used in CodonSubstitutionModel");
+        Log.info.println();
     }
-
-    // stop codon freq has to be 0, non-stop code freq has to > 0.
-//    private void validate(double[] freqs) {
-//        GeneticCode geneticCode = codonDataType.getGeneticCode();
-//        for (int s=0; s < freqs.length; s++) {
-//            if (geneticCode.isStopCodonIndex(s) && freqs[s] > 0)
-//                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
-//                        " at stop code state " + s + " !");
-//            if ( (!geneticCode.isStopCodonIndex(s)) && freqs[s] <= 0)
-//                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
-//                        " at non-stop code state " + s + " !");
-//        }
-//
-//    }
 
     @Override
     protected void update() {
