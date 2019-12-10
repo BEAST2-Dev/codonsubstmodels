@@ -25,14 +25,18 @@ import java.util.List;
 public class NodeStates extends StateNode {
 
     private final int nodeNr; // used to map to index of DABranchLikelihoodCore[]
-    private final String tipID;
+    private final String tipID; // taxon name, null if not tip
 //    final GeneticCode geneticCode;
 
-    // 1st dimension is matrix index (current, stored),
-    // 2nd is nrOfSites
-    // states[matrix index][sites]
+    /**
+     * states[matrix index][sites]
+     * 1st dimension is matrix index (current, stored),
+     * 2nd is nrOfSites.
+     */
     protected int[][] states;
-    // store the matrix index, instead of different matrices
+    /**
+     * store the matrix index, instead of different matrices
+     */
     protected int currentMatrixIndex;
     protected int storedMatrixIndex;
 
@@ -353,7 +357,7 @@ public class NodeStates extends StateNode {
 
     //TODO full copy or just currentMatrixIndex?
     @Override
-    public StateNode copy() {
+    public NodeStates copy() {
         try {
             @SuppressWarnings("unchecked")
             final NodeStates copy = (NodeStates) this.clone();

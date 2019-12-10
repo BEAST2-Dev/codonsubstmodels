@@ -260,7 +260,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--            <log idref="clockRate"/>-->
 <!--        </logger>-->
 
-        <logger logEvery="100">
+        <logger logEvery="1">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>

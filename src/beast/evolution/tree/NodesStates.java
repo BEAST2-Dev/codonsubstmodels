@@ -51,6 +51,7 @@ public class NodesStates extends StateNode {
 
     // all nodes, use nodeNr to map the index of nodesStates[]
     protected  NodeStates[] nodesStates;
+//    protected  NodeStates[] storedNodesStates;
 
     // isDirty flags for each node
     protected boolean[] nodeIsDirty;
@@ -131,6 +132,7 @@ public class NodesStates extends StateNode {
 
         // init from constructor
         nodesStates = new NodeStates[nodeCount];
+//        storedNodesStates = new NodeStates[nodeCount];
 
         // set tips states
         setTipsStates(codonAlignment, tree);
@@ -500,15 +502,27 @@ public class NodesStates extends StateNode {
     //TODO store restore a site
     @Override
     protected void store() {
-        for (NodeStates nodeStates : nodesStates)
-            nodeStates.store();
-        //TODO need nodeIsDirty[]?
+        // internal nodes only
+        for (int i = getTipsCount(); i < getNodeCount(); i++){
+            //TODO need nodeIsDirty[]?
+//            storedNodesStates[i] = nodesStates[i].copy();
+            nodesStates[i].store();
+        }
+
+
+
     }
 
     @Override
     public void restore() {
-        for (NodeStates nodeStates : nodesStates)
-            nodeStates.restore();
+        // internal nodes only
+        for (int i = getTipsCount(); i < getNodeCount(); i++){
+            //TODO need nodeIsDirty[]?
+//            nodesStates[i] = storedNodesStates[i].copy();
+            nodesStates[i].restore();
+        }
+
+
     }
 
 //    @Override

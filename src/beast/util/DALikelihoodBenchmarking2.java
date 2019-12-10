@@ -1,12 +1,10 @@
 package beast.util;
 
-import beast.core.Distribution;
-import beast.core.Logger;
-import beast.core.MCMC;
-import beast.core.State;
+import beast.core.*;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
+import beast.evolution.operators.ScaleOperator;
 import beast.evolution.operators.Uniform;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodesStates;
@@ -34,8 +32,8 @@ import java.text.DecimalFormat;
  * @author Walter Xie
  */
 public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
-    final String chainLength = "1000";
-    final String logEvery = "100";
+    final String chainLength = "100000";
+    final String logEvery = "10000";
 
 //    // 1st[] starts 0, need to adjust to BEAST node index
 //    final int[][] states; // [internal nodes][codon states]
@@ -191,15 +189,17 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
 
 
         // Set up operator: TODO add flag to determine which operator is used
-        Uniform operator = new Uniform();
+        Uniform operator1 = new Uniform();
         // Randomly select internal node (not root) and move node height uniformly in [children, parent].
-        operator.initByName("tree", tree, "weight", 10.0);
-//        ScaleOperator operator = new ScaleOperator();
-//        operator.initByName("tree", tree, "scaleFactor", 0.5, "weight", 1.0, "rootOnly", true); // scale root height
+        operator1.initByName("tree", tree, "weight", 10.0);
+        ScaleOperator operator2 = new ScaleOperator();
+        operator2.initByName("tree", tree, "scaleFactor", 0.75, "weight", 3.0, "rootOnly", true); // scale root height
 //        operator.initByName("tree", tree, "scaleFactor", 0.7, "weight", 1.0); // scale tree
 
-//        Uniform operator = new Uniform();
-//        operator.initByName("tree", tree, "weight", 10.0);
+        OperatorSchedule schedule = new OperatorSchedule();
+        schedule.initAndValidate();
+        schedule.addOperator(operator1);
+        schedule.addOperator(operator2);
 
         //Screen logging
         TreeStatLogger treeStatLogger = new TreeStatLogger();
@@ -214,7 +214,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
                 "chainLength", chainLength,
                 "state", state,
                 "distribution", likelihood,
-                "operator", operator,
+                "operatorschedule", schedule,
                 "logger", logger
         );
 
