@@ -2,14 +2,13 @@
 
 package beast.evolution.likelihood;
 
-import beast.evolution.tree.Node;
-
 /**
  * framework of data augmentation branch likelihood core
  */
 
 public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore {
-    private final Node node;
+//    private final Node node; //TODO bug : destroy store/restore
+    private final int branchNr; // the node Nr of child node below the branch
 
     final protected int nrOfSites; // e.g. number of codons
 
@@ -30,26 +29,30 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
 
 
     /**
+     * data augmentation likelihood core based on a branch,
      * called initialize() inside
-     * @param nrOfStates
-     * @param nrOfSites
-     * @param nrOfCategories
+     * @param branchNr       the node Nr of child node below the branch
+     * @param nrOfStates     number of states in the data, 64 for codon
+     * @param nrOfSites      number of sites (codon)
+     * @param nrOfCategories number of categories in the site model
      */
-//    public AbstrDABranchLikelihoodCore(int nrOfStates, int nrOfSites, int nrOfCategories) {
-//        super(nrOfStates, nrOfCategories);
-//        this.nrOfSites = nrOfSites;
-//
-//        initialize();
-//    }
-
-    public AbstrDABranchLikelihoodCore(Node node, int nrOfStates, int nrOfSites, int nrOfCategories) {
+    public AbstrDABranchLikelihoodCore(int branchNr, int nrOfStates, int nrOfSites, int nrOfCategories) {
         super(nrOfStates, nrOfCategories);
         this.nrOfSites = nrOfSites;
-        this.node = node;
+        this.branchNr = branchNr;
 
         initialize();
     }
 
+
+    /**
+     * Restore the stored state
+     */
+    @Override
+    public void store() {
+        storedMatrixIndex = currentMatrixIndex;
+        storedBrLdIndex = currentBrLdIndex;
+    }
 
     /**
      * Store current state
@@ -70,15 +73,6 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
     public void unstore() {
         currentMatrixIndex = storedMatrixIndex;
         currentBrLdIndex = storedBrLdIndex;
-    }
-
-    /**
-     * Restore the stored state
-     */
-    @Override
-    public void store() {
-        storedMatrixIndex = currentMatrixIndex;
-        storedBrLdIndex = currentBrLdIndex;
     }
 
 
@@ -140,11 +134,7 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
         return nrOfSites;
     }
 
-    public Node getNode() {
-        return node;
-    }
-
-    public int getNodeNr() {
-        return node.getNr();
+    public int getBranchNr() {
+        return branchNr;
     }
 }

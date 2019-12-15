@@ -61,7 +61,7 @@ public class NodeStates extends StateNode {
     /**
      * isDirty flags for each site
      */
-    protected boolean[] siteIsDirty;
+    protected boolean[] siteIsDirty; // TODO setASiteDirty
 
 
     /**
@@ -184,6 +184,8 @@ public class NodeStates extends StateNode {
      * indicate that the states matrix for node nodeIndex is to be changed *
      */
     public void setStatesForUpdate() {
+        if (tipID != null)
+            throw new UnsupportedOperationException("Can not sample tip states yet !");
         currentMatrixIndex = 1 - currentMatrixIndex; // 0 or 1
     }
 
@@ -201,14 +203,20 @@ public class NodeStates extends StateNode {
     }
 
 
-    //TODO store restore a site
+    //TODO store/restore per site
     @Override
     protected void store() {
+        if (tipID != null)
+            throw new UnsupportedOperationException("Can not sample tip states yet !");
+
         storedMatrixIndex = currentMatrixIndex;
     }
 
     @Override
     public void restore() {
+        if (tipID != null)
+            throw new UnsupportedOperationException("Can not sample tip states yet !");
+
         // Rather than copying the stored stuff back, just swap the pointers...
         currentMatrixIndex = storedMatrixIndex;
 

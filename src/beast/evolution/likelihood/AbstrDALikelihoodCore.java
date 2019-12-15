@@ -62,15 +62,14 @@ abstract public class AbstrDALikelihoodCore {
     abstract public void store();
 
     /**
-     * reset current state to stored state, only used when switching from non-scaled to scaled or vice versa *
-     */
-    abstract public void unstore();
-
-    /**
      * restore state *
      */
     abstract public void restore();
 
+    /**
+     * reset current state to stored state, only used when switching from non-scaled to scaled or vice versa *
+     */
+    abstract public void unstore();
 
     public int getNrOfStates() {
         return nrOfStates;

@@ -201,7 +201,7 @@ public class NodesStates extends StateNode {
 
         int[] tipsStates = new int[getTipsCount()];
         for (int k=0; k < getSiteCount(); k++) {
-            getTipsStates(k, tipsStates);
+            getTipsStatesAtSite(k, tipsStates);
             RASParsimony1Site ras1Site = new RASParsimony1Site(tipsStates, tree);
 
             int[] as = ras1Site.reconstructAncestralStates();
@@ -210,22 +210,6 @@ public class NodesStates extends StateNode {
                 inStates[i][k] = as[i];
         }
         return inStates;
-    }
-
-
-    /**
-     * Get tips states at given 1 site (codon).
-     * @param nrOfSite      The codon site index in the alignment
-     * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
-     */
-    public void getTipsStates(int nrOfSite, int[] tipsStates) {
-        assert tipsStates.length == getTipsCount();
-        int state;
-        // BEAST tips nr = [0, TipsCount-1]
-        for (int i=0; i < getTipsCount() ; i++) {
-            state = getState(i, nrOfSite);
-            tipsStates[i] = state;
-        }
     }
 
 
@@ -347,18 +331,34 @@ public class NodesStates extends StateNode {
         nodeIsDirty[nodeIndex] = true;
     }
 
+
     /**
-     * get the sites at a site of all internal nodes.
-     *
-     * @param codonNr the codon site index.
-     * @return
+     * Get tips states at given 1 site (codon).
+     * @param nrOfSite      The codon site index in the alignment
+     * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
      */
-    public int[] getStatesAtSite(final int codonNr) {
-        int[] col = new int[getNodeCount()];
-        for (int i = 0; i < getNodeCount(); i++)
-            col[i] = getState(i, codonNr);
-        return col;
+    public void getTipsStatesAtSite(int nrOfSite, int[] tipsStates) {
+        assert tipsStates.length == getTipsCount();
+        int state;
+        // BEAST tips nr = [0, TipsCount-1]
+        for (int i=0; i < getTipsCount() ; i++) {
+            state = getState(i, nrOfSite);
+            tipsStates[i] = state;
+        }
     }
+
+//    /**
+//     * get the sites at a site of all nodes.
+//     *
+//     * @param codonNr the codon site index.
+//     * @return
+//     */
+//    public int[] getStatesAtSite(final int codonNr) {
+//        int[] col = new int[getNodeCount()];
+//        for (int i = 0; i < getNodeCount(); i++)
+//            col[i] = getState(i, codonNr);
+//        return col;
+//    }
 
     /**
      * Get a codon state from the site at the node.
@@ -414,6 +414,21 @@ public class NodesStates extends StateNode {
     }
 
 
+//    /**
+//     * Internal node states changed
+//     * @return
+//     */
+//    @Override
+//    protected boolean requiresRecalculation() {
+//        // internal nodes only
+//        for (int i = getTipsCount(); i < getNodeCount(); i++) {
+//            if (isNodeStatesDirty(i)) return true;
+//        }
+//        return false;
+//        //return super.requiresRecalculation();
+//    }
+
+
     public NodeStates getNodeStates(final int nodeIndex) {
         return nodesStates[nodeIndex];
     }
@@ -464,6 +479,9 @@ public class NodesStates extends StateNode {
         super.log(sampleNr, out);
     }
 
+    /**
+     * all tree nodes at the moment
+     */
     @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder();
@@ -506,13 +524,15 @@ public class NodesStates extends StateNode {
     }
 
     /**
-     * this will set tips and internal nodes dirty in array {@link #nodeIsDirty}
+     * this will only set internal nodes dirty in array {@link #nodeIsDirty}
      * @param isDirty
      */
     @Override
     public void setEverythingDirty(boolean isDirty) {
         setSomethingIsDirty(isDirty);
-        Arrays.fill(nodeIsDirty, isDirty);
+//        Arrays.fill(nodeIsDirty, isDirty);
+        for (int i=getTipsCount(); i < getNodeCount(); i++)
+            nodeIsDirty[i] = true;
     }
 
     //cleans up and deallocates arrays
@@ -524,7 +544,10 @@ public class NodesStates extends StateNode {
     }
 
 
-    //TODO store restore a site
+    /**
+     * only call internal nodes {@link NodeStates#store()}
+     */
+    //TODO store/restore per site
     @Override
     protected void store() {
         // internal nodes only
@@ -538,6 +561,9 @@ public class NodesStates extends StateNode {
 
     }
 
+    /**
+     * only call internal nodes {@link NodeStates#restore()}
+     */
     @Override
     public void restore() {
         // internal nodes only
@@ -554,6 +580,9 @@ public class NodesStates extends StateNode {
 //    public void unstore() {
 //        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
 //    }
+
+
+
 
     //******* use those in NodesStates not these below *******
 

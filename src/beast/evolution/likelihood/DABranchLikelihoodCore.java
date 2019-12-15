@@ -1,8 +1,6 @@
 package beast.evolution.likelihood;
 
 
-import beast.evolution.tree.Node;
-
 /**
  * data augmentation likelihood core based on a branch for multithreading.
  * the branch is defined above the selected child node.
@@ -18,14 +16,10 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
     double SCALE = 2;
 
     /**
-     * data augmentation likelihood core based on a branch
-     * @param node          the child {@link Node} below the branch
-     * @param nrOfStates    64 for codon
-     * @param nrOfSites     codon sites
-     * @param categoryCount site model gamma category count
+     * inherited from {@link AbstrDABranchLikelihoodCore#AbstrDABranchLikelihoodCore(int, int, int, int)}
      */
-    public DABranchLikelihoodCore(Node node, int nrOfStates, int nrOfSites, int categoryCount) {
-        super(node, nrOfStates, nrOfSites, categoryCount);
+    public DABranchLikelihoodCore(int branchNr, int nrOfStates, int nrOfSites, int categoryCount) {
+        super(branchNr, nrOfStates, nrOfSites, categoryCount);
     } // called initialize()
 
 
@@ -220,7 +214,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
                     System.err.println("Category " + l +  ": transition probability = " +
                             matrices[l * matrixSize + state1 * nrOfStates + state3]);
 //                System.err.println
-                throw new RuntimeException("\nBranch above node " + getNodeNr() + " likelihood = 0 !\n" +
+                throw new RuntimeException("\nBranch above node " + getBranchNr() + " likelihood = 0 !\n" +
                         "At site " + k + ", child node state = " + state1 + ", parent node state = " + state3);
             }
 
