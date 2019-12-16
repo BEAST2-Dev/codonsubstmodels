@@ -4,10 +4,11 @@ import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
 import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.*;
+import beast.evolution.tree.Node;
+import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.Tree;
+import beast.evolution.tree.TreeInterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,11 +66,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
      */
     private final List<Callable<Double>> likelihoodCallers = new ArrayList<Callable<Double>>();
 
-    /**
-     * BEASTObject associated with inputs. Since none of the inputs are StateNodes, it
-     * is safe to link to them only once, during initAndValidate.
-     */
-    protected SubstitutionModel substitutionModel;
 
     /**
      * flag to indicate the
@@ -112,14 +108,10 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     public DataAugTreeLikelihood(){}
 
-    public DataAugTreeLikelihood(NodesStates nodesStates, TreeInterface tree,
-                                 SiteModel.Base siteModel, BranchRateModel.Base branchRateModel, int threadCount) {
-        this.nodesStates = nodesStates;
-        this.tree = tree;
-        this.siteModel = siteModel;
-        this.substitutionModel = siteModel.getSubstitutionModel();
-        this.branchRateModel = branchRateModel;
-        this.threadCount = threadCount;
+    public DataAugTreeLikelihood(NodesStates nodesStates, TreeInterface tree, SiteModel.Base siteModel,
+                                 BranchRateModel.Base branchRateModel, int threadCount) {
+        initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel,
+                "branchRateModel", branchRateModel, "threads", threadCount);
 //TODO
     }
 
@@ -137,8 +129,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             threadCount = Integer.parseInt(instanceCount);
         }
 
-        // data and tree
-        nodesStates = nodesStatesInput.get();
+        // data, tree and models
+        super.initAndValidate();
 
 //        beagle = null;
 //        beagle = new BeagleTreeLikelihood();
@@ -157,24 +149,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //        // No Beagle instance was found, so we use the good old java likelihood core
 //        beagle = null;
 
-        if (!(siteModelInput.get() instanceof SiteModel.Base)) {
-            throw new IllegalArgumentException("siteModel input should be of type SiteModel.Base");
-        }
-        siteModel = (SiteModel.Base) siteModelInput.get();
-        siteModel.setDataType(nodesStates.getCodonDataType());
-        substitutionModel = siteModel.getSubstitutionModel();
-
-        if (branchRateModelInput.get() != null) {
-            branchRateModel = branchRateModelInput.get();
-        } else {
-            branchRateModel = new StrictClockModel();
-        }
-
         // init DALikelihoodCore
         initCore();
-
-
-
 
         // TODO
         proportionInvariant = siteModel.getProportionInvariant();
@@ -195,13 +171,16 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // no pattern, use getSiteCount()
         final int siteCount = nodesStates.getSiteCount();
         final int nodeCount = nodesStates.getNodeCount();
+        // caching branch lengths and log likelihoods for each of branch,
         branchLengths = new double[nodeCount-1];
         storedBranchLengths = new double[nodeCount-1];
+        // root index is used to store frequencies prior at root
+        branchLogLikelihoods = new double[nodeCount];
+        storedBranchLogLikelihoods = new double[nodeCount];
 
         // excl. root index
         daBranchLdCores = new DABranchLikelihoodCore[nodeCount-1];
 
-        tree = treeInput.get();
         // init likelihood core using branch index (child node index below the branch)
         for (int n = 0; n < getRootIndex(); n++) {
             final Node node = tree.getNode(n);
@@ -222,11 +201,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                 likelihoodCallers.add(new DABranchLikelihoodCallable(daBranchLdCores[n], n));
             }
         }
-
-        // caching log likelihoods for each of node,
-        // root index is used to store frequencies prior at root
-        branchLogLikelihoods = new double[nodeCount];
-        storedBranchLogLikelihoods = new double[nodeCount];
 
         final int matrixSize = stateCount * stateCount; // matrixSize = stateCount * stateCount;
         // transition probability matrix, P
@@ -528,10 +502,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         double[] tmp2 = branchLogLikelihoods;
         branchLogLikelihoods = storedBranchLogLikelihoods;
         storedBranchLogLikelihoods = tmp2;
-    }
-
-    public NodesStates getNodesStates() {
-        return nodesStates;
     }
 
     // for testing, nodeIndex is the child node below this branch

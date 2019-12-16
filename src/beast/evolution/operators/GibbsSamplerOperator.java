@@ -1,6 +1,10 @@
 package beast.evolution.operators;
 
+import beast.core.Description;
+import beast.core.Input;
 import beast.core.Operator;
+import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.Tree;
 
 /**
  * Gibbs sampler to sample the internal node states.
@@ -14,7 +18,27 @@ import beast.core.Operator;
  *
  * @author Walter Xie
  */
+@Description("Gibbs sampler to sample the internal node states.")
 public class GibbsSamplerOperator extends Operator {
+
+    final public Input<Tree> treeInput = new Input<>("tree",
+            "beast.tree on which this operation is performed", Input.Validate.REQUIRED);
+    final public Input<NodesStates> nodesStatesInput = new Input<>("nodesStates",
+            "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
+
+
+
+
+    @Override
+    public void initAndValidate() {
+
+        final Tree tree = treeInput.get();
+        final NodesStates nodesStates = nodesStatesInput.get();
+
+        nodesStates.validateTree(tree);
+        nodesStates.validateNodeStates();
+
+    }
 
 
 
@@ -25,15 +49,6 @@ public class GibbsSamplerOperator extends Operator {
         return 0;
     }
 
-    @Override
-    public void initAndValidate() {
-
-    }
-
-    @Override
-    public String getDescription() {
-        return null;
-    }
 
     @Override
     public String getCitations() {

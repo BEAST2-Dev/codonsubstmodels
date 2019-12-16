@@ -26,6 +26,7 @@ import java.util.List;
  * Init and validate in {@link NodesStates#initAndValidate()}.
  */
 public class NodeStates extends StateNode {
+
     /**
      * The node index :<br>
      * Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
@@ -165,12 +166,16 @@ public class NodeStates extends StateNode {
         return taxonIndex;
     }
 
+    public int getNodeNr() {
+        return nodeNr;
+    }
+
     /**
      * @return   node index in BEAST tree
      */
     @Override
     public String getID() {
-        return Integer.toString(nodeNr);
+        return Integer.toString(getNodeNr());
     }
 
     /**

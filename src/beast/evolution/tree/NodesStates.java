@@ -63,8 +63,9 @@ public class NodesStates extends StateNode {
     public NodesStates() { }
 
     public NodesStates(CodonAlignment codonAlignment, TreeInterface tree) {
-        initParams(codonAlignment);
-        initTipsStates(codonAlignment, tree);
+        initByAlignment(codonAlignment);
+        validateTree(tree);
+        setTipsStates(codonAlignment, tree);
     }
 
     /**
@@ -78,6 +79,7 @@ public class NodesStates extends StateNode {
     public NodesStates(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
         this(codonAlignment, tree);
         initInternalNodesStates(initMethod, tree);
+        validateNodeStates();
     }
 
     @Override
@@ -85,26 +87,58 @@ public class NodesStates extends StateNode {
         // need data type, site count, taxa count
         CodonAlignment codonAlignment = codonAlignmentInput.get();
         // cannot init params by constructor
-        initParams(codonAlignment);
+        initByAlignment(codonAlignment);
 
         TreeInterface tree = treeInput.get();
-        initTipsStates(codonAlignment, tree);
+        validateTree(tree);
+        setTipsStates(codonAlignment, tree);
 
         // get BEAST seed long seed = Randomizer.getSeed();
         String initMethod = initINSInput.get();
         initInternalNodesStates(initMethod, tree);
 
         // validation
-        for (int i=0; i < getTipsCount(); i++) {
-            NodeStates tip = getNodeStates(i);
-            // use it to recognise tips in setter
-            if (tip.getTipID() == null)
-                throw new IllegalArgumentException("Tip (" + i + ") requires ID taxon name in NodeStates object !");
-        }
+        validateNodeStates();
     }
 
 
-    protected void initParams(CodonAlignment codonAlignment) {
+    public void validateTree(TreeInterface tree) {
+        // sanity check: alignment should have same #taxa as tree
+        if (getTipsCount() != tree.getLeafNodeCount())
+            throw new IllegalArgumentException("The number of tips in the tree does not match the number of sequences");
+        // nodeCount == tree.getNodeCount()
+        if (getNodeCount() != tree.getNodeCount())
+            throw new IllegalArgumentException("The dimension of nodes states should equal to " +
+                    "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
+        // get***Count uses nodeCount
+//        assert getTipsCount() == tree.getLeafNodeCount();
+//        assert getInternalNodeCount() == tree.getInternalNodeCount();
+    }
+
+    public void validateNodeStates() {
+        for (int i=0; i < getNodeCount(); i++) {
+            NodeStates node = getNodeStates(i);
+            assert node.getNodeNr() == i;
+
+            if (i < getTipsCount()) { // tips ID
+                // use it to recognise tips in setter
+                if (node.getTipID() == null)
+                    throw new IllegalArgumentException("Tip (" + i + ") requires ID taxon name in NodeStates object !");
+                if (node.getNodeNr() >= getTipsCount())
+                    throw new IllegalArgumentException("Invalid node index at tip : " + i + " cannot >= " + getTipsCount() + " !");
+            } else { // internal nodes
+                // use it to recognise tips in setter
+                if (node.getTipID() != null)
+                    throw new IllegalArgumentException("TipID should be null in internal node (" + i + ") NodeStates object !");
+                if (node.getNodeNr() < getTipsCount() || node.getNodeNr() >= getNodeCount())
+                    throw new IllegalArgumentException("Invalid node index at internal node : " + i +
+                            " should range [" + getTipsCount() + ", " + (getNodeCount()-1) + "] !");
+            }
+        } // end i loop
+    }
+
+    // nodeCount = 2 * codonAlignment.getTaxonCount() - 1
+    protected void initByAlignment(CodonAlignment codonAlignment) {
         this.codonDataType = codonAlignment.getDataType();
         final int stateCount = getStateCount();
 //        assert stateCount == 64;
@@ -120,6 +154,9 @@ public class NodesStates extends StateNode {
         // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
         siteCount = codonAlignment.getSiteCount();
 
+        // init from constructor
+        nodesStates = new NodeStates[nodeCount];
+//        storedNodesStates = new NodeStates[nodeCount];
         nodeIsDirty = new boolean[nodeCount];
 
         // fix ID
@@ -127,37 +164,21 @@ public class NodesStates extends StateNode {
             setID(codonAlignment.getID());
     }
 
-    protected void initTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
+    // set tips states to nodesStates[] by nodeNr indexing
+    protected void setTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
         // sanity check: alignment should have same #taxa as tree
         if (codonAlignment.getTaxonCount() != tree.getLeafNodeCount())
             throw new IllegalArgumentException("The number of nodes in the tree does not match the number of sequences");
-        // nodeCount == tree.getNodeCount()
-        if (getNodeCount() != tree.getNodeCount())
-            throw new IllegalArgumentException("The dimension of nodes states should equal to " +
-                    "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
-        // get***Count uses nodeCount
-        assert getTipsCount() == tree.getLeafNodeCount();
-        assert getInternalNodeCount() == tree.getInternalNodeCount();
 
         Log.info.println("  " + codonAlignment.toString(true));
 
-        // init from constructor
-        nodesStates = new NodeStates[nodeCount];
-//        storedNodesStates = new NodeStates[nodeCount];
-
         // set tips states
-        setTipsStates(codonAlignment, tree);
-        // call initINS
-    }
-
-    // set tips states to nodesStates[] by nodeNr indexing
-    protected void setTipsStates(CodonAlignment codonAlignment, TreeInterface tree) {
-        // tips
         for (Node tip : tree.getExternalNodes()) {
             int nr = tip.getNr();
             // use nodeNr to map the index of nodesStates[]
             nodesStates[nr] = new NodeStates(nr, tip.getID(), codonAlignment);
         }
+        // call initINS
     }
 
     /**
