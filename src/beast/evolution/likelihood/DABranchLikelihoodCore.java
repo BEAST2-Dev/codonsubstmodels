@@ -156,14 +156,13 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
     /**
      * It calculates branch likelihoods at a branch,
      * and integrates branch likelihood across categories.
-     *
-     * @param childNodeStates   states at one 'child' node
-     * @param parentNodeStates  states at 'parent' node
+     *  @param statesParentNode  states at 'parent' node
+     * @param statesChildNode   states at one 'child' node
      * @param proportions the proportions of sites in each category. length = nrOfCategories.
      */
     //TODO need to cache per site to avoid recalculation, when only the sequence at a site is changed
     @Override
-    public void calculateBranchLdOverCategories(final int[] childNodeStates, final int[] parentNodeStates,
+    public void calculateBranchLdOverCategories(final int[] statesParentNode, final int[] statesChildNode,
                                                 double[] proportions) {
 
         /**
@@ -173,9 +172,7 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
          * i is child state, j is parent state, w is the category index.
          */
 
-        // transition probability matrix
-        double[] matrices = this.matrices[currentMatrixIndex];
-        // branch likelihoods
+        // branch likelihoods for calculating
         double[] branchLd = this.branchLd[currentBrLdIndex];
 
         int state1;
@@ -183,19 +180,22 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
         // integrate over categories
         for (int k = 0; k < getNrOfSites(); k++) {
 
-            state1 = childNodeStates[k];
-            state3 = parentNodeStates[k];
+            state1 = statesChildNode[k];
+            state3 = statesParentNode[k]; // parent
 
             if (state1 < nrOfStates) { // && state3 < nrOfStates && state2 < nrOfStates
 
-                //branchLd[] is linked to the branch above the child node 1
-                branchLd[k] = matrices[state1 * nrOfStates + state3] * proportions[0];
+                // sum_l(P_s3_s1(t) * proportions[l])
+                branchLd[k] = getBranchLdAtSite(state3, state1, proportions);
 
-                for (int l = 1; l < nrOfCategories; l++) {
-                    int w = l * matrixSize;
-                    //n = w + i * state + j
-                    branchLd[k] += matrices[w + state1 * nrOfStates + state3] * proportions[l];
-                } // end l nrOfCategories
+//                //branchLd[] is linked to the branch above the child node 1
+//                branchLd[k] = matrices[state1 * nrOfStates + state3] * proportions[0];
+//
+//                for (int l = 1; l < nrOfCategories; l++) {
+//                    int w = l * matrixSize;
+//                    //n = w + i * state + j
+//                    branchLd[k] += matrices[w + state1 * nrOfStates + state3] * proportions[l];
+//                } // end l nrOfCategories
 
             } else {
                 throw new UnsupportedOperationException("State out of range at site " + k +
@@ -210,6 +210,8 @@ public class DABranchLikelihoodCore extends AbstrDABranchLikelihoodCore {
             }
 
             if (branchLd[k] == 0) {
+                // transition probability matrix
+                double[] matrices = getCurrentMatrix();
                 for (int l = 0; l < nrOfCategories; l++)
                     System.err.println("Category " + l +  ": transition probability = " +
                             matrices[l * matrixSize + state1 * nrOfStates + state3]);

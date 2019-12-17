@@ -48,12 +48,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             "maximum number of threads to use, if less than 1 the number of threads " +
                     "in BeastMCMC is used (default -1)", -1);
 
-    /****** calculation engine ******/
-//    protected BeagleTreeLikelihood beagle;
-    /**
-     * calculation engine for each branch, excl. root index, nrOfNodes-1
-     */
-    private DABranchLikelihoodCore[] daBranchLdCores;
 
     /**
      * number of threads to use, changes when threading causes problems
@@ -177,9 +171,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // root index is used to store frequencies prior at root
         branchLogLikelihoods = new double[nodeCount];
         storedBranchLogLikelihoods = new double[nodeCount];
-
-        // excl. root index
-        daBranchLdCores = new DABranchLikelihoodCore[nodeCount-1];
 
         // init likelihood core using branch index (child node index below the branch)
         for (int n = 0; n < getRootIndex(); n++) {
@@ -401,7 +392,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             final int[] nodeStates = nodesStates.getStates(nodeIndex);
             final int[] parentNodeStates = nodesStates.getStates(parentNum);
             // populate branchLd[][excl. root], nodeIndex is child
-            daBranchLdCore.calculateBranchLdOverCategories(nodeStates, parentNodeStates, proportions);
+            daBranchLdCore.calculateBranchLdOverCategories(parentNodeStates, nodeStates, proportions);
         }
 
         return nodeUpdate;

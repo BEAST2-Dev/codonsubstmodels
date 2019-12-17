@@ -75,12 +75,37 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
         currentBrLdIndex = storedBrLdIndex;
     }
 
+    /**
+     * @return the current transition probability matrix P(t),
+     *         which is flattened to n = w + i * state + j,
+     *         where n is index of flattened transition probability matrix,
+     *         i is child state, j is parent state, w is the category index.
+     */
+    public double[] getCurrentMatrix() {
+        return matrices[currentMatrixIndex];
+    }
 
+    /**
+     * branch likelihood calculation with site model categories.
+     * @param stateParentNode   state in parent node, j.
+     * @param stateChildNode    state in child node, i.
+     * @param proportions       the proportions of sites in each category. length = nrOfCategories.
+     * @return   the branch likelihood at one site
+     */
+    public double getBranchLdAtSite(final int stateParentNode, final int stateChildNode,
+                                    final double[] proportions) {
+        final double[] matrices = getCurrentMatrix();
 
-//    /**
-//     * reserve memory for branchLd for node *
-//     */
-//    public abstract void createNodeBranchLd();
+        //branchLd is defined as the branch above the child node 1
+        double branchLdSite = matrices[stateChildNode * nrOfStates + stateParentNode] * proportions[0];
+
+        for (int l = 1; l < nrOfCategories; l++) {
+            int w = l * matrixSize;
+            //n = w + i * state + j
+            branchLdSite += matrices[w + stateChildNode * nrOfStates + stateParentNode] * proportions[l];
+        } // end l nrOfCategories
+        return branchLdSite;
+    }
 
 
     /**
@@ -101,7 +126,7 @@ public abstract class AbstrDABranchLikelihoodCore extends AbstrDALikelihoodCore 
 
 //    public abstract void calculateNodeBrLdOverCategories(int nodeIndex1, int nodeIndex2, int nodeIndex3, double[] proportions);
 
-    public abstract void calculateBranchLdOverCategories(int[] childNodeStates, int[] parentNodeStates, double[] proportions);
+    public abstract void calculateBranchLdOverCategories(int[] parentNodeStates, int[] childNodeStates, double[] proportions);
 
     //    public abstract void calculateLogLikelihoods(double[] rootBranchLd, double[] frequencies, double[] siteLogLikelihoods);
     public abstract double calculateBranchLogLikelihood();

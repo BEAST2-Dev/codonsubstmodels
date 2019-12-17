@@ -48,12 +48,12 @@ public class DAStatesLikelihoodCoreIndexTest {
         daLdCore1siteBr1 = new DABranchLikelihoodCore(0, nrOfState, 1, 1);
         daLdCore1siteBr1.setNodeMatrix(0, p0);
         // set codon state to 1 site, state = [0, 63]
-        daLdCore1siteBr1.calculateBranchLdOverCategories(new int[]{1},new int[]{8}, new double[]{1});
+        daLdCore1siteBr1.calculateBranchLdOverCategories(new int[]{8}, new int[]{1}, new double[]{1});
 
         // branch 2
         daLdCore1siteBr2 = new DABranchLikelihoodCore(1, nrOfState, 1, 1);
         daLdCore1siteBr2.setNodeMatrix(0, p1);
-        daLdCore1siteBr2.calculateBranchLdOverCategories(new int[]{60},new int[]{8}, new double[]{1});
+        daLdCore1siteBr2.calculateBranchLdOverCategories(new int[]{8}, new int[]{60}, new double[]{1});
 
         // ======= 2 codons, 4 category =======
         double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
@@ -61,13 +61,13 @@ public class DAStatesLikelihoodCoreIndexTest {
         daLdCoreBr1 = new DABranchLikelihoodCore(0, nrOfState, 2, 4);
         for (int i = 0; i < daLdCoreBr1.getNrOfCategories(); i++)
             daLdCoreBr1.setNodeMatrix(i, p0);
-        daLdCoreBr1.calculateBranchLdOverCategories(new int[]{1,2},new int[]{8,9}, proportions);
+        daLdCoreBr1.calculateBranchLdOverCategories(new int[]{8,9}, new int[]{1,2}, proportions);
 
         // branch 2
         daLdCoreBr2 = new DABranchLikelihoodCore(1, nrOfState, 2, 4);
         for (int i = 0; i < daLdCoreBr2.getNrOfCategories(); i++)
             daLdCoreBr2.setNodeMatrix(i, p1);
-        daLdCoreBr2.calculateBranchLdOverCategories(new int[]{60,59},new int[]{8,9}, proportions);
+        daLdCoreBr2.calculateBranchLdOverCategories(new int[]{8,9}, new int[]{60,59}, proportions);
     }
 
     @Test

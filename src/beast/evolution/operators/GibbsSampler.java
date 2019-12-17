@@ -1,0 +1,153 @@
+package beast.evolution.operators;
+
+import beast.core.Description;
+import beast.core.Input;
+import beast.core.Operator;
+import beast.evolution.likelihood.DABranchLikelihoodCore;
+import beast.evolution.likelihood.GenericDATreeLikelihood;
+import beast.evolution.tree.Node;
+import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.Tree;
+import beast.util.RandomUtils;
+import beast.util.Randomizer;
+
+/**
+ * Gibbs sampler to sample the internal node states.
+ *
+ * <p><code>w_i</code> is the ith state of total 60/61 states:
+ * <p><code>w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)</code>
+ * <p>At the root:
+ * <p><code>w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)</code>,
+ * where P_{w_i}(t) is the equilibrium frequency.
+ * <p>Renormalise all <code>w_i</code> and choose <code>w</code> from the distribution.
+ *
+ * @author Walter Xie
+ */
+@Description("Gibbs sampler to sample the internal node states.")
+public class GibbsSampler extends Operator {
+
+    final public Input<Tree> treeInput = new Input<>("tree",
+            "beast.tree on which this operation is performed", Input.Validate.REQUIRED);
+    final public Input<NodesStates> nodesStatesInput = new Input<>("nodesStates",
+            "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
+    // to get P(t)
+    final public Input<GenericDATreeLikelihood> daTreeLdInput = new Input<>("DATreeLikelihood",
+            "The data augmentation tree likelihood used for the given nodes states and tree",
+            Input.Validate.REQUIRED);
+
+    public GibbsSampler() {
+    }
+
+    @Override
+    public void initAndValidate() {
+
+        final Tree tree = treeInput.get();
+        final NodesStates nodesStates = nodesStatesInput.get();
+
+        nodesStates.validateTree(tree);
+        nodesStates.validateNodeStates();
+
+        // To change DATreeLikelihood is not allowed
+        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
+        assert daTreeLd.getNodesStates() == nodesStates;
+        assert daTreeLd.getTree() == tree;
+
+    }
+
+    @Override
+    public double proposal() {
+        Node node = getRandomInternalNode();
+        final int nodeNr = node.getNr();
+
+        NodesStates nodesStates = nodesStatesInput.get(this);
+        int state;
+        for (int k = 0; k < nodesStates.getSiteCount(); k++) {
+            state = gibbsSampling(node, k, nodesStates);
+            // change state at k for nodeNr
+            nodesStates.setState(state, nodeNr, k);
+        }
+        return 0.0;
+    }
+
+    /**
+     * randomly select an internal node
+     * @return {@link Node}, or null if no internal nodes
+     */
+    public Node getRandomInternalNode() {
+        final Tree tree = treeInput.get(this);
+        final int tipsCount = tree.getLeafNodeCount();
+        // Abort if no internal nodes
+        if (tipsCount < 2) return null;
+
+        int nodeNr;
+        do {
+            // internal node Nr = [tipsCount, 2*tipsCount-2]
+            nodeNr = tipsCount + Randomizer.nextInt(tipsCount-1);
+        } while (nodeNr < tree.getLeafNodeCount() || nodeNr >= tree.getNodeCount());
+
+        return tree.getNode(nodeNr);
+    }
+
+    /**
+     * Gibbs sampling
+     * @param node     {@link Node}
+     * @param siteNr   the site (codon) index
+     * @param nodesStates   {@link NodesStates}
+     * @return         the proposed state at the node, or -1 if node is null
+     */
+    protected int gibbsSampling(Node node, int siteNr, NodesStates nodesStates) {
+        if (node == null) return -1;
+
+        final int nodeNr = node.getNr();
+        final int ch1Nr = node.getChild(0).getNr();
+        final int ch2Nr = node.getChild(1).getNr();
+
+
+        // states
+        final int x = nodesStates.getState(ch1Nr, siteNr);
+        final int y = nodesStates.getState(ch2Nr, siteNr);
+
+        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
+        final DABranchLikelihoodCore daBLd = daTreeLd.getDaBranchLdCores(nodeNr);
+        // n = w + i * state + j
+        final double[] matrix = daBLd.getCurrentMatrix();
+
+        final int stateCount = nodesStates.getStateCount();
+        double[] pr_w = new double[stateCount];
+
+        final double[] proportions = daTreeLd.getSiteModel().getCategoryProportions(node);
+        final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
+
+        double pzw,pwx,pwy,sum = 0;
+        for (int w=0; w < pr_w.length; w++) {
+            pwx = daBLd.getBranchLdAtSite(w, x, proportions);
+            pwy = daBLd.getBranchLdAtSite(w, y, proportions);
+
+            if (node.isRoot()) {
+                // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
+                pr_w[w] = frequencies[w] * pwx * pwy;
+            } else {
+                final int parentNr = node.getParent().getNr();
+                final int z = nodesStates.getState(parentNr, siteNr);
+                pzw = daBLd.getBranchLdAtSite(z, w, proportions);
+                // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
+                pr_w[w] = pzw * pwx * pwy;
+            }
+
+            sum += pr_w[w];
+        } // end w loop
+
+        // Renormalise all w
+        for (int w=0; w < pr_w.length; w++)
+            pr_w[w] = pr_w[w] / sum;
+
+        // choose final state w from the distribution
+        int w = RandomUtils.randomIntegerFrom(pr_w, false);
+        return w;
+    }
+
+    @Override
+    public String getCitations() {
+        return null;
+    }
+}
