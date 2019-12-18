@@ -6,7 +6,7 @@ import beast.core.Operator;
 import beast.evolution.likelihood.DABranchLikelihoodCore;
 import beast.evolution.likelihood.GenericDATreeLikelihood;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.util.RandomUtils;
 import beast.util.Randomizer;
@@ -28,7 +28,7 @@ public class GibbsSampler extends Operator {
 
     final public Input<Tree> treeInput = new Input<>("tree",
             "beast.tree on which this operation is performed", Input.Validate.REQUIRED);
-    final public Input<NodesStates> nodesStatesInput = new Input<>("nodesStates",
+    final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
             "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
     // to get P(t)
     final public Input<GenericDATreeLikelihood> daTreeLdInput = new Input<>("DATreeLikelihood",
@@ -42,7 +42,7 @@ public class GibbsSampler extends Operator {
     public void initAndValidate() {
 
         final Tree tree = treeInput.get();
-        final NodesStates nodesStates = nodesStatesInput.get();
+        final NodeStatesArray nodesStates = nodesStatesInput.get();
 
         nodesStates.validateTree(tree);
         nodesStates.validateNodeStates();
@@ -54,19 +54,25 @@ public class GibbsSampler extends Operator {
 
     }
 
+    /**
+     * @see Operator#proposal()
+     */
     @Override
     public double proposal() {
         Node node = getRandomInternalNode();
         final int nodeNr = node.getNr();
 
-        NodesStates nodesStates = nodesStatesInput.get(this);
+        NodeStatesArray nodesStates = nodesStatesInput.get(this);
+        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
+
         int state;
         for (int k = 0; k < nodesStates.getSiteCount(); k++) {
-            state = gibbsSampling(node, k, nodesStates);
+            state = gibbsSampling(node, k, nodesStates, daTreeLd);
             // change state at k for nodeNr
-            nodesStates.setState(state, nodeNr, k);
+            nodesStates.setState(nodeNr, k, state);
         }
-        return 0.0;
+        // Gibbs operator should always be accepted
+        return 0.0;//test store/restore //Double.POSITIVE_INFINITY;
     }
 
     /**
@@ -77,7 +83,8 @@ public class GibbsSampler extends Operator {
         final Tree tree = treeInput.get(this);
         final int tipsCount = tree.getLeafNodeCount();
         // Abort if no internal nodes
-        if (tipsCount < 2) return null;
+        if (tipsCount < 2)
+            throw new IllegalArgumentException("Tree must have at least 2 tips ! " + tipsCount);
 
         int nodeNr;
         do {
@@ -92,25 +99,17 @@ public class GibbsSampler extends Operator {
      * Gibbs sampling
      * @param node     {@link Node}
      * @param siteNr   the site (codon) index
-     * @param nodesStates   {@link NodesStates}
+     * @param nodesStates   {@link NodeStatesArray}
      * @return         the proposed state at the node, or -1 if node is null
      */
-    protected int gibbsSampling(Node node, int siteNr, NodesStates nodesStates) {
-        if (node == null) return -1;
-
+    protected int gibbsSampling(Node node, int siteNr, NodeStatesArray nodesStates,
+                                final GenericDATreeLikelihood daTreeLd) {
         final int nodeNr = node.getNr();
         final int ch1Nr = node.getChild(0).getNr();
         final int ch2Nr = node.getChild(1).getNr();
-
-
-        // states
+        // states at child nodes
         final int x = nodesStates.getState(ch1Nr, siteNr);
         final int y = nodesStates.getState(ch2Nr, siteNr);
-
-        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
-        final DABranchLikelihoodCore daBLd = daTreeLd.getDaBranchLdCores(nodeNr);
-        // n = w + i * state + j
-        final double[] matrix = daBLd.getCurrentMatrix();
 
         final int stateCount = nodesStates.getStateCount();
         double[] pr_w = new double[stateCount];
@@ -119,23 +118,39 @@ public class GibbsSampler extends Operator {
         final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
 
         double pzw,pwx,pwy,sum = 0;
-        for (int w=0; w < pr_w.length; w++) {
-            pwx = daBLd.getBranchLdAtSite(w, x, proportions);
-            pwy = daBLd.getBranchLdAtSite(w, y, proportions);
+        // w-x branch
+        final DABranchLikelihoodCore wxBranchLd = daTreeLd.getDaBranchLdCores(ch1Nr);
+        // w-y branch
+        final DABranchLikelihoodCore wyBranchLd = daTreeLd.getDaBranchLdCores(ch2Nr);
 
-            if (node.isRoot()) {
+        if (node.isRoot()) {
+            // no z
+            for (int w=0; w < pr_w.length; w++) {
+                // n = w + i * state + j
+                pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
+                pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
                 pr_w[w] = frequencies[w] * pwx * pwy;
-            } else {
-                final int parentNr = node.getParent().getNr();
-                final int z = nodesStates.getState(parentNr, siteNr);
-                pzw = daBLd.getBranchLdAtSite(z, w, proportions);
+                sum += pr_w[w];
+            } // end w loop
+
+        } else {
+            // z-w branch
+            final DABranchLikelihoodCore zwBranchLd = daTreeLd.getDaBranchLdCores(nodeNr);
+
+            final int parentNr = node.getParent().getNr();
+            final int z = nodesStates.getState(parentNr, siteNr);
+
+            for (int w=0; w < pr_w.length; w++) {
+                pzw = zwBranchLd.calculateBranchLdAtSite(z, w, proportions);
+                pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
+                pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
                 pr_w[w] = pzw * pwx * pwy;
-            }
+                sum += pr_w[w];
+            } // end w loop
 
-            sum += pr_w[w];
-        } // end w loop
+        } // end if
 
         // Renormalise all w
         for (int w=0; w < pr_w.length; w++)

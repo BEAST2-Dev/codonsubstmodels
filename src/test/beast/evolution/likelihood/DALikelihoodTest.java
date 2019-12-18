@@ -6,7 +6,7 @@ import beast.evolution.alignment.Sequence;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
@@ -61,7 +61,7 @@ public class DALikelihoodTest {
 
         System.out.println("\n=============== DA tree likelihood ===============");
 
-        NodesStates nodesStates = daTreeLikelihood.getNodesStates();
+        NodeStatesArray nodesStates = daTreeLikelihood.getNodesStates();
         int rootNr = daTreeLikelihood.getRootIndex();
         System.out.println("Root index = " + rootNr);
 
@@ -72,7 +72,7 @@ public class DALikelihoodTest {
         // 0 - 59
         for (int s=0; s < 60; s++) {
             // internal nodes
-            nodesStates.setStates(new int[]{s}, rootNr);
+            nodesStates.setStates(rootNr, new int[]{s});
             System.out.println("\nSet internal node state to " + s);
 
             double logPDA = daTreeLikelihood.calculateLogP();
@@ -139,7 +139,7 @@ public class DALikelihoodTest {
 
         // =============== DA tree likelihood ===============
         // this only init NodeStates for tips
-        NodesStates nodesStates = new NodesStates(codonAlignment, tree);
+        NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree);
         // set internal node states on the fly
 
         DataAugTreeLikelihood daTreeLikelihood = new DataAugTreeLikelihood();

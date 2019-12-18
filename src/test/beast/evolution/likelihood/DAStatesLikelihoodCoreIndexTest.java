@@ -2,7 +2,6 @@ package test.beast.evolution.likelihood;
 
 
 import beast.evolution.likelihood.DABranchLikelihoodCore;
-import beast.evolution.tree.Tree;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,33 +40,39 @@ public class DAStatesLikelihoodCoreIndexTest {
         }
 
         // ======= 2 tips + 1 internal node
-        Tree tree = new Tree("((0:1.0,1:1.0)2:0.0);");
+//        Tree tree = new Tree("((0:1.0,1:1.0)2:0.0);");
 
         // ======= 1 codon, 1 category =======
+        int[] statesParentNode = new int[]{8};
+        int[] statesChildNode1 = new int[]{1};
+        int[] statesChildNode2 = new int[]{60};
         // branch 1
         daLdCore1siteBr1 = new DABranchLikelihoodCore(0, nrOfState, 1, 1);
         daLdCore1siteBr1.setNodeMatrix(0, p0);
         // set codon state to 1 site, state = [0, 63]
-        daLdCore1siteBr1.calculateBranchLdOverCategories(new int[]{8}, new int[]{1}, new double[]{1});
+        daLdCore1siteBr1.calculateBranchLd(statesParentNode, statesChildNode1, new double[]{1});
 
         // branch 2
         daLdCore1siteBr2 = new DABranchLikelihoodCore(1, nrOfState, 1, 1);
         daLdCore1siteBr2.setNodeMatrix(0, p1);
-        daLdCore1siteBr2.calculateBranchLdOverCategories(new int[]{8}, new int[]{60}, new double[]{1});
+        daLdCore1siteBr2.calculateBranchLd(statesParentNode, statesChildNode2, new double[]{1});
 
         // ======= 2 codons, 4 category =======
+        statesParentNode = new int[]{8,9};
+        statesChildNode1 = new int[]{1,2};
+        statesChildNode2 = new int[]{60,59};
         double[] proportions = new double[]{0.1, 0.2, 0.3, 0.1};
         // branch 1
         daLdCoreBr1 = new DABranchLikelihoodCore(0, nrOfState, 2, 4);
         for (int i = 0; i < daLdCoreBr1.getNrOfCategories(); i++)
             daLdCoreBr1.setNodeMatrix(i, p0);
-        daLdCoreBr1.calculateBranchLdOverCategories(new int[]{8,9}, new int[]{1,2}, proportions);
+        daLdCoreBr1.calculateBranchLd(statesParentNode, statesChildNode1, proportions);
 
         // branch 2
         daLdCoreBr2 = new DABranchLikelihoodCore(1, nrOfState, 2, 4);
         for (int i = 0; i < daLdCoreBr2.getNrOfCategories(); i++)
             daLdCoreBr2.setNodeMatrix(i, p1);
-        daLdCoreBr2.calculateBranchLdOverCategories(new int[]{8,9}, new int[]{60,59}, proportions);
+        daLdCoreBr2.calculateBranchLd(statesParentNode, statesChildNode2, proportions);
     }
 
     @Test
@@ -92,13 +97,13 @@ public class DAStatesLikelihoodCoreIndexTest {
         double[] brLd = new double[daLdCore1siteBr1.getBranchLdSize()];
         daLdCore1siteBr1.getBranchLikelihoods(brLd);
         System.out.println("branchLd = " + Arrays.toString(brLd));
-        // 1 site: p0_1_8 = 1*(61*0.1) + 8*0.1 = 6.9
-        assertEquals(6.9, brLd[0], 1e-6);
+        // 1 site 8=>1 : p0_8_1 = 8*(61*0.1) + 1*0.1 = 48.9
+        assertEquals(48.9, brLd[0], 1e-6);
 
         daLdCore1siteBr2.getBranchLikelihoods(brLd);
         System.out.println("branchLd = " + Arrays.toString(brLd));
-        // 1 site : p1_60_8 = 60 * (61*0.01) + 8*0.01 = 36.68
-        assertEquals(36.68, brLd[0], 1e-6);
+        // 1 site 8=>60 : p1_8_60 = 8 * (61*0.01) + 60*0.01 = 5.48
+        assertEquals(5.48, brLd[0], 1e-6);
     }
 
     @Test
@@ -107,17 +112,17 @@ public class DAStatesLikelihoodCoreIndexTest {
         double[] integratedBrLd = new double[daLdCoreBr1.getBranchLdSize()];
         daLdCoreBr1.getBranchLikelihoods(integratedBrLd);
         System.out.println("branchLd = " + Arrays.toString(integratedBrLd));
-        // p0_1_8 = 6.1 + 0.8 = 6.9, p0_2_9 = 6.1 * 2 + 0.9 = 13.1
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
-        assertEquals(6.9 * 0.7, integratedBrLd[0], 1e-6);
-        assertEquals(13.1 * 0.7, integratedBrLd[1], 1e-6);
+        // p0_8_1 = 48.9, p0_9_2 = 55.1
+        assertEquals(48.9 * 0.7, integratedBrLd[0], 1e-6);
+        assertEquals(55.1 * 0.7, integratedBrLd[1], 1e-6);
 
         daLdCoreBr2.getBranchLikelihoods(integratedBrLd);
         System.out.println("branchLd = " + Arrays.toString(integratedBrLd));
         // 2 sites, proportions = 0.1 + 0.2 + 0.3 + 0.1 = 0.7
-        // p1_60_8 = 60 * 0.61 + 0.08 = 36.68, p1_59_9 = 59 * 0.61 + 0.09 = 36.08
-        assertEquals(36.68 * 0.7, integratedBrLd[0], 1e-6);
-        assertEquals(36.08 * 0.7, integratedBrLd[1], 1e-6);
+        // p1_8_60 = 5.48, p1_9_59 = 6.08
+        assertEquals(5.48 * 0.7, integratedBrLd[0], 1e-6);
+        assertEquals(6.08 * 0.7, integratedBrLd[1], 1e-6);
     }
 
 }

@@ -10,7 +10,6 @@ import beast.evolution.datatype.GeneticCode;
 import beast.util.Randomizer;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,7 +23,7 @@ import java.util.List;
  * Root index is always the last number.<br>
  * @author Walter Xie
  */
-public class NodesStates extends StateNode {
+public class NodeStatesArray extends StateNode {
 
     final public Input<CodonAlignment> codonAlignmentInput = new Input<>("data",
             "codon alignment to initialise the 2-d matrix of nodes (including tips) states",
@@ -60,9 +59,9 @@ public class NodesStates extends StateNode {
     protected boolean[] nodeIsDirty;
 
     //for XML parser
-    public NodesStates() { }
+    public NodeStatesArray() { }
 
-    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree) {
+    public NodeStatesArray(CodonAlignment codonAlignment, TreeInterface tree) {
         initByAlignment(codonAlignment);
         validateTree(tree);
         setTipsStates(codonAlignment, tree);
@@ -76,7 +75,7 @@ public class NodesStates extends StateNode {
      * @param initMethod       method to generate states for internal nodes.
      *                         see {@link #initInternalNodesStates(String, TreeInterface)}
      */
-    public NodesStates(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
+    public NodeStatesArray(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
         this(codonAlignment, tree);
         initInternalNodesStates(initMethod, tree);
         validateNodeStates();
@@ -310,12 +309,13 @@ public class NodesStates extends StateNode {
         return sequence.stream().mapToInt(i -> i).toArray();
     }
 
-    /**
-     * indicate that the states matrix for node nodeIndex is to be changed *
-     */
-    public void setStatesForUpdate(int nodeIndex) {
-        nodesStates[nodeIndex].setStatesForUpdate(); // 0 or 1
-    }
+//    /**
+//     * indicate that the states matrix for node nodeIndex is to be changed.
+//     * use before {@link #setStates(int[], int)} or {@link #setState(int, int, int)}.
+//     */
+//    public void setStatesForUpdate(int nodeNr) {
+//        nodesStates[nodeNr].setStatesForUpdate(); // 0 or 1
+//    }
 
     /**
      * Get an internal node states. The state starts from 0.
@@ -335,21 +335,23 @@ public class NodesStates extends StateNode {
      * Set the states to an internal node given its node index.
      * If {@link NodeStates} not init, then create with the given states.
      *
-     * @param states int[] states
-     * @param nodeIndex The node index :<br>
+     * @param nodeNr The node index :<br>
      *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
      *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
      *                  The root node is always indexed <code>nodeCount-1</code>.
+     * @param states int[] states
      */
-    public void setStates(final int[] states, final int nodeIndex) {
-        if (nodesStates[nodeIndex] == null) {
+    public void setStates(final int nodeNr, final int[] states) {
+        if (nodesStates[nodeNr] == null) {
             // internal node not init
-            nodesStates[nodeIndex] = new NodeStates(nodeIndex, states, getStateCount());
+            nodesStates[nodeNr] = new NodeStates(nodeNr, states, getStateCount());
         } else {
+            startEditing(null);
+
             // internal node index starts from getTipsCount();
-            nodesStates[nodeIndex].setStates(states);
+            nodesStates[nodeNr].setStates(states);
         }
-        nodeIsDirty[nodeIndex] = true;
+        nodeIsDirty[nodeNr] = true;
     }
 
 
@@ -402,21 +404,22 @@ public class NodesStates extends StateNode {
      * Set a codon state to the site at the internal node.
      * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
-     *
-     * @param state   new state to set
-     * @param nodeIndex The node index :<br>
+     *  @param nodeNr The node index :<br>
      *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
      *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
      *                  The root node is always indexed <code>nodeCount-1</code>.
      * @param codonNr the site index.
+     * @param state   new state to set
      */
-    public void setState(final int state, final int nodeIndex, final int codonNr) {
-        if (nodesStates[nodeIndex] == null)
-            throw new IllegalArgumentException("Node (" + nodeIndex + ") states are not initiated !");
+    public void setState(final int nodeNr, final int codonNr, final int state) {
+        if (nodesStates[nodeNr] == null)
+            throw new IllegalArgumentException("Node (" + nodeNr + ") states are not initiated !");
+
+        startEditing(null);
 
         // internal node index starts from getTipsCount();
-        nodesStates[nodeIndex].setState(state, codonNr);
-        nodeIsDirty[nodeIndex] = true;
+        nodesStates[nodeNr].setState(codonNr, state);
+        nodeIsDirty[nodeNr] = true;
     }
 
     /**
@@ -552,7 +555,7 @@ public class NodesStates extends StateNode {
     public void setEverythingDirty(boolean isDirty) {
         setSomethingIsDirty(isDirty);
 //        Arrays.fill(nodeIsDirty, isDirty);
-        for (int i=getTipsCount(); i < getNodeCount(); i++)
+        for (int i=getTipsCount(); i < getNodeCount(); i++) // only internal nodes
             nodeIsDirty[i] = true;
     }
 
@@ -607,12 +610,12 @@ public class NodesStates extends StateNode {
 
     //******* use those in NodesStates not these below *******
 
-    //TODO full copy or just currentMatrixIndex?
+    //TODO
     @Override
     public StateNode copy() {
         try {
             @SuppressWarnings("unchecked")
-            final NodesStates copy = (NodesStates) this.clone();
+            final NodeStatesArray copy = (NodeStatesArray) this.clone();
             for (int i = 0; i < nodesStates.length; i++)
                 copy.nodesStates[i] = (NodeStates) nodesStates[i].copy();
 
@@ -628,37 +631,40 @@ public class NodesStates extends StateNode {
 
     @Override
     public void assignTo(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodesStates copy = (NodesStates) other;
-        copy.setID(getID());
-        copy.index = index;
-        for (int i = 0; i < nodesStates.length; i++)
-            nodesStates[i].assignTo(copy.nodesStates[i]);
-        //storedStates = copy.storedStates.clone();
-        copy.lower = lower;
-        copy.upper = upper;
-        copy.nodeIsDirty = new boolean[getNodeCount()];
+        throw new UnsupportedOperationException("Unsupported");
+//        @SuppressWarnings("unchecked")
+//        final NodeStatesArray copy = (NodeStatesArray) other;
+//        copy.setID(getID());
+//        copy.index = index;
+//        for (int i = 0; i < nodesStates.length; i++)
+//            nodesStates[i].assignTo(copy.nodesStates[i]);
+//        //storedStates = copy.storedStates.clone();
+//        copy.lower = lower;
+//        copy.upper = upper;
+//        copy.nodeIsDirty = new boolean[getNodeCount()];
     }
 
     @Override
     public void assignFrom(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodesStates source = (NodesStates) other;
-        setID(source.getID());
-        for (int i = 0; i < nodesStates.length; i++)
-            nodesStates[i].assignFrom(source.nodesStates[i]);
-        lower = source.lower;
-        upper = source.upper;
-        nodeIsDirty = new boolean[source.getNodeCount()];
+        throw new UnsupportedOperationException("Unsupported");
+//        @SuppressWarnings("unchecked")
+//        final NodeStatesArray source = (NodeStatesArray) other;
+//        setID(source.getID());
+//        for (int i = 0; i < nodesStates.length; i++)
+//            nodesStates[i].assignFrom(source.nodesStates[i]);
+//        lower = source.lower;
+//        upper = source.upper;
+//        nodeIsDirty = new boolean[source.getNodeCount()];
     }
 
     @Override
     public void assignFromFragile(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodesStates source = (NodesStates) other;
-        for (int i = 0; i < nodesStates.length; i++)
-            nodesStates[i].assignFromFragile(source.nodesStates[i]);
-        Arrays.fill(nodeIsDirty, false);
+        throw new UnsupportedOperationException("Unsupported");
+//        @SuppressWarnings("unchecked")
+//        final NodeStatesArray source = (NodeStatesArray) other;
+//        for (int i = 0; i < nodesStates.length; i++)
+//            nodesStates[i].assignFromFragile(source.nodesStates[i]);
+//        Arrays.fill(nodeIsDirty, false);
     }
 
     @Override

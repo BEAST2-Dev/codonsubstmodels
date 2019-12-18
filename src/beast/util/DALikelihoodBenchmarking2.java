@@ -7,7 +7,7 @@ import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.operators.ScaleOperator;
 import beast.evolution.operators.Uniform;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeStatLogger;
 
@@ -157,7 +157,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         // init time
         long startInit = System.currentTimeMillis();
 
-        NodesStates nodesStates = new NodesStates(codonAlignment, tree, "parsimony");//random
+        NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree, "parsimony");//random
 
         DataAugTreeLikelihood likelihood = new DataAugTreeLikelihood();
         likelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel);
@@ -179,7 +179,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
     }
 
 
-    private MCMC initMCMC(Tree tree, NodesStates nodesStates, Distribution likelihood,
+    private MCMC initMCMC(Tree tree, NodeStatesArray nodesStates, Distribution likelihood,
                           String chainLength, String logEvery) {
 
         // Set up state: TODO omega kappa ?

@@ -11,7 +11,7 @@ import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.sitemodel.SiteModelInterface;
 import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.TreeInterface;
 
 import java.util.Collections;
@@ -25,7 +25,7 @@ import java.util.Random;
 // Override Distribution.calculatLogP() to make this class functional.
 public class GenericDATreeLikelihood extends Distribution {
 
-	final public Input<NodesStates> nodesStatesInput = new Input<>("nodesStates",
+	final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
 			"States in all nodes with the beast.tree", Validate.REQUIRED);
 
 	final public Input<TreeInterface> treeInput = new Input<>("tree",
@@ -39,9 +39,9 @@ public class GenericDATreeLikelihood extends Distribution {
 
     /** data, tree and models **/
 	/**
-	 * Data : states in all nodes {@link NodesStates}
+	 * Data : states in all nodes {@link NodeStatesArray}
 	 */
-    protected NodesStates nodesStates;
+    protected NodeStatesArray nodesStates;
 	/**
 	 * {@link TreeInterface}
 	 */
@@ -99,7 +99,7 @@ public class GenericDATreeLikelihood extends Distribution {
 
 
 
-	public NodesStates getNodesStates() {
+	public NodeStatesArray getNodesStates() {
 		return nodesStates;
 	}
 

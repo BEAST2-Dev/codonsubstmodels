@@ -1,6 +1,7 @@
 package beast.evolution.tree;
 
-import beast.core.StateNode;
+import beast.core.Function;
+import beast.core.Loggable;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
@@ -17,15 +18,13 @@ import java.util.List;
  * For internal nodes, they are ranged from the number of leaf nodes
  * to the nodeCount - 1.<br>
  *
- * Not use {@link beast.core.parameter.IntegerParameter}
- * because of both <code>arraycopy</code> and storing Object are slow.
- * Apple the index trick implemented in {@link beast.evolution.likelihood.BeerLikelihoodCore}
- * to avoid <code>arraycopy</code>.<br>
+ * Not use {@link beast.core.parameter.IntegerParameter}, because of performance.
+ * https://softwareengineering.stackexchange.com/questions/203970/when-to-use-primitive-vs-class-in-java/203974.
  *
  * No {@link beast.core.Input} here.
- * Init and validate in {@link NodesStates#initAndValidate()}.
+ * Init and validate in {@link NodeStatesArray#initAndValidate()}.
  */
-public class NodeStates extends StateNode {
+public class NodeStates implements Loggable, Cloneable, Function {//extends StateNode {
 
     /**
      * The node index :<br>
@@ -41,16 +40,10 @@ public class NodeStates extends StateNode {
 //    final GeneticCode geneticCode;
 
     /**
-     * states[matrix index][sites]
-     * 1st dimension is matrix index (current, stored),
-     * 2nd is nrOfSites.
+     * states[sites], the int states for this node.
      */
-    protected int[][] states;
-    /**
-     * store the matrix index, instead of different matrices
-     */
-    protected int currentMatrixIndex;
-    protected int storedMatrixIndex;
+    protected int[] states;
+    protected int[] storedStates;
 
     /**
      * upper & lower bound These are located before the inputs (instead of
@@ -103,18 +96,16 @@ public class NodeStates extends StateNode {
         setTipStates(tipID, codonAlignment);
     }
 
-    @Override
-    public void initAndValidate() {
-        //init validate in NodesStates.
-    }
+//    @Override
+//    public void initAndValidate() {
+//        //init validate in NodesStates.
+//    }
 
     // stateCount -> upper, siteCount -> array
     private void initParam(int stateCount, int siteCount) {
         // siteCount = num of codons, overwrite in CodonAlignment /= 3
-        states = new int[2][siteCount];
-
-//        currentMatrixIndex = 0;
-//        storedMatrixIndex = 0;
+        states = new int[siteCount];
+        storedStates = new int[siteCount];
 
         // 0 - 60/61, ignore lowerValueInput upperValueInput
         lower = 0;
@@ -141,9 +132,9 @@ public class NodeStates extends StateNode {
 
         // no patterns
         List<Integer> statesList = codonAlignment.getCounts().get(taxonIndex);
-        assert statesList.size() == states[currentMatrixIndex].length;
+        assert statesList.size() == states.length;
         // Java 8
-        states[currentMatrixIndex] = statesList.stream().mapToInt(i->i).toArray();
+        states = statesList.stream().mapToInt(i->i).toArray();
     }
 
     /**
@@ -173,7 +164,7 @@ public class NodeStates extends StateNode {
     /**
      * @return   node index in BEAST tree
      */
-    @Override
+//    @Override
     public String getID() {
         return Integer.toString(getNodeNr());
     }
@@ -186,59 +177,43 @@ public class NodeStates extends StateNode {
     }
 
     /**
-     * indicate that the states matrix for node nodeIndex is to be changed *
-     */
-    public void setStatesForUpdate() {
-        if (tipID != null)
-            throw new UnsupportedOperationException("Can not sample tip states yet !");
-        currentMatrixIndex = 1 - currentMatrixIndex; // 0 or 1
-    }
-
-
-
-    /**
      * cleans up and deallocates arrays.
      */
     @Override
     public void finalize() throws Throwable {
         states = null;
+        storedStates = null;
         siteIsDirty = null;
-        currentMatrixIndex = 0;
-        storedMatrixIndex = 0;
     }
 
-
     //TODO store/restore per site
-    @Override
+//    @Override
     protected void store() {
         if (tipID != null)
             throw new UnsupportedOperationException("Can not sample tip states yet !");
 
-        storedMatrixIndex = currentMatrixIndex;
+        System.arraycopy(states, 0, storedStates, 0, states.length);
     }
 
-    @Override
+//    @Override
     public void restore() {
         if (tipID != null)
             throw new UnsupportedOperationException("Can not sample tip states yet !");
 
-        // Rather than copying the stored stuff back, just swap the pointers...
-        currentMatrixIndex = storedMatrixIndex;
+        final int[] tmp = storedStates;
+        storedStates = states;
+        states = tmp;
+//        hasStartedEditing = false;
 
-        hasStartedEditing = false;
         if (siteIsDirty.length != getSiteCount()) {
             siteIsDirty = new boolean[getSiteCount()];
         }
 
     }
 
-//    @Override
-//    public void unstore() {
-//        currentMatrixIndex = storedMatrixIndex;
-//    }
 
     public int getSiteCount() {
-        return states[currentMatrixIndex].length;
+        return states.length;
     }
 
     /**
@@ -248,7 +223,7 @@ public class NodeStates extends StateNode {
      */
     public int[] getStates() {
         // internal node index starts from getTipsCount();
-        return states[currentMatrixIndex];
+        return states;
     }
 
     /**
@@ -259,9 +234,9 @@ public class NodeStates extends StateNode {
      */
     public void setStates(final int[] states) {
         // internal node index starts from getTipsCount();
-        startEditing(null);
+//        startEditing(null);
 
-        System.arraycopy(states, 0, this.states[currentMatrixIndex], 0, states.length);
+        System.arraycopy(states, 0, this.states, 0, states.length);
         Arrays.fill(siteIsDirty, true);
     }
 
@@ -273,7 +248,7 @@ public class NodeStates extends StateNode {
      * @return
      */
     public int getState(final int codonNr) {
-        return states[currentMatrixIndex][codonNr];
+        return states[codonNr];
     }
 
 
@@ -282,13 +257,13 @@ public class NodeStates extends StateNode {
      * The state starts from 0.
      * <code>matrix[i,j] = values[i * minorDimension + j]</code>
      *
-     * @param state   new state to set.
      * @param codonNr the site index.
+     * @param state   new state to set.
      */
-    public void setState(final int state, final int codonNr) {
-        startEditing(null);
+    public void setState(final int codonNr, final int state) {
+//        startEditing(null);
 
-        states[currentMatrixIndex][codonNr] = state;
+        states[codonNr] = state;
         siteIsDirty[codonNr] = true;
     }
 
@@ -325,10 +300,10 @@ public class NodeStates extends StateNode {
         out.print(nodeNr + "\t");
     }
 
-    @Override
-    public void log(long sampleNr, PrintStream out) {
-        super.log(sampleNr, out);
-    }
+//    @Override
+//    public void log(long sampleNr, PrintStream out) {
+//        super.log(sampleNr, out);
+//    }
 
     @Override
     public void close(PrintStream out) {
@@ -349,22 +324,19 @@ public class NodeStates extends StateNode {
         return buf.toString();
     }
 
-    @Override
-    public void setEverythingDirty(boolean isDirty) {
-        setSomethingIsDirty(isDirty);
-        Arrays.fill(siteIsDirty, isDirty);
-    }
-
-    //TODO full copy or just currentMatrixIndex?
-    @Override
+//    @Override
+//    public void setEverythingDirty(boolean isDirty) {
+//        setSomethingIsDirty(isDirty);
+//        Arrays.fill(siteIsDirty, isDirty);
+//    }
+//
+    //TODO
+//    @Override
     public NodeStates copy() {
         try {
             @SuppressWarnings("unchecked")
             final NodeStates copy = (NodeStates) this.clone();
-//            copy.states = states.clone(); // always [2][][]
-            copy.states[0] = states[0].clone();
-            copy.states[1] = states[1].clone();
-
+            copy.states = states.clone();
             //storedStates = copy.storedStates.clone();
             copy.siteIsDirty = new boolean[getSiteCount()];
             return copy;
@@ -375,58 +347,50 @@ public class NodeStates extends StateNode {
 
     }
 
-    @Override
-    public void assignTo(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodeStates copy = (NodeStates) other;
-        copy.setID(getID());
-        copy.index = index;
-
-        copy.states[0] = states[0].clone();
-        copy.states[1] = states[1].clone();
-
-        //storedStates = copy.storedStates.clone();
-        copy.lower = lower;
-        copy.upper = upper;
-        copy.siteIsDirty = new boolean[getSiteCount()];
-    }
-
-    @Override
-    public void assignFrom(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodeStates source = (NodeStates) other;
-        setID(source.getID());
+//
+//    @Override
+//    public void assignTo(StateNode other) {
+//        @SuppressWarnings("unchecked")
+//        final NodeStates copy = (NodeStates) other;
+//        copy.setID(getID());
+//        copy.index = index;
+//
+//        copy.states = states.clone();
+//        //storedStates = copy.storedStates.clone();
+//        copy.lower = lower;
+//        copy.upper = upper;
+//        copy.siteIsDirty = new boolean[getSiteCount()];
+//    }
+//
+//    @Override
+//    public void assignFrom(StateNode other) {
+//        @SuppressWarnings("unchecked")
+//        final NodeStates source = (NodeStates) other;
+//        setID(source.getID());
 //        states = source.states.clone();
-//        storedStates = source.storedStates.clone();
-
-        states[0] = source.states[0].clone();
-        states[1] = source.states[1].clone();
-
-        lower = source.lower;
-        upper = source.upper;
-        siteIsDirty = new boolean[source.getSiteCount()];
-    }
-
-    @Override
-    public void assignFromFragile(StateNode other) {
-        @SuppressWarnings("unchecked")
-        final NodeStates source = (NodeStates) other;
-
-        System.arraycopy(source.states[0], 0, states[0], 0, source.states[0].length);
-        System.arraycopy(source.states[1], 0, states[1], 0, source.states[1].length);
-
-        Arrays.fill(siteIsDirty, false);
-    }
-
-    @Override
-    public void fromXML(org.w3c.dom.Node xmlNode) {
-        throw new UnsupportedOperationException("in dev");
-    }
-
-    @Override
-    public int scale(double scale) {
-        throw new UnsupportedOperationException("in dev");
-    }
+////        storedStates = source.storedStates.clone();
+//        lower = source.lower;
+//        upper = source.upper;
+//        siteIsDirty = new boolean[source.getSiteCount()];
+//    }
+//
+//    @Override
+//    public void assignFromFragile(StateNode other) {
+//        @SuppressWarnings("unchecked")
+//        final NodeStates source = (NodeStates) other;
+//        System.arraycopy(source.states, 0, states, 0, source.states.length);
+//        Arrays.fill(siteIsDirty, false);
+//    }
+//
+//    @Override
+//    public void fromXML(org.w3c.dom.Node xmlNode) {
+//        throw new UnsupportedOperationException("in dev");
+//    }
+//
+//    @Override
+//    public int scale(double scale) {
+//        throw new UnsupportedOperationException("in dev");
+//    }
 
     @Override
     public int getDimension() { // use getInternalNodeCount() & getSiteCount()

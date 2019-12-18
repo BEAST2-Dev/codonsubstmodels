@@ -74,8 +74,9 @@ public class CodonFrequencies extends Frequencies {
         // non-stop code freq has to > 0.
         for (int s=0; s < freqs.length; s++) {
             if ( freqs[s] <= 0 )
-                throw new IllegalArgumentException("Invalid codon frequency " + freqs[s] +
-                        " at non-stop code state " + s + " !");
+// TODO should throw new IllegalArgumentException?
+            Log.warning.println("Zero frequency at non-stop code " +
+                    codonDataType.encodingToString(new int[]{s}) + " ! freqs[" + s + "]=" + freqs[s]);
         }
 
         if (verboseInput.get())

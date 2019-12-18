@@ -4,7 +4,7 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 
 import java.io.IOException;
@@ -167,7 +167,7 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
         // init time
         long start = System.nanoTime();
 
-        NodesStates nodesStates = new NodesStates(codonAlignment, tree, "parsimony");
+        NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree, "parsimony");
 
         DataAugTreeLikelihood daLikelihood = new DataAugTreeLikelihood();
         daLikelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel, "threads", threads);

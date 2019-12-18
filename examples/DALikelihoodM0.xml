@@ -153,7 +153,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
                  (Human_Arnason:0.0133,Human_Horai:0.01332):0.165):0.1256,
                  (Gorilla_Arnason:0.0046,Gorilla_Horai:0.0046):0.23);"/>
 
-    <nodesStates spec="NodesStates" id="nodesStates" >
+    <nodesStates spec="NodeStatesArray" id="nodesStates" >
         <data idref="codon.alignment"/>
         <tree idref="tree"/>
     </nodesStates>
@@ -237,8 +237,8 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
-        <operator id="GibbsSampler" spec="beast.evolution.operators.GibbsSampler"
-                  nodesStates="@nodesStates" tree="@tree" DATreeLikelihood="@daTreeLikelihood" weight="15.0"/>
+        <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
+                  DATreeLikelihood="@daTreeLikelihood" weight="15.0"/>
 
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.75" tree="@tree" weight="3.0"/>
 

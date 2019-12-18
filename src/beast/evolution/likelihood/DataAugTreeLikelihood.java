@@ -6,7 +6,7 @@ import beast.core.State;
 import beast.evolution.branchratemodel.BranchRateModel;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.NodesStates;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
 
@@ -102,7 +102,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     public DataAugTreeLikelihood(){}
 
-    public DataAugTreeLikelihood(NodesStates nodesStates, TreeInterface tree, SiteModel.Base siteModel,
+    public DataAugTreeLikelihood(NodeStatesArray nodesStates, TreeInterface tree, SiteModel.Base siteModel,
                                  BranchRateModel.Base branchRateModel, int threadCount) {
         initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel,
                 "branchRateModel", branchRateModel, "threads", threadCount);
@@ -358,7 +358,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
         if (seqUpdate || nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
             branchLengths[nodeIndex] = branchTime;
-//            daBranchLdCore.setNodeMatrixForUpdate(); // TODO destroy restore?
+            daBranchLdCore.setNodeMatrixForUpdate(); // TODO review the index
             // rate category
             for (int i = 0; i < siteModel.getCategoryCount(); i++) {
                 final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
@@ -385,14 +385,13 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         if (nodeUpdate != Tree.IS_CLEAN) {
             // code in SiteModel, node is not used
             final double[] proportions = siteModel.getCategoryProportions(node);
-
-            // brLD is linked to the child node index down
-//            daBranchLdCore.setBranchLdForUpdate(); // TODO destroy restore?
-
             final int[] nodeStates = nodesStates.getStates(nodeIndex);
             final int[] parentNodeStates = nodesStates.getStates(parentNum);
+
+            // brLD is linked to the child node index down
+            daBranchLdCore.setBranchLdForUpdate(); // TODO review the index
             // populate branchLd[][excl. root], nodeIndex is child
-            daBranchLdCore.calculateBranchLdOverCategories(parentNodeStates, nodeStates, proportions);
+            daBranchLdCore.calculateBranchLd(parentNodeStates, nodeStates, proportions);
         }
 
         return nodeUpdate;
