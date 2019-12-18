@@ -55,7 +55,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
           taxa='@alignment' adjustTipHeights='false'
           newick="((t1:0.1,t2:0.1):0.1,t3:0.2);"/>
 
-    <nodesStates spec="NodesStates" id="nodesStates" >
+    <nodesStates spec="NodeStatesArray" id="nodesStates" >
         <data idref="codon.alignment"/>
         <tree idref="tree"/>
     </nodesStates>
@@ -139,9 +139,12 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
+        <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
+                  DATreeLikelihood="@daTreeLikelihood" weight="15.0"/>
+
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@tree" weight="3.0"/>
 
-        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="30.0"/>
+        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="15.0"/>
 
 <!--        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>-->
 

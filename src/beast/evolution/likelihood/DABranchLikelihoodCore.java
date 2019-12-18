@@ -186,6 +186,14 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
     //============ branch likelihood ============
 
     /**
+     * use before {@link #calculateBranchLd(int[], int[], double[])}
+     */
+    public void setBranchLdForUpdate() {
+        currentBrLdIndex = 1 - currentBrLdIndex; // 0 or 1
+    }
+
+
+    /**
      * Branch likelihood calculation with site model categories from state i to j.
      * The flattened transition probability matrix P(t) index : n = w + i * state + j.
      * @param i   state i in parent node.
@@ -205,18 +213,6 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
             branchLdSite += matrices[w + i * nrOfStates + j] * proportions[l];
         } // end l nrOfCategories
         return branchLdSite;
-    }
-
-    // suppose only used by unit test
-    public void getBranchLikelihoods(double[] branchLdOut) {
-        System.arraycopy(branchLd[currentBrLdIndex], 0, branchLdOut, 0, branchLdOut.length);
-    }
-
-    /**
-     * use before {@link #calculateBranchLd(int[], int[], double[])}
-     */
-    public void setBranchLdForUpdate() {
-        currentBrLdIndex = 1 - currentBrLdIndex; // 0 or 1
     }
 
     /**
@@ -459,6 +455,11 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         return logScalingFactor;
     }
 
+
+    // suppose only used by unit test
+    public void getBranchLikelihoods(double[] branchLdOut) {
+        System.arraycopy(branchLd[currentBrLdIndex], 0, branchLdOut, 0, branchLdOut.length);
+    }
 
     // ======= getters =======
 

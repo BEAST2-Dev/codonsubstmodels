@@ -62,29 +62,34 @@ public class GibbsSampler extends Operator {
         Node node = getRandomInternalNode();
         final int nodeNr = node.getNr();
 
+        System.out.println("GibbsSampler at node " + nodeNr);
+
         NodeStatesArray nodesStates = nodesStatesInput.get(this);
         final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
 
-        int state;
+        int newState;
         for (int k = 0; k < nodesStates.getSiteCount(); k++) {
-            state = gibbsSampling(node, k, nodesStates, daTreeLd);
+            newState = gibbsSampling(node, k, nodesStates, daTreeLd);
+
+//            if (newState < nodesStates.getLower() || newState > nodesStates.getUpper()) {
+//                // reject out of bounds scales
+//                return Double.NEGATIVE_INFINITY;
+//            }
+
             // change state at k for nodeNr
-            nodesStates.setState(nodeNr, k, state);
+            nodesStates.setState(nodeNr, k, newState); // TODO copy states array faster?
         }
         // Gibbs operator should always be accepted
-        return 0.0;//test store/restore //Double.POSITIVE_INFINITY;
+        return 0.0;//test store/restore // Double.POSITIVE_INFINITY;//
     }
 
     /**
      * randomly select an internal node
      * @return {@link Node}, or null if no internal nodes
      */
-    public Node getRandomInternalNode() {
-        final Tree tree = treeInput.get(this);
+    protected Node getRandomInternalNode() {
+        final Tree tree = treeInput.get(); // Gibbs alone not operate on tree
         final int tipsCount = tree.getLeafNodeCount();
-        // Abort if no internal nodes
-        if (tipsCount < 2)
-            throw new IllegalArgumentException("Tree must have at least 2 tips ! " + tipsCount);
 
         int nodeNr;
         do {

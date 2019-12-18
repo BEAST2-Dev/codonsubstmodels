@@ -1,12 +1,9 @@
 package beast.evolution.tree;
 
-import beast.core.Function;
-import beast.core.Loggable;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
 
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +21,7 @@ import java.util.List;
  * No {@link beast.core.Input} here.
  * Init and validate in {@link NodeStatesArray#initAndValidate()}.
  */
-public class NodeStates implements Loggable, Cloneable, Function {//extends StateNode {
+public class NodeStates implements Cloneable {//extends StateNode {
 
     /**
      * The node index :<br>
@@ -43,7 +40,7 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
      * states[sites], the int states for this node.
      */
     protected int[] states;
-    protected int[] storedStates;
+//    protected int[] storedStates;
 
     /**
      * upper & lower bound These are located before the inputs (instead of
@@ -105,7 +102,7 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
     private void initParam(int stateCount, int siteCount) {
         // siteCount = num of codons, overwrite in CodonAlignment /= 3
         states = new int[siteCount];
-        storedStates = new int[siteCount];
+//        storedStates = new int[siteCount];
 
         // 0 - 60/61, ignore lowerValueInput upperValueInput
         lower = 0;
@@ -182,34 +179,34 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
     @Override
     public void finalize() throws Throwable {
         states = null;
-        storedStates = null;
+//        storedStates = null;
         siteIsDirty = null;
     }
 
-    //TODO store/restore per site
-//    @Override
-    protected void store() {
-        if (tipID != null)
-            throw new UnsupportedOperationException("Can not sample tip states yet !");
-
-        System.arraycopy(states, 0, storedStates, 0, states.length);
-    }
-
-//    @Override
-    public void restore() {
-        if (tipID != null)
-            throw new UnsupportedOperationException("Can not sample tip states yet !");
-
-        final int[] tmp = storedStates;
-        storedStates = states;
-        states = tmp;
-//        hasStartedEditing = false;
-
-        if (siteIsDirty.length != getSiteCount()) {
-            siteIsDirty = new boolean[getSiteCount()];
-        }
-
-    }
+//    //TODO store/restore per site
+////    @Override
+//    protected void store() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+//
+//        System.arraycopy(states, 0, storedStates, 0, states.length);
+//    }
+//
+////    @Override
+//    public void restore() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+//
+//        final int[] tmp = storedStates;
+//        storedStates = states;
+//        states = tmp;
+////        hasStartedEditing = false;
+//
+//        if (siteIsDirty.length != getSiteCount()) {
+//            siteIsDirty = new boolean[getSiteCount()];
+//        }
+//
+//    }
 
 
     public int getSiteCount() {
@@ -295,20 +292,21 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
     }
 
 
-    @Override
-    public void init(PrintStream out) {
-        out.print(nodeNr + "\t");
-    }
+//    @Override
+//    public void init(PrintStream out) {
+//        out.print(nodeNr + "\t");
+//    }
+//
+//    @Override
+//    public void close(PrintStream out) {
+//        // nothing to do
+//    }
 
 //    @Override
 //    public void log(long sampleNr, PrintStream out) {
 //        super.log(sampleNr, out);
 //    }
 
-    @Override
-    public void close(PrintStream out) {
-        // nothing to do
-    }
 
     @Override
     public String toString() {
@@ -333,12 +331,13 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
     //TODO
 //    @Override
     public NodeStates copy() {
+        // https://stackoverflow.com/questions/46145826/why-clone-is-the-best-way-for-copying-arrays
         try {
             @SuppressWarnings("unchecked")
             final NodeStates copy = (NodeStates) this.clone();
             copy.states = states.clone();
             //storedStates = copy.storedStates.clone();
-            copy.siteIsDirty = new boolean[getSiteCount()];
+            copy.siteIsDirty = siteIsDirty.clone();
             return copy;
         } catch (Exception e) {
             e.printStackTrace();
@@ -392,14 +391,14 @@ public class NodeStates implements Loggable, Cloneable, Function {//extends Stat
 //        throw new UnsupportedOperationException("in dev");
 //    }
 
-    @Override
-    public int getDimension() { // use getInternalNodeCount() & getSiteCount()
-        throw new UnsupportedOperationException("Unsupported");
-    }
-
-    @Override
-    public double getArrayValue(int dim) { // use getASite(int, int)
-        throw new UnsupportedOperationException("Unsupported");
-    }
+//    @Override
+//    public int getDimension() { // use getInternalNodeCount() & getSiteCount()
+//        throw new UnsupportedOperationException("Unsupported");
+//    }
+//
+//    @Override
+//    public double getArrayValue(int dim) { // use getASite(int, int)
+//        throw new UnsupportedOperationException("Unsupported");
+//    }
 
 }

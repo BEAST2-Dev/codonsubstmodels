@@ -51,12 +51,17 @@ public class NodeStatesArray extends StateNode {
 
     // all nodes, use nodeNr to map the index of nodesStates[]
     protected  NodeStates[] nodesStates;
-//    protected  NodeStates[] storedNodesStates;
+    protected  NodeStates[] storedNodesStates;
 
     /**
      * isDirty array flags for each node
      */
     protected boolean[] nodeIsDirty;
+    /**
+     * last node to be changed *
+     */
+//    protected int nodeLastDirty;
+
 
     //for XML parser
     public NodeStatesArray() { }
@@ -102,6 +107,10 @@ public class NodeStatesArray extends StateNode {
 
 
     public void validateTree(TreeInterface tree) {
+        // Abort if no internal nodes
+        if (tree.getLeafNodeCount() < 2)
+            throw new IllegalArgumentException("Tree must have at least 2 tips ! " + tree.getLeafNodeCount());
+
         // sanity check: alignment should have same #taxa as tree
         if (getTipsCount() != tree.getLeafNodeCount())
             throw new IllegalArgumentException("The number of tips in the tree does not match the number of sequences");
@@ -155,7 +164,7 @@ public class NodeStatesArray extends StateNode {
 
         // init from constructor
         nodesStates = new NodeStates[nodeCount];
-//        storedNodesStates = new NodeStates[nodeCount];
+        storedNodesStates = new NodeStates[nodeCount];
         nodeIsDirty = new boolean[nodeCount];
 
         // fix ID
@@ -220,6 +229,7 @@ public class NodeStatesArray extends StateNode {
         int[][] inStates = new int[getInternalNodeCount()][getSiteCount()];
 
         int[] tipsStates = new int[getTipsCount()];
+        // Reconstruct internal nodes states site by site
         for (int k=0; k < getSiteCount(); k++) {
             getTipsStatesAtSite(k, tipsStates);
             RASParsimony1Site ras1Site = new RASParsimony1Site(tipsStates, tree);
@@ -342,6 +352,7 @@ public class NodeStatesArray extends StateNode {
      * @param states int[] states
      */
     public void setStates(final int nodeNr, final int[] states) {
+        assert nodeNr >= getTipsCount();
         if (nodesStates[nodeNr] == null) {
             // internal node not init
             nodesStates[nodeNr] = new NodeStates(nodeNr, states, getStateCount());
@@ -497,6 +508,14 @@ public class NodeStatesArray extends StateNode {
     }
 
 
+    public int getUpper() {
+        return upper;
+    }
+
+    public int getLower() {
+        return lower;
+    }
+
     //******* MCMC StateNode *******
     @Override
     public void log(long sampleNr, PrintStream out) {
@@ -538,13 +557,21 @@ public class NodeStatesArray extends StateNode {
     }
 
     @Override
-    public int getDimension() { // use getInternalNodeCount() & getSiteCount()
-        throw new UnsupportedOperationException("Unsupported");
+    public int getDimension() { // use getInternalNodeCount() or getSiteCount()
+        throw new UnsupportedOperationException("use getInternalNodeCount() or getSiteCount()");
     }
 
     @Override
-    public double getArrayValue(int dim) { // use getASite(int, int)
-        throw new UnsupportedOperationException("Unsupported");
+    public double getArrayValue(int dim) { // use getNodeStates(int)
+        throw new UnsupportedOperationException("use getNodeStates(int)");
+    }
+
+    /**
+     * @param nodeIndex node Nr
+     * @return true if the node states have changed
+     */
+    public boolean isDirty(final int nodeIndex) {
+        return nodeIsDirty[nodeIndex];
     }
 
     /**
@@ -568,33 +595,29 @@ public class NodeStatesArray extends StateNode {
     }
 
 
-    /**
-     * only call internal nodes {@link NodeStates#store()}
-     */
     //TODO store/restore per site
     @Override
     protected void store() {
         // internal nodes only
         for (int i = getTipsCount(); i < getNodeCount(); i++){
             //TODO need nodeIsDirty[]?
-//            storedNodesStates[i] = nodesStates[i].copy();
-            nodesStates[i].store();
+            storedNodesStates[i] = nodesStates[i].copy();
+//            nodesStates[i].store();
         }
-
-
 
     }
 
-    /**
-     * only call internal nodes {@link NodeStates#restore()}
-     */
     @Override
     public void restore() {
         // internal nodes only
         for (int i = getTipsCount(); i < getNodeCount(); i++){
             //TODO need nodeIsDirty[]?
-//            nodesStates[i] = storedNodesStates[i].copy();
-            nodesStates[i].restore();
+            nodesStates[i] = storedNodesStates[i].copy();
+//            final NodeStates tmp = storedNodesStates[i].copy();
+//            storedNodesStates[i] = nodesStates[i].copy();
+//            nodesStates[i] = tmp;
+//            nodesStates[i].restore();
+            nodeIsDirty[i] = false;
         }
 
         hasStartedEditing = false;
@@ -619,7 +642,6 @@ public class NodeStatesArray extends StateNode {
             for (int i = 0; i < nodesStates.length; i++)
                 copy.nodesStates[i] = (NodeStates) nodesStates[i].copy();
 
-            //storedStates = copy.storedStates.clone();
             copy.nodeIsDirty = new boolean[getNodeCount()];
             return copy;
         } catch (Exception e) {
