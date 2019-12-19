@@ -342,31 +342,6 @@ public class NodeStatesArray extends StateNode {
     }
 
     /**
-     * Set the states to an internal node given its node index.
-     * If {@link NodeStates} not init, then create with the given states.
-     *
-     * @param nodeNr The node index :<br>
-     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
-     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
-     *                  The root node is always indexed <code>nodeCount-1</code>.
-     * @param states int[] states
-     */
-    public void setStates(final int nodeNr, final int[] states) {
-        assert nodeNr >= getTipsCount();
-        if (nodesStates[nodeNr] == null) {
-            // internal node not init
-            nodesStates[nodeNr] = new NodeStates(nodeNr, states, getStateCount());
-        } else {
-            startEditing(null);
-
-            // internal node index starts from getTipsCount();
-            nodesStates[nodeNr].setStates(states);
-        }
-        nodeIsDirty[nodeNr] = true;
-    }
-
-
-    /**
      * Get tips states at given 1 site (codon).
      * @param nrOfSite      The codon site index in the alignment
      * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
@@ -410,6 +385,29 @@ public class NodeStatesArray extends StateNode {
         return nodesStates[nodeIndex].getState(codonNr);
     }
 
+    /**
+     * Set the states to an internal node given its node index.
+     * If {@link NodeStates} not init, then create with the given states.
+     *
+     * @param nodeNr The node index :<br>
+     *                  Leaf nodes are indexed from 0 to <code>tipsCount - 1</code>.
+     *                  Internal nodes are indexed from <code>tipsCount</code> to <code>nodeCount-1</code>.
+     *                  The root node is always indexed <code>nodeCount-1</code>.
+     * @param states int[] states
+     */
+    public void setStates(final int nodeNr, final int[] states) {
+        assert nodeNr >= getTipsCount();
+        if (nodesStates[nodeNr] == null) {
+            // internal node not init
+            nodesStates[nodeNr] = new NodeStates(nodeNr, states, getStateCount());
+        } else {
+            startEditing(null);
+
+            // internal node index starts from getTipsCount();
+            nodesStates[nodeNr].setStates(states);
+        }
+        nodeIsDirty[nodeNr] = true;
+    }
 
     /**
      * Set a codon state to the site at the internal node.

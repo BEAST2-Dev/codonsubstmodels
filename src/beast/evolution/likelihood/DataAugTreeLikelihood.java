@@ -335,11 +335,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // the branch between node and parent
         // root is excluded from node when creating DABranchLikelihoodCore
         final Node parent = node.getParent();
-        final int nodeIndex = node.getNr();
+        final int nodeNr = node.getNr();
         final int parentNum = parent.getNr();
 
         // if tips, always false
-        boolean seqUpdate = nodesStates.isNodeStatesDirty(nodeIndex) || nodesStates.isNodeStatesDirty(parentNum);
+        boolean seqUpdate = nodesStates.isNodeStatesDirty(nodeNr) || nodesStates.isNodeStatesDirty(parentNum);
 
         int nodeUpdate = node.isDirty() | parent.isDirty(); // TODO need to review
 
@@ -347,17 +347,18 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         final double branchTime = node.getLength() * branchRate;
 
 //TODO deal with 0 branch length, such as SA
-        if (branchTime < 1e-6)
-            throw new UnsupportedOperationException(
-//                System.err.println(
-                    "Time from parent " + parentNum + " to node " + nodeIndex + " is 0 !  " +
+        if (branchTime == 0)
+            throw new UnsupportedOperationException("0 branch length, such as SA, not supported !");
+        if (branchTime < 1e-10)
+            throw new IllegalArgumentException(
+                    "Time from parent " + parentNum + " to node " + nodeNr + " is 0 !  " +
                             "branch length = " + node.getLength() + ", branchRate = " + branchRate);
 
         //TODO how to distinguish branch len change and internal node seq change, when topology is same
 
         // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
-        if (seqUpdate || nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeIndex]) {
-            branchLengths[nodeIndex] = branchTime;
+        if (seqUpdate || nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeNr]) {
+            branchLengths[nodeNr] = branchTime;
             daBranchLdCore.setNodeMatrixForUpdate(); // TODO review the index
             // rate category
             for (int i = 0; i < siteModel.getCategoryCount(); i++) {
@@ -370,8 +371,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                     //TODO P(t) cannot be 0, but short branch causes numeric precision error.
                     if (probabilities[j] <= 0) {
 //                        System.err.println(Arrays.toString(probabilities));
-                        throw new ArithmeticException("Return -Inf as short branch causes P(t) = 0 ! " +
-                                "node Nr = " + j + ", node Nr = " + nodeIndex + ", branchTime = " + branchTime);
+                        throw new ArithmeticException("Select 0 in P(t) matrix possibly caused by a short branch ! " +
+                                "matrix index = " + j + ", branch Nr = " + nodeNr + ", branchTime = " + branchTime);
                     }
 
                 daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy
@@ -385,7 +386,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         if (nodeUpdate != Tree.IS_CLEAN) {
             // code in SiteModel, node is not used
             final double[] proportions = siteModel.getCategoryProportions(node);
-            final int[] nodeStates = nodesStates.getStates(nodeIndex);
+            final int[] nodeStates = nodesStates.getStates(nodeNr);
             final int[] parentNodeStates = nodesStates.getStates(parentNum);
 
             // brLD is linked to the child node index down

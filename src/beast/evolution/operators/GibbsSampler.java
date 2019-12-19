@@ -59,10 +59,10 @@ public class GibbsSampler extends Operator {
      */
     @Override
     public double proposal() {
-        Node node = getRandomInternalNode();
+        final Tree tree = treeInput.get(); // Gibbs alone not operate on tree
+        Node node = getRandomInternalNode(tree);
         final int nodeNr = node.getNr();
-
-        System.out.println("GibbsSampler at node " + nodeNr);
+//        System.out.println("GibbsSampler at node " + nodeNr);
 
         NodeStatesArray nodesStates = nodesStatesInput.get(this);
         final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
@@ -77,20 +77,19 @@ public class GibbsSampler extends Operator {
 //            }
 
             // change state at k for nodeNr
-            nodesStates.setState(nodeNr, k, newState); // TODO copy states array faster?
+            nodesStates.setState(nodeNr, k, newState); // TODO setStates(int, int[]) faster?
         }
         // Gibbs operator should always be accepted
-        return 0.0;//test store/restore // Double.POSITIVE_INFINITY;//
+        return Double.POSITIVE_INFINITY;//0.0;//for debug//
     }
 
     /**
      * randomly select an internal node
+     * @param tree   {@link Tree}
      * @return {@link Node}, or null if no internal nodes
      */
-    protected Node getRandomInternalNode() {
-        final Tree tree = treeInput.get(); // Gibbs alone not operate on tree
+    protected Node getRandomInternalNode(final Tree tree) {
         final int tipsCount = tree.getLeafNodeCount();
-
         int nodeNr;
         do {
             // internal node Nr = [tipsCount, 2*tipsCount-2]
@@ -105,6 +104,7 @@ public class GibbsSampler extends Operator {
      * @param node     {@link Node}
      * @param siteNr   the site (codon) index
      * @param nodesStates   {@link NodeStatesArray}
+     * @param daTreeLd the cache to get P(t) in each branch {@link DABranchLikelihoodCore}.
      * @return         the proposed state at the node, or -1 if node is null
      */
     protected int gibbsSampling(Node node, int siteNr, NodeStatesArray nodesStates,
