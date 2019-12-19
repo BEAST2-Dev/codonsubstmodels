@@ -581,7 +581,7 @@ public class NodeStatesArray extends StateNode {
         setSomethingIsDirty(isDirty);
 //        Arrays.fill(nodeIsDirty, isDirty);
         for (int i=getTipsCount(); i < getNodeCount(); i++) // only internal nodes
-            nodeIsDirty[i] = true;
+            nodeIsDirty[i] = isDirty;
     }
 
     //cleans up and deallocates arrays
