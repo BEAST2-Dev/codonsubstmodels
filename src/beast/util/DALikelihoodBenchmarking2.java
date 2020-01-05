@@ -31,6 +31,7 @@ import java.text.DecimalFormat;
  * </ol>
  * @author Walter Xie
  */
+@Deprecated
 public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
     final String chainLength = "100000";
     final String logEvery = "10000";

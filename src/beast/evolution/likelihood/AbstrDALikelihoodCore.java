@@ -7,21 +7,6 @@ package beast.evolution.likelihood;
  */
 
 abstract public class AbstrDALikelihoodCore {
-    final protected int nrOfStates; // e.g. 64
-    final protected int matrixSize; // nrOfStates^2
-    protected int nrOfCategories; // number of categories
-
-    /**
-     * need to call initialize() after this
-     *
-     * @param nrOfStates
-     * @param nrOfCategories
-     */
-    public AbstrDALikelihoodCore(int nrOfStates, int nrOfCategories) {
-        this.nrOfStates = nrOfStates;
-        this.matrixSize = nrOfStates * nrOfStates;
-        this.nrOfCategories = nrOfCategories;
-    }
 
     /**
      * reserve memory for branchLd, indices and other
@@ -70,19 +55,5 @@ abstract public class AbstrDALikelihoodCore {
      * reset current state to stored state, only used when switching from non-scaled to scaled or vice versa *
      */
     abstract public void unstore();
-
-    public int getNrOfStates() {
-        return nrOfStates;
-    }
-
-    // transition probability matrix size = nrOfStates^2
-    public int getMatrixSize() {
-        return matrixSize;
-    }
-
-    // nrOfCategories
-    public int getNrOfCategories() {
-        return nrOfCategories;
-    }
 
 }

@@ -20,10 +20,9 @@ import java.util.concurrent.Executors;
 
 /**
  * Data augmentation to fast codon tree likelihood calculation.
- *
  * No pattern, use site count.
  *
- * TODO 1: make it working in MCMC
+ * TODO: make it working in multi-threading in MCMC
  */
 public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
@@ -179,10 +178,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             // make every nodes dirty
             node.makeDirty(Tree.IS_FILTHY);
             // init by the node below the branch
-            daBranchLdCores[n] = new DABranchLikelihoodCore(n, stateCount,
-                    siteCount, siteModel.getCategoryCount());
+            daBranchLdCores[n] = new DABranchLikelihoodCore(n, stateCount, siteCount, siteModel.getCategoryCount());
         }
         tree.getRoot().makeDirty(Tree.IS_FILTHY);
+        // only to call logIntegratedLikelihood(double[])
+        daRootLdCores = new DABranchLikelihoodCore(getRootIndex(), stateCount, siteCount);
 
         // multi-threading
         if (threadCount > 1) {
@@ -271,9 +271,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // TODO how to check the dirty condition at root?
         // if (nodesStates.isNodeStatesDirty(rootIndex) || siteModel.isDirtyCalculation()) {
 //        if (tree.getRoot().isDirty() != Tree.IS_CLEAN || siteModel.isDirtyCalculation()) {
-            final double[] frequencies = substitutionModel.getFrequencies();
         // nodeLogLikelihoods[rootIndex] = log likelihood for frequencies prior at root
-            branchLogLikelihoods[rootIndex] = calculateRootLogLikelihood(rootIndex, frequencies);
+        branchLogLikelihoods[rootIndex] = calculateRootLogLikelihood(rootIndex);
 //        }
 
         // sum logP
@@ -312,25 +311,25 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         return logP;
     }
 
-    // log likelihood for frequencies prior at root
-    protected double calculateRootLogLikelihood(int rootIndex, double[] frequencies) {
+    // log likelihood at root given codon frequencies
+    protected double calculateRootLogLikelihood(int rootIndex) {
+        final double[] frequencies = substitutionModel.getFrequencies();
+
         int siteCount = nodesStates.getSiteCount();
-        double[] rootPrior = new double[siteCount];
+        double[] siteLdAtRoot = new double[siteCount];
         for (int k = 0; k < siteCount; k++) {
             // hard code for root node
             int state = nodesStates.getState(rootIndex, k); // 0-63
-            rootPrior[k] = frequencies[state];
+            siteLdAtRoot[k] = frequencies[state];
         }
 
-        return DABranchLikelihoodCore.integrateLogLikelihood(rootPrior,
-                DABranchLikelihoodCore.scalingThreshold); //+ getLogScalingFactor(k); TODO
+        return daRootLdCores.logIntegratedLikelihood(siteLdAtRoot); //+ getLogScalingFactor(k); TODO
     }
 
     //    protected synchronized void sumLogP(double logPBr) {
 //        logP += logPBr;
 //    }
     //TODO calculateNodeBrLdOverCategories
-    // cache per site to avoid recalculation, when only sequence at a site is changed
     protected int updateBranch(final DABranchLikelihoodCore daBranchLdCore, final Node node) {
         // the branch between node and parent
         // root is excluded from node when creating DABranchLikelihoodCore
@@ -339,9 +338,10 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         final int parentNum = parent.getNr();
 
         // if tips, always false
+        //TODO cache per site to avoid recalculation, when only sequence at a site is changed
         boolean seqUpdate = nodesStates.isNodeStatesDirty(nodeNr) || nodesStates.isNodeStatesDirty(parentNum);
 
-        int nodeUpdate = node.isDirty() | parent.isDirty(); // TODO need to review
+        int nodeUpdate = node.isDirty() | parent.isDirty();
 
         final double branchRate = branchRateModel.getRateForBranch(node);
         final double branchTime = node.getLength() * branchRate;

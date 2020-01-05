@@ -178,7 +178,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="100000"> <!--autoOptimize="true"-->
+    <run spec="MCMC" id="mcmc" chainLength="300000"> <!--autoOptimize="true"-->
         <state id="state" storeEvery="10000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
@@ -264,7 +264,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--            <log idref="clockRate"/>-->
         </logger>
 
-        <logger logEvery="1000">
+        <logger logEvery="5000">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>

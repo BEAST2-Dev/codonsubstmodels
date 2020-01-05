@@ -7,9 +7,12 @@ package beast.evolution.likelihood;
  *
  */
 public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
-    private final int branchNr; // the node Nr of child node below the branch
+    final private int branchNr; // the node Nr of child node below the branch
 
+    final protected int nrOfStates; // e.g. 64
+    final protected int matrixSize; // nrOfStates^2
     final protected int nrOfSites; // e.g. number of codons
+    protected int nrOfCategories; // number of categories
 
     // to store branch likelihood calculation per site:
     // 1st dimension is matrix index (current, stored),
@@ -27,29 +30,39 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
     protected int storedBrLdIndex = 0;
 
 
-
     protected boolean useScaling = false;
 
     protected double[][] scalingFactors; //TODO
 
-    static final public double scalingThreshold = 1.0E-150; // MAX_VALUE 1.7*10^308
+    static final public double SCALING_THRESHOLD = 1.0E-150; // MAX_VALUE 1.7*10^308
     double SCALE = 2;
 
     /**
+     * no initialization, for calculating site likelihoods at the root.
+     * @param branchNr       the node Nr of child node below the branch
+     * @param nrOfStates     number of states in the data, 64 for codon
+     * @param nrOfSites      number of sites (codon)
+     */
+    public DABranchLikelihoodCore(int branchNr, int nrOfStates, int nrOfSites) {
+        this.branchNr = branchNr;
+        this.nrOfStates = nrOfStates;
+        this.matrixSize = nrOfStates * nrOfStates;
+        this.nrOfSites = nrOfSites;
+    }
+
+    /**
      * data augmentation likelihood core based on a branch,
-     * called initialize() inside
+     * initialize() is called inside.
      * @param branchNr       the node Nr of child node below the branch
      * @param nrOfStates     number of states in the data, 64 for codon
      * @param nrOfSites      number of sites (codon)
      * @param nrOfCategories number of categories in the site model
      */
     public DABranchLikelihoodCore(int branchNr, int nrOfStates, int nrOfSites, int nrOfCategories) {
-        super(nrOfStates, nrOfCategories);
-        this.nrOfSites = nrOfSites;
-        this.branchNr = branchNr;
+        this(branchNr, nrOfStates, nrOfSites);
+        this.nrOfCategories = nrOfCategories;
 
         initialize();
-
     } // called initialize()
 
 
@@ -324,26 +337,26 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
     }
 
     /**
-     * static calculation engine.
-     * Multiple site likelihoods at this branch, if at root, then multiple frequencies.
-     * Log the product.
-     * The input likelihoods here have been integrated across categories.
-     * @param siteLd     likelihoods (not logged), which can be either site likelihoods or frequencies at root.
+     * Log likelihood calculation engine.
+     * Multiple given site likelihoods, and then log the product.
+     * The likelihood input has been integrated across categories.
+     * It can be also used for the site likelihoods at the root.
+     * @param siteLd     likelihoods (not logged) by sites (codons).
+//     * @param scalingThreshold   threshold for the product to call {@link Math#log(double)}.
      * @return           logged likelihood
      */
-    public static double integrateLogLikelihood(double[] siteLd, double scalingThreshold) {
+    public double logIntegratedLikelihood(double[] siteLd) {
 
         double product = 1.0;
         double logP = 0;
 
-        // exclude root frequency prior
-//TODO review
-        for (int k = 0; k < siteLd.length; k++) { // siteLd.length == getNrOfSites()
-            // internal nodes, excl root
+        // siteLd.length == getNrOfSites()
+        for (int k = 0; k < siteLd.length; k++) {
+            // multiple (not logged) site likelihoods
             product *= siteLd[k];
 
             // hard code to log when product is too small, Double.MAX_VALUE 1.79...e+308
-            if (product < scalingThreshold || siteLd[k] < scalingThreshold) {
+            if (product < SCALING_THRESHOLD || siteLd[k] < SCALING_THRESHOLD) {
                 // important check before implement log scaling
                 if (product == 0)
                     throw new RuntimeException("Likelihood product -Inf ! " +
@@ -355,7 +368,7 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
 
         } // end k
 
-        // the rest
+        // log the rest
         if (product < 1.0)
             logP += Math.log(product); //+ getLogScalingFactor(k); TODO
 
@@ -369,8 +382,7 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
      * frequency[] need to be added later in DATreeLikelihood
      */
     public double calculateBranchLogLikelihood() {
-        return DABranchLikelihoodCore.
-                integrateLogLikelihood(branchLd[currentBrLdIndex], scalingThreshold);
+        return logIntegratedLikelihood(branchLd[currentBrLdIndex]);
     }
 
 
@@ -477,4 +489,17 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         return branchLd[0].length;
     }
 
+    public int getNrOfStates() {
+        return nrOfStates;
+    }
+
+    // transition probability matrix size = nrOfStates^2
+    public int getMatrixSize() {
+        return matrixSize;
+    }
+
+    // nrOfCategories
+    public int getNrOfCategories() {
+        return nrOfCategories;
+    }
 } // class

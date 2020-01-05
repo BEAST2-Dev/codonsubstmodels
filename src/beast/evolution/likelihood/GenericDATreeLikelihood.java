@@ -66,7 +66,7 @@ public class GenericDATreeLikelihood extends Distribution {
 	 * calculation engine for each branch, excl. root index, nrOfNodes-1
 	 */
 	protected DABranchLikelihoodCore[] daBranchLdCores;
-
+	protected DABranchLikelihoodCore daRootLdCores;
 
 	@Override
 	public void initAndValidate() {
