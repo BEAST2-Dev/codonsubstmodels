@@ -4,6 +4,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
+import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
@@ -46,7 +47,9 @@ public class CodonData {
     /**
      * Create BEAST tree from alignment and newick string
      */
-    public static Tree getTree(Alignment data, String newickTree, boolean adjustTipHeights) {
+    public static Tree getTree(Alignment data, String newickTree, boolean adjustTipHeights, boolean verbose) {
+        if (verbose)
+            System.out.println("Tree is " + newickTree + "\n");
         TreeParser t = new TreeParser();
         t.initByName("taxa", data, "newick", newickTree, "IsLabelledNewick", true, "adjustTipHeights", adjustTipHeights);
         return t;
@@ -65,5 +68,17 @@ public class CodonData {
         return siteModel;
     }
 
+    // M0 get logP, 0.3, 5
+    public static TreeLikelihood getTreeLikelihoodM0(String omegaValue, String kappaValue, CodonFrequencies codonFreq,
+                                                     Alignment data, String newickTree, boolean adjustTipHeights,
+                                                     boolean verbose) {
+        SiteModel siteModel = CodonData.getSiteModel(omegaValue, kappaValue, codonFreq, verbose);
+        Tree tree = CodonData.getTree(data, newickTree, adjustTipHeights, verbose);
+
+        System.setProperty("java.only","true");
+        TreeLikelihood likelihood = new TreeLikelihood();
+        likelihood.initByName("data", data, "tree", tree, "siteModel", siteModel);
+        return likelihood;
+    }
 
 }

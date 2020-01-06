@@ -19,7 +19,7 @@ import static junit.framework.Assert.assertEquals;
 
 
 /**
- * Use BEAST 2 core TreeLikelihood result to test DACodonTreeLikelihood.
+ * Use BEAST 2 core TreeLikelihood result to test DataAugTreeLikelihood.
  *
  * @author Walter Xie
  */
@@ -32,7 +32,6 @@ public class DALikelihoodTest {
 
     @Before
     public void setUp() {
-
 //        String newickTree = "(t1:0.5, t2:0.0):0.0;"; // TODO bug for 0 branch length ?
         String newickTree = "(t1:0.5, t2:0.1):0.0;";
 //        boolean adjustTipHeights = true;
@@ -49,8 +48,12 @@ public class DALikelihoodTest {
 //        System.out.println("Root index = " + rootNr);
     }
 
+    /**
+     * For 1 codon 2 taxa, the sum of tree likelihoods given every state in the internal node (root)
+     * should equal to the tree likelihood from BEAST.
+     */
     @Test
-    public void testDALikelihood1Site(){
+    public void testDALikelihood1Site2Taxa(){
         System.out.println("\n=============== Standard tree likelihood ===============\n");
 
         double logP = treeLikelihood.calculateLogP();
@@ -132,9 +135,7 @@ public class DALikelihoodTest {
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", true);
         SiteModel siteModel = CodonData.getSiteModel("0.3", "5", codonFreq, false);
 
-        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights);
-        System.out.println("Tree is " + newickTree + "\n");
-
+        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights, true);
         System.setProperty("java.only","true");
 
         // =============== DA tree likelihood ===============
@@ -155,16 +156,13 @@ public class DALikelihoodTest {
         codonFreq.initByName("pi", pi, "data", codonAlignment, "verbose", true);
         SiteModel siteModel = CodonData.getSiteModel("0.3", "5", codonFreq, false);
 
-        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights);
-        System.out.println("Tree is " + newickTree + "\n");
+        Tree tree = CodonData.getTree(codonAlignment, newickTree, adjustTipHeights, true);
 
         System.setProperty("java.only","true");
+        TreeLikelihood likelihood = new TreeLikelihood();
+        likelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
 
-        // =============== Standard tree likelihood ===============
-        TreeLikelihood treeLikelihood = new TreeLikelihood();
-        treeLikelihood.initByName("data", codonAlignment, "tree", tree, "siteModel", siteModel);
-
-        return treeLikelihood;
+        return likelihood;
     }
 
 }
