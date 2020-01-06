@@ -3,12 +3,8 @@ package beast.evolution.likelihood;
 import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeInterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,12 +97,12 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     public DataAugTreeLikelihood(){}
 
-    public DataAugTreeLikelihood(NodeStatesArray nodesStates, TreeInterface tree, SiteModel.Base siteModel,
-                                 BranchRateModel.Base branchRateModel, int threadCount) {
-        initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel,
-                "branchRateModel", branchRateModel, "threads", threadCount);
-//TODO
-    }
+//    public DataAugTreeLikelihood(NodeStatesArray nodesStates, TreeInterface tree, SiteModel.Base siteModel,
+//                                 BranchRateModel.Base branchRateModel, int threadCount) {
+//        initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel,
+//                "branchRateModel", branchRateModel, "threads", threadCount);
+////TODO
+//    }
 
     @Override
     public void initAndValidate() {
@@ -211,7 +207,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
      * @see ExecutorService#shutdown()
      */
     public void shutdown() {
-        executor.shutdown();
+        if (executor != null) executor.shutdown();
     }
 
     /**

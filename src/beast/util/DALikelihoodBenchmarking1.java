@@ -37,10 +37,11 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 //        this.states = null;
 //    }
 
-    public DALikelihoodBenchmarking1(String fileName, int iteration, int MAX_TIPS, int MAX_CODONS)
+    public DALikelihoodBenchmarking1(String fileName, int iteration, int MAX_TIPS, int MAX_CODONS, int nThreads)
             throws IOException, XMLParserException {
         super(fileName, MAX_TIPS, MAX_CODONS);
         this.iteration = iteration;
+        this.nThreads = nThreads;
     }
 
 
@@ -93,11 +94,14 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
         DALikelihoodBenchmarking1 likelihoodBenchmarking = null;
 
+        int threads = 4;
         try {
             if (args.length > 2)
-                likelihoodBenchmarking = new DALikelihoodBenchmarking1(args[2], iteration, 1024, 1000);
+                likelihoodBenchmarking = new DALikelihoodBenchmarking1(args[2], iteration,
+                        1024, 1000, threads);
             else
-                likelihoodBenchmarking = new DALikelihoodBenchmarking1(null, iteration, 128, 500);
+                likelihoodBenchmarking = new DALikelihoodBenchmarking1(null, iteration,
+                        128, 500, threads);
 
         } catch (IOException | XMLParserException e) {
             e.printStackTrace();
@@ -127,7 +131,7 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
         System.out.print("\n\n=============== Summary of ");
         if (isDA)
-            System.out.print("DA tree likelihood " + threads + " thread(s) ");
+            System.out.print("DA tree likelihood " + nThreads + " thread(s) ");
         else
             System.out.print("standard tree likelihood ");
         System.out.print(iteration + " iteration(s) ===============\n\n");
@@ -170,7 +174,8 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
         NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree, "parsimony");
 
         DataAugTreeLikelihood daLikelihood = new DataAugTreeLikelihood();
-        daLikelihood.initByName("nodesStates", nodesStates, "tree", tree, "siteModel", siteModel, "threads", threads);
+        daLikelihood.initByName("nodesStates", nodesStates, "tree", tree,
+                "siteModel", siteModel, "threads", nThreads);
 
         long daInit = System.nanoTime() - start;
 

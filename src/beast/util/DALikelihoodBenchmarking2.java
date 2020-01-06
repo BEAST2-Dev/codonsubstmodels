@@ -47,8 +47,10 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
 //
 //    final int threads = 4; //TODO
 
-    public DALikelihoodBenchmarking2(String fileName, int MAX_TIPS, int MAX_CODONS) throws IOException, XMLParserException {
+    public DALikelihoodBenchmarking2(String fileName, int MAX_TIPS, int MAX_CODONS, int nThreads)
+            throws IOException, XMLParserException {
         super(fileName, MAX_TIPS, MAX_CODONS);
+        this.nThreads = nThreads;
     }
 
     @Override
@@ -96,9 +98,10 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
         String fileName = args[1];
         assert fileName != null && fileName.length() > 1;
 
+        int threads = 4;
         DALikelihoodBenchmarking2 likelihoodBenchmarking = null;
         try {
-            likelihoodBenchmarking = new DALikelihoodBenchmarking2(fileName, 1024, 1000);
+            likelihoodBenchmarking = new DALikelihoodBenchmarking2(fileName, 1024, 1000, threads);
         } catch (IOException | XMLParserException e) {
             e.printStackTrace();
         }
@@ -118,7 +121,7 @@ public class DALikelihoodBenchmarking2 extends BenchmarkingSetup {
 
         System.out.print("\n\n=============== Summary of ");
         if (isDA)
-            System.out.print("DA tree likelihood " + threads + " thread(s) ");
+            System.out.print("DA tree likelihood " + nThreads + " thread(s) ");
         else
             System.out.print("standard tree likelihood ");
         System.out.print(", MCMC " + chainLength + " iterations, log every " +
