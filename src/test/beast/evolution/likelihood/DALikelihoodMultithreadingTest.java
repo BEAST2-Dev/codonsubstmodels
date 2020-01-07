@@ -53,15 +53,15 @@ public class DALikelihoodMultithreadingTest {
 
         // =============== DA tree likelihood ===============
         testLds = new DataAugTreeLikelihood[threads.length];
+        // set internal node states on the fly
+        NodeStatesArray nodeStatesArray = new NodeStatesArray(codonAlignment, tree, "parsimony");
 
         // different threads
         for (int i = 0; i < threads.length; i++) {
-            // set internal node states on the fly
-            NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree, "parsimony");
-
+            NodeStatesArray newNSA = (NodeStatesArray) nodeStatesArray.copy();
             int th = threads[i];
             testLds[i] = new DataAugTreeLikelihood();
-            testLds[i].initByName("nodesStates", nodesStates, "tree", tree,
+            testLds[i].initByName("nodesStates", newNSA, "tree", tree,
                     "siteModel", siteModel, "threads", th);
         }
 
@@ -72,6 +72,7 @@ public class DALikelihoodMultithreadingTest {
             if (!nodesStates2.hasSameInternalNodeStates(nodesStates))
                 throw new IllegalArgumentException("Internal node states cannot be different !");
         }
+        System.out.println("\nSetup the same internal node states.");
     }
 
     @After

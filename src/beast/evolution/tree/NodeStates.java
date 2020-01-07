@@ -1,9 +1,11 @@
 package beast.evolution.tree;
 
+import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
 
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +23,7 @@ import java.util.List;
  * No {@link beast.core.Input} here.
  * Init and validate in {@link NodeStatesArray#initAndValidate()}.
  */
-public class NodeStates implements Cloneable {//extends StateNode {
+public class NodeStates implements Cloneable {// cannot extend StateNode
 
     /**
      * The node index :<br>
@@ -173,42 +175,6 @@ public class NodeStates implements Cloneable {//extends StateNode {
         return tipID;
     }
 
-    /**
-     * cleans up and deallocates arrays.
-     */
-    @Override
-    public void finalize() throws Throwable {
-        states = null;
-//        storedStates = null;
-        siteIsDirty = null;
-    }
-
-//    //TODO store/restore per site
-////    @Override
-//    protected void store() {
-//        if (tipID != null)
-//            throw new UnsupportedOperationException("Can not sample tip states yet !");
-//
-//        System.arraycopy(states, 0, storedStates, 0, states.length);
-//    }
-//
-////    @Override
-//    public void restore() {
-//        if (tipID != null)
-//            throw new UnsupportedOperationException("Can not sample tip states yet !");
-//
-//        final int[] tmp = storedStates;
-//        storedStates = states;
-//        states = tmp;
-////        hasStartedEditing = false;
-//
-//        if (siteIsDirty.length != getSiteCount()) {
-//            siteIsDirty = new boolean[getSiteCount()];
-//        }
-//
-//    }
-
-
     public int getSiteCount() {
         return states.length;
     }
@@ -264,6 +230,22 @@ public class NodeStates implements Cloneable {//extends StateNode {
         siteIsDirty[codonNr] = true;
     }
 
+    /**
+     * @param ns  another NodeStates
+     * @return    true if they have the same states, no matter siteIsDirty[].
+     */
+    public boolean hasSameStates(NodeStates ns) {
+        int[] states2 = ns.getStates();
+        if (states2.length != states.length)
+            return false;
+        for (int i = 0; i < states.length; i++) {
+            if (states2[i] != states[i]) {
+                Log.err.println("Internal node " + nodeNr + " site " + i + " has different states !");
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * For CodonAlignment, convert triplets string into list of codon states.
@@ -291,49 +273,6 @@ public class NodeStates implements Cloneable {//extends StateNode {
         return sequence.stream().mapToInt(i -> i).toArray();
     }
 
-
-//    @Override
-//    public void init(PrintStream out) {
-//        out.print(nodeNr + "\t");
-//    }
-//
-//    @Override
-//    public void close(PrintStream out) {
-//        // nothing to do
-//    }
-
-//    @Override
-//    public void log(long sampleNr, PrintStream out) {
-//        super.log(sampleNr, out);
-//    }
-
-//    @Override
-//    public boolean equals(Object obj) {
-//        NodeStates ns = (NodeStates) obj;
-//        // nodeNr
-//        // tipID
-//        // states
-//        // siteIsDirty
-//        // lower upper
-//        return super.equals(obj);
-//    }
-
-    /**
-     * @param ns  another NodeStates
-     * @return    true if they have the same states, no matter siteIsDirty[].
-     */
-    public boolean hasSameStates(NodeStates ns) {
-        int[] states2 = ns.getStates();
-        if (states2.length != states.length)
-            return false;
-        for (int i = 0; i < states.length; i++) {
-            if (states2[i] != states[i])
-                return false;
-        }
-        return true;
-    }
-
-
     @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder();
@@ -348,31 +287,62 @@ public class NodeStates implements Cloneable {//extends StateNode {
         return buf.toString();
     }
 
-//    @Override
-//    public void setEverythingDirty(boolean isDirty) {
-//        setSomethingIsDirty(isDirty);
-//        Arrays.fill(siteIsDirty, isDirty);
-//    }
-//
-    //TODO
-//    @Override
-    public NodeStates copy() {
-        // https://stackoverflow.com/questions/46145826/why-clone-is-the-best-way-for-copying-arrays
+    /**
+     * cleans up and deallocates arrays.
+     */
+    @Override
+    public void finalize() throws Throwable {
+        states = null;
+//        storedStates = null;
+        siteIsDirty = null;
+    }
+
+    /**
+     * Used in {@link NodeStatesArray#copy()}.
+     * @return a shallow copy of NodeStates
+     */
+    public NodeStates shallowCopy() {
         try {
-            @SuppressWarnings("unchecked")
+            // https://stackoverflow.com/questions/46145826/why-clone-is-the-best-way-for-copying-arrays
             final NodeStates copy = (NodeStates) this.clone();
-            copy.states = states.clone();
-            //storedStates = copy.storedStates.clone();
-            copy.siteIsDirty = siteIsDirty.clone();
             return copy;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
-
     }
 
-//
+    /**
+     * Print <code>nodeNr</code> and states.
+     * @param out {@link PrintStream}
+     * @param delimiter  delimiter between states, use "" to make no delimiter case.
+     */
+    public void log(PrintStream out, String delimiter) {
+        out.print(nodeNr + "\t");
+        for (int sta : states) {
+            // 01,02,...,60
+            if (sta < 10)
+                out.print("0" + sta);
+            else
+                out.print(sta);
+            // delimiter between states
+            out.print(delimiter);
+        }
+    }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        NodeStates ns = (NodeStates) obj;
+//        // nodeNr
+//        // tipID
+//        // states
+//        // siteIsDirty
+//        // lower upper
+//        return super.equals(obj);
+//    }
+
+//TODO
+
 //    @Override
 //    public void assignTo(StateNode other) {
 //        @SuppressWarnings("unchecked")
@@ -426,5 +396,37 @@ public class NodeStates implements Cloneable {//extends StateNode {
 //    public double getArrayValue(int dim) { // use getASite(int, int)
 //        throw new UnsupportedOperationException("Unsupported");
 //    }
+
+
+
+//    @Override
+//    protected void store() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+//
+//        System.arraycopy(states, 0, storedStates, 0, states.length);
+//    }
+//
+//    @Override
+//    public void restore() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+//
+//        final int[] tmp = storedStates;
+//        storedStates = states;
+//        states = tmp;
+////        hasStartedEditing = false;
+//
+//        if (siteIsDirty.length != getSiteCount()) {
+//            siteIsDirty = new boolean[getSiteCount()];
+//        }
+//
+//    }
+//    @Override
+//    public void setEverythingDirty(boolean isDirty) {
+//        setSomethingIsDirty(isDirty);
+//        Arrays.fill(siteIsDirty, isDirty);
+//    }
+//
 
 }

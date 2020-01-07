@@ -517,7 +517,13 @@ public class NodeStatesArray extends StateNode {
     //******* MCMC StateNode *******
     @Override
     public void log(long sampleNr, PrintStream out) {
-        super.log(sampleNr, out);
+        NodeStatesArray nsa = (NodeStatesArray) getCurrent();
+        out.print(sampleNr);
+        for (int i=getTipsCount(); i < getNodeCount(); i++) {// only internal nodes
+            out.print("\t");
+            nsa.getNodeStates(i).log(out, " ");
+            out.print("\n");
+        }
     }
 
     /**
@@ -598,24 +604,21 @@ public class NodeStatesArray extends StateNode {
     protected void store() {
         // internal nodes only
         for (int i = getTipsCount(); i < getNodeCount(); i++){
+            storedNodesStates[i] = nodesStates[i].shallowCopy();
             //TODO need nodeIsDirty[]?
-            storedNodesStates[i] = nodesStates[i].copy();
-//            nodesStates[i].store();
         }
-
     }
 
     @Override
     public void restore() {
         // internal nodes only
         for (int i = getTipsCount(); i < getNodeCount(); i++){
-            //TODO need nodeIsDirty[]?
-            nodesStates[i] = storedNodesStates[i].copy();
+            nodesStates[i] = storedNodesStates[i].shallowCopy();
 //            final NodeStates tmp = storedNodesStates[i].copy();
 //            storedNodesStates[i] = nodesStates[i].copy();
 //            nodesStates[i] = tmp;
-//            nodesStates[i].restore();
             nodeIsDirty[i] = false;
+            //TODO reset nodesStates[i].siteIsDirty[] ?
         }
 
         hasStartedEditing = false;
@@ -637,24 +640,23 @@ public class NodeStatesArray extends StateNode {
         for (int i = getTipsCount(); i < getNodeCount(); i++){
             NodeStates nodeStates = getNodeStates(i);
             NodeStates nodeStates2 = nsa.getNodeStates(i);
-            if (!nodeStates2.hasSameStates(nodeStates))
+            if (!nodeStates2.hasSameStates(nodeStates)) {
+//                Log.err.println("Internal node " + i + " has different states !");
                 return false;
+            }
         }
         return true;
     }
 
 
-    //******* use those in NodesStates not these below *******
-
-    //TODO
     @Override
     public StateNode copy() {
         try {
             @SuppressWarnings("unchecked")
             final NodeStatesArray copy = (NodeStatesArray) this.clone();
             for (int i = 0; i < nodesStates.length; i++)
-                copy.nodesStates[i] = (NodeStates) nodesStates[i].copy();
-
+                copy.nodesStates[i] = nodesStates[i].shallowCopy();
+            // nodeIsDirty[] all false
             copy.nodeIsDirty = new boolean[getNodeCount()];
             return copy;
         } catch (Exception e) {
@@ -664,6 +666,7 @@ public class NodeStatesArray extends StateNode {
 
     }
 
+    //TODO
     @Override
     public void assignTo(StateNode other) {
         throw new UnsupportedOperationException("Unsupported");
