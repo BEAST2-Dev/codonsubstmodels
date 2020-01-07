@@ -43,7 +43,8 @@ public class DALikelihoodMultithreadingTest {
         codonFreq.initByName("pi", "F3X4", "data", codonAlignment, "verbose", false);
         SiteModel siteModel = CodonData.getSiteModel("0.3", "5", codonFreq, false);
 
-        String newickTree = "(((Human_Horai: 1, Human_Arnason: 1.1): 1, (Chimp_Horai: 1, Chimp_Arnason: 1.1): 0.8): 0.5, " +
+        String newickTree = "(((Human_Horai: 1, Human_Arnason: 1.1): 1, " +
+                "(Chimp_Horai: 1, Chimp_Arnason: 1.1): 0.8): 0.5, " +
                 "(Gorilla_Horai: 1, Gorilla_Arnason: 1.1): 1.5);";
         Tree tree = CodonData.getTree(codonAlignment, newickTree, false, true);
 
@@ -63,6 +64,14 @@ public class DALikelihoodMultithreadingTest {
             testLds[i].initByName("nodesStates", nodesStates, "tree", tree,
                     "siteModel", siteModel, "threads", th);
         }
+
+        NodeStatesArray nodesStates = testLds[0].getNodesStates();
+        // test internal node states are same
+        for (int i = 1; i < threads.length; i++) {
+            NodeStatesArray nodesStates2 = testLds[i].getNodesStates();
+            if (!nodesStates2.hasSameInternalNodeStates(nodesStates))
+                throw new IllegalArgumentException("Internal node states cannot be different !");
+        }
     }
 
     @After
@@ -75,7 +84,7 @@ public class DALikelihoodMultithreadingTest {
     public void testMultithreading(){
         double[] logPs = new double[threads.length];
         long[] timeDAs = new long[threads.length];
-        System.out.println("\n=============== DA tree likelihood ===============\n");
+        System.out.println("\n=============== DA tree likelihood multithreading test ===============\n");
 
         long start = System.nanoTime();
         for (int i = 0; i < threads.length; i++){

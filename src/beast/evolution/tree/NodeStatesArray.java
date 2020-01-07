@@ -626,7 +626,22 @@ public class NodeStatesArray extends StateNode {
 //        System.arraycopy(storedMatrixIndex, 0, currentMatrixIndex, 0, getNodeCount());
 //    }
 
-
+    /**
+     * @param nsa another NodeStatesArray
+     * @return  true if they have the same internal node states
+     */
+    public boolean hasSameInternalNodeStates(NodeStatesArray nsa) {
+        if (nsa.getNodeCount() != getNodeCount())
+            return false;
+        // internal nodes only
+        for (int i = getTipsCount(); i < getNodeCount(); i++){
+            NodeStates nodeStates = getNodeStates(i);
+            NodeStates nodeStates2 = nsa.getNodeStates(i);
+            if (!nodeStates2.hasSameStates(nodeStates))
+                return false;
+        }
+        return true;
+    }
 
 
     //******* use those in NodesStates not these below *******

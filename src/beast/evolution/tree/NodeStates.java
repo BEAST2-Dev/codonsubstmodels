@@ -307,6 +307,32 @@ public class NodeStates implements Cloneable {//extends StateNode {
 //        super.log(sampleNr, out);
 //    }
 
+//    @Override
+//    public boolean equals(Object obj) {
+//        NodeStates ns = (NodeStates) obj;
+//        // nodeNr
+//        // tipID
+//        // states
+//        // siteIsDirty
+//        // lower upper
+//        return super.equals(obj);
+//    }
+
+    /**
+     * @param ns  another NodeStates
+     * @return    true if they have the same states, no matter siteIsDirty[].
+     */
+    public boolean hasSameStates(NodeStates ns) {
+        int[] states2 = ns.getStates();
+        if (states2.length != states.length)
+            return false;
+        for (int i = 0; i < states.length; i++) {
+            if (states2[i] != states[i])
+                return false;
+        }
+        return true;
+    }
+
 
     @Override
     public String toString() {
