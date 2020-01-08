@@ -6,7 +6,6 @@ import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
 import codonmodels.CodonFrequencies;
 import org.junit.After;
 import org.junit.Before;
@@ -30,8 +29,6 @@ public class DALikelihoodMultithreadingTest {
 
     @Before
     public void setUp() {
-        Randomizer.setSeed(777);
-
         Alignment data = CodonData.getAlig6T333();
         // create Codon Alignment
         CodonAlignment codonAlignment = new CodonAlignment();

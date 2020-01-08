@@ -360,13 +360,14 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                         jointBranchRate, probabilities);
                 //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
-                for (int j=0; j < probabilities.length; j++)
-                    //TODO P(t) cannot be 0, but short branch causes numeric precision error.
-                    if (probabilities[j] <= 0) {
-//                        System.err.println(Arrays.toString(probabilities));
-                        throw new ArithmeticException("Select 0 in P(t) matrix possibly caused by a short branch ! " +
-                                "matrix index = " + j + ", branch Nr = " + nodeNr + ", branchTime = " + branchTime);
-                    }
+//                for (int j=0; j < probabilities.length; j++)
+//                    //TODO P(t) cannot be 0, but short branch causes numeric precision error.
+//                    if (probabilities[j] <= 0) {
+////                        System.err.println(Arrays.toString(probabilities));
+//                        throw new ArithmeticException("Select " + probabilities[j] + " probability in P(t) matrix " +
+//                                ", possibly caused by a short branch ! " + "matrix index = " + j +
+//                                ", branch Nr = " + nodeNr + ", branchTime = " + branchTime);
+//                    }
 
                 daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy
             }
