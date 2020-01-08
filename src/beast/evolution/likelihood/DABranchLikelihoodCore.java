@@ -1,6 +1,8 @@
 package beast.evolution.likelihood;
 
 
+import java.util.Arrays;
+
 /**
  * data augmentation likelihood core based on a branch for multithreading.
  * the branch is defined above the selected child node.
@@ -29,6 +31,11 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
     protected int currentBrLdIndex = 0;
     protected int storedBrLdIndex = 0;
 
+    /**
+     * caching probability tables obtained from substitutionModel,
+     * size = stateCount * stateCount
+     */
+    protected double[] probabilities;
 
     protected boolean useScaling = false;
 
@@ -75,10 +82,23 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         // merged likelihood for all categories
         branchLd = new double[2][nrOfSites];
 
-        // 2 means current and stored
+        // matrixSize = stateCount * stateCount;
+        // transition probability matrix P, [2] are current and stored
         matrices = new double[2][nrOfCategories * matrixSize];
+
+        // used to cache transition probability matrix P
+        probabilities = new double[matrixSize];
+        Arrays.fill(probabilities, 1.0);
+
     }
 
+    /**
+     * @return the reference of array caching probability,
+     *         which has to be here to make thread safe.
+     */
+    public double[] getProbRef() {
+        return this.probabilities;
+    }
 
     /**
      * Restore the stored state

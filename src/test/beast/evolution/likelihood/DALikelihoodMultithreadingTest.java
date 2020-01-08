@@ -14,7 +14,6 @@ import org.junit.Test;
 import test.beast.evolution.CodonData;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -86,7 +85,7 @@ public class DALikelihoodMultithreadingTest {
         double[] logPs = new double[threads.length];
         long[] timeDAs = new long[threads.length];
         System.out.println("\n=============== DA tree likelihood multithreading test ===============\n");
-
+//int i=1; // 2 threads
         long start = System.nanoTime();
         for (int i = 0; i < threads.length; i++){
             logPs[i] = testLds[i].calculateLogP();
@@ -99,7 +98,7 @@ public class DALikelihoodMultithreadingTest {
         assertEquals(logPs[0], logPs[2], 1e-10);
 
         // not true for single core
-        assertTrue("Invalid test for single core", timeDAs[0] > timeDAs[2]);
+//        assertTrue("Invalid test for single core", timeDAs[0] > timeDAs[2]);
     }
 
 
