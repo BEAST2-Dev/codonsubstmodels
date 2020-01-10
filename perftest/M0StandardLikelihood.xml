@@ -1,0 +1,159 @@
+<beast version="2.6" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree:
+beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:
+beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
+
+
+    <!-- m0, variables: DATA, PI, TREE -->
+    <data id="alignment" dataType="nucleotide">
+[DATA]
+    </data>
+
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial"
+          spec="CodonAlignment"  verbose="false"/>
+
+    <parameter id="m0.omega" value="0.08"/>
+    <parameter id="m0.kappa" value="15.0"/>
+    <parameter id="popSize" value="0.2"/>
+    <parameter id="clockRate" name="stateNode">1.0</parameter>
+
+    <substModel spec="codonmodels.M0Model" id="m0" verbose="false">
+        <omega idref="m0.omega"/>
+        <kappa idref="m0.kappa"/>
+        <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="[PI]" verbose="true">
+            <data idref="codon.alignment"/>
+        </frequencies>
+    </substModel>
+
+    <!-- site model                                                              -->
+    <siteModel spec="SiteModel" id="siteModel" gammaCategoryCount="1">
+        <!--
+        <parameter id="mutationRate.m0" estimate="false" name="mutationRate">1.0</parameter>
+        <parameter id="gammaShape.m0" estimate="false" name="shape">1.0</parameter>
+        <parameter id="proportionInvariant.m0" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+         -->
+        <substModel idref="m0"/>
+    </siteModel>
+
+    <tree spec="beast.util.TreeParser" id='tree' IsLabelledNewick='true'
+          taxa='@alignment' adjustTipHeights='false'
+          newick="[TREE]"/>
+
+    <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
+        <data name="data" idref="codon.alignment"/>
+        <tree name="tree" idref="tree"/>
+        <siteModel name="siteModel" idref="siteModel"/>
+<!--        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>-->
+    </distribution>
+
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.math.distributions.Normal</map>
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+    <run spec="MCMC" id="mcmc" chainLength="300000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="10000">
+<!--            <input name='stateNode' idref='m0.omega'/>-->
+<!--            <input name='stateNode' idref='m0.kappa'/>-->
+<!--            <input name='stateNode' idref='popSize'/>-->
+            <input name='stateNode' idref='tree'/>
+        </state>
+
+        <distribution spec="util.CompoundDistribution" id="posterior">
+            <distribution id="prior" spec="util.CompoundDistribution">
+                <distribution id="coalescent" spec="Coalescent">
+                    <populationModel id="ConstantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
+                    <treeIntervals spec='TreeIntervals' id='TreeIntervals' tree="@tree"/>
+                </distribution>
+                <prior id="OmegaPrior" name="distribution" x="@m0.omega">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <!-- "1.9064e-02" "1.3534e-01" "9.6075e-01" -->
+                        <parameter id="RealParameter.1" estimate="false" name="M">-2</parameter>
+                        <parameter id="RealParameter.2" estimate="false" name="S">1</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="KappaPrior" name="distribution" x="@m0.kappa">
+                    <LogNormal id="LogNormalDistributionModel.1" name="distr">
+                        <!-- 2 to 40  "1.0408e+00" "7.3891e+00" "5.2455e+01" -->
+                        <parameter id="RealParameter.3" estimate="false" name="M">2</parameter>
+                        <parameter id="RealParameter.4" estimate="false" name="S">1</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="PopSizePrior" name="distribution" x="@popSize">
+                    <LogNormal id="LogNormalDistributionModel.2" name="distr">
+                        <!-- "7.1550e-03" "1.3534e-01" "2.5598e+00" -->
+                        <parameter id="PopM" estimate="false" name="M">-2</parameter>
+                        <parameter id="PopS" estimate="false" name="S">1.5</parameter>
+                    </LogNormal>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
+                <distribution idref="treeLikelihood"/>
+            </distribution>
+        </distribution>
+
+        <!-- add this if estimating clock rate, for example, tip dates or MRCA analysis.
+        <operator id="StrictClockRateScaler" spec="ScaleOperator" parameter="@clockRate" scaleFactor="0.75" weight="1.0"/>
+
+        <operator id="strictClockUpDownOperator" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">
+            <up idref="clockRate"/>
+            <down idref="tree"/>
+        </operator>
+        -->
+
+<!--        <operator id='omegaScaler' spec='ScaleOperator' parameter="@m0.omega" scaleFactor="0.5" weight="0.5" />-->
+
+<!--        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="3"/>-->
+
+<!--        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="0.5"/>-->
+
+<!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
+
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.75" tree="@tree" weight="3.0"/>
+
+        <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="15.0"/>
+
+<!--        <operator id="SubtreeSlide" spec="SubtreeSlide" tree="@tree" size="0.1" weight="15.0"/>-->
+
+<!--        <operator id="Narrow" spec="Exchange" tree="@tree" weight="15.0"/>-->
+
+<!--        <operator id="Wide" spec="Exchange" isNarrow="false" tree="@tree" weight="3.0"/>-->
+
+<!--        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>-->
+
+        <logger logEvery="1000" fileName="m0.std.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log spec='beast.evolution.tree.TreeStatLogger' tree='@tree'/>
+<!--            <log idref="coalescent"/>-->
+<!--            <log idref="popSize"/>-->
+<!--            <log idref="m0.omega"/>-->
+<!--            <log idref="m0.kappa"/>-->
+<!--            <log idref="clockRate"/>-->
+        </logger>
+
+        <logger logEvery="5000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log spec='beast.evolution.tree.TreeStatLogger' tree='@tree'/>
+<!--            <log idref="popSize"/>-->
+<!--            <log idref="m0.omega"/>-->
+<!--            <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>-->
+<!--            <log idref="m0.kappa"/>-->
+<!--            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>-->
+        </logger>
+
+<!--        <logger logEvery="5000" fileName="test.m0.trees" mode="tree">-->
+<!--            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>-->
+<!--        </logger>-->
+    </run>
+
+</beast>

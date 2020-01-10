@@ -5,7 +5,8 @@ library(ape)
 WD="~/WorkSpace/codonsubstmodels/perftest"
 setwd(WD)
 
-nTaxa = 8
+# c(8, 64, 512)
+nTaxa = 512
 DIR=paste0("T",nTaxa)
 if (!dir.exists(DIR)) {
   dir.create(DIR)
