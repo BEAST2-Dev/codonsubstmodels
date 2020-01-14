@@ -4,6 +4,7 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Operator;
 import beast.evolution.likelihood.DABranchLikelihoodCore;
+import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.likelihood.GenericDATreeLikelihood;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.NodeStatesArray;
@@ -31,7 +32,7 @@ public class GibbsSampler extends Operator {
     final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
             "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
     // to get P(t)
-    final public Input<GenericDATreeLikelihood> daTreeLdInput = new Input<>("DATreeLikelihood",
+    final public Input<DataAugTreeLikelihood> daTreeLdInput = new Input<>("DATreeLikelihood",
             "The data augmentation tree likelihood used for the given nodes states and tree",
             Input.Validate.REQUIRED);
 
@@ -65,7 +66,7 @@ public class GibbsSampler extends Operator {
 //        System.out.println("GibbsSampler at node " + nodeNr);
 
         NodeStatesArray nodesStates = nodesStatesInput.get(this);
-        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
+        final DataAugTreeLikelihood daTreeLd = daTreeLdInput.get();
 
         int newState;
         for (int k = 0; k < nodesStates.getSiteCount(); k++) {
@@ -108,7 +109,7 @@ public class GibbsSampler extends Operator {
      * @return         the proposed state at the node, or -1 if node is null
      */
     protected int gibbsSampling(Node node, int siteNr, NodeStatesArray nodesStates,
-                                final GenericDATreeLikelihood daTreeLd) {
+                                final DataAugTreeLikelihood daTreeLd) {
         final int nodeNr = node.getNr();
         final int ch1Nr = node.getChild(0).getNr();
         final int ch2Nr = node.getChild(1).getNr();

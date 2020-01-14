@@ -60,14 +60,6 @@ public class GenericDATreeLikelihood extends Distribution {
 	protected BranchRateModel.Base branchRateModel;
 
 
-	/****** calculation engine ******/
-//    protected BeagleTreeLikelihood beagle;
-	/**
-	 * calculation engine for each branch, excl. root index, nrOfNodes-1
-	 */
-	protected DABranchLikelihoodCore[] daBranchLdCores;
-	protected DABranchLikelihoodCore daRootLdCores;
-
 	@Override
 	public void initAndValidate() {
 		// data
@@ -89,11 +81,6 @@ public class GenericDATreeLikelihood extends Distribution {
 		} else {
 			branchRateModel = new StrictClockModel();
 		}
-
-		// branch Likelihood
-		final int nodeCount = nodesStates.getNodeCount();
-		// excl. root index
-		daBranchLdCores = new DABranchLikelihoodCore[nodeCount-1];
 
 	}
 
@@ -117,14 +104,6 @@ public class GenericDATreeLikelihood extends Distribution {
 
 	public BranchRateModel.Base getBranchRateModel() {
 		return branchRateModel;
-	}
-
-	/**
-	 * @param branchNr the node Nr of child node below the branch
-	 * @return {@link DABranchLikelihoodCore} containing cached values.
-	 */
-	public DABranchLikelihoodCore getDaBranchLdCores(int branchNr) {
-		return daBranchLdCores[branchNr];
 	}
 
 	/**

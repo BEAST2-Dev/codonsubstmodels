@@ -1,6 +1,8 @@
 package beast.evolution.likelihood;
 
 
+import beast.evolution.tree.NodeStates;
+
 import java.util.Arrays;
 
 /**
@@ -405,6 +407,19 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         return logIntegratedLikelihood(branchLd[currentBrLdIndex]);
     }
 
+    // log likelihood at root given codon frequencies
+    public double calculateRootLogLikelihood(int rootIndex, NodeStates rootStates, double[] frequencies) {
+        int siteCount = rootStates.getSiteCount();
+        double[] siteLdAtRoot = new double[siteCount];
+        int state;
+        for (int k = 0; k < siteCount; k++) {
+            // hard code for root node
+            state = rootStates.getState(k); // 0-63
+            siteLdAtRoot[k] = frequencies[state];
+        }
+
+        return logIntegratedLikelihood(siteLdAtRoot); //+ getLogScalingFactor(k); TODO
+    }
 
 
     /**

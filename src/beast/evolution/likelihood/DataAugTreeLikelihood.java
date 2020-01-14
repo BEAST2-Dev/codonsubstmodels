@@ -3,13 +3,12 @@ package beast.evolution.likelihood;
 import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
+import beast.core.util.Log;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.NodeStates;
 import beast.evolution.tree.Tree;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +17,6 @@ import java.util.concurrent.Executors;
  * Data augmentation to fast codon tree likelihood calculation.
  * No pattern, use site count.
  *
- * TODO: make it working in multi-threading in MCMC
  */
 public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
@@ -43,12 +41,24 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             "maximum number of threads to use, if less than 1 the number of threads " +
                     "in BeastMCMC is used (default -1)", -1);
 
+    final public Input<Integer> maxNrOfBranchesPerTaskInput = new Input<>("branchesPerTask",
+            "maximum number of branches assigned to a task for thread pool, " +
+                    "if less than 1 use Java default.", -1);
 
+
+    /****** calculation engine ******/
+//    protected BeagleTreeLikelihood beagle;
+    /**
+     * calculation engine for each branch, excl. root index, nrOfNodes-1
+     */
+    protected DABranchLikelihoodCore[] daBranchLdCores;
+    protected DABranchLikelihoodCore daRootLdCores;
     /**
      * number of threads to use, changes when threading causes problems
      */
     private int threadCount;
-
+    private int maxBrPerTask;
+    // New thread pool from BEAST MCMC.
     private ExecutorService executor = null;
     /**
      * multi-threading {@link DABranchLikelihoodCallable}
@@ -103,7 +113,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
     public void initAndValidate() {
         // init threadCount
         threadCount = BeastMCMC.m_nThreads;
-        // threadCount is overwritten by TreeLikelihood threads
+        // overwritten by max(maxNrOfThreadsInput, BEAST thread in command line)
         if (maxNrOfThreadsInput.get() > 0) {
             threadCount = Math.max(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
         }
@@ -112,6 +122,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         if (instanceCount != null && instanceCount.length() > 0) {
             threadCount = Integer.parseInt(instanceCount);
         }
+        Log.info("Data augmentation tree likelihood thread = " + threadCount);
 
         // data, tree and models
         super.initAndValidate();
@@ -162,6 +173,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         branchLogLikelihoods = new double[nodeCount];
         storedBranchLogLikelihoods = new double[nodeCount];
 
+        // branch Likelihood excl. root index
+        daBranchLdCores = new DABranchLikelihoodCore[nodeCount-1];
         // init likelihood core using branch index (child node index below the branch)
         for (int n = 0; n < getRootIndex(); n++) {
             final Node node = tree.getNode(n);
@@ -172,15 +185,57 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             daBranchLdCores[n] = new DABranchLikelihoodCore(n, stateCount, siteCount, siteModel.getCategoryCount());
         }
         tree.getRoot().makeDirty(Tree.IS_FILTHY);
-        // only to call logIntegratedLikelihood(double[])
+        // root special
         daRootLdCores = new DABranchLikelihoodCore(getRootIndex(), stateCount, siteCount);
 
         // multi-threading
         if (threadCount > 1) {
             executor = Executors.newFixedThreadPool(threadCount);
-            for (int n = 0; n < getRootIndex(); n++) { // n is branchNr
-                likelihoodCallers.add(new DABranchLikelihoodCallable(daBranchLdCores[n], n));
+
+            maxBrPerTask = maxNrOfBranchesPerTaskInput.get();
+            if (maxBrPerTask > 1) {
+                int tasks = (int) Math.floor((double)(nodeCount-1) / (double)maxBrPerTask);
+                Log.info("number of branches per task = " + maxBrPerTask + ",  tasks = " + tasks);
+                if ( tasks < threadCount)
+                    throw new IllegalArgumentException("The number of groups " + ((nodeCount-1) / maxBrPerTask) +
+                            " cannot be less than number of threads " + threadCount + " !");
+
+                // group the BrLd cores [0, nodeCount-2] by maxBrPerTask to reduce the lock/unlock
+                for (int i = 0; i < tasks; i++) {
+                    List<DABranchLikelihoodCore> cores = new ArrayList<>();
+                    for (int n = 0; n < getRootIndex(); n++) { // n is branchNr
+                        if (n % tasks == i)
+                            cores.add(daBranchLdCores[n]);
+                    }
+                    // add root special calculation method
+                    if (i == (tasks-1))
+                        cores.add(daRootLdCores);
+
+                    DABranchLikelihoodCallable group = new DABranchLikelihoodCallable(cores);
+                    likelihoodCallers.add(group);
+                }
+            } else {
+                // TODO if number of element is small, esp. 1, this is slower than without List.
+                for (int n = 0; n < getRootIndex(); n++) { // n is branchNr
+                    List<DABranchLikelihoodCore> cores = new ArrayList<>();
+                    cores.add(daBranchLdCores[n]);
+                    likelihoodCallers.add(new DABranchLikelihoodCallable(cores));
+                }
+                // add root special calculation method
+                List<DABranchLikelihoodCore> cores = Collections.singletonList(daRootLdCores);
+                likelihoodCallers.add(new DABranchLikelihoodCallable(cores));
             }
+
+//            for (int i = 0; i < threadCount; i++) {
+//                List<DABranchLikelihoodCore> cores = new ArrayList<>();
+//                for (int n = 0; n < getRootIndex(); n++) { // n is branchNr
+//                    if (n % threadCount == i)
+//                        cores.add(daBranchLdCores[n]);
+//                }
+//                DABranchLikelihoodCallable group = new DABranchLikelihoodCallable(cores);
+//                likelihoodCallers.add(group);
+//            }
+
         }
 
 //        final int matrixSize = stateCount * stateCount; // matrixSize = stateCount * stateCount;
@@ -229,10 +284,13 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            return logP;
 //        }
 
-        // exclude root node, branches = nodes - 1
-        final int rootIndex = getRootIndex();
-
         if (threadCount <= 1) {
+            // exclude root node, branches = nodes - 1
+            final int rootIndex = getRootIndex();
+
+            final double[] frequencies = substitutionModel.getFrequencies();
+            NodeStates rootStates = nodesStates.getNodeStates(rootIndex);
+
             // branch likelihoods indexes excludes root index
             for (int n = 0; n < rootIndex; n++) {
                 final Node node = tree.getNode(n);
@@ -244,15 +302,21 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                     }
 //            System.out.println("logP = " + logP);
                 } catch (ArithmeticException e) {
-                    System.err.println(e.getMessage());
+                    Log.err.println(e.getMessage());
                     return Double.NEGATIVE_INFINITY;
                 }
             } // end n loop
+            // root special
+            this.branchLogLikelihoods[rootIndex] =
+                    daRootLdCores.calculateRootLogLikelihood(rootIndex, rootStates, frequencies);
 
         } else {
             try {
-                // likelihoodCallers.add(new DABranchLikelihoodCallable(daBranchLdCores[n]));
+                // include root special
                 executor.invokeAll(likelihoodCallers);
+            } catch (ArithmeticException e) {
+                Log.err.println(e.getMessage());
+                return Double.NEGATIVE_INFINITY;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -262,7 +326,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // if (nodesStates.isNodeStatesDirty(rootIndex) || siteModel.isDirtyCalculation()) {
 //        if (tree.getRoot().isDirty() != Tree.IS_CLEAN || siteModel.isDirtyCalculation()) {
         // nodeLogLikelihoods[rootIndex] = log likelihood for frequencies prior at root
-        this.branchLogLikelihoods[rootIndex] = calculateRootLogLikelihood(rootIndex);
+//        this.branchLogLikelihoods[rootIndex] = calculateRootLogLikelihood(rootIndex);
 //        }
 
         // sum logP
@@ -302,19 +366,21 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
     }
 
     // log likelihood at root given codon frequencies
-    protected double calculateRootLogLikelihood(int rootIndex) {
-        final double[] frequencies = substitutionModel.getFrequencies();
-
-        int siteCount = nodesStates.getSiteCount();
-        double[] siteLdAtRoot = new double[siteCount];
-        for (int k = 0; k < siteCount; k++) {
-            // hard code for root node
-            int state = nodesStates.getState(rootIndex, k); // 0-63
-            siteLdAtRoot[k] = frequencies[state];
-        }
-
-        return daRootLdCores.logIntegratedLikelihood(siteLdAtRoot); //+ getLogScalingFactor(k); TODO
-    }
+//    protected double calculateRootLogLikelihood(int rootIndex) {
+//        final double[] frequencies = substitutionModel.getFrequencies();
+//
+//        NodeStates rootStates = nodesStates.getNodeStates(rootIndex);
+//        int siteCount = nodesStates.getSiteCount();
+//        double[] siteLdAtRoot = new double[siteCount];
+//        int state;
+//        for (int k = 0; k < siteCount; k++) {
+//            // hard code for root node
+//            state = rootStates.getState(k); // 0-63
+//            siteLdAtRoot[k] = frequencies[state];
+//        }
+//
+//        return daRootLdCores.logIntegratedLikelihood(siteLdAtRoot); //+ getLogScalingFactor(k); TODO
+//    }
 
     //    protected synchronized void sumLogP(double logPBr) {
 //        logP += logPBr;
@@ -340,9 +406,9 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         if (branchTime == 0)
             throw new UnsupportedOperationException("0 branch length, such as SA, not supported !");
         if (branchTime < 1e-10)
-            throw new IllegalArgumentException(
-                    "Time from parent " + parentNum + " to node " + nodeNr + " is 0 !  " +
-                            "branch length = " + node.getLength() + ", branchRate = " + branchRate);
+            throw new ArithmeticException("Reject proposal : " +
+                    "time is 0 at the branch between parent node " + parentNum + " and node " + nodeNr +
+                    " !\n" + "branch length = " + node.getLength() + ", branchRate = " + branchRate);
 
         //TODO how to distinguish branch len change and internal node seq change, when topology is same
 
@@ -393,35 +459,89 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
     }
 
 
-    // for multi-threading
+    // ArithmeticException if branch time < 1e-10
     class DABranchLikelihoodCallable implements Callable<Double> {
-        private final DABranchLikelihoodCore brLDCore;
-        private final int branchNr; // used to make thread safe
+//        private final DABranchLikelihoodCore brLDCore;
+//        private final int branchNr; // used to make thread safe
+//
+//        // per branch
+//        public DABranchLikelihoodCallable(DABranchLikelihoodCore brLDCore, int branchNr) {
+//            this.brLDCore = brLDCore;
+//            this.branchNr = branchNr;
+//        }
 
-        // per branch
-        public DABranchLikelihoodCallable(DABranchLikelihoodCore brLDCore, int branchNr) {
-            this.brLDCore = brLDCore;
-            this.branchNr = branchNr;
+        private final List<DABranchLikelihoodCore> brLDCores;
+
+        // by group
+        public DABranchLikelihoodCallable(List<DABranchLikelihoodCore> brLDCores) {
+            this.brLDCores = brLDCores;
         }
 
         @Override
         public Double call() throws Exception {
-            try {
+//            try {
+            double logP = 0;
+            for (DABranchLikelihoodCore core : brLDCores) {
+                final int branchNr = core.getBranchNr();
                 final Node node = tree.getNode(branchNr);
-                // caching branchLogLikelihoods[nodeNr]
-                if (updateBranch(brLDCore, node) != Tree.IS_CLEAN)
-                    branchLogLikelihoods[branchNr] = brLDCore.calculateBranchLogLikelihood();
 
-            } catch (Exception e) {
-                System.err.println("Something wrong to calculate branch likelihood above node " +
-                        branchNr + " during multithreading !");
-                e.printStackTrace();
-                System.exit(0);
+                final int rootIndex = getRootIndex();
+                if (branchNr == rootIndex) {
+                    final double[] freqs = substitutionModel.getFrequencies();
+                    NodeStates rootStates = nodesStates.getNodeStates(rootIndex);
+
+                    branchLogLikelihoods[rootIndex] = core.calculateRootLogLikelihood(rootIndex, rootStates, freqs);
+                    logP += branchLogLikelihoods[rootIndex];
+                } else {
+                    // caching branchLogLikelihoods[nodeNr]
+                    if (updateBranch(core, node) != Tree.IS_CLEAN)
+                        branchLogLikelihoods[branchNr] = core.calculateBranchLogLikelihood();
+
+                    logP += branchLogLikelihoods[branchNr];
+                }
             }
+//            } catch (Exception e) {
+//                System.err.println("Something wrong to calculate branch likelihood above node " +
+//                        branchNr + " during multithreading !");
+//                e.printStackTrace();
+//                System.exit(0);
+//            }
 //            System.out.println("Branch likelihood logP = " + branchLogLikelihoods[branchNr] + " above node " + branchNr);
-            return branchLogLikelihoods[branchNr];
+            return logP;
         }
 
+    }
+
+    class Store implements Runnable{
+        private final int branchNr;
+        public Store(int branchNr){
+            this.branchNr = branchNr;
+        }
+        public void run(){
+//            try{
+                daBranchLdCores[branchNr].store();
+                storedBranchLengths[branchNr] = branchLengths[branchNr];
+                storedBranchLogLikelihoods[branchNr] = branchLogLikelihoods[branchNr];
+//            }catch(Exception err){
+//                err.printStackTrace();
+//            }
+        }
+    }
+
+    class Restore implements Runnable{
+        private final int branchNr;
+        public Restore(int branchNr){
+            this.branchNr = branchNr;
+        }
+        public void run(){
+//            try{
+            daBranchLdCores[branchNr].restore();
+            branchLengths[branchNr] = storedBranchLengths[branchNr];
+            branchLogLikelihoods[branchNr] = storedBranchLogLikelihoods[branchNr];
+//            }catch(Exception err){
+//                err.printStackTrace();
+//            }
+        }
     }
 
 
@@ -459,12 +579,22 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            super.store();
 //            return;
 //        }
-        for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores)
-            daBrLdCore.store();
-
         super.store(); // storedLogP = logP; isDirty = false
-        System.arraycopy(branchLengths, 0, storedBranchLengths, 0, getNrOfBranches());
-        System.arraycopy(branchLogLikelihoods, 0, storedBranchLogLikelihoods, 0, getNrOfBranches()+1);
+
+//        if (threadCount > 1) { // multi-threading
+//            // daBranchLdCores.length = nodeCount-1
+//            for (int n = 0; n < daBranchLdCores.length; n++) {
+//                executor.execute(new Store(n));
+//            }
+//            // root index
+//            storedBranchLogLikelihoods[daBranchLdCores.length] = branchLogLikelihoods[daBranchLdCores.length];
+//        } else {
+            for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores)
+                daBrLdCore.store();
+
+            System.arraycopy(branchLengths, 0, storedBranchLengths, 0, getNrOfBranches());
+            System.arraycopy(branchLogLikelihoods, 0, storedBranchLogLikelihoods, 0, getNrOfBranches()+1);
+//        }
     }
 
     @Override
@@ -474,19 +604,28 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            super.restore();
 //            return;
 //        }
-        for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores)
-            daBrLdCore.restore();
-
         super.restore(); // logP = storedLogP; isDirty = false
 
-        // pass reference in restore, but have to copy array in store.
-        double[] tmp1 = branchLengths;
-        branchLengths = storedBranchLengths;
-        storedBranchLengths = tmp1;
+//        if (threadCount > 1) { // multi-threading
+//            // daBranchLdCores.length = nodeCount-1
+//            for (int n = 0; n < daBranchLdCores.length; n++) {
+//                executor.execute(new Restore(n));
+//            }
+//            // root index
+//            branchLogLikelihoods[daBranchLdCores.length] = storedBranchLogLikelihoods[daBranchLdCores.length];
+//        } else {
+            for (DABranchLikelihoodCore daBrLdCore : daBranchLdCores)
+                daBrLdCore.restore();
 
-        double[] tmp2 = branchLogLikelihoods;
-        branchLogLikelihoods = storedBranchLogLikelihoods;
-        storedBranchLogLikelihoods = tmp2;
+            // pass reference in restore, but have to copy array in store.
+            double[] tmp1 = branchLengths;
+            branchLengths = storedBranchLengths;
+            storedBranchLengths = tmp1;
+
+            double[] tmp2 = branchLogLikelihoods;
+            branchLogLikelihoods = storedBranchLogLikelihoods;
+            storedBranchLogLikelihoods = tmp2;
+//        }
     }
 
     // for testing, nodeIndex is the child node below this branch
@@ -504,6 +643,14 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         int branchCount = tree.getNodeCount() - 1;
         assert branchCount == branchLengths.length;
         return branchCount;
+    }
+
+    /**
+     * @param branchNr the node Nr of child node below the branch
+     * @return {@link DABranchLikelihoodCore} containing cached values.
+     */
+    public DABranchLikelihoodCore getDaBranchLdCores(int branchNr) {
+        return daBranchLdCores[branchNr];
     }
 
 
