@@ -8,6 +8,7 @@ import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
 import beast.util.Randomizer;
+import beast.util.ThreadHelper;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -36,6 +37,11 @@ public class NodeStatesArray extends StateNode {
             "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
             "parsimony", Input.Validate.OPTIONAL);
 
+
+    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
+            "maximum number of threads to use, if less than 1 the number of threads " +
+                    "in BeastMCMC is used (default -1)", -1);
+
     /**
      * upper & lower bound These are located before the inputs (instead of
      * after the inputs, as usual) so that valuesInput can determines the
@@ -61,6 +67,15 @@ public class NodeStatesArray extends StateNode {
      * last node to be changed *
      */
 //    protected int nodeLastDirty;
+
+    /**
+     * number of threads to use, changes when threading causes problems
+     */
+    private ThreadHelper threadHelper;
+//    private int threadCount;
+//    private int maxBrPerTask;
+    // New thread pool from BEAST MCMC.
+//    private ExecutorService executor = null;
 
 
     //for XML parser
@@ -88,6 +103,9 @@ public class NodeStatesArray extends StateNode {
 
     @Override
     public void initAndValidate() {
+
+        threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+
         // need data type, site count, taxa count
         CodonAlignment codonAlignment = codonAlignmentInput.get();
         // cannot init params by constructor
@@ -462,6 +480,10 @@ public class NodeStatesArray extends StateNode {
 //    }
 
 
+    public ThreadHelper getThreadHelper() {
+        return threadHelper;
+    }
+
     public NodeStates getNodeStates(final int nodeIndex) {
         return nodesStates[nodeIndex];
     }
@@ -599,28 +621,60 @@ public class NodeStatesArray extends StateNode {
     }
 
 
+    class Store implements Runnable{
+        private final int nodeNr;
+        public Store(int nodeNr){
+            this.nodeNr = nodeNr;
+        }
+        public void run(){
+            // internal nodes only
+            storedNodesStates[nodeNr] = nodesStates[nodeNr].shallowCopy();
+            //TODO need nodeIsDirty[]?
+        }
+    }
+
+    class Restore implements Runnable{
+        private final int nodeNr;
+        public Restore(int nodeNr){
+            this.nodeNr = nodeNr;
+        }
+        public void run(){
+            // internal nodes only
+            nodesStates[nodeNr] = storedNodesStates[nodeNr].shallowCopy();
+            nodeIsDirty[nodeNr] = false;
+        }
+    }
+
+
     //TODO store/restore per site
     @Override
     protected void store() {
         // internal nodes only
-        for (int i = getTipsCount(); i < getNodeCount(); i++){
-            storedNodesStates[i] = nodesStates[i].shallowCopy();
-            //TODO need nodeIsDirty[]?
+        for (int i = getTipsCount(); i < getNodeCount(); i++) {
+            if (threadHelper.getThreadCount() > 1) {
+                threadHelper.getExecutor().execute(new Store(i));
+            } else {
+                storedNodesStates[i] = nodesStates[i].shallowCopy();
+                //TODO need nodeIsDirty[]?
+            }
         }
     }
 
     @Override
     public void restore() {
         // internal nodes only
-        for (int i = getTipsCount(); i < getNodeCount(); i++){
-            nodesStates[i] = storedNodesStates[i].shallowCopy();
+        for (int i = getTipsCount(); i < getNodeCount(); i++) {
+            if (threadHelper.getThreadCount() > 1) {
+                threadHelper.getExecutor().execute(new Restore(i));
+            } else {
+                nodesStates[i] = storedNodesStates[i].shallowCopy();
 //            final NodeStates tmp = storedNodesStates[i].copy();
 //            storedNodesStates[i] = nodesStates[i].copy();
 //            nodesStates[i] = tmp;
-            nodeIsDirty[i] = false;
-            //TODO reset nodesStates[i].siteIsDirty[] ?
+                nodeIsDirty[i] = false;
+                //TODO reset nodesStates[i].siteIsDirty[] ?
+            }
         }
-
         hasStartedEditing = false;
     }
 

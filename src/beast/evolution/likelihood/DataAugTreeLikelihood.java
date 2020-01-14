@@ -1,17 +1,16 @@
 package beast.evolution.likelihood;
 
-import beast.app.BeastMCMC;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.util.Log;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.NodeStates;
 import beast.evolution.tree.Tree;
+import beast.util.ThreadHelper;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Data augmentation to fast codon tree likelihood calculation.
@@ -56,10 +55,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
     /**
      * number of threads to use, changes when threading causes problems
      */
-    private int threadCount;
+    private ThreadHelper threadHelper;
+//    private int threadCount;
     private int maxBrPerTask;
     // New thread pool from BEAST MCMC.
-    private ExecutorService executor = null;
+//    private ExecutorService executor = null;
     /**
      * multi-threading {@link DABranchLikelihoodCallable}
      */
@@ -111,21 +111,13 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     @Override
     public void initAndValidate() {
-        // init threadCount
-        threadCount = BeastMCMC.m_nThreads;
-        // overwritten by max(maxNrOfThreadsInput, BEAST thread in command line)
-        if (maxNrOfThreadsInput.get() > 0) {
-            threadCount = Math.max(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
-        }
-        // threadCount is overwritten by instanceCount
-        String instanceCount = System.getProperty("beast.instance.count");
-        if (instanceCount != null && instanceCount.length() > 0) {
-            threadCount = Integer.parseInt(instanceCount);
-        }
-        Log.info("Data augmentation tree likelihood thread = " + threadCount);
-
         // data, tree and models
         super.initAndValidate();
+
+        this.threadHelper = nodesStates.getThreadHelper();
+        if (threadHelper == null) {
+            threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        }
 
 //        beagle = null;
 //        beagle = new BeagleTreeLikelihood();
@@ -189,9 +181,8 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         daRootLdCores = new DABranchLikelihoodCore(getRootIndex(), stateCount, siteCount);
 
         // multi-threading
+        int threadCount = threadHelper.getThreadCount();
         if (threadCount > 1) {
-            executor = Executors.newFixedThreadPool(threadCount);
-
             maxBrPerTask = maxNrOfBranchesPerTaskInput.get();
             if (maxBrPerTask > 1) {
                 int tasks = (int) Math.floor((double)(nodeCount-1) / (double)maxBrPerTask);
@@ -256,7 +247,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
      * @see ExecutorService#shutdown()
      */
     public void shutdown() {
-        if (executor != null) executor.shutdown();
+        threadHelper.shutdown();
     }
 
     /**
@@ -284,7 +275,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            return logP;
 //        }
 
-        if (threadCount <= 1) {
+        if (threadHelper.getThreadCount() <= 1) {
             // exclude root node, branches = nodes - 1
             final int rootIndex = getRootIndex();
 
@@ -313,7 +304,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         } else {
             try {
                 // include root special
-                executor.invokeAll(likelihoodCallers);
+                threadHelper.getExecutor().invokeAll(likelihoodCallers);
             } catch (ArithmeticException e) {
                 Log.err.println(e.getMessage());
                 return Double.NEGATIVE_INFINITY;
