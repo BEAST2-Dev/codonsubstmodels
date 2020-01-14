@@ -183,10 +183,12 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // multi-threading
         int threadCount = threadHelper.getThreadCount();
         if (threadCount > 1) {
+            Log.info("Data augmentation tree likelihood threads = " + threadCount);
+
             maxBrPerTask = maxNrOfBranchesPerTaskInput.get();
             if (maxBrPerTask > 1) {
                 int tasks = (int) Math.floor((double)(nodeCount-1) / (double)maxBrPerTask);
-                Log.info("number of branches per task = " + maxBrPerTask + ",  tasks = " + tasks);
+                Log.info("Set " + maxBrPerTask + " branches per task, total tasks = " + tasks);
                 if ( tasks < threadCount)
                     throw new IllegalArgumentException("The number of groups " + ((nodeCount-1) / maxBrPerTask) +
                             " cannot be less than number of threads " + threadCount + " !");

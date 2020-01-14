@@ -1,7 +1,6 @@
 package beast.util;
 
 import beast.app.BeastMCMC;
-import beast.core.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,7 +34,6 @@ public class ThreadHelper {
         if (instanceCount != null && instanceCount.length() > 0) {
             threadCount = Integer.parseInt(instanceCount);
         }
-        Log.info("Data augmentation tree likelihood thread = " + threadCount);
     }
 
     /**

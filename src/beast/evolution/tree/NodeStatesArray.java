@@ -645,7 +645,6 @@ public class NodeStatesArray extends StateNode {
         }
     }
 
-
     //TODO store/restore per site
     @Override
     protected void store() {
