@@ -306,7 +306,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         } else {
             try {
                 // include root special
-                threadHelper.getExecutor().invokeAll(likelihoodCallers);
+                threadHelper.invokeAll(likelihoodCallers);
             } catch (ArithmeticException e) {
                 Log.err.println(e.getMessage());
                 return Double.NEGATIVE_INFINITY;
@@ -505,37 +505,37 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     }
 
-    class Store implements Runnable{
-        private final int branchNr;
-        public Store(int branchNr){
-            this.branchNr = branchNr;
-        }
-        public void run(){
-//            try{
-                daBranchLdCores[branchNr].store();
-                storedBranchLengths[branchNr] = branchLengths[branchNr];
-                storedBranchLogLikelihoods[branchNr] = branchLogLikelihoods[branchNr];
-//            }catch(Exception err){
-//                err.printStackTrace();
-//            }
-        }
-    }
-
-    class Restore implements Runnable{
-        private final int branchNr;
-        public Restore(int branchNr){
-            this.branchNr = branchNr;
-        }
-        public void run(){
-//            try{
-            daBranchLdCores[branchNr].restore();
-            branchLengths[branchNr] = storedBranchLengths[branchNr];
-            branchLogLikelihoods[branchNr] = storedBranchLogLikelihoods[branchNr];
-//            }catch(Exception err){
-//                err.printStackTrace();
-//            }
-        }
-    }
+//    class Store implements Runnable{
+//        private final int branchNr;
+//        public Store(int branchNr){
+//            this.branchNr = branchNr;
+//        }
+//        public void run(){
+////            try{
+//                daBranchLdCores[branchNr].store();
+//                storedBranchLengths[branchNr] = branchLengths[branchNr];
+//                storedBranchLogLikelihoods[branchNr] = branchLogLikelihoods[branchNr];
+////            }catch(Exception err){
+////                err.printStackTrace();
+////            }
+//        }
+//    }
+//
+//    class Restore implements Runnable{
+//        private final int branchNr;
+//        public Restore(int branchNr){
+//            this.branchNr = branchNr;
+//        }
+//        public void run(){
+////            try{
+//            daBranchLdCores[branchNr].restore();
+//            branchLengths[branchNr] = storedBranchLengths[branchNr];
+//            branchLogLikelihoods[branchNr] = storedBranchLogLikelihoods[branchNr];
+////            }catch(Exception err){
+////                err.printStackTrace();
+////            }
+//        }
+//    }
 
 
     /** CalculationNode methods **/

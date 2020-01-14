@@ -2,8 +2,12 @@ package beast.util;
 
 import beast.app.BeastMCMC;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Walter Xie
@@ -16,6 +20,8 @@ public class ThreadHelper {
     private int threadCount;
     // maximum number of branches assigned to a task for thread pool
 //    private int maxBrPerTask;
+
+//    private final List<Callable<T>> callers = new ArrayList<>();
 
     /**
      * Initiate the number of threads from BEAST command line,
@@ -52,6 +58,20 @@ public class ThreadHelper {
             else
                 this.executor = executor;
         }
+    }
+
+    /**
+     * @see ExecutorService#invokeAll(Collection)
+     * @param tasks
+     * @param <T>
+     * @return
+     * @throws InterruptedException
+     */
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+            throws InterruptedException {
+//        if (this.executor == null)
+//            throw new IllegalArgumentException("ExecutorService cannot be null !");
+        return this.executor.invokeAll(tasks);
     }
 
     /**

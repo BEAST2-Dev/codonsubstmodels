@@ -11,7 +11,9 @@ import beast.util.Randomizer;
 import beast.util.ThreadHelper;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Store states for all nodes including tips in the array of {@link NodeStates},
@@ -76,6 +78,8 @@ public class NodeStatesArray extends StateNode {
 //    private int maxBrPerTask;
     // New thread pool from BEAST MCMC.
 //    private ExecutorService executor = null;
+    private final List<Callable<NodeStates>> storeCallers = new ArrayList<>();
+    private final List<Callable<NodeStates>> restoreCallers = new ArrayList<>();
 
 
     //for XML parser
@@ -105,6 +109,11 @@ public class NodeStatesArray extends StateNode {
     public void initAndValidate() {
 
         threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        // internal nodes only
+        for (int i = getTipsCount(); i < getNodeCount(); i++) {
+            storeCallers.add(new Store(i));
+            restoreCallers.add(new Restore(i));
+        }
 
         // need data type, site count, taxa count
         CodonAlignment codonAlignment = codonAlignmentInput.get();
@@ -620,39 +629,44 @@ public class NodeStatesArray extends StateNode {
         nodeIsDirty = null;
     }
 
-
-    class Store implements Runnable{
+    // multi-threading
+    class Store implements Callable<NodeStates> {
         private final int nodeNr;
         public Store(int nodeNr){
             this.nodeNr = nodeNr;
         }
-        public void run(){
+        public NodeStates call() throws Exception {
             // internal nodes only
             storedNodesStates[nodeNr] = nodesStates[nodeNr].shallowCopy();
             //TODO need nodeIsDirty[]?
+            return storedNodesStates[nodeNr];
         }
     }
 
-    class Restore implements Runnable{
+    class Restore implements Callable<NodeStates> {
         private final int nodeNr;
         public Restore(int nodeNr){
             this.nodeNr = nodeNr;
         }
-        public void run(){
+        public NodeStates call() throws Exception {
             // internal nodes only
             nodesStates[nodeNr] = storedNodesStates[nodeNr].shallowCopy();
             nodeIsDirty[nodeNr] = false;
+            return nodesStates[nodeNr];
         }
     }
 
-    //TODO store/restore per site
     @Override
     protected void store() {
         // internal nodes only
-        for (int i = getTipsCount(); i < getNodeCount(); i++) {
-            if (threadHelper.getThreadCount() > 1) {
-                threadHelper.getExecutor().execute(new Store(i));
-            } else {
+        if (threadHelper.getThreadCount() > 1) {
+            try {
+                threadHelper.invokeAll(storeCallers);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = getTipsCount(); i < getNodeCount(); i++) {
                 storedNodesStates[i] = nodesStates[i].shallowCopy();
                 //TODO need nodeIsDirty[]?
             }
@@ -662,11 +676,15 @@ public class NodeStatesArray extends StateNode {
     @Override
     public void restore() {
         // internal nodes only
-        for (int i = getTipsCount(); i < getNodeCount(); i++) {
-            if (threadHelper.getThreadCount() > 1) {
-                threadHelper.getExecutor().execute(new Restore(i));
-            } else {
-                nodesStates[i] = storedNodesStates[i].shallowCopy();
+        if (threadHelper.getThreadCount() > 1) {
+            try {
+                threadHelper.invokeAll(restoreCallers);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = getTipsCount(); i < getNodeCount(); i++) {
+            nodesStates[i] = storedNodesStates[i].shallowCopy();
 //            final NodeStates tmp = storedNodesStates[i].copy();
 //            storedNodesStates[i] = nodesStates[i].copy();
 //            nodesStates[i] = tmp;
