@@ -5,12 +5,17 @@ import beast.core.Input;
 import beast.core.Operator;
 import beast.evolution.likelihood.DABranchLikelihoodCore;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.likelihood.GenericDATreeLikelihood;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.NodeStates;
 import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.util.RandomUtils;
 import beast.util.Randomizer;
+import beast.util.ThreadHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Gibbs sampler to sample the internal node states.
@@ -36,79 +41,202 @@ public class GibbsSampler extends Operator {
             "The data augmentation tree likelihood used for the given nodes states and tree",
             Input.Validate.REQUIRED);
 
-    public GibbsSampler() {
+    final public Input<String> selectionInput = new Input<>("select",
+            "The method how to select nodes during Gibbs sampling, " +
+            "including RandomOne, ByNr, TowardsRoot, AwayRoot", "RandomOne");
+
+    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
+            "maximum number of threads to use, if less than 1 the number of threads " +
+                    "in BeastMCMC is used (default -1)", -1);
+
+
+    private Tree tree; // Gibbs operates on sequences but not on the tree
+    private NodeStatesArray nodesStates;
+    private DataAugTreeLikelihood daTreeLd; // DATreeLikelihood is not allowed to change here
+
+    // control which node will be operated, if only working on a node
+    private int opNodeNr = -1;
+
+    private ThreadHelper threadHelper;
+    private final List<Callable<NodeStates>> callers = new ArrayList<>();
+
+    public GibbsSampler() { }
+
+    public GibbsSampler(Tree tree, NodeStatesArray nodesStates, DataAugTreeLikelihood daTreeLd) {
+        this.tree = tree;
+        this.nodesStates = nodesStates;
+        this.daTreeLd = daTreeLd;
+    }
+
+    private void validate() {
+        nodesStates.validateTree(tree);
+        nodesStates.validateNodeStates();
+
+        // make sure using same object
+        assert daTreeLd.getNodesStates() == nodesStates;
+        assert daTreeLd.getTree() == tree;
     }
 
     @Override
     public void initAndValidate() {
+        this.tree = treeInput.get();
+        this.nodesStates = nodesStatesInput.get();
+        this.daTreeLd = daTreeLdInput.get();
+        validate();
 
-        final Tree tree = treeInput.get();
-        final NodeStatesArray nodesStates = nodesStatesInput.get();
+        this.threadHelper = nodesStates.getThreadHelper();
+        if (threadHelper == null) {
+            threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        }
 
-        nodesStates.validateTree(tree);
-        nodesStates.validateNodeStates();
-
-        // To change DATreeLikelihood is not allowed
-        final GenericDATreeLikelihood daTreeLd = daTreeLdInput.get();
-        assert daTreeLd.getNodesStates() == nodesStates;
-        assert daTreeLd.getTree() == tree;
+        // internal nodes only
+        for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++){
+            callers.add(new GibbsSampling(i, this));
+        }
 
     }
 
+//    public int getCurrentNodeNr() {
+//        return currentNodeNr;
+//    }
+
     /**
+     * @param opNodeNr the internal node Nr for Gibbs sampling
+     */
+    public void setOpNodeNr(int opNodeNr) {
+        this.opNodeNr = opNodeNr;
+    }
+
+    /**
+     * Gibbs sampling at one internal node
      * @see Operator#proposal()
      */
     @Override
     public double proposal() {
-        final Tree tree = treeInput.get(); // Gibbs alone not operate on tree
-        Node node = getRandomInternalNode(tree);
-        final int nodeNr = node.getNr();
+        if ("ByNr".equalsIgnoreCase(selectionInput.get())) {
+            gibbsSamplingByNr(tree, this);
+
+        } else if ("TowardsRoot".equalsIgnoreCase(selectionInput.get())) {
+            gibbsSamplingTowardsRoot(tree.getRoot(), this);
+
+        } else if ("AwayRoot".equalsIgnoreCase(selectionInput.get())) {
+            gibbsSamplingAwayRoot(tree.getRoot(), this);
+
+        } else { // "RandomOne"
+            final Node node;// internal node
+            if (opNodeNr < tree.getLeafNodeCount()) {
+                node = getRandomInternalNode(tree);
+                setOpNodeNr(node.getNr());
+            } else {
+                node = tree.getNode(opNodeNr);
+            }
 //        System.out.println("GibbsSampler at node " + nodeNr);
 
-        NodeStatesArray nodesStates = nodesStatesInput.get(this);
-        final DataAugTreeLikelihood daTreeLd = daTreeLdInput.get();
+            // sampling all sites for given node, and set new states
+            gibbsSampling(node, this);
 
-        int newState;
-        for (int k = 0; k < nodesStates.getSiteCount(); k++) {
-            newState = gibbsSampling(node, k, nodesStates, daTreeLd);
-
-//            if (newState < nodesStates.getLower() || newState > nodesStates.getUpper()) {
-//                // reject out of bounds scales
-//                return Double.NEGATIVE_INFINITY;
-//            }
-
-            // change state at k for nodeNr
-            nodesStates.setState(nodeNr, k, newState); // TODO setStates(int, int[]) faster?
+            // this makes selecting node random every time,
+            // unless setCurrentNodeNr(Nr) is called before proposal()
+            setOpNodeNr(-1);
         }
+
         // Gibbs operator should always be accepted
         return Double.POSITIVE_INFINITY;//0.0;//for debug//
     }
 
-    /**
-     * randomly select an internal node
-     * @param tree   {@link Tree}
-     * @return {@link Node}, or null if no internal nodes
-     */
-    protected Node getRandomInternalNode(final Tree tree) {
-        final int tipsCount = tree.getLeafNodeCount();
-        int nodeNr;
-        do {
-            // internal node Nr = [tipsCount, 2*tipsCount-2]
-            nodeNr = tipsCount + Randomizer.nextInt(tipsCount-1);
-        } while (nodeNr < tree.getLeafNodeCount() || nodeNr >= tree.getNodeCount());
+    public void gibbsSamplingByNr(final Tree tree, final Operator operator) {
+        if (threadHelper.getThreadCount() > 1) {
+            try {
+                threadHelper.invokeAll(callers);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // all internal nodes ordered by Nr
+            for (int i = tree.getLeafNodeCount(); i < tree.getNodeCount(); i++){
+                Node internalNode = tree.getNode(i);
+                gibbsSampling(internalNode, operator);
+            }
+        }
 
-        return tree.getNode(nodeNr);
+    }
+
+    // multi-threading
+    class GibbsSampling implements Callable<NodeStates> {
+        private final int nodeNr;
+        private final Operator operator;
+        public GibbsSampling(int nodeNr, Operator operator){
+            this.nodeNr = nodeNr;
+            this.operator = operator;
+        }
+        public NodeStates call() throws Exception {
+            // internal nodes only
+            Node internalNode = tree.getNode(nodeNr);
+            gibbsSampling(internalNode, operator);
+            return nodesStates.getNodeStates(nodeNr);
+        }
+    }
+
+
+    public void gibbsSamplingTowardsRoot(final Node node, final Operator operator) {
+        // Traverse down the two child nodes
+        final Node child1 = node.getChild(0);
+        final Node child2 = node.getChild(1);
+
+        if (!child1.isLeaf())
+            gibbsSamplingTowardsRoot(child1, operator);
+        if (!child2.isLeaf())
+            gibbsSamplingTowardsRoot(child2, operator);
+
+        gibbsSampling(node, operator);
+    }
+
+    public void gibbsSamplingAwayRoot(final Node node, final Operator operator) {
+        gibbsSampling(node, operator);
+
+        // Traverse down the two child nodes
+        final Node child1 = node.getChild(0);
+        final Node child2 = node.getChild(1);
+
+        if (!child1.isLeaf())
+            gibbsSamplingAwayRoot(child1, operator);
+        if (!child2.isLeaf())
+            gibbsSamplingAwayRoot(child2, operator);
+    }
+    /**
+     * Sampling all sites for given node, and set new states.
+     * @param node     {@link Node}
+     * @param operator if null, then direct set states without proposal.
+     * @see #gibbsSampling(NodeStatesArray, Node, int, DataAugTreeLikelihood)
+     */
+    public void gibbsSampling(final Node node, final Operator operator) {
+        final int nodeNr = node.getNr();
+
+        final NodeStatesArray nodesStates;
+        if (operator == null)
+            nodesStates = this.nodesStates;
+        else // State makes a copy and register this operator
+            nodesStates = nodesStatesInput.get(operator);
+
+        // sampling all sites for given node
+        int newState;
+        for (int k = 0; k < nodesStates.getSiteCount(); k++) {
+            newState = gibbsSampling(nodesStates, node, k, daTreeLd);
+            // change state at k for nodeNr
+            nodesStates.setState(nodeNr, k, newState); // TODO setStates(int, int[]) faster?
+        }
     }
 
     /**
-     * Gibbs sampling
+     * Gibbs sampling state at a given site and node.
+     * If root, then use equilibrium frequencies.
+     * @param nodesStates   {@link NodeStatesArray}
      * @param node     {@link Node}
      * @param siteNr   the site (codon) index
-     * @param nodesStates   {@link NodeStatesArray}
      * @param daTreeLd the cache to get P(t) in each branch {@link DABranchLikelihoodCore}.
      * @return         the proposed state at the node, or -1 if node is null
      */
-    protected int gibbsSampling(Node node, int siteNr, NodeStatesArray nodesStates,
+    protected int gibbsSampling(NodeStatesArray nodesStates, final Node node, final int siteNr,
                                 final DataAugTreeLikelihood daTreeLd) {
         final int nodeNr = node.getNr();
         final int ch1Nr = node.getChild(0).getNr();
@@ -165,6 +293,22 @@ public class GibbsSampler extends Operator {
         // choose final state w from the distribution
         int w = RandomUtils.randomIntegerFrom(pr_w, false);
         return w;
+    }
+
+    /**
+     * randomly select an internal node.
+     * @param tree   {@link Tree}
+     * @return {@link Node}, or null if no internal nodes
+     */
+    protected Node getRandomInternalNode(final Tree tree) {
+        final int tipsCount = tree.getLeafNodeCount();
+        int nodeNr;
+        do {
+            // internal node Nr = [tipsCount, 2*tipsCount-2]
+            nodeNr = tipsCount + Randomizer.nextInt(tipsCount-1);
+        } while (nodeNr < tree.getLeafNodeCount() || nodeNr >= tree.getNodeCount());
+
+        return tree.getNode(nodeNr);
     }
 
     @Override

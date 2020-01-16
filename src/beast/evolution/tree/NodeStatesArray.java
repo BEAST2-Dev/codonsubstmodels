@@ -638,7 +638,6 @@ public class NodeStatesArray extends StateNode {
         public NodeStates call() throws Exception {
             // internal nodes only
             storedNodesStates[nodeNr] = nodesStates[nodeNr].shallowCopy();
-            //TODO need nodeIsDirty[]?
             return storedNodesStates[nodeNr];
         }
     }
@@ -668,7 +667,6 @@ public class NodeStatesArray extends StateNode {
         } else {
             for (int i = getTipsCount(); i < getNodeCount(); i++) {
                 storedNodesStates[i] = nodesStates[i].shallowCopy();
-                //TODO need nodeIsDirty[]?
             }
         }
     }
@@ -684,12 +682,12 @@ public class NodeStatesArray extends StateNode {
             }
         } else {
             for (int i = getTipsCount(); i < getNodeCount(); i++) {
-            nodesStates[i] = storedNodesStates[i].shallowCopy();
+                nodesStates[i] = storedNodesStates[i].shallowCopy();
 //            final NodeStates tmp = storedNodesStates[i].copy();
 //            storedNodesStates[i] = nodesStates[i].copy();
 //            nodesStates[i] = tmp;
                 nodeIsDirty[i] = false;
-                //TODO reset nodesStates[i].siteIsDirty[] ?
+                //TODO implement nodesStates[i].siteIsDirty[] ?
             }
         }
         hasStartedEditing = false;
