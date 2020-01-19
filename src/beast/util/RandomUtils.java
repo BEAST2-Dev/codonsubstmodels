@@ -1,5 +1,8 @@
 package beast.util;
 
+import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
+
 import java.util.Set;
 
 /**
@@ -53,6 +56,24 @@ public class RandomUtils {
             r -= probs[i];
         }
         throw new RuntimeException("probabilities should sum to 1");
+    }
+
+
+
+    /**
+     * randomly select an internal node.
+     * @param tree   {@link Tree}
+     * @return {@link Node}, or null if no internal nodes
+     */
+    public static Node getRandomInternalNode(final Tree tree) {
+        final int tipsCount = tree.getLeafNodeCount();
+        int nodeNr;
+        do {
+            // internal node Nr = [tipsCount, 2*tipsCount-2]
+            nodeNr = tipsCount + Randomizer.nextInt(tipsCount-1);
+        } while (nodeNr < tree.getLeafNodeCount() || nodeNr >= tree.getNodeCount());
+
+        return tree.getNode(nodeNr);
     }
 
 

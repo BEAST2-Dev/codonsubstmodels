@@ -114,7 +114,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // data, tree and models
         super.initAndValidate();
 
-        this.threadHelper = nodesStates.getThreadHelper();
+//        this.threadHelper = nodesStates.getThreadHelper();
         if (threadHelper == null) {
             threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
         }
@@ -449,6 +449,10 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         }
 
         return nodeUpdate;
+    }
+
+    public ThreadHelper getThreadHelper() {
+        return threadHelper;
     }
 
 

@@ -40,10 +40,8 @@ public class UniformGibbs extends Uniform {
 
         // run Gibbs sampler and directly set states
         //TODO follow lineage of operated node?
-//        for (Node inNode : tree.getInternalNodes()) {
-//            gibbsSampler.gibbsSampling(inNode, null);
-//        }
-        gibbsSampler.gibbsSamplingTowardsRoot(tree.getRoot(), null);
+        gibbsSampler.gibbsSamplingByNr(tree, null);
+//        gibbsSampler.gibbsSamplingTowardsRoot(tree.getRoot(), null);
 //        gibbsSampler.gibbsSamplingAwayRoot(tree.getRoot(), null);
     }
 
