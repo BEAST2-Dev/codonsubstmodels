@@ -1,8 +1,6 @@
 package beast.util;
 
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -61,19 +59,21 @@ public class RandomUtils {
 
 
     /**
-     * randomly select an internal node.
-     * @param tree   {@link Tree}
-     * @return {@link Node}, or null if no internal nodes
+     * randomly select n integers.
+     * @param min
+     * @param max
+     * @param n
+     * @return n int(s) between min and max-1
      */
-    public static Node getRandomInternalNode(final Tree tree) {
-        final int tipsCount = tree.getLeafNodeCount();
-        int nodeNr;
+    public static Set<Integer> getRandomInt(final int min, final int max, final int n) {
+        Set<Integer> nL = new HashSet<>();
         do {
-            // internal node Nr = [tipsCount, 2*tipsCount-2]
-            nodeNr = tipsCount + Randomizer.nextInt(tipsCount-1);
-        } while (nodeNr < tree.getLeafNodeCount() || nodeNr >= tree.getNodeCount());
+            // Samples an int uniformly from between 0 and n-1.
+            int nr = min + Randomizer.nextInt(max);
+            nL.add(nr);
+        } while (nL.size() >= n);
 
-        return tree.getNode(nodeNr);
+        return nL;
     }
 
 

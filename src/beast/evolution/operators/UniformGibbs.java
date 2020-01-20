@@ -36,11 +36,11 @@ public class UniformGibbs extends Uniform {
         final Tree tree = treeInput.get();
         // Gibbs sampling at the operated node
         Node node = tree.getNode(opNodeNr);
-        gibbsSampler.gibbsSampling(node, null);
+//        gibbsSampler.gibbsSampling(node, null);
 
         // run Gibbs sampler and directly set states
         //TODO follow lineage of operated node?
-        gibbsSampler.gibbsSamplingByNr(tree, null);
+//        gibbsSampler.gibbsSamplingByNr(tree, null);
 //        gibbsSampler.gibbsSamplingTowardsRoot(tree.getRoot(), null);
 //        gibbsSampler.gibbsSamplingAwayRoot(tree.getRoot(), null);
     }
@@ -69,8 +69,8 @@ public class UniformGibbs extends Uniform {
         final double upper = node.getParent().getHeight();
         final double lower = Math.max(node.getLeft().getHeight(), node.getRight().getHeight());
         final double newValue = (Randomizer.nextDouble() * (upper - lower)) + lower;
-        node.setHeight(newValue);
-
+//        node.setHeight(newValue);
+        node.setHeight2(newValue);
         return 0.0;
     }
 
