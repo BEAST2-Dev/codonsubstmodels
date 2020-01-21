@@ -299,12 +299,13 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
 
     /**
      * Used in {@link NodeStatesArray#copy()}.
-     * @return a shallow copy of NodeStates
+     * @return a deep copy of NodeStates
      */
-    public NodeStates shallowCopy() {
+    public NodeStates copyStates() {
         try {
-            // https://stackoverflow.com/questions/46145826/why-clone-is-the-best-way-for-copying-arrays
+//            final NodeStates copy = new NodeStates(nodeNr, states, upper+1);
             final NodeStates copy = (NodeStates) this.clone();
+            System.arraycopy(this.states, 0, copy.states, 0, states.length);
             return copy;
         } catch (Exception e) {
             e.printStackTrace();

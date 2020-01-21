@@ -69,9 +69,9 @@ public class RandomUtils {
         Set<Integer> nL = new HashSet<>();
         do {
             // Samples an int uniformly from between 0 and n-1.
-            int nr = min + Randomizer.nextInt(max);
+            int nr = min + Randomizer.nextInt(max-min);
             nL.add(nr);
-        } while (nL.size() >= n);
+        } while (nL.size() < n);
 
         return nL;
     }

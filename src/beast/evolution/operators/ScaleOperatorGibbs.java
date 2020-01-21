@@ -66,7 +66,7 @@ public class ScaleOperatorGibbs extends ScaleOperator {
                     if (newHeight < Math.max(root.getLeft().getHeight(), root.getRight().getHeight())) {
                         return Double.NEGATIVE_INFINITY;
                     }
-                    root.setHeight2(newHeight);
+                    root.setHeightDA(newHeight);
                     return -Math.log(scale);
                 } else {
                     // scale the beast.tree

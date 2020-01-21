@@ -2,6 +2,7 @@ package beast.evolution.operators;
 
 import beast.core.Input;
 import beast.evolution.tree.Node;
+import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 
@@ -12,6 +13,9 @@ import beast.util.Randomizer;
  * @author Walter Xie
  */
 public class UniformGibbs extends Uniform {
+
+    final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
+            "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
 
     final public Input<GibbsSampler> gibbsSamplerInput = new Input<>("gibbsSampler",
             "The Gibbs sampler will be used after this tree operator proposal is accepted.",
@@ -33,9 +37,9 @@ public class UniformGibbs extends Uniform {
     public void accept() {
         super.accept();
 
-        final Tree tree = treeInput.get();
+//        final Tree tree = treeInput.get();
         // Gibbs sampling at the operated node
-        Node node = tree.getNode(opNodeNr);
+//        Node node = tree.getNode(opNodeNr);
 //        gibbsSampler.gibbsSampling(node, null);
 
         // run Gibbs sampler and directly set states
@@ -67,10 +71,15 @@ public class UniformGibbs extends Uniform {
             node = tree.getNode(opNodeNr);
         } while (node.isRoot() || node.isLeaf());
         final double upper = node.getParent().getHeight();
-        final double lower = Math.max(node.getLeft().getHeight(), node.getRight().getHeight());
+        final double lower = Math.max(node.getChild(0).getHeight(), node.getChild(1).getHeight());
         final double newValue = (Randomizer.nextDouble() * (upper - lower)) + lower;
 //        node.setHeight(newValue);
-        node.setHeight2(newValue);
+        node.setHeightDA(newValue);
+
+        //TODO bug: NodeStatesArray.store is called in MCMC line 498
+//        NodeStatesArray nodesStates = nodesStatesInput.get(this);
+//        gibbsSampler.gibbsSampling(node, nodesStates);
+
         return 0.0;
     }
 
