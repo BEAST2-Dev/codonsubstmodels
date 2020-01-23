@@ -67,11 +67,15 @@ public class ScaleOperatorGibbs extends ScaleOperator {
                         return Double.NEGATIVE_INFINITY;
                     }
                     root.setHeightDA(newHeight);
+
+                    gibbsSampler.gibbsSampling(root, this);
+
                     return -Math.log(scale);
                 } else {
+                    throw new UnsupportedOperationException("in dev");
                     // scale the beast.tree
-                    final int internalNodes = tree.scale(scale);
-                    return Math.log(scale) * (internalNodes - 2);
+//                    final int internalNodes = tree.scale(scale);
+//                    return Math.log(scale) * (internalNodes - 2);
                 }
             }
 

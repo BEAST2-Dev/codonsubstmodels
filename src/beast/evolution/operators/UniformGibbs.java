@@ -2,7 +2,6 @@ package beast.evolution.operators;
 
 import beast.core.Input;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
 import beast.util.Randomizer;
 
@@ -14,8 +13,8 @@ import beast.util.Randomizer;
  */
 public class UniformGibbs extends Uniform {
 
-    final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
-            "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
+//    final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
+//            "States in all nodes for sampling with the beast.tree", Input.Validate.REQUIRED);
 
     final public Input<GibbsSampler> gibbsSamplerInput = new Input<>("gibbsSampler",
             "The Gibbs sampler will be used after this tree operator proposal is accepted.",
@@ -76,8 +75,10 @@ public class UniformGibbs extends Uniform {
 //        node.setHeight(newValue);
         node.setHeightDA(newValue);
 
-        NodeStatesArray nodesStates = nodesStatesInput.get(this);
-        gibbsSampler.gibbsSampling(node, nodesStates);
+//        NodeStatesArray nodesStates = nodesStatesInput.get(this);
+//        int[] states = gibbsSampler.gibbsSampling(node, nodesStates);
+//        nodesStates.setStates(opNodeNr, states);
+        gibbsSampler.gibbsSampling(node, this);
 
         return 0.0;
     }

@@ -5,7 +5,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -300,16 +300,16 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
      * Used in {@link NodeStatesArray#copy()}.
      * @return a deep copy of NodeStates
      */
-    public NodeStates copyStates() {
+    public NodeStates deepCopy() {
+        NodeStates copy = null;
         try {
-//            final NodeStates copy = new NodeStates(nodeNr, states, upper+1);
-            final NodeStates copy = (NodeStates) this.clone();
-            System.arraycopy(this.states, 0, copy.states, 0, states.length);
-            return copy;
+            copy = new NodeStates(nodeNr, states, upper+1);
+//            final NodeStates copy = (NodeStates) this.clone();
+//TODO not working            System.arraycopy(this.states, 0, copy.states, 0, states.length);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return copy;
     }
 
     /**

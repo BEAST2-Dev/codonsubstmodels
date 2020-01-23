@@ -646,7 +646,7 @@ public class NodeStatesArray extends StateNode {
             }
         } else {
             for (int i = getTipsCount(); i < getNodeCount(); i++) {
-                storedNodesStates[i] = nodesStates[i].copyStates();
+                storedNodesStates[i] = nodesStates[i].deepCopy();
             }
         }
     }
@@ -680,7 +680,7 @@ public class NodeStatesArray extends StateNode {
             @SuppressWarnings("unchecked")
             final NodeStatesArray copy = (NodeStatesArray) this.clone();
             for (int i = 0; i < nodesStates.length; i++)
-                copy.nodesStates[i] = nodesStates[i].copyStates();
+                copy.nodesStates[i] = nodesStates[i].deepCopy();
             // nodeIsDirty[] all false
             copy.nodeIsDirty = new boolean[getNodeCount()];
             return copy;
@@ -749,7 +749,7 @@ public class NodeStatesArray extends StateNode {
         }
         public NodeStates call() throws Exception {
             // internal nodes only
-            storedNodesStates[nodeNr] = nodesStates[nodeNr].copyStates();
+            storedNodesStates[nodeNr] = nodesStates[nodeNr].deepCopy();
             return storedNodesStates[nodeNr];
         }
     }
