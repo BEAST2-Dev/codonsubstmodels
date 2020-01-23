@@ -198,7 +198,6 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     public void setStates(final int[] states) {
         // internal node index starts from getTipsCount();
 //        startEditing(null);
-
         System.arraycopy(states, 0, this.states, 0, states.length);
         Arrays.fill(siteIsDirty, true);
     }

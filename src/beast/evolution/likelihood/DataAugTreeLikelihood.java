@@ -114,9 +114,10 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         // data, tree and models
         super.initAndValidate();
 
-//        this.threadHelper = nodesStates.getThreadHelper();
-        if (threadHelper == null) {
-            threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        if (threadHelper.getThreadCount() > 1) {
+            // set ThreadHelper and add Callers in NodeStatesArray
+            nodesStates.setThreadHelper(threadHelper);
         }
 
 //        beagle = null;
@@ -136,8 +137,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //        // No Beagle instance was found, so we use the good old java likelihood core
 //        beagle = null;
 
+        // tree has to be here, otherwise BEAST will treat NodeStatesArray as CalculationNode
+        nodesStates.initAllNodesStates(tree);
+
         // init DALikelihoodCore
-        initCore();
+        initLikelihoodCore();
 
         // TODO
         proportionInvariant = siteModel.getProportionInvariant();
@@ -150,13 +154,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
     }
 
-
-
-    protected void initCore() {
-
+    protected void initLikelihoodCore() {
         final int stateCount = nodesStates.getStateCount();
         // no pattern, use getSiteCount()
         final int siteCount = nodesStates.getSiteCount();
+        // nodeCount = 2 * codonAlignment.getTaxonCount() - 1
         final int nodeCount = nodesStates.getNodeCount();
         // caching branch lengths and log likelihoods for each of branch,
         branchLengths = new double[nodeCount-1];
@@ -240,9 +242,11 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            throw new UnsupportedOperationException("in development");
 //        }
 //        hasDirt = Tree.IS_FILTHY;
-
-
     }
+
+
+
+
 
     /**
      * Be careful to use.

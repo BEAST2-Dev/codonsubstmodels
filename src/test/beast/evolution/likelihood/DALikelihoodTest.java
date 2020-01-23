@@ -140,7 +140,8 @@ public class DALikelihoodTest {
 
         // =============== DA tree likelihood ===============
         // this only init NodeStates for tips
-        NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree);
+        NodeStatesArray nodesStates = new NodeStatesArray();
+        nodesStates.initByName("data", codonAlignment);
         // set internal node states on the fly
 
         DataAugTreeLikelihood daTreeLikelihood = new DataAugTreeLikelihood();

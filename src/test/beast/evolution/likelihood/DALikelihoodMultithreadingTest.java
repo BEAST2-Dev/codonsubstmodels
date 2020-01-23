@@ -6,6 +6,7 @@ import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.Tree;
+import beast.util.Randomizer;
 import codonmodels.CodonFrequencies;
 import org.junit.After;
 import org.junit.Before;
@@ -48,16 +49,18 @@ public class DALikelihoodMultithreadingTest {
 
 
         // =============== DA tree likelihood ===============
+        Randomizer.setSeed(777);
         testLds = new DataAugTreeLikelihood[threads.length];
         // set internal node states on the fly
-        NodeStatesArray nodeStatesArray = new NodeStatesArray(codonAlignment, tree, "parsimony");
+        NodeStatesArray nodeStatesArray = new NodeStatesArray();
+        nodeStatesArray.initByName("data", codonAlignment, "initINS", "parsimony");
 
         // different threads
         for (int i = 0; i < threads.length; i++) {
-            NodeStatesArray newNSA = (NodeStatesArray) nodeStatesArray.copy();
+//            NodeStatesArray newNSA = (NodeStatesArray) nodeStatesArray.copy();
             int th = threads[i];
             testLds[i] = new DataAugTreeLikelihood();
-            testLds[i].initByName("nodesStates", newNSA, "tree", tree,
+            testLds[i].initByName("nodesStates", nodeStatesArray, "tree", tree,
                     "siteModel", siteModel, "threads", th);
         }
 

@@ -171,7 +171,8 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
         // init time
         long start = System.nanoTime();
 
-        NodeStatesArray nodesStates = new NodeStatesArray(codonAlignment, tree, "parsimony");
+        NodeStatesArray nodesStates = new NodeStatesArray();
+        nodesStates.initByName("data", codonAlignment, "initINS", "parsimony");
 
         DataAugTreeLikelihood daLikelihood = new DataAugTreeLikelihood();
         daLikelihood.initByName("nodesStates", nodesStates, "tree", tree,

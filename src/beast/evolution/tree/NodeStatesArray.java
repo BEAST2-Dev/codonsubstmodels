@@ -1,5 +1,6 @@
 package beast.evolution.tree;
 
+import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.StateNode;
 import beast.core.util.Log;
@@ -7,6 +8,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
+import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.util.Randomizer;
 import beast.util.ThreadHelper;
 
@@ -24,6 +26,14 @@ import java.util.concurrent.Callable;
  * The tip index starts from 0, and the index of an internal node is ranged
  * from the number of leaf nodes to the total nodes - 1.
  * Root index is always the last number.<br>
+ *
+ * Note: BEAST will force {@link StateNode} to behave as
+ * {@link CalculationNode}, if it has any {@link StateNode} as input.
+ * {@link NodeStatesArray} cannot take {@link TreeInterface}
+ * as the input, which is used for initialisation, so that
+ * all internal node states are initialised in
+ * {@link DataAugTreeLikelihood}.
+ *
  * @author Walter Xie
  */
 public class NodeStatesArray extends StateNode {
@@ -32,16 +42,16 @@ public class NodeStatesArray extends StateNode {
             "codon alignment to initialise the 2-d matrix of nodes (including tips) states",
             Input.Validate.REQUIRED);
 
-    final public Input<TreeInterface> treeInput = new Input<>("tree",
-            "phylogenetic beast.tree to map states data correctly to the nodes", Input.Validate.REQUIRED);
+//    final public Input<TreeInterface> treeInput = new Input<>("tree",
+//            "phylogenetic beast.tree to map states data correctly to the nodes", Input.Validate.REQUIRED);
 
     final public Input<String> initINSInput = new Input<>("initINS",
             "whether and how to initialise the states of internal nodes. Choose 'random' or 'parsimony'",
             "parsimony", Input.Validate.OPTIONAL);
 
-    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
-            "maximum number of threads to use, if less than 1 the number of threads " +
-                    "in BeastMCMC is used (default -1)", -1);
+//    final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
+//            "maximum number of threads to use, if less than 1 the number of threads " +
+//                    "in BeastMCMC is used (default -1)", -1);
 
     /**
      * upper & lower bound These are located before the inputs (instead of
@@ -78,101 +88,20 @@ public class NodeStatesArray extends StateNode {
     public ThreadHelper getThreadHelper() {
         return threadHelper;
     }
-
-    //for XML parser
-    public NodeStatesArray() { }
-
-    public NodeStatesArray(CodonAlignment codonAlignment, TreeInterface tree) {
-        initByAlignment(codonAlignment);
-        validateTree(tree);
-        setTipsStates(codonAlignment, tree);
-    }
-
-    /**
-     * Init class and states in tips given {@link CodonAlignment},
-     * and generate states for internal nodes.
-     * @param codonAlignment   data
-     * @param tree             tree
-     * @param initMethod       method to generate states for internal nodes.
-     *                         see {@link #initInternalNodesStates(String, TreeInterface)}
-     */
-    public NodeStatesArray(CodonAlignment codonAlignment, TreeInterface tree, String initMethod) {
-        this(codonAlignment, tree);
-        initInternalNodesStates(initMethod, tree);
-        validateNodeStates();
-    }
-
-    @Override
-    public void initAndValidate() {
-
-        // need data type, site count, taxa count
-        CodonAlignment codonAlignment = codonAlignmentInput.get();
-        // cannot init params by constructor
-        initByAlignment(codonAlignment);
-
-        TreeInterface tree = treeInput.get();
-        validateTree(tree);
-        setTipsStates(codonAlignment, tree);
-
-        // get BEAST seed long seed = Randomizer.getSeed();
-        String initMethod = initINSInput.get();
-        initInternalNodesStates(initMethod, tree);
-
-        // validation
-        validateNodeStates();
-
-        // after all inits
-        threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+    // set from DataAugTreeLikelihood.initAndValidate()
+    public void setThreadHelper(ThreadHelper threadHelper) {
+        this.threadHelper = threadHelper;
         // internal nodes only
         for (int i = getTipsCount(); i < getNodeCount(); i++) {
             storeCallers.add(new Store(i));
             restoreCallers.add(new Restore(i));
         }
-
     }
 
-
-    public void validateTree(TreeInterface tree) {
-        // Abort if no internal nodes
-        if (tree.getLeafNodeCount() < 2)
-            throw new IllegalArgumentException("Tree must have at least 2 tips ! " + tree.getLeafNodeCount());
-
-        // sanity check: alignment should have same #taxa as tree
-        if (getTipsCount() != tree.getLeafNodeCount())
-            throw new IllegalArgumentException("The number of tips in the tree does not match the number of sequences");
-        // nodeCount == tree.getNodeCount()
-        if (getNodeCount() != tree.getNodeCount())
-            throw new IllegalArgumentException("The dimension of nodes states should equal to " +
-                    "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
-        // get***Count uses nodeCount
-//        assert getTipsCount() == tree.getLeafNodeCount();
-//        assert getInternalNodeCount() == tree.getInternalNodeCount();
-    }
-
-    public void validateNodeStates() {
-        for (int i=0; i < getNodeCount(); i++) {
-            NodeStates node = getNodeStates(i);
-            assert node.getNodeNr() == i;
-
-            if (i < getTipsCount()) { // tips ID
-                // use it to recognise tips in setter
-                if (node.getTipID() == null)
-                    throw new IllegalArgumentException("Tip (" + i + ") requires ID taxon name in NodeStates object !");
-                if (node.getNodeNr() >= getTipsCount())
-                    throw new IllegalArgumentException("Invalid node index at tip : " + i + " cannot >= " + getTipsCount() + " !");
-            } else { // internal nodes
-                // use it to recognise tips in setter
-                if (node.getTipID() != null)
-                    throw new IllegalArgumentException("TipID should be null in internal node (" + i + ") NodeStates object !");
-                if (node.getNodeNr() < getTipsCount() || node.getNodeNr() >= getNodeCount())
-                    throw new IllegalArgumentException("Invalid node index at internal node : " + i +
-                            " should range [" + getTipsCount() + ", " + (getNodeCount()-1) + "] !");
-            }
-        } // end i loop
-    }
-
-    // nodeCount = 2 * codonAlignment.getTaxonCount() - 1
-    protected void initByAlignment(CodonAlignment codonAlignment) {
+    @Override
+    public void initAndValidate() {
+        // need data type, site count, taxa count
+        CodonAlignment codonAlignment = codonAlignmentInput.get();
         this.codonDataType = codonAlignment.getDataType();
         final int stateCount = getStateCount();
 //        assert stateCount == 64;
@@ -196,6 +125,69 @@ public class NodeStatesArray extends StateNode {
         // fix ID
         if (getID() == null || getID().length() < 1)
             setID(codonAlignment.getID());
+
+        // mv tree to DataAugTreeLikelihood,
+        // otherwise NodeStatesArray will be treated as CalculationNode
+
+        // set threadHelper from DataAugTreeLikelihood.initAndValidate()
+    }
+
+    /**
+     * The pipeline to init all nodes states.
+     * It is called by {@link DataAugTreeLikelihood#initAndValidate()}.
+     * @param tree  It is moved to {@link DataAugTreeLikelihood}, otherwise
+     *              BEAST will treat {@link NodeStatesArray} as {@link CalculationNode}.
+     */
+    public void initAllNodesStates(TreeInterface tree) {
+        // tree is mainly used by initINStatesParsimony(tree)
+        validateTree(tree);
+        CodonAlignment codonAlignment = codonAlignmentInput.get();
+        setTipsStates(codonAlignment, tree);
+
+        // get BEAST seed long seed = Randomizer.getSeed();
+        String initMethod = initINSInput.get();
+        initInternalNodesStates(initMethod, tree);
+
+        // validation
+        validateNodeStates();
+    }
+
+    public void validateTree(TreeInterface tree) {
+        // Abort if no internal nodes
+        if (tree.getLeafNodeCount() < 2)
+            throw new IllegalArgumentException("Tree must have at least 2 tips ! " + tree.getLeafNodeCount());
+
+        // sanity check: alignment should have same #taxa as tree
+        if (getTipsCount() != tree.getLeafNodeCount())
+            throw new IllegalArgumentException("The number of tips in the tree does not match the number of sequences");
+        // nodeCount == tree.getNodeCount()
+        if (getNodeCount() != tree.getNodeCount())
+            throw new IllegalArgumentException("The dimension of nodes states should equal to " +
+                    "the number of nodes in the tree !\n" + getNodeCount() + " != " + tree.getNodeCount());
+        // get***Count uses nodeCount
+//        assert nodeStates.getTipsCount() == tree.getLeafNodeCount();
+//        assert nodeStates.getInternalNodeCount() == tree.getInternalNodeCount();
+    }
+    public void validateNodeStates() {
+        for (int i=0; i < getNodeCount(); i++) {
+            NodeStates node = getNodeStates(i);
+            assert node.getNodeNr() == i;
+
+            if (i < getTipsCount()) { // tips ID
+                // use it to recognise tips in setter
+                if (node.getTipID() == null)
+                    throw new IllegalArgumentException("Tip (" + i + ") requires ID taxon name in NodeStates object !");
+                if (node.getNodeNr() >= getTipsCount())
+                    throw new IllegalArgumentException("Invalid node index at tip : " + i + " cannot >= " + getTipsCount() + " !");
+            } else { // internal nodes
+                // use it to recognise tips in setter
+                if (node.getTipID() != null)
+                    throw new IllegalArgumentException("TipID should be null in internal node (" + i + ") NodeStates object !");
+                if (node.getNodeNr() < getTipsCount() || node.getNodeNr() >= getNodeCount())
+                    throw new IllegalArgumentException("Invalid node index at internal node : " + i +
+                            " should range [" + getTipsCount() + ", " + (getNodeCount()-1) + "] !");
+            }
+        } // end i loop
     }
 
     // set tips states to nodesStates[] by nodeNr indexing
@@ -221,7 +213,7 @@ public class NodeStatesArray extends StateNode {
      * @param initMethod   "random" or "parsimony"
      * @param tree         used for parsimony Fitch (1971) algorithm.
      */
-    public void initInternalNodesStates(String initMethod, TreeInterface tree) {
+    protected void initInternalNodesStates(String initMethod, TreeInterface tree) {
         // internal nodes
         int[][] inStates;
         if ("random".equalsIgnoreCase(initMethod)) {
@@ -250,7 +242,7 @@ public class NodeStatesArray extends StateNode {
      * @return   states[internal nodes][sites], where i from 0 to internalNodeCount-1
      * @see RASParsimony1Site
      */
-    public int[][] initINStatesParsimony(TreeInterface tree) {
+    protected int[][] initINStatesParsimony(TreeInterface tree) {
         // states[internal nodes][sites], where i from 0 to internalNodeCount-1
         int[][] inStates = new int[getInternalNodeCount()][getSiteCount()];
 
@@ -302,7 +294,7 @@ public class NodeStatesArray extends StateNode {
      * @param stateCount         the maximum state to generate.
      * @return    states[internal nodes][sites], where i from 0 to internalNodeCount-1
      */
-    public int[][] initINStatesRandom(final int internalNodeCount, final int siteCount, final int stateCount) {
+    protected int[][] initINStatesRandom(final int internalNodeCount, final int siteCount, final int stateCount) {
 
         Log.info("Randomly generate codon states using " + getGeneticCode().getDescription() + " for " +
                 internalNodeCount + " internal nodes, " + getSiteCount() + " codon, seed = " + Randomizer.getSeed());
@@ -445,17 +437,17 @@ public class NodeStatesArray extends StateNode {
      *                  The root node is always indexed <code>nodeCount-1</code>.
      * @param codonNr the site index.
      * @param state   new state to set
-     */
+     *
     public void setState(final int nodeNr, final int codonNr, final int state) {
         if (nodesStates[nodeNr] == null)
             throw new IllegalArgumentException("Node (" + nodeNr + ") states are not initiated !");
 
-        startEditing(null);
+        startEditing(null); //TODO this will call NodeStatesArray.store() each site
 
         // internal node index starts from getTipsCount();
         nodesStates[nodeNr].setState(codonNr, state);
         nodeIsDirty[nodeNr] = true;
-    }
+    }*/
 
     /**
      * @param nodeIndex The node index :<br>
@@ -646,7 +638,7 @@ public class NodeStatesArray extends StateNode {
     @Override
     protected void store() {
         // internal nodes only
-        if (threadHelper.getThreadCount() > 1) {
+        if (threadHelper != null && threadHelper.getThreadCount() > 1) {
             try {
                 threadHelper.invokeAll(storeCallers);
             } catch (InterruptedException e) {

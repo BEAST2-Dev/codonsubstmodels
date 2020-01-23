@@ -75,7 +75,7 @@ public class GibbsSampler extends Operator {
     }
 
     private void validate() {
-        nodesStates.validateTree(tree);
+        nodesStates.validateTree(tree); // TODO rm for faster speed
         nodesStates.validateNodeStates();
 
         // make sure using same object
@@ -270,29 +270,32 @@ public class GibbsSampler extends Operator {
         else // State makes a copy and register this operator
             nodesStates = nodesStatesInput.get(operator);
 
-        gibbsSampling(node, nodesStates);
+        int[] states = gibbsSampling(node, nodesStates);
+        final int nodeNr = node.getNr();
+        nodesStates.setStates(nodeNr, states);
     }
 
     /**
      * Sampling all sites for given node, and set new states.
+     * Change states to new states by {@link NodeStatesArray#setStates(int, int[])}.
      * @param node          {@link Node}
      * @param nodesStates   {@link NodeStatesArray}
 //     * @param daTreeLd      calculation {@link DataAugTreeLikelihood}
      */
-    public void gibbsSampling(final Node node, final NodeStatesArray nodesStates){
+    public int[] gibbsSampling(final Node node, final NodeStatesArray nodesStates){
 //                              final DataAugTreeLikelihood daTreeLd) {
         final int stateCount = nodesStates.getStateCount();
         double[] pr_w = new double[stateCount];
-        final int nodeNr = node.getNr();
+//        final int nodeNr = node.getNr();
+
+        int[] newStates = new int[nodesStates.getSiteCount()];
         // sampling all sites for given node
-        int newState;
 //        int oldState;
 //        int changes = 0;
-        for (int k = 0; k < nodesStates.getSiteCount(); k++) {
+        for (int k = 0; k < newStates.length; k++) {
 //            oldState = nodesStates.getState(nodeNr, k);
-            newState = gibbsSampling(nodesStates, node, k, daTreeLd, pr_w);
-            // change state at k for nodeNr
-            nodesStates.setState(nodeNr, k, newState); // TODO setStates(int, int[]) faster?
+            newStates[k] = gibbsSampling(nodesStates, node, k, daTreeLd, pr_w);
+
 //            if (newState != oldState) {
 //                System.out.println("Node " + nodeNr + " site " + k + " : state changes from " +
 //                        oldState + " to " + newState);
@@ -300,6 +303,7 @@ public class GibbsSampler extends Operator {
 //            }
         }
 //        System.out.println("Total " + changes + " sites are changed.");
+        return newStates;
     }
 
     /**

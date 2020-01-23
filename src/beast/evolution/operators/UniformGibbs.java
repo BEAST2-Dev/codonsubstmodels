@@ -76,9 +76,8 @@ public class UniformGibbs extends Uniform {
 //        node.setHeight(newValue);
         node.setHeightDA(newValue);
 
-        //TODO bug: NodeStatesArray.store is called in MCMC line 498
-//        NodeStatesArray nodesStates = nodesStatesInput.get(this);
-//        gibbsSampler.gibbsSampling(node, nodesStates);
+        NodeStatesArray nodesStates = nodesStatesInput.get(this);
+        gibbsSampler.gibbsSampling(node, nodesStates);
 
         return 0.0;
     }
