@@ -6,6 +6,7 @@ codeml
 evolver
 examples
 out
+perftest
 .idea
 *.iml
 src/META-INF/

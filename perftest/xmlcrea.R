@@ -22,7 +22,7 @@ node.data <- xml_find_first(template, ".//data")
 xml_replace(node.data, DATA)
 
 # 2. replace PI: equal, F1X4, F3X4, F60/F61
-PI = "F3X4"
+PI = "F60/F61"
 nodes<-xml_find_all(template, ".//frequencies")
 node<-nodes[xml_has_attr(nodes, "pi")]
 xml_attr(node, "pi") <- PI

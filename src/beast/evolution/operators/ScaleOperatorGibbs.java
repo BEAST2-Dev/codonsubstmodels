@@ -63,7 +63,7 @@ public class ScaleOperatorGibbs extends ScaleOperator {
                     final Node root = tree.getRoot();
                     final double newHeight = root.getHeight() * scale;
 
-                    if (newHeight < Math.max(root.getLeft().getHeight(), root.getRight().getHeight())) {
+                    if (newHeight < Math.max(root.getChild(0).getHeight(), root.getChild(1).getHeight())) {
                         return Double.NEGATIVE_INFINITY;
                     }
                     root.setHeightDA(newHeight);
@@ -72,10 +72,12 @@ public class ScaleOperatorGibbs extends ScaleOperator {
 
                     return -Math.log(scale);
                 } else {
-                    throw new UnsupportedOperationException("in dev");
                     // scale the beast.tree
-//                    final int internalNodes = tree.scale(scale);
-//                    return Math.log(scale) * (internalNodes - 2);
+                    final int internalNodes = tree.scale(scale);
+
+                    gibbsSampler.gibbsSamplingAwayRoot(tree.getRoot(), this);
+
+                    return Math.log(scale) * (internalNodes - 2);
                 }
             }
 

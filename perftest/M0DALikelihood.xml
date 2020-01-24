@@ -43,7 +43,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
         <tree idref="tree"/>
     </nodesStates>
 
-    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="[THREAD]">
+    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="[THREAD]" branchesPerTask="10">
 <!--        <data idref="codon.alignment"/>-->
         <nodesStates idref="nodesStates"/>
         <tree idref="tree"/>
@@ -123,7 +123,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
         <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
-                  DATreeLikelihood="@daTreeLikelihood" weight="15.0"/>
+                  DATreeLikelihood="@daTreeLikelihood" weight="15.0" select="RandomN" randomN="1"/>
 
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.75" tree="@tree" weight="3.0"/>
 
