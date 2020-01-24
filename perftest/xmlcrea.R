@@ -30,7 +30,7 @@ xml_attr(node, "pi") <- PI
 # 3. replace tree
 TREE <- readLines(paste0("t",nTaxa,"coal.txt"))
 # set starting tree all branch lengths to 1
-TREE <- str_replace_all(tre, ":(\\d+).(\\d+)", ":1.0")
+TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")
 
 nodes<-xml_find_all(template, ".//tree")
 node<-nodes[xml_has_attr(nodes, "newick")]
@@ -75,5 +75,5 @@ xml_attr(node, "newick") <- TREE
 
 
 # finish XML
-write_xml(template, file = paste0("t", nTaxa, "standard.xml"))
+write_xml(template, file = paste0("t", nTaxa, "st.xml"))
 

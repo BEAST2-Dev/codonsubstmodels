@@ -57,8 +57,8 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="300000"> <!--autoOptimize="true"-->
-        <state id="state" storeEvery="10000">
+    <run spec="MCMC" id="mcmc" chainLength="20000000"> <!--autoOptimize="true"-->
+        <state id="state" storeEvery="1000000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
 <!--            <input name='stateNode' idref='popSize'/>-->
@@ -115,7 +115,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
-        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.75" tree="@tree" weight="3.0"/>
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.9" tree="@tree" weight="3.0"/>
 
         <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="15.0"/>
 
@@ -127,7 +127,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>-->
 
-        <logger logEvery="1000" fileName="m0.std.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <logger logEvery="20000" fileName="m0.std.log" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>
@@ -139,7 +139,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--            <log idref="clockRate"/>-->
         </logger>
 
-        <logger logEvery="5000">
+        <logger logEvery="1000000">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>

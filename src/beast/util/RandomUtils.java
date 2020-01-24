@@ -1,6 +1,5 @@
 package beast.util;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -59,21 +58,20 @@ public class RandomUtils {
 
 
     /**
-     * randomly select n integers.
+     * randomly select n integers between min and max-min.
      * @param min
      * @param max
      * @param n
-     * @return n int(s) between min and max-1
+     * @param integerSet   result set, used to avoid <code>new HashSet<>()</code>.
      */
-    public static Set<Integer> getRandomInt(final int min, final int max, final int n) {
-        Set<Integer> nL = new HashSet<>();
+    public static void getRandomInt(final int min, final int max,
+                                    final int n, Set<Integer> integerSet) {
+        integerSet.clear();
         do {
             // Samples an int uniformly from between 0 and n-1.
             int nr = min + Randomizer.nextInt(max-min);
-            nL.add(nr);
-        } while (nL.size() < n);
-
-        return nL;
+            integerSet.add(nr);
+        } while (integerSet.size() < n);
     }
 
 

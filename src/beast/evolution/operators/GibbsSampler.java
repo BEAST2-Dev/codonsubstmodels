@@ -14,6 +14,7 @@ import beast.util.RandomUtils;
 import beast.util.ThreadHelper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -65,6 +66,7 @@ public class GibbsSampler extends Operator {
     private final List<Callable<NodeStates>> callers = new ArrayList<>();
 
     private int randomN = 0;
+    private Set<Integer> integerSet = new HashSet<>();
 
     private void validate() {
         nodesStates.validateTree(tree); // TODO rm for faster speed
@@ -99,7 +101,7 @@ public class GibbsSampler extends Operator {
 //            if (randomN < threads) randomN = threads;
             // avoid to access the same internal node
             assert randomN < tree.getInternalNodeCount();
-            Log.info.println("Gibbs Sampling states at random " + randomN + " internal nodes.");
+            Log.info.println("Gibbs Sampling states at random " + randomN + " internal node(s).");
 
         } else {
             throw new IllegalArgumentException("No such method ! " + selectionInput.get());
@@ -141,11 +143,11 @@ public class GibbsSampler extends Operator {
     // One node each thread, if threads*2 < tree.getInternalNodeCount()
     public void gibbsRandomNNodes(final int n, final Tree tree, final Operator operator) {
         int threads = threadHelper.getThreadCount();
-        if (threads > 1) {
+        if (threads > 1 && n < 1) {
             callers.clear();
-            // TODO bug, cannot sample parent and child at the same time
-            Set<Integer> selectedN = RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n);
-            for (Integer i : selectedN) {
+            // TODO bug, cannot sample parent and child at the same time, if multithreading
+            RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n, integerSet);
+            for (Integer i : integerSet) {
                 callers.add(new GibbsSamplingNode(i, this));
             }
 
@@ -156,8 +158,9 @@ public class GibbsSampler extends Operator {
             }
         } else {
             // internal node Nr = [tipsCount, NodeCount-1]
-            Set<Integer> selectedN = RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n);
-            for (Integer i : selectedN) {
+            RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n, integerSet);
+            // if sample nodes one by one, then do not need to worry
+            for (Integer i : integerSet) {
                 final Node node = tree.getNode(i);
                 gibbsSampling(node, operator);
             }
