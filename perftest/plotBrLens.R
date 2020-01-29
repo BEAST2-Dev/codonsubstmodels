@@ -94,7 +94,7 @@ p2 <- ggplot(data.m2, aes(truth, value)) +
   scale_shape_manual(values=3:4) +
   ggtitle(paste("Truth vs. Simulations", nTaxa, "Taxa")) + ylab("mean branch lengths") +
   theme_minimal()
-ggsave(paste0("t",nTaxa,"-truth-mean.pdf"), p2, width = 7, height = 5)
+ggsave(paste0("t",nTaxa,"-truth-mean.pdf"), p2, width = 6, height = 5)
 
 # last
 data.m3 <- melt(traces[,c("truth","last.std","last.da")], id='truth')
@@ -104,6 +104,6 @@ p3 <- ggplot(data.m3, aes(truth, value)) +
   scale_shape_manual(values=3:4) +
   ggtitle(paste("Truth vs. Simulations", nTaxa, "Taxa")) + ylab("last branch lengths") +
   theme_minimal()
-ggsave(paste0("t",nTaxa,"-truth-last.pdf"), p3, width = 7, height = 5)
+ggsave(paste0("t",nTaxa,"-truth-last.pdf"), p3, width = 6, height = 5)
 
 
