@@ -62,23 +62,29 @@ traces <- data.frame(branch=1:branches, truth=true.tre$edge.length, mean.std=mea
                      mean.da=mean.bl.da, last.std=unlist(last.bl.std), last.da=unlist(last.bl.da))
 
 library(reshape2)
+traces.rel = data.frame(branch=1:branches, mean.std=(traces$mean.std-traces$truth), 
+                        mean.da=(traces$mean.da-traces$truth), last.std=(traces$last.std-traces$truth), 
+                        last.da=(traces$last.da-traces$truth))
 # branch variable value
-data.m <- melt(traces, id='branch')
-comps <- length(unique(data.m$variable))
+data.m <- melt(traces.rel, id='branch')
+colnames(data.m)[2] <- "simulation"
+comps <- length(unique(data.m$simulation))
 
 library(ggplot2)
-# all br lens
+# relative br lens to truth
 p <- ggplot(data.m, aes(branch, value)) + 
-  geom_point(aes(colour = variable, shape= variable), alpha=.7) + 
-  scale_shape_manual(values=0:comps) +
-  ggtitle("") +
+  geom_point(aes(colour = variable, shape= simulation), size=.8, alpha=.7) + 
+  scale_shape_manual(values=1:comps) + ylab("relative to truth") +
+  ggtitle(paste(nTaxa, "Taxa")) +
   theme_minimal()
+ggsave(paste0("t",nTaxa,"-relative-brlens.pdf"), p, width = 20, height = 4)
 
 # std vs da
 p1 <- ggplot(traces, aes(mean.std, mean.da)) + 
   geom_point(shape = 1, alpha=.7) + 
   ggtitle(paste("Standard Likelihood vs. Data Augmentation", nTaxa, "Taxa")) +
   theme_minimal()
+ggsave(paste0("t",nTaxa,"-std-da.pdf"), p1, width = 5, height = 5)
 
 # truth vs std,da
 data.m2 <- melt(traces[,c("truth","mean.std","mean.da")], id='truth')
@@ -88,6 +94,7 @@ p2 <- ggplot(data.m2, aes(truth, value)) +
   scale_shape_manual(values=3:4) +
   ggtitle(paste("Truth vs. Simulations", nTaxa, "Taxa")) + ylab("mean branch lengths") +
   theme_minimal()
+ggsave(paste0("t",nTaxa,"-truth-mean.pdf"), p2, width = 7, height = 5)
 
 # last
 data.m3 <- melt(traces[,c("truth","last.std","last.da")], id='truth')
@@ -97,6 +104,6 @@ p3 <- ggplot(data.m3, aes(truth, value)) +
   scale_shape_manual(values=3:4) +
   ggtitle(paste("Truth vs. Simulations", nTaxa, "Taxa")) + ylab("last branch lengths") +
   theme_minimal()
-
+ggsave(paste0("t",nTaxa,"-truth-last.pdf"), p3, width = 7, height = 5)
 
 
