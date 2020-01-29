@@ -47,7 +47,7 @@ node<-nodes[xml_has_attr(nodes, "threads")]
 xml_attr(node, "threads") <- THREAD
 
 # finish XML
-write_xml(template, file = paste0("t", nTaxa, "thr", THREAD, ".xml"))
+write_xml(template, file = paste0("t", nTaxa, "th", THREAD, ".xml"))
 
 ###### standard tree likelihood
 

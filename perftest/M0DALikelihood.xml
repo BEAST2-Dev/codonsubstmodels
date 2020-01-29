@@ -40,7 +40,6 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
     <nodesStates spec="NodeStatesArray" id="nodesStates" >
         <data idref="codon.alignment"/>
-        <tree idref="tree"/>
     </nodesStates>
 
     <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="[THREAD]" branchesPerTask="10">
