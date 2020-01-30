@@ -315,9 +315,9 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     /**
      * Print <code>nodeNr</code> and states.
      * @param out {@link PrintStream}
-     * @param delimiter  delimiter between states, use "" to make no delimiter case.
+//     * @param delimiter  delimiter between states, use "" to make no delimiter case.
      */
-    public void log(PrintStream out, String delimiter) {
+    public void log(PrintStream out) {//, String delimiter) {
         out.print(nodeNr + "\t");
         for (int sta : states) {
             // 01,02,...,60
@@ -326,7 +326,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
             else
                 out.print(sta);
             // delimiter between states
-            out.print(delimiter);
+//            out.print(delimiter);
         }
     }
 

@@ -535,16 +535,44 @@ public class NodeStatesArray extends StateNode {
         return true;
     }
 
+    // p distance
+    public double getPDist(int[] states1, int[] states2) {
+        assert states1.length == states2.length;
+        double p = 0.0;
+        for (int i = 0; i < states1.length; i++) {
+            if (states1[i] != states2[i]) p++;
+        }
+        return p / (double) states1.length;
+    }
+
     //******* MCMC StateNode *******
     @Override
     public void log(long sampleNr, PrintStream out) {
-        NodeStatesArray nsa = (NodeStatesArray) getCurrent();
-        out.print(sampleNr);
-        for (int i=getTipsCount(); i < getNodeCount(); i++) {// only internal nodes
-            out.print("\t");
-            nsa.getNodeStates(i).log(out, " ");
-            out.print("\n");
-        }
+//        NodeStatesArray nsa = (NodeStatesArray) getCurrent();
+//        out.print(sampleNr);
+//        for (int i=getTipsCount(); i < getNodeCount(); i++) {// only internal nodes
+//            out.print("\t");
+//            nsa.getNodeStates(i).log(out, " ");
+//            out.print("\n");
+//        }
+    }
+
+    @Override
+    public void init(PrintStream out) {
+//        out.print("Sample\tNode\t");
+//        final int ncol = getSiteCount();
+//        if (ncol == 1) {
+//            out.print(getID() + "\t");
+//        } else {
+//            for (int i = 0; i < ncol; i++) {
+//                out.print("s" + (i + 1) + "\t");
+//            }
+//        }
+    }
+
+    @Override
+    public void close(PrintStream out) {
+// nothing to do
     }
 
     /**
@@ -564,22 +592,6 @@ public class NodeStatesArray extends StateNode {
         return buf.toString();
     }
 
-    @Override
-    public void init(PrintStream out) {
-        final int nodeCount = getNodeCount();
-        if (nodeCount == 1) {
-            out.print(getID() + "\t");
-        } else {
-            for (int i = 0; i < nodeCount; i++) {
-                out.print(getID() + (i + 1) + "\t");
-            }
-        }
-    }
-
-    @Override
-    public void close(PrintStream out) {
-// nothing to do
-    }
 
     @Override
     public int getDimension() { // use getInternalNodeCount() or getSiteCount()
