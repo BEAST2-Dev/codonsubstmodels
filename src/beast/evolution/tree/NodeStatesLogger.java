@@ -15,8 +15,8 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
     final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
             "Internal node states to be logged", Validate.REQUIRED);
 
-    final public Input<Boolean> compressInput = new Input<>("compress",
-            "if require to compress log", false);
+//    final public Input<Boolean> compressInput = new Input<>("compress",
+//            "if require to compress log", false, Validate.OPTIONAL);
 
     private NodeStatesArray nsa;
     private int tipCount;
@@ -30,7 +30,7 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
         tipCount = nsa.getTipsCount();
         nodeCount = nsa.getNodeCount();
 
-        isCompress = compressInput.get();
+//        isCompress = compressInput.get();
     }
 
     @Override

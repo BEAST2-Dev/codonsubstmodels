@@ -4,7 +4,8 @@ WD="~/WorkSpace/codonsubstmodels/perftest"
 source(file.path(WD, "nexparser.R"))
 
 # c(8, 64, 512)
-nTaxa = 512
+nTaxa = 128
+DIR=paste0("T",nTaxa)
 # working dir
 setwd(file.path(WD, DIR))
 
@@ -29,16 +30,20 @@ xml_attr(node, "pi") <- PI
 
 # 3. replace tree
 TREE <- readLines(paste0("t",nTaxa,"coal.txt"))
-# set starting tree all branch lengths to 1
-TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")
+require(ape)
+start.tree <- read.tree(text = TREE);
+## Note: the tree has to be time tree, be careful when changing branch lengths, instead of node heights.  
+# all branch lengths times 10
+start.tree$edge.length <- start.tree$edge.length * 10
+# starting tree 
+TREE <- write.tree(start.tree)
 
 nodes<-xml_find_all(template, ".//tree")
 node<-nodes[xml_has_attr(nodes, "newick")]
 xml_attr(node, "newick") <- TREE
 
 # 4. replace MCMC config
-
-
+# TODO
 
 # 5. replace thread
 THREAD = 4
@@ -72,8 +77,15 @@ node<-nodes[xml_has_attr(nodes, "newick")]
 xml_attr(node, "newick") <- TREE
 
 # 4. replace MCMC config
-
+# TODO
 
 # finish XML
 write_xml(template, file = paste0("t", nTaxa, "st.xml"))
 
+### 
+# TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")
+## find all tip branch's indexes 
+#tip.edges <- which(start.tree$edge[,2] <= nTaxa)
+## and tips height plus 0.1
+#start.tree$edge.length[tip.edges] = start.tree$edge.length[tip.edges] + 0.1
+###

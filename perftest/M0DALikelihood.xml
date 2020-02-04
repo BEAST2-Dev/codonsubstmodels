@@ -13,7 +13,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
     <parameter id="m0.omega" value="0.08"/>
     <parameter id="m0.kappa" value="15.0"/>
-    <parameter id="popSize" value="0.2"/>
+    <parameter id="popSize" value="1"/>
     <parameter id="clockRate" name="stateNode">1.0</parameter>
 
     <substModel spec="codonmodels.M0Model" id="m0" verbose="false">
@@ -124,7 +124,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
         <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
                   DATreeLikelihood="@daTreeLikelihood" weight="15.0" select="RandomN" randomN="1"/>
 
-        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.9" tree="@tree" weight="3.0"/>
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@tree" weight="3.0"/>
 
         <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="15.0"/>
 
@@ -160,9 +160,13 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>-->
         </logger>
 
-<!--        <logger logEvery="5000" fileName="test.m0.trees" mode="tree">-->
-<!--            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>-->
-<!--        </logger>-->
+    <logger logEvery="50000" fileName="m0.da.trees" mode="tree">
+         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
+    </logger>
+
+    <logger logEvery="50000" fileName="m0.da.ins.txt" mode="tree">
+        <log id="NodeStatesLogger" spec="beast.evolution.tree.NodeStatesLogger" nodesStates="@nodesStates"/>
+    </logger>
     </run>
 
 </beast>

@@ -13,7 +13,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
     <parameter id="m0.omega" value="0.08"/>
     <parameter id="m0.kappa" value="15.0"/>
-    <parameter id="popSize" value="0.2"/>
+    <parameter id="popSize" value="1"/>
     <parameter id="clockRate" name="stateNode">1.0</parameter>
 
     <substModel spec="codonmodels.M0Model" id="m0" verbose="false">
@@ -57,7 +57,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="20000000"> <!--autoOptimize="true"-->
+    <run spec="MCMC" id="mcmc" chainLength="25000000"> <!--autoOptimize="true"-->
         <state id="state" storeEvery="1000000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
@@ -115,7 +115,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
-        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.9" tree="@tree" weight="3.0"/>
+        <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@tree" weight="3.0"/>
 
         <operator id="UniformOperator" spec="Uniform" tree="@tree" weight="15.0"/>
 
@@ -151,9 +151,10 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>-->
         </logger>
 
-<!--        <logger logEvery="5000" fileName="test.m0.trees" mode="tree">-->
-<!--            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>-->
-<!--        </logger>-->
+    <logger logEvery="20000" fileName="m0.std.trees" mode="tree">
+         <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
+    </logger>
+
     </run>
 
 </beast>
