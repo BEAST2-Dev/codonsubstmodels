@@ -40,9 +40,11 @@ stats <- stats %>% mutate(order = as.character(order))
 library(ggplot2)
 
 p <- ggplot(stats, aes(site, freq, fill = order)) + 
-  geom_bar(stat="identity", alpha = 0.7) + scale_fill_brewer(palette="Set1") +
+  geom_bar(stat="identity") + #, alpha = 0.7) + #scale_fill_brewer(palette="Set1") +
+  scale_fill_manual(values = c(alpha(c("lightblue"), .2), 
+                               alpha(c("red","blue","purple","brown","orange","yellow","green"), .8))) +
 #  scale_y_log10() +
-  ggtitle(paste("Internal Node", node.id)) + ylab("Codon frequency") +
+  ggtitle(paste("Internal Node", node.id)) + ylab("codon frequency") +
   theme_minimal()
 ggsave(paste0("node",node.id,"-hist.pdf"), p, width = 10, height = 5)
 
