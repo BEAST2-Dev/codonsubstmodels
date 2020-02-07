@@ -10,7 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The large array to store one node states (can be a tip).<br>
+ * The large array to store one node states (can be a tip).
+ * A non-ambiguous state starts from 0 ends to <code>stateCount - 1</code>,
+ * such as the universal genetic code has states 0-60. <br>
  *
  * <code>nodeNr</code> used for all indexing system
  * is the node index number starting from 0 to root index (nodeCount - 1).
@@ -106,7 +108,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
         states = new int[siteCount];
 //        storedStates = new int[siteCount];
 
-        // 0 - 60/61, ignore lowerValueInput upperValueInput
+        // 0 - 59/60, ignore lowerValueInput upperValueInput
         lower = 0;
         upper = stateCount - 1; // not deal unknown codon
 
@@ -313,14 +315,16 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     }
 
     /**
-     * Print <code>nodeNr</code> and states.
+     * Print <code>nodeNr+1</code> and states.
+     * Note: BEAST tree log uses nodeNr+1 in Newick,
+     * see {@link Node#toSortedNewick(int[])}.
      * @param out {@link PrintStream}
 //     * @param delimiter  delimiter between states, use "" to make no delimiter case.
      */
     public void log(PrintStream out) {//, String delimiter) {
-        out.print(nodeNr + "\t");
+        out.print((nodeNr+1) + "\t"); // Note: BEAST tree log makes nodeNr+1 in Newick
         for (int sta : states) {
-            // 01,02,...,60
+            // 00,01,02,...,59
             if (sta < 10)
                 out.print("0" + sta);
             else

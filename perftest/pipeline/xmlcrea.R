@@ -4,8 +4,8 @@ WD="~/WorkSpace/codonsubstmodels/perftest"
 source(file.path(WD, "nexparser.R"))
 
 # c(8, 64, 512)
-nTaxa = 128
-DIR=paste0("T",nTaxa)
+n.taxa = 128
+DIR=paste0("T",n.taxa)
 # working dir
 setwd(file.path(WD, DIR))
 
@@ -29,7 +29,7 @@ node<-nodes[xml_has_attr(nodes, "pi")]
 xml_attr(node, "pi") <- PI
 
 # 3. replace tree
-TREE <- readLines(paste0("t",nTaxa,"coal.txt"))
+TREE <- readLines(paste0("t",n.taxa,"coal.txt"))
 require(ape)
 start.tree <- read.tree(text = TREE);
 ## Note: the tree has to be time tree, be careful when changing branch lengths, instead of node heights.  
@@ -52,7 +52,7 @@ node<-nodes[xml_has_attr(nodes, "threads")]
 xml_attr(node, "threads") <- THREAD
 
 # finish XML
-write_xml(template, file = paste0("t", nTaxa, "th", THREAD, ".xml"))
+write_xml(template, file = paste0("t", n.taxa, "th", THREAD, ".xml"))
 
 ###### standard tree likelihood
 
@@ -80,12 +80,12 @@ xml_attr(node, "newick") <- TREE
 # TODO
 
 # finish XML
-write_xml(template, file = paste0("t", nTaxa, "st.xml"))
+write_xml(template, file = paste0("t", n.taxa, "st.xml"))
 
 ### 
 # TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")
 ## find all tip branch's indexes 
-#tip.edges <- which(start.tree$edge[,2] <= nTaxa)
+#tip.edges <- which(start.tree$edge[,2] <= n.taxa)
 ## and tips height plus 0.1
 #start.tree$edge.length[tip.edges] = start.tree$edge.length[tip.edges] + 0.1
 ###

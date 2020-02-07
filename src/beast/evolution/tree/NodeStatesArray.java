@@ -20,7 +20,8 @@ import java.util.concurrent.Callable;
 /**
  * Store states for all nodes including tips in the array of {@link NodeStates},
  * which contains an array of states at all sites.
- * The state is an integer starting from 0. <br>
+ * The state is an integer starting from 0 and ending to <code>stateCount - 1</code>. <br>
+ *
  * The array index is <code>nodeNr</code> which is the node index
  * used in {@link TreeInterface}.
  * The tip index starts from 0, and the index of an internal node is ranged
@@ -303,7 +304,7 @@ public class NodeStatesArray extends StateNode {
         int[][] inStates = new int[internalNodeCount][siteCount];
         for (int i=0; i < inStates.length; i++) {
             for (int j = 0; j < inStates[0].length; j++) {
-                // 0 - 60/61, no stop codon
+                // 0 - 59/60, no stop codon
                 inStates[i][j] = (int) (Randomizer.nextDouble() * stateCount);
             }
         }

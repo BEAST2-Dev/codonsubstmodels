@@ -2,51 +2,60 @@
 
 library(tidyverse)
 
-nTaxa = 32
-WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",nTaxa)
+WD="~/WorkSpace/codonsubstmodels/perftest/pipeline"
+source(file.path(WD, "TraceUtils.R"))
+source(file.path(WD, "Codon.R"))
+source(file.path(WD, "EvolerUtils.R"))
+
+n.taxa = 32
+WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa)
 setwd(WD)
 
-burnin=0.1
 # m0.da.ins.txt
-ins.log <- file.path(paste0("4t",nTaxa), "m0.da.ins.txt")
-# Sample  Node States  
-seqs <- read_delim(ins.log, "\t", comment = "#", col_types = cols( States = col_character() ))
+ins.log <- file.path(paste0("4t",n.taxa), "m0.da.ins.txt")
 
-# MCMC summary
-samples = unique(seqs[["Sample"]])
-samples = samples[!is.na(samples)]
-cat("Chain length", prettyNum(samples[length(samples)], big.mark=",",scientific=FALSE), 
-    ", log every", prettyNum(samples[2], big.mark=",",scientific=FALSE), "samples.\n")
+stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
 
-# state is a 2-digit integer from 01 to 60, n.codon = str.len / 2 
-str.len = str_length(seqs[["States"]][1])
-n.codon = str.len / 2 
+### evolver.out
+# Note: evolver tree uses the same format as APE tree
+nod.states <- getSeqsEvoOut("ancestral.txt", n.taxa=n.taxa, genetic.code="vertebrateMitochondrial")
+
+for (node.id in nodes) {
+  
+}
+
+
+
+
 
 node.id = 33
-# internal node index starts from nTaxa
-sites <- seqs %>% filter(Node==node.id)
-# paste0("c", 1:1000), seq(2, 2000, 2)
-sites <- sites %>% separate(States, into = paste0("c", 1:n.codon), sep = seq(2, str.len, 2))
-
-stats <- NULL
-for (c in 1:n.codon) {
-  freq <- table(sites[[paste0("c", c)]])
-  freq <- sort(freq, decreasing=T)
-  s1 <- tibble(state=names(freq), freq=freq, site=c, order=1:length(freq))
-  stats <- bind_rows(stats, s1)
-}
-stats <- stats %>% mutate(order = as.character(order))
 
 library(ggplot2)
 
 p <- ggplot(stats, aes(site, freq, fill = order)) + 
   geom_bar(stat="identity") + #, alpha = 0.7) + #scale_fill_brewer(palette="Set1") +
   scale_fill_manual(values = c(alpha(c("lightblue"), .2), 
-                               alpha(c("red","blue","purple","brown","orange","yellow","green"), .8))) +
+                               alpha(c("red","blue","yellow","purple","orange","brown","green"), .8))) +
 #  scale_y_log10() +
   ggtitle(paste("Internal Node", node.id)) + ylab("codon frequency") +
   theme_minimal()
-ggsave(paste0("node",node.id,"-hist.pdf"), p, width = 10, height = 5)
+ggsave(paste0("node",node.id,"-freq.pdf"), p, width = 10, height = 5)
+
+
+### MAP maximum a posteriori
+map <- stats %>% filter(order=="1") %>% 
+  mutate(state = as.integer(state)) %>% mutate(node = as.character(node.id))   
+stopifnot(nrow(map) == n.codon)
+
+
+# result
+map <- map %>% mutate(true.state = as.integer(states.list[[as.character(node.id)]])) %>% 
+  mutate(test = true.state == state)
+
+nrow(map[map$test,]) / nrow(map)
+
+
+
 
 
 #############
@@ -61,5 +70,5 @@ s1 <- tibble(state=names(freq), freq=freq) %>% mutate(site=1)
 # relative br lens to truth
 p <- ggplot(s1, aes(site, freq, fill = state)) + 
   geom_bar(stat="identity") +
-  #ggtitle(paste(nTaxa, "Taxa", branches, "Branches")) + ylab("ESS / hour") +
+  #ggtitle(paste(n.taxa, "Taxa", branches, "Branches")) + ylab("ESS / hour") +
   theme_minimal()

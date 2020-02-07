@@ -40,6 +40,8 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
         out.println("#States\t" + nsa.getStateCount());
 
         out.println("Sample\tNode\tStates");
+        // state from 0 to 59/60
+
 //        final int ncol = nsa.getSiteCount();
 //        if (ncol == 1) {
 //            out.print(getID() + "\t");
@@ -58,7 +60,7 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
         // only internal nodes
         for (int i=tipCount; i < nodeCount; i++) {
             out.print("\t");
-            nsaCurrent.getNodeStates(i).log(out);
+            nsaCurrent.getNodeStates(i).log(out); // state from 0 to 59/60
             out.print("\n");
         }
     }
