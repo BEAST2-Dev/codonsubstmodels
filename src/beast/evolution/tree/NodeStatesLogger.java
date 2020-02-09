@@ -10,10 +10,10 @@ import java.io.PrintStream;
 
 @Description("Logs tree annotated with metadata and/or rates")
 public class NodeStatesLogger extends BEASTObject implements Loggable {
-//    final public Input<Tree> treeInput = new Input<>("tree",
-//            "tree to provide node ID while logging.", Validate.REQUIRED);
     final public Input<NodeStatesArray> nodesStatesInput = new Input<>("nodesStates",
             "Internal node states to be logged", Validate.REQUIRED);
+    final public Input<Tree> treeInput = new Input<>("tree",
+            "tree to provide node ID while logging.", Validate.REQUIRED);
 
 //    final public Input<Boolean> compressInput = new Input<>("compress",
 //            "if require to compress log", false, Validate.OPTIONAL);
@@ -56,7 +56,11 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
     @Override
     public void log(long sampleNr, PrintStream out) {
         NodeStatesArray nsaCurrent = (NodeStatesArray) nsa.getCurrent();
-        out.print(sampleNr);
+        Tree treeCurrent = (Tree) treeInput.get().getCurrent();
+        int branch = treeCurrent.getInternalNodeCount() - 1;
+        out.print(sampleNr + "\t" + branch + "\t");
+        // log branches, parent node .. child, e.g. 3..1,5..3,3..2,5..4
+        out.print(getNodesMap(treeCurrent));
         // only internal nodes
         for (int i=tipCount; i < nodeCount; i++) {
             out.print("\t");
@@ -65,6 +69,23 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
         }
     }
 
+    // parent node .. child, e.g. 3..1,5..3,3..2,5..4
+    private String getNodesMap(Tree tree) {
+        StringBuilder nodesMap = new StringBuilder();
+        for (int i = 0; i < tree.getNodeCount(); i++) {
+            Node node = tree.getNode(i);
+            if (!node.isRoot()) {
+                Node parent = node.getParent();
+                int pa = parent.getNr();
+                // parent node .. child
+                nodesMap.append(pa).append("..").append(i);
+
+                if(i < (tree.getNodeCount() - 1))
+                    nodesMap.append(",");
+            }
+        }
+        return nodesMap.toString();
+    }
 
     @Override
     public void close(PrintStream out) {

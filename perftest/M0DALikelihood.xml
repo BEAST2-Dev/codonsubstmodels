@@ -165,7 +165,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     </logger>
 
     <logger logEvery="50000" fileName="m0.da.ins.txt" mode="tree">
-        <log id="NodeStatesLogger" spec="beast.evolution.tree.NodeStatesLogger" nodesStates="@nodesStates"/>
+        <log id="NodeStatesLogger" spec="beast.evolution.tree.NodeStatesLogger" nodesStates="@nodesStates" tree="@tree"/>
     </logger>
     </run>
 

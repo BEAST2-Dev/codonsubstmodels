@@ -6,7 +6,7 @@ source(file.path(WD, "TraceUtils.R"))
 
 library(ape)
 
-n.taxa = 128
+n.taxa = 32
 WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa)
 setwd(WD)
 
@@ -18,8 +18,8 @@ nodelabels()
 
 true.tre$edge.length
 
-WD=paste0("~/WorkSpace/codonsubstmodels/perftest")#,"/T",n.taxa)
-setwd(WD)
+#WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa)
+#setwd(WD)
 
 burnin=0.1
 ### standard tree likelihood
@@ -46,7 +46,7 @@ stopifnot(length(mean.bl.std) == branches)
 stopifnot(length(mean.bl.da) == branches)
 
 ess = pmin(ess.std, ess.da)
-# capped at EES 400
+# cap EES to
 #ess[ess > 300] = 300
 traces <- data.frame(branch=1:branches, truth=true.tre$edge.length, mean.std=mean.bl.std, 
                      mean.da=mean.bl.da, ess = ess, ess.std=ess.std, ess.da=ess.da,
@@ -63,6 +63,7 @@ nrow(traces[traces$ess.da < 100,])
 nrow(traces[traces$ess.std < 200,])
 nrow(traces[traces$ess.std < 100,])
 
+# ESS
 
 library(reshape2)
 # branch variable value

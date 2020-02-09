@@ -15,16 +15,35 @@ setwd(WD)
 ins.log <- file.path(paste0("4t",n.taxa), "m0.da.ins.txt")
 
 stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
+#### bug in logging nodeNr not nodeNr+1 ###
+names(stats.list) = as.character(as.integer(names(stats.list)) + 1)
+### rm above line after run fixed jar.
 
 ### evolver.out
 # Note: evolver tree uses the same format as APE tree
 nod.states <- getSeqsEvoOut("ancestral.txt", n.taxa=n.taxa, genetic.code="vertebrateMitochondrial")
 
-for (node.id in nodes) {
+# node indexes should match
+stopifnot(all(names(stats.list) == names(nod.states)))
+
+
+n.codon = length(nod.states[[1]])
+true.per = c()
+for (node.id in names(stats.list)) {
+  ### MAP maximum a posteriori
+  map <- stats.list[[as.character(node.id)]] %>% filter(order=="1") %>% 
+    mutate(state = as.integer(state)) %>% mutate(node = as.character(node.id))   
+  stopifnot(nrow(map) == n.codon)
   
+  # result
+  map <- map %>% mutate(true.state = as.integer(nod.states[[as.character(node.id)]])) %>% 
+    mutate(test = true.state == state)
+  
+  true.per = c(true.per, nrow(map[map$test,]) / nrow(map) )
 }
 
-
+stats <- tibble(node = names(stats.list), true.per = true.per)
+print(stats, n = Inf)
 
 
 
