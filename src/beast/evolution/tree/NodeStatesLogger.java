@@ -35,7 +35,7 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
 
     @Override
     public void init(PrintStream out) {
-        out.println("#Sequences\t" + nsa.getInternalNodeCount());
+        out.println("#Internal Node Sequences\t" + nsa.getInternalNodeCount());
         out.println("#Sites\t" + nsa.getSiteCount());
         out.println("#States\t" + nsa.getStateCount());
 
@@ -57,10 +57,10 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
     public void log(long sampleNr, PrintStream out) {
         NodeStatesArray nsaCurrent = (NodeStatesArray) nsa.getCurrent();
         Tree treeCurrent = (Tree) treeInput.get().getCurrent();
-        int branch = treeCurrent.getInternalNodeCount() - 1;
-        out.print(sampleNr + "\t" + branch + "\t");
+        out.print(sampleNr + "\t" + 0 + "\t");
         // log branches, parent node .. child, e.g. 3..1,5..3,3..2,5..4
         out.print(getNodesMap(treeCurrent));
+        out.print("\n");
         // only internal nodes
         for (int i=tipCount; i < nodeCount; i++) {
             out.print("\t");
@@ -70,6 +70,7 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
     }
 
     // parent node .. child, e.g. 3..1,5..3,3..2,5..4
+    // Note: BEAST tree log makes nodeNr+1 in Newick
     private String getNodesMap(Tree tree) {
         StringBuilder nodesMap = new StringBuilder();
         for (int i = 0; i < tree.getNodeCount(); i++) {
@@ -78,7 +79,7 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
                 Node parent = node.getParent();
                 int pa = parent.getNr();
                 // parent node .. child
-                nodesMap.append(pa).append("..").append(i);
+                nodesMap.append(pa+1).append("..").append(i+1);
 
                 if(i < (tree.getNodeCount() - 1))
                     nodesMap.append(",");
