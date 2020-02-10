@@ -44,10 +44,10 @@ screen.log <- file.path(paste0("4t",n.taxa), paste0("t",n.taxa,"th4.xml_out.txt"
 ess.hour.da<- getBrLenESSHour(tre.log, screen.log, burnin)
 
 ### plot
-branches = 2*n.taxa - 2
-stopifnot(length(ess.hour.std) == branches)
-stopifnot(length(ess.hour.da) == branches)
-ess.hour <- data.frame(branch=1:branches, std=ess.hour.std, da=ess.hour.da)
+n.branches = 2*n.taxa - 2
+stopifnot(length(ess.hour.std) == n.branches)
+stopifnot(length(ess.hour.da) == n.branches)
+ess.hour <- data.frame(branch=1:n.branches, std=ess.hour.std, da=ess.hour.da)
 
 data.m <- melt(ess.hour, id='branch')
 colnames(data.m)[2] <- "method"
@@ -57,7 +57,7 @@ library(ggplot2)
 # relative br lens to truth
 p <- ggplot(data.m, aes(method, value)) + 
   geom_boxplot(aes(colour = method)) +
-  ggtitle(paste(n.taxa, "Taxa", branches, "Branches")) + ylab("ESS / hour") +
+  ggtitle(paste(n.taxa, "Taxa", n.branches, "Branches")) + ylab("ESS / hour") +
   theme_minimal()
 ggsave(paste0("t",n.taxa,"-ess-hour.pdf"), p, width = 5, height = 5)
 
