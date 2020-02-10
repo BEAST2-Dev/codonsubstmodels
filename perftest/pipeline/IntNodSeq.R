@@ -8,10 +8,11 @@ source(file.path(WD, "Codon.R"))
 source(file.path(WD, "EvolerUtils.R"))
 
 n.taxa = 32
-WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa)
+# perftest/T32
+WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa) 
 setwd(WD)
 
-# m0.da.ins.txt
+# T32/4t32/m0.da.ins.txt
 ins.log <- file.path(paste0("4t",n.taxa), "m0.da.ins.txt")
 
 stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
@@ -28,7 +29,7 @@ stopifnot(all(names(stats.list) == names(nod.states)))
 
 
 n.codon = length(nod.states[[1]])
-true.per = c()
+p.dist = c()
 for (node.id in names(stats.list)) {
   ### MAP maximum a posteriori
   map <- stats.list[[as.character(node.id)]] %>% filter(order=="1") %>% 
@@ -39,10 +40,10 @@ for (node.id in names(stats.list)) {
   map <- map %>% mutate(true.state = as.integer(nod.states[[as.character(node.id)]])) %>% 
     mutate(test = true.state == state)
   
-  true.per = c(true.per, nrow(map[map$test,]) / nrow(map) )
+  p.dist = c(p.dist, 1 - nrow(map[map$test,]) / nrow(map) )
 }
 
-stats <- tibble(node = names(stats.list), true.per = true.per)
+stats <- tibble(node = names(stats.list), p.dist = p.dist)
 print(stats, n = Inf)
 
 

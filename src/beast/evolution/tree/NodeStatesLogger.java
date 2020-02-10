@@ -80,11 +80,11 @@ public class NodeStatesLogger extends BEASTObject implements Loggable {
                 int pa = parent.getNr();
                 // parent node .. child
                 nodesMap.append(pa+1).append("..").append(i+1);
-
-                if(i < (tree.getNodeCount() - 1))
-                    nodesMap.append(",");
             }
         }
+        // rm last ,
+        if( nodesMap.length() > 0 )
+            nodesMap.deleteCharAt( nodesMap.length() - 1 );
         return nodesMap.toString();
     }
 

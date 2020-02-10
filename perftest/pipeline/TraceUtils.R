@@ -77,19 +77,28 @@ getBrLensStats <- function(tre.log="m0.trees", burnin=0.1, plot.1st.tree=FALSE) 
   list(mean=mean.br.lens, sd=sd.br.lens, br.lens=br.lens)
 }
 
-
+# 1st line is node mapping: 50000	0	35..1,34..2,
+# 2nd starts sequences: 	33	575741074201...
+# internal node index is same to BEAST tree log, where id=nodeNr+1.
 getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1, 
                                col.names=c("Sample","Node","States")) {
   require(tidyverse)
-  # Sample  Node States  
+  # rm comments # 
   traces <- read_delim(ins.log, "\t", comment = "#", col_types = cols( States = col_character() ))
   if (! any(colnames(traces) %in% col.names) )
     stop("Incorrect file format in the log file of internal node sequences !\n", 
          "Column names = ", paste(colnames(traces), collapse = ","))
+  #     Sample  Node States                                                                                                                                    
+  #     <dbl> <dbl> <chr>                                                                                                                                     
+  #1      0     0 35..1,34..2,33..3,33..4,...
+  #2     NA    33 005741074201522219035315...
+  #3     NA    34 005741074201522219035315...
   
+  # separate nodes map and node states
+  nodes.map <- traces %>% filter(Node==0)
+  traces <- traces %>% filter(Node!=0)
   # MCMC summary
-  samples = unique(traces[[col.names[1]]]) # "Sample"
-  samples = samples[!is.na(samples)]
+  samples = unique(nodes.map[[col.names[1]]]) # "Sample"
   nodes = unique(traces[[col.names[2]]]) # "Node"
   nodes = nodes[!is.na(nodes)]
   # state is a 2-digit integer from 00 to 59/60, n.codon = str.len / 2 
@@ -97,35 +106,50 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
   n.codon = str.len / 2 
   
   cat("Chain length", prettyNum(samples[length(samples)], big.mark=",",scientific=FALSE), 
-      ", log every", prettyNum(samples[2], big.mark=",",scientific=FALSE), "samples, each sample includes",
-      length(nodes), "internal nodes [", nodes[1], "-", nodes[length(nodes)], "], ", n.codon, " codons.\n")
+      ", log every", prettyNum(samples[2], big.mark=",",scientific=FALSE), 
+      "samples, each sample includes", length(nodes), "internal nodes [", nodes[1], "-", 
+      nodes[length(nodes)], "], ", n.codon, " codons.\n")
   
-  stats.list <- list()
+  # rm burnin, +2 to exclude state 0 
+  start = as.integer(burnin * length(samples)) + 2
+  cat("Remove burnin ", start-1, " sampled internal node sequences from the total of ", 
+      length(samples), "for node ", node.id, "\n")
+  nodes.map <- nodes.map[start:nrow(node.samples),]
+  
+  ### TODO diff topology
+  
+  
+  ###
+  
+  # create freq table of states
+  freq.tb.list <- list()
   for (node.id in nodes) {
     # internal node index starts from n.taxa, node.id = 33
     node.samples <- traces %>% filter(Node==node.id)
     # rm burnin, +2 to exclude state 0 
-    start = as.integer(burnin * nrow(node.samples)) + 2
-    cat("Remove burnin ", start-1, " sampled internal node sequences from the total of ", 
-        nrow(node.samples), "for node ", node.id, "\n")
-    # paste0("c", 1:1000), seq(2, 2000, 2)
     node.samples <- node.samples[start:nrow(node.samples),] %>% 
       separate(States, into = paste0("c", 1:n.codon), sep = seq(2, str.len, 2))
+    # check
+    stopifnot(nrow(node.samples) == nrow(nodes.map))
     
     ### posterior distribution
-    stats <- NULL
+    freq.tb <- NULL
     for (c in 1:n.codon) {
       freq <- table(node.samples[[paste0("c", c)]])
       freq <- sort(freq, decreasing=T)
       s1 <- tibble(state=names(freq), freq=freq, site=c, order=1:length(freq))
-      stats <- bind_rows(stats, s1)
+      freq.tb <- bind_rows(freq.tb, s1)
     }
-    stats <- stats %>% mutate(order = as.character(order))
-    
-    stats.list[[as.character(node.id)]] <- stats
+    freq.tb <- freq.tb %>% mutate(order = as.character(order))
+    # state  freq  site order
+    # <chr> <int> <int> <chr>
+    #1 57      712     1 1    
+    #2 59      325     1 2    
+    #3 27       22     1 3    
+    freq.tb.list[[as.character(node.id)]] <- freq.tb
   }
   
-  return(stats.list)
+  return(freq.tb.list)
 }
 
 
