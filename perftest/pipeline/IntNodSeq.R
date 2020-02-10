@@ -16,8 +16,9 @@ setwd(WD)
 ins.log <- file.path(paste0("4t",n.taxa), "m0.da.ins.txt")
 
 stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
+names(stats.list)
 #### bug in logging nodeNr not nodeNr+1 ###
-names(stats.list) = as.character(as.integer(names(stats.list)) + 1)
+#names(stats.list) = as.character(as.integer(names(stats.list)) + 1)
 ### rm above line after run fixed jar.
 
 ### evolver.out
@@ -27,7 +28,31 @@ nod.states <- getSeqsEvoOut("ancestral.txt", n.taxa=n.taxa, genetic.code="verteb
 # node indexes should match
 stopifnot(all(names(stats.list) == names(nod.states)))
 
+### make sure the same node index is the same node
+edges1 <- stats.list$edges %>% mutate(parent=as.integer(parent), child=as.integer(child)) %>% arrange(child)
+edges2 <- nod.states$edges %>% mutate(parent=as.integer(parent), child=as.integer(child)) %>% arrange(child)
+# Note: the tip indexing is same
+edges.map <- full_join(edges1[1:n.taxa,], edges2[1:n.taxa,], by="child")
+# having NA is incorrect
+stopifnot(!anyNA(edges.map))
 
+###    map edges2 parents to edges1 parents
+
+
+rown.in1 <- match(edges1$parent, edges1$child)
+rown.in1 <- rown.in1[!is.na(rown.in1)]
+edges1[rown.in1,]
+
+
+edges1 %>% select(child = )   %>% drop_na
+
+
+# NA is root
+edges.map <- full_join(edges1, edges2, by="child")
+colnames(edges.map) <- c("parent.ins", "child", "parent.true")
+print(edges.map, n=Inf)
+
+### compare to true ancestral states
 n.codon = length(nod.states[[1]])
 p.dist = c()
 for (node.id in names(stats.list)) {

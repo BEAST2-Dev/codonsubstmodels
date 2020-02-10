@@ -99,26 +99,30 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
   traces <- traces %>% filter(Node!=0)
   # MCMC summary
   samples = unique(nodes.map[[col.names[1]]]) # "Sample"
-  nodes = unique(traces[[col.names[2]]]) # "Node"
-  nodes = nodes[!is.na(nodes)]
+  in.nodes = unique(traces[[col.names[2]]]) # "Node"
+  in.nodes = in.nodes[!is.na(in.nodes)]
   # state is a 2-digit integer from 00 to 59/60, n.codon = str.len / 2 
   str.len = str_length(traces[[col.names[3]]][1]) # "States"
   n.codon = str.len / 2 
   
   cat("Chain length", prettyNum(samples[length(samples)], big.mark=",",scientific=FALSE), 
       ", log every", prettyNum(samples[2], big.mark=",",scientific=FALSE), 
-      "samples, each sample includes", length(nodes), "internal nodes [", nodes[1], "-", 
-      nodes[length(nodes)], "], ", n.codon, " codons.\n")
+      "samples, each sample includes", length(in.nodes), "internal nodes [", in.nodes[1], "-", 
+      in.nodes[length(in.nodes)], "], ", n.codon, " codons.\n")
   
   # rm burnin, +2 to exclude state 0 
   start = as.integer(burnin * length(samples)) + 2
   cat("Remove burnin ", start-1, " sampled internal node sequences from the total of ", 
       length(samples), "for node ", node.id, "\n")
-  nodes.map <- nodes.map[start:nrow(node.samples),]
   
-  ### TODO diff topology
-  
-  
+  nodes.map <- nodes.map[start:nrow(nodes.map),]
+  ### TODO diff topology ?
+  # assuming fixed tree
+  edges <- nodes.map[["States"]][1] %>% str_split(",") %>% 
+    unlist %>% enframe(name = NULL) %>% separate(value, c("parent", "child"))
+  edges <- edges %>% drop_na # because of previous logging bug
+  # branches == 2 * internal nodes
+  stopifnot(nrow(edges) == 2*length(in.nodes))
   ###
   
   # create freq table of states
@@ -148,8 +152,10 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
     #3 27       22     1 3    
     freq.tb.list[[as.character(node.id)]] <- freq.tb
   }
-  
-  return(freq.tb.list)
+  # add edges
+  freq.tb.list[["edges"]] <- edges
+  # names are internal node indexes + "edges"
+  return(freq.tb.list) 
 }
 
 
