@@ -142,14 +142,17 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
       freq <- table(node.samples[[paste0("c", c)]])
       freq <- sort(freq, decreasing=T)
       s1 <- tibble(state=names(freq), freq=freq, site=c, order=1:length(freq))
+      # calculate prob
+      s1 <- s1 %>% mutate(prob = freq / sum(freq)) %>%
+        mutate(cred = cumsum(prob)) # used to find 95% credible set
       freq.tb <- bind_rows(freq.tb, s1)
     }
-    freq.tb <- freq.tb %>% mutate(order = as.character(order))
-    # state  freq  site order
-    # <chr> <int> <int> <chr>
-    #1 57      712     1 1    
-    #2 59      325     1 2    
-    #3 27       22     1 3    
+    freq.tb <- freq.tb %>% mutate(order = as.integer(order))
+    #  state  freq  site order    prob  cred
+    #  <chr> <int> <int> <int>   <dbl> <dbl>
+    #1 57      110     1     1 0.692   0.692
+    #2 59       44     1     2 0.277   0.969
+    #3 27        2     1     3 0.0126  0.981
     freq.tb.list[[as.character(node.id)]] <- freq.tb
   }
   # add edges

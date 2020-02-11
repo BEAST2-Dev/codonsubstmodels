@@ -49,9 +49,9 @@ stopifnot(length(ess.hour.std) == n.branches)
 stopifnot(length(ess.hour.da) == n.branches)
 ess.hour <- data.frame(branch=1:n.branches, std=ess.hour.std, da=ess.hour.da)
 
+require(reshape2)
 data.m <- melt(ess.hour, id='branch')
 colnames(data.m)[2] <- "method"
-
 
 library(ggplot2)
 # relative br lens to truth
