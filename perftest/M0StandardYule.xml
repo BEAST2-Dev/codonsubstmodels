@@ -3,7 +3,7 @@ beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolut
 beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
 
-    <!-- m0, variables: DATA, PI, TREE, THREAD -->
+    <!-- m0, variables: DATA, PI, TREE -->
     <data id="alignment" dataType="nucleotide">
 [DATA]
     </data>
@@ -13,7 +13,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
     <parameter id="m0.omega" value="0.08"/>
     <parameter id="m0.kappa" value="15.0"/>
-    <parameter id="popSize" value="1"/>
+    <parameter id="birthRate" value="10.0"/>
     <parameter id="clockRate" name="stateNode">1.0</parameter>
 
     <substModel spec="codonmodels.M0Model" id="m0" verbose="false">
@@ -38,15 +38,10 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
           taxa='@alignment' adjustTipHeights='false'
           newick="[TREE]"/>
 
-    <nodesStates spec="NodeStatesArray" id="nodesStates" >
-        <data idref="codon.alignment"/>
-    </nodesStates>
-
-    <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="[THREAD]" branchesPerTask="10">
-<!--        <data idref="codon.alignment"/>-->
-        <nodesStates idref="nodesStates"/>
-        <tree idref="tree"/>
-        <siteModel idref="siteModel"/>
+    <distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
+        <data name="data" idref="codon.alignment"/>
+        <tree name="tree" idref="tree"/>
+        <siteModel name="siteModel" idref="siteModel"/>
 <!--        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>-->
     </distribution>
 
@@ -62,21 +57,22 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="100000000"> <!--autoOptimize="true"-->
+    <run spec="MCMC" id="mcmc" chainLength="20000000"> <!--autoOptimize="true"-->
         <state id="state" storeEvery="1000000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
-<!--            <input name='stateNode' idref='popSize'/>-->
+<!--            <input name='stateNode' idref='birthRate'/>-->
             <input name='stateNode' idref='tree'/>
-            <input name='stateNode' idref='nodesStates'/>
         </state>
 
         <distribution spec="util.CompoundDistribution" id="posterior">
             <distribution id="prior" spec="util.CompoundDistribution">
-                <distribution id="coalescent" spec="Coalescent">
-                    <populationModel id="ConstantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
-                    <treeIntervals spec='TreeIntervals' id='TreeIntervals' tree="@tree"/>
-                </distribution>
+                <distribution id="YuleModel" spec="beast.evolution.speciation.YuleModel" 
+                birthDiffRate="@birthRate" tree="@tree"/>                   
+                <prior id="YuleBirthRatePrior" name="distribution" x="@birthRate">                                    
+                    <Uniform id="Uniform.1" name="distr" upper="Infinity"/>                                
+                </prior>
+
                 <prior id="OmegaPrior" name="distribution" x="@m0.omega">
                     <LogNormal id="LogNormalDistributionModel.0" name="distr">
                         <!-- "1.9064e-02" "1.3534e-01" "9.6075e-01" -->
@@ -91,16 +87,10 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
                         <parameter id="RealParameter.4" estimate="false" name="S">1</parameter>
                     </LogNormal>
                 </prior>
-                <prior id="PopSizePrior" name="distribution" x="@popSize">
-                    <LogNormal id="LogNormalDistributionModel.2" name="distr">
-                        <!-- "7.1550e-03" "1.3534e-01" "2.5598e+00" -->
-                        <parameter id="PopM" estimate="false" name="M">-2</parameter>
-                        <parameter id="PopS" estimate="false" name="S">1.5</parameter>
-                    </LogNormal>
-                </prior>
+
             </distribution>
             <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="false">
-                <distribution idref="daTreeLikelihood"/>
+                <distribution idref="treeLikelihood"/>
             </distribution>
         </distribution>
 
@@ -117,12 +107,9 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id='kappaScaler' spec='ScaleOperator' parameter="@m0.kappa" scaleFactor="0.5" weight="3"/>-->
 
-<!--        <operator id='popSizeScaler' spec='ScaleOperator' parameter="@popSize" scaleFactor="0.75" weight="0.5"/>-->
+<!--        <operator id='birthRateScaler' spec='ScaleOperator' parameter="@birthRate" scaleFactor="0.75" weight="0.5"/>-->
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
-
-        <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
-                  DATreeLikelihood="@daTreeLikelihood" weight="15.0" select="RandomN" randomN="1"/>
 
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@tree" weight="3.0"/>
 
@@ -136,13 +123,13 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 
 <!--        <operator id="WilsonBalding" spec="WilsonBalding" tree="@tree" weight="3.0"/>-->
 
-        <logger logEvery="50000" fileName="m0.da.log" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <logger logEvery="20000" fileName="m0.std.log" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
             <log idref="likelihood"/>
             <log idref="prior"/>
             <log spec='beast.evolution.tree.TreeStatLogger' tree='@tree'/>
-<!--            <log idref="coalescent"/>-->
-<!--            <log idref="popSize"/>-->
+<!--            <log idref="YuleModel"/>-->
+<!--            <log idref="birthRate"/>-->
 <!--            <log idref="m0.omega"/>-->
 <!--            <log idref="m0.kappa"/>-->
 <!--            <log idref="clockRate"/>-->
@@ -153,20 +140,17 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
             <log idref="likelihood"/>
             <log idref="prior"/>
             <log spec='beast.evolution.tree.TreeStatLogger' tree='@tree'/>
-<!--            <log idref="popSize"/>-->
+<!--            <log idref="birthRate"/>-->
 <!--            <log idref="m0.omega"/>-->
 <!--            <log id="ESS.0" spec="util.ESS" arg="@m0.omega"/>-->
 <!--            <log idref="m0.kappa"/>-->
 <!--            <log id="ESS.1" spec="util.ESS" arg="@m0.kappa"/>-->
         </logger>
 
-    <logger logEvery="50000" fileName="m0.da.trees" mode="tree">
+    <logger logEvery="20000" fileName="m0.std.trees" mode="tree">
          <log id="TreeWithMetaDataLogger" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
     </logger>
 
-    <logger logEvery="50000" fileName="m0.da.ins.txt" mode="tree">
-        <log id="NodeStatesLogger" spec="beast.evolution.tree.NodeStatesLogger" nodesStates="@nodesStates" tree="@tree"/>
-    </logger>
     </run>
 
 </beast>

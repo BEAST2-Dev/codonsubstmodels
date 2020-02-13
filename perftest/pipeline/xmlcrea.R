@@ -1,18 +1,22 @@
 # create XML, run simtree before this
 
-WD="~/WorkSpace/codonsubstmodels/perftest"
+WD="~/WorkSpace/codonsubstmodels/perftest/pipeline"
 source(file.path(WD, "nexparser.R"))
 
 # c(8, 64, 512)
-n.taxa = 128
+n.taxa = 32
 DIR=paste0("T",n.taxa)
 # working dir
 setwd(file.path(WD, DIR))
 
+#tre.txt <- paste0("t",n.taxa,"coal.txt")
+tre.txt <- paste0("t",n.taxa,"yulelamda10.txt")
+
 ###### DA tree likelihood
 library(xml2)
 # load XML template
-template <- read_xml("../M0DALikelihood.xml")
+#template <- read_xml("../M0DALikelihood.xml")
+template <- read_xml("../M0DAYule.xml")
 
 # load sequences to a 2-column tibble
 nex <- readNex("mc.nex", "t\\d+")
@@ -29,10 +33,12 @@ node<-nodes[xml_has_attr(nodes, "pi")]
 xml_attr(node, "pi") <- PI
 
 # 3. replace tree
-TREE <- readLines(paste0("t",n.taxa,"coal.txt"))
+TREE <- readLines(tre.txt)
 require(ape)
 start.tree <- read.tree(text = TREE);
-## Note: the tree has to be time tree, be careful when changing branch lengths, instead of node heights.  
+## Note: the tree has to be time tree, be careful when changing branch lengths, instead of node heights. 
+# check all branch lengths
+stopifnot(all(start.tree$edge.length > 1e-6))
 # all branch lengths times 10
 start.tree$edge.length <- start.tree$edge.length * 10
 # starting tree 
@@ -52,12 +58,12 @@ node<-nodes[xml_has_attr(nodes, "threads")]
 xml_attr(node, "threads") <- THREAD
 
 # finish XML
-write_xml(template, file = paste0("t", n.taxa, "th", THREAD, ".xml"))
+write_xml(template, file = paste0("t", n.taxa, "th", THREAD, "yule.xml"))
 
 ###### standard tree likelihood
 
 # load XML template
-template <- read_xml("../M0StandardLikelihood.xml")
+template <- read_xml("../M0StandardYule.xml")
 
 # 1. replace data
 node.data <- xml_find_first(template, ".//data")
@@ -80,7 +86,7 @@ xml_attr(node, "newick") <- TREE
 # TODO
 
 # finish XML
-write_xml(template, file = paste0("t", n.taxa, "st.xml"))
+write_xml(template, file = paste0("t", n.taxa, "yule.xml"))
 
 ### 
 # TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")

@@ -76,9 +76,62 @@ while (anyNA(edges.map)) {
 }
 #print(edges.map, n=Inf)
 
+######  require edges.map before this line ###### 
+
+### 95% credible set
+internal.nodes <- suppressWarnings(as.integer(names(stats.list)))
+internal.nodes <- internal.nodes[!is.na(internal.nodes)]
+
+# 1. sanity check how true codon falls into x% credible set
+cred.check <- tibble(node=internal.nodes) 
+for (cred.thre in c(0.05, 0.25, 0.5, 0.75, 0.95)) {
+  in.cred = c()
+  mean.tot.prob = c()
+  for (nod.idx in internal.nodes) {
+    # have to map nodes before checking states
+    node.true <- edges.map %>% filter(pa1==as.integer(nod.idx)) %>% select(pa2) %>% unlist %>% unique
+    stopifnot(length(node.true) == 1)
+    
+    state.true = as.integer(nod.states[[as.character(node.true)]])
+    n.codon = length(state.true)
+    
+    # 95% credible set at each site (codon)
+    freq.table <- stats.list[[as.character(nod.idx)]] %>% group_by(site) 
+    out951st <- freq.table %>% filter(cred >= cred.thre) %>% slice(1)
+    in95 <-  freq.table %>% filter(cred < cred.thre) %>% bind_rows(out951st) %>% arrange(site)
+    stopifnot(length(unique(in95[["site"]])) == n.codon)
+    
+    cred.set <- in95 %>% group_by(site) %>% mutate(cred95 = paste0(as.integer(state), collapse = ",")) %>% 
+      slice(n()) %>% select(site, cred, cred95) %>% arrange(site) %>% as_tibble() 
+    stopifnot(nrow(cred.set) == n.codon)
+    
+    cred.set <- cred.set %>% mutate(state.true = as.character(state.true)) %>%
+      mutate(cred95.set = strsplit(cred95, ",")) %>%
+      mutate(in.cred = state.true %in% unlist(cred95.set)) 
+    
+    in.per = nrow(cred.set[cred.set[["in.cred"]],]) / nrow(cred.set)
+    in.cred = c(in.cred,  in.per)
+    mean.t.p = mean(cred.set[["cred"]])
+    mean.tot.prob = c(mean.tot.prob, mean.t.p)
+  }
+  # all in 95% cred set
+  in.cred
+  mean.tot.prob
+  stopifnot(length(in.cred) == n.taxa - 1 || any(in.cred < cred.thre))
+  
+  colnm = gsub("0\\.", "cred", cred.thre)
+  colnm2 = paste0(colnm,".prob")
+  cred.check <- cred.check %>% add_column(!!colnm := in.cred) %>% add_column(!!colnm2 := mean.tot.prob)
+}
+print(cred.check, n = Inf)
+# crd.prob is the mean of the total probabilities inside the x% credible set
+write_delim(cred.check, paste0("t",n.taxa,"-cred-check.txt"), delim = "\t")
+
 
 ### compare to true ancestral states
 p.dist = c()
+mean.map.prob = c()
+sd.map.prob = c()
 internal.nodes <- suppressWarnings(as.integer(names(stats.list)))
 internal.nodes <- internal.nodes[!is.na(internal.nodes)]
 for (nod.idx in internal.nodes) {
@@ -99,8 +152,12 @@ for (nod.idx in internal.nodes) {
     mutate(test = state.true == state)
   
   p.dist = c(p.dist, 1 - nrow(map[map[["test"]],]) / nrow(map) )
+  mean.map.prob = c(mean.map.prob, mean(map[["prob"]]))
+  sd.map.prob = c(sd.map.prob, sd(map[["prob"]]))
 }
-stats <- tibble(node = internal.nodes, p.dist = p.dist)
+# p.dist of MAP to true codon, and mean/sd (across sites) of posterior prob that the MAP represents
+stats <- tibble(node = internal.nodes, p.dist = p.dist, 
+                map.prob.mean = mean.map.prob, map.prob.sd = sd.map.prob)
 print(stats, n = Inf)
 
 
@@ -149,7 +206,6 @@ print(parsimony, n = Inf)
 
 library(ggplot2)
 require(reshape2)
-### 95% credible set
 
 
 
@@ -159,7 +215,8 @@ require(reshape2)
 
 
 
-######### replaced by using 95% credible set
+
+
 
 ### plot state0 vs MAP
 data.m <- melt(parsimony, id='node')
