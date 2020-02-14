@@ -7,21 +7,30 @@ source(file.path(WD, "nexparser.R"))
 n.taxa = 32
 DIR=paste0("T",n.taxa)
 # working dir
+WD="~/WorkSpace/codonsubstmodels/perftest/"
 setwd(file.path(WD, DIR))
 
-#tre.txt <- paste0("t",n.taxa,"coal.txt")
-tre.txt <- paste0("t",n.taxa,"yulelamda10.txt")
+# coal or yulelam10
+tree.prior = "yulelam10"
 
 ###### DA tree likelihood
 library(xml2)
-# load XML template
-#template <- read_xml("../M0DALikelihood.xml")
-template <- read_xml("../M0DAYule.xml")
+# load XML template from ~/WorkSpace/codonsubstmodels/perftest/
+if (tree.prior == "coal") {
+  template <- read_xml(file.path(WD, "M0DACoalescent.xml"))
+} else {
+  template <- read_xml(file.path(WD, "M0DAYule.xml"))
+}
+
 
 # load sequences to a 2-column tibble
+setwd(file.path(WD, DIR, tree.prior))
 nex <- readNex("mc.nex", "t\\d+")
-# create data
+# create <data> and save to xml
 DATA <- toXMLData(nex, "data.xml", id="alignment")
+# back to working dir
+setwd(file.path(WD, DIR))
+
 # 1. replace data
 node.data <- xml_find_first(template, ".//data")
 xml_replace(node.data, DATA)
@@ -33,9 +42,10 @@ node<-nodes[xml_has_attr(nodes, "pi")]
 xml_attr(node, "pi") <- PI
 
 # 3. replace tree
+tre.txt <- paste0("t",n.taxa,tree.prior,".txt")
 TREE <- readLines(tre.txt)
 require(ape)
-start.tree <- read.tree(text = TREE);
+start.tree <- read.tree(text = TREE)
 ## Note: the tree has to be time tree, be careful when changing branch lengths, instead of node heights. 
 # check all branch lengths
 stopifnot(all(start.tree$edge.length > 1e-6))
@@ -58,12 +68,17 @@ node<-nodes[xml_has_attr(nodes, "threads")]
 xml_attr(node, "threads") <- THREAD
 
 # finish XML
-write_xml(template, file = paste0("t", n.taxa, "th", THREAD, "yule.xml"))
+write_xml(template, file = paste0("t", n.taxa, tree.prior,"DA.xml"))
 
 ###### standard tree likelihood
 
 # load XML template
-template <- read_xml("../M0StandardYule.xml")
+if (tree.prior == "coal") {
+  template <- read_xml(file.path(WD, "M0StandardCoalescent.xml"))
+} else {
+  template <- read_xml(file.path(WD, "M0StandardYule.xml"))
+}
+
 
 # 1. replace data
 node.data <- xml_find_first(template, ".//data")
@@ -86,7 +101,7 @@ xml_attr(node, "newick") <- TREE
 # TODO
 
 # finish XML
-write_xml(template, file = paste0("t", n.taxa, "yule.xml"))
+write_xml(template, file = paste0("t", n.taxa, tree.prior,"STD.xml"))
 
 ### 
 # TREE <- str_replace_all(TREE, ":(\\d+).(\\d+)", ":1.0")
