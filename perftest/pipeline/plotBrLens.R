@@ -10,8 +10,11 @@ n.taxa = 32
 WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa)
 setwd(WD)
 
+# coal or yulelam10
+tree.prior = "yulelam10"
+
 ### true tree
-true.txt <- readLines(paste0("t",n.taxa,"coal.txt"))
+true.txt <- readLines(paste0("t",n.taxa,tree.prior,".txt"))
 true.tre <- read.tree(text=true.txt)
 plot(true.tre)
 nodelabels()
@@ -24,7 +27,7 @@ true.tre$edge.length
 burnin=0.1
 ### standard tree likelihood
 # read MCMC trees m0.std.trees
-tre.log <- file.path(paste0("s4t",n.taxa), "m0.std.trees")
+tre.log <- file.path(paste0("t",n.taxa,tree.prior,"STD"),"m0.std.trees")
 stats.std <- getBrLensStats(tre.log, burnin)
 mean.bl.std <- stats.std$mean
 last.bl.std <- stats.std$br.lens[nrow(stats.std$br.lens),]
@@ -36,7 +39,7 @@ ess.ttl.std <- getESS(total.tree.len)
 
 ### DA tree likelihood
 # read MCMC trees m0.da.trees
-tre.log <- file.path(paste0("4t",n.taxa), "m0.da.trees")
+tre.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"), "m0.da.trees")
 stats.da <- getBrLensStats(tre.log, burnin)
 mean.bl.da <- stats.da$mean
 last.bl.da <- stats.da$br.lens[nrow(stats.da$br.lens),]
@@ -86,23 +89,23 @@ library(ggplot2)
 # branch=0 is total tree length
 p <- ggplot(data.m, aes(branch, value)) + 
   geom_point(aes(colour = simulation, shape= simulation), size=.8, alpha=.7) + 
-  geom_hline(yintercept=200, linetype="dashed", color = "red") +
+#  geom_hline(yintercept=200, linetype="dashed", color = "red") +
   scale_y_continuous(trans='log10') +
-  annotate("text", x = 0, y = 210, label = "200") +
+#  annotate("text", x = 0, y = 210, label = "200") +
   ggtitle(paste(n.taxa, "Taxa", n.branches, "Branches")) + 
   ylab("ESS") + xlab("branch index (0 for total tree length)") +
   theme_minimal()
-ggsave(paste0("t",n.taxa,"-brlens-ess.pdf"), p, width = 6, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-brlens-ess.pdf"), p, width = 6, height = 5)
 
 ### fig to compare 2 likelihoods
 # std vs da
 p1 <- ggplot(traces, aes(mean.std, mean.da)) + 
   geom_point(aes(colour = ess), shape = 1, alpha=.7) + 
   scale_colour_gradientn(colors = c("red", "orange", "blue", "blue")) + # "lightblue", "blue"
-  ggtitle(paste("Standard Likelihood vs. Data Augmentation", n.taxa, "Taxa", n.branches, "Branches")) +
+  ggtitle(paste(n.taxa, "Taxa", n.branches, "Branches")) + #"Standard Likelihood vs. Data Augmentation", 
   xlab("standard likelihood branch lengths") + ylab("data augmentation branch lengths") +
   theme_minimal()
-ggsave(paste0("t",n.taxa,"-std-da.pdf"), p1, width = 5, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-std-da.pdf"), p1, width = 5, height = 5)
 
 # truth vs std,da
 data.m2 <- melt(traces[,c("truth","mean.std","mean.da")], id='truth')
@@ -113,7 +116,7 @@ p2 <- ggplot(data.m2, aes(truth, value)) +
   ggtitle(paste("True Tree vs. Estimated Tree", n.taxa, "Taxa", n.branches, "Branches")) + 
   xlab("true branch lengths") + ylab("mean branch lengths") +
   theme_minimal()
-ggsave(paste0("t",n.taxa,"-truth-mean.pdf"), p2, width = 6, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-truth-mean.pdf"), p2, width = 6, height = 5)
 
 # last
 data.m3 <- melt(traces[,c("truth","last.std","last.da")], id='truth')
@@ -124,6 +127,6 @@ p3 <- ggplot(data.m3, aes(truth, value)) +
   ggtitle(paste("True Tree vs. Estimated Tree", n.taxa, "Taxa", n.branches, "Branches")) + 
   xlab("true branch lengths") + ylab("last branch lengths") +
   theme_minimal()
-ggsave(paste0("t",n.taxa,"-truth-last.pdf"), p3, width = 6, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-truth-last.pdf"), p3, width = 6, height = 5)
 
 

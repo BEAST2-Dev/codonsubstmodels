@@ -163,6 +163,25 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
 
 
 
+# branch lengths ESS per hour 
+getBrLenESSHour <- function(tre.log="m0.trees", screen.log="out.txt", burnin=0.1) {
+  require(ape)
+  # read MCMC trees m0.std.trees
+  stats <- getBrLensStats(tre.log, burnin)
+  mean.bl <- stats$mean
+  last.bl <- stats$br.lens[nrow(stats$br.lens),]
+  # by columns
+  ess <- apply(stats$br.lens, 2, getESS)  
+  
+  # read screen log
+  screen.info <- scan(screen.log,sep="\n",what="char(0)",skip=110)
+  # Total calculation time: 71818.323 seconds
+  time <- screen.info[length(screen.info)]
+  time <- gsub("^.*time: (.*) seconds.*", "\\1", time)
+  time <- as.numeric(time) / 3600 # ESS/hour
+  
+  ess.per.hour = ess / time
+}
 
 
 
