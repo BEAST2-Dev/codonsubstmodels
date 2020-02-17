@@ -57,24 +57,31 @@ getESS <- function(samples, verbose=FALSE) {
 # Branch lengths stats given a tre.log containing MCMC trees
 getBrLensStats <- function(tre.log="m0.trees", burnin=0.1, plot.1st.tree=FALSE) {
   require(ape)
-  tre <- read.nexus(tre.log)
+  trees <- read.nexus(tre.log)
   # rm burnin
-  start = as.integer(burnin * length(tre)) + 1
-  cat("Remove burnin ", start-1, " trees from the total of ", length(tre), " trees in ", tre.log, "\n")
-  tre <- tre[start:length(tre)]
+  start = as.integer(burnin * length(trees)) + 1
+  cat("Remove burnin ", start-1, " trees from the total of ", length(trees), " trees in ", tre.log, "\n")
+  trees <- trees[start:length(trees)]
   
   if (plot.1st.tree) {
-    plot(tre[[1]])
+    plot(trees[[1]])
     nodelabels()
   }
   # combine the list of phylo$edge.length to a data.frame
-  br.lens <- as.data.frame( t(sapply(tre, function(tr) rbind(as.numeric(tr$edge.length)))) )
+  br.lens <- as.data.frame( t(sapply(trees, function(tr) rbind(as.numeric(tr$edge.length)))) )
   # mean
   mean.br.lens <- sapply(br.lens, mean) 
   # standard deviation
   sd.br.lens <- sapply(br.lens, sd) 
+  # hpd 95%
+  suppressMessages(require(TeachingDemos)) 
+  # emp.hpd(trace, conf=0.95)
+  hpd95 <- lapply(br.lens, emp.hpd, conf=0.95) 
   
-  list(mean=mean.br.lens, sd=sd.br.lens, br.lens=br.lens)
+  # all topologies
+  edges.list <- lapply(trees, "[[", "edge")
+  
+  list(mean=mean.br.lens, sd=sd.br.lens, br.lens=br.lens, edges.list=edges.list)
 }
 
 # 1st line is node mapping: 50000	0	35..1,34..2,
@@ -113,7 +120,7 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
   # rm burnin, +2 to exclude state 0 
   start = as.integer(burnin * length(samples)) + 2
   cat("Remove burnin ", start-1, " sampled internal node sequences from the total of ", 
-      length(samples), "for node ", node.id, "\n")
+      length(samples), "\n")
   
   nodes.map <- nodes.map[start:nrow(nodes.map),]
   ### TODO diff topology ?
@@ -127,7 +134,7 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
   
   # create freq table of states
   freq.tb.list <- list()
-  for (node.id in nodes) {
+  for (node.id in in.nodes) {
     # internal node index starts from n.taxa, node.id = 33
     node.samples <- traces %>% filter(Node==node.id)
     # rm burnin, +2 to exclude state 0 
@@ -157,6 +164,8 @@ getIntNodeSeqStats <- function(ins.log="ins.txt", burnin=0.1,
   }
   # add edges
   freq.tb.list[["edges"]] <- edges
+  freq.tb.list[["n.nodes"]] <- length(in.nodes)
+  freq.tb.list[["n.codons"]] <- n.codon
   # names are internal node indexes + "edges"
   return(freq.tb.list) 
 }
@@ -173,6 +182,10 @@ getBrLenESSHour <- function(tre.log="m0.trees", screen.log="out.txt", burnin=0.1
   # by columns
   ess <- apply(stats$br.lens, 2, getESS)  
   
+  # total tree length
+  total.tree.len <- rowSums(stats$br.lens)
+  ess.ttl <- getESS(total.tree.len)
+  
   # read screen log
   screen.info <- scan(screen.log,sep="\n",what="char(0)",skip=110)
   # Total calculation time: 71818.323 seconds
@@ -180,7 +193,7 @@ getBrLenESSHour <- function(tre.log="m0.trees", screen.log="out.txt", burnin=0.1
   time <- gsub("^.*time: (.*) seconds.*", "\\1", time)
   time <- as.numeric(time) / 3600 # ESS/hour
   
-  ess.per.hour = ess / time
+  list(ess.per.hour.branch.lens = ess / time, ess.per.hour.tot.lens = ess.ttl / time)
 }
 
 

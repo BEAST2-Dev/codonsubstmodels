@@ -6,75 +6,37 @@ WD="~/WorkSpace/codonsubstmodels/perftest/pipeline"
 source(file.path(WD, "TraceUtils.R"))
 source(file.path(WD, "Codon.R"))
 source(file.path(WD, "EvolerUtils.R"))
+source(file.path(WD, "TreeUtils.R"))
 
 n.taxa = 32
 # perftest/T32
 WD=paste0("~/WorkSpace/codonsubstmodels/perftest/T",n.taxa) 
 setwd(WD)
 
+# coal or yulelam10
+tree.prior = "yulelam10"
+
+### BEAST
 # T32/4t32/m0.da.ins.txt
-ins.log <- file.path(paste0("4t",n.taxa), "m0.da.ins.txt")
+ins.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"),"m0.da.ins.txt")
 
 stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
 names(stats.list)
-#### bug in logging nodeNr not nodeNr+1 ###
-#names(stats.list) = as.character(as.integer(names(stats.list)) + 1)
-### rm above line after run fixed jar.
 
 ### evolver.out
 # Note: evolver tree uses the same format as APE tree
-nod.states <- getSeqsEvoOut("ancestral.txt", n.taxa=n.taxa, genetic.code="vertebrateMitochondrial")
+nod.states <- getSeqsEvoOut(file.path(tree.prior, "ancestral.txt"), 
+                            n.taxa=n.taxa, genetic.code="vertebrateMitochondrial")
 
-# node indexes should match
-stopifnot(all(names(stats.list) == names(nod.states)))
+stopifnot(length(nod.states[[1]]) == stats.list[["n.codons"]])
+# same edges
+stopifnot(nrow(nod.states[["edges"]]) == nrow(stats.list[["edges"]]))
 
-### make sure the same node index is the same node
-# BEAST
-edges1 <- stats.list$edges %>% mutate(parent=as.integer(parent), child=as.integer(child)) %>% arrange(child)
-# evolver.out
-edges2 <- nod.states$edges %>% mutate(parent=as.integer(parent), child=as.integer(child)) %>% arrange(child)
-# Note: the tip indexing system must be same
-dup1 <- which(duplicated(edges1[["parent"]][1:n.taxa]))
-dup2 <- which(duplicated(edges2[["parent"]][1:n.taxa]))
-stopifnot(all(dup1 == dup2))
-
-# map edges2 parents to edges1 parents by lineages from tips
-edges.map <- edges1 %>% rename(pa1="parent", ch1="child") %>% 
-  mutate( pa2=c(edges2[["parent"]][1:n.taxa],rep(NA, nrow(edges2)-n.taxa)),
-          ch2=c(edges2[["child"]][1:n.taxa],rep(NA, nrow(edges2)-n.taxa)) )
-# pa1   ch1   pa2   ch2
-#<int> <int> <int> <int>
-#1    35     1    37     1
-#2    34     2    38     2
-# find row numbers of parents of tips at child1 appearing in parent1,
-pa1.idx <- match(edges1[["child"]][(n.taxa+1):nrow(edges1)], edges1[["parent"]][1:n.taxa])
-# and use the same row numbers to find edges2 parents of tips, 
-ch2 <- edges2[["parent"]][pa1.idx]
-stopifnot(length(ch2) == nrow(edges.map)-n.taxa)
-# then, fill selecetd internal nodes in child2 according to above mapping
-edges.map[["ch2"]][(n.taxa+1):nrow(edges.map)] <- ch2
-
-# fill in parent2 by edges2 mapping
-pa2.idx <- match(ch2, edges2[["child"]])
-pa2 <- edges2[["parent"]][pa2.idx]
-edges.map[["pa2"]][(n.taxa+1):nrow(edges.map)] <- pa2
-
-# repeat to fill in the rest of NA
-while (anyNA(edges.map)) {
-  na.idx <- which(is.na(edges.map[["pa2"]]))
-  
-  pa1.idx <- match(edges1[["child"]][na.idx], edges1[["parent"]])
-  # use the same row numbers to find edges2 parents of tips  
-  ch2 <- edges.map[["pa2"]][pa1.idx]
-  stopifnot(length(ch2) == length(na.idx))
-  edges.map[["ch2"]][na.idx] <- ch2
-  
-  # fill in parent2 by edges2 mapping
-  pa2.idx <- match(ch2, edges2[["child"]])
-  pa2 <- edges2[["parent"]][pa2.idx]
-  edges.map[["pa2"]][na.idx] <- pa2
-}
+### create edges.map to make sure the same node index is the same node 
+# stats.list$edges is BEAST, nod.states$edges is evolver.out
+edges.map <- mapEdges(stats.list$edges, nod.states$edges)
 #print(edges.map, n=Inf)
+
 
 ######  require edges.map before this line ###### 
 
@@ -84,7 +46,7 @@ internal.nodes <- internal.nodes[!is.na(internal.nodes)]
 
 # 1. sanity check how true codon falls into x% credible set
 cred.check <- tibble(node=internal.nodes) 
-for (cred.thre in c(0.05, 0.25, 0.5, 0.75, 0.95)) {
+for (cred.thre in c(0.05, 0.25, 0.50, 0.75, 0.95)) {
   in.cred = c()
   mean.tot.prob = c()
   for (nod.idx in internal.nodes) {
@@ -109,7 +71,8 @@ for (cred.thre in c(0.05, 0.25, 0.5, 0.75, 0.95)) {
       mutate(cred95.set = strsplit(cred95, ",")) %>%
       mutate(in.cred = state.true %in% unlist(cred95.set)) 
     
-    in.per = nrow(cred.set[cred.set[["in.cred"]],]) / nrow(cred.set)
+    # convert to percentage
+    in.per = nrow(cred.set[cred.set[["in.cred"]],]) / nrow(cred.set) * 100
     in.cred = c(in.cred,  in.per)
     mean.t.p = mean(cred.set[["cred"]])
     mean.tot.prob = c(mean.tot.prob, mean.t.p)
@@ -119,13 +82,13 @@ for (cred.thre in c(0.05, 0.25, 0.5, 0.75, 0.95)) {
   mean.tot.prob
   stopifnot(length(in.cred) == n.taxa - 1 || any(in.cred < cred.thre))
   
-  colnm = gsub("0\\.", "cred", cred.thre)
+  colnm = gsub("0\\.", "cred", as.character(cred.thre))
   colnm2 = paste0(colnm,".prob")
   cred.check <- cred.check %>% add_column(!!colnm := in.cred) %>% add_column(!!colnm2 := mean.tot.prob)
 }
 print(cred.check, n = Inf)
 # crd.prob is the mean of the total probabilities inside the x% credible set
-write_delim(cred.check, paste0("t",n.taxa,"-cred-check.txt"), delim = "\t")
+write_delim(cred.check, paste0("t",n.taxa,tree.prior,"-credset.txt"), delim = "\t")
 
 
 ### compare to true ancestral states
@@ -207,30 +170,23 @@ print(parsimony, n = Inf)
 library(ggplot2)
 require(reshape2)
 
-
-
-
-
-
-
-
-
-
-
-
 ### plot state0 vs MAP
-data.m <- melt(parsimony, id='node')
+data.m <- parsimony %>% select(node,p.dist.0,p.dist.map) %>% melt(id='node')
 colnames(data.m)[2] <- "method"
 data.m$method <- gsub("p.dist.0", "parsimony", data.m$method)
 data.m$method <- gsub("p.dist.map", "MAP", data.m$method)
 data.m$method <- factor(data.m$method, levels = unique(data.m$method))
 
-p <- ggplot(data.m, aes(node, value, fill = method)) + 
+max.p <- max(data.m$value)
+max.p
+p <- ggplot(data.m, aes(node, value, fill = method, colour = method)) + 
   geom_bar(position = "dodge", stat="identity") + 
-  scale_y_sqrt() +
-  ggtitle("Parsimony ASR vs. MAP") + ylab("p distance") +
+  scale_y_sqrt(breaks=c(0, 0.001, 0.01, 0.05, 0.1)) +
+  ggtitle(paste("Parsimony ASR vs. MAP", n.taxa, "Taxa")) + ylab("p distance") +
   theme_minimal()
-ggsave(paste0("parsimony-map.pdf"), p, width = 7, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"parsimony-map.pdf"), p, width = 7, height = 5)
+
+
 
 ### plot MAP maximum a posteriori
 nod.idx = 63 # root

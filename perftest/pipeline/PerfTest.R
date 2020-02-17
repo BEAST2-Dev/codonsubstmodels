@@ -17,12 +17,16 @@ tre.log <- file.path(paste0("t",n.taxa,tree.prior,"STD"),"m0.std.trees")
 # read screen log
 screen.log <- file.path(paste0("t",n.taxa,tree.prior,"STD"), paste0("t",n.taxa,tree.prior,"STD.xml_out.txt"))
 # ESS per hour for all branches
-ess.hour.std <- getBrLenESSHour(tre.log, screen.log, burnin)
-
+ess.std <- getBrLenESSHour(tre.log, screen.log, burnin)
+ess.hour.std <- ess.std[["ess.per.hour.branch.lens"]]
+ess.hour.totlen.std <- ess.std[["ess.per.hour.tot.lens"]]
 
 tre.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"), "m0.da.trees")
 screen.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"), paste0("t",n.taxa,tree.prior,"DA.xml_out.txt"))
-ess.hour.da<- getBrLenESSHour(tre.log, screen.log, burnin)
+ess.da <- getBrLenESSHour(tre.log, screen.log, burnin)
+ess.hour.da <- ess.da[["ess.per.hour.branch.lens"]]
+ess.hour.totlen.da <- ess.da[["ess.per.hour.tot.lens"]]
+
 
 ### plot
 n.branches = 2*n.taxa - 2

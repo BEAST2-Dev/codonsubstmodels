@@ -20,7 +20,6 @@ getSeqsEvoOut <- function(out.file="ancestral.txt", n.taxa=NULL,
   seqs <- gsub(paste0("^(",nod.name,")\\s+(.*)"), "\\2", anc.tru) # "^(node[0-9]+)\\s+(.*)"
   # rm spaces
   seqs <- gsub("\\s+", "", seqs)
-  stopifnot(str_length(seqs[1]) == n.codon*3)
   
   states <- lapply(seqs, seqToStates, genetic.code=genetic.code)
   # internal nodes index
