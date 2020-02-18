@@ -4,7 +4,6 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
-import beast.evolution.tree.Node;
 import beast.util.StringUtils;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
@@ -59,7 +58,8 @@ public class M0ModelTest {
 
         int len = m0Model.getStateCount();
         double[] prob = new double[len*len];
-        m0Model.getTransitionProbabilities(new Node(), startTime, endTime, rate, prob, true);
+        double[] iexp = new double[len*len];
+        m0Model.getTransiProbs(startTime, endTime, rate, iexp, prob);
 
 //        System.out.println("relative rates :\n" + Arrays.toString(m0Model.getRelativeRates()) + "\n");
         System.out.println("renormalised rate matrix :\n" + StringUtils.

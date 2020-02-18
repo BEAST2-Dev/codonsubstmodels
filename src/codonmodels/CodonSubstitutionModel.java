@@ -34,12 +34,18 @@ import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
+import beast.evolution.tree.Node;
 
 import java.lang.reflect.InvocationTargetException;
 
 /**
  * Modified from BEAST 1 AbstractCodonModel.
  *
+ * This also uses new code to compute transition-prob matrix,
+ * which is faster than
+ * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
+ *
+ * @author Alexei Drummond
  * @author Marc A. Suchard
  * @author Walter Xie
  */
@@ -98,6 +104,16 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     }
 
+    /**
+     * Faster code to replace
+     * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
+     *
+     * @param startTime
+     * @param endTime
+     * @param rate
+     * @param iexp
+     * @param matrix
+     */
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
         double distance = (startTime - endTime) * rate;

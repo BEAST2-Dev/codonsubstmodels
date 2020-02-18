@@ -15,6 +15,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * This only tests {@link GeneralSubstitutionModel}, not {@link codonmodels.CodonSubstitutionModel}.
  * Instantaneous rate q_ij can be 0, but the transition prob p_ij(t) cannot.
  *
  * @author Walter Xie

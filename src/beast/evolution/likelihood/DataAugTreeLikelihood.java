@@ -392,7 +392,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
         // if tips, always false
         //TODO cache per site to avoid recalculation, when only sequence at a site is changed
-        boolean seqUpdate = isSeqUpdate(nodeNr, parentNum);
+        boolean seqUpdate = nodesStates.isNodeStatesDirty(nodeNr) || nodesStates.isNodeStatesDirty(parentNum);
 
         int nodeUpdate = node.isDirty() | parent.isDirty();
 
@@ -412,39 +412,20 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 
         // ====== 1. update the transition probability matrix(ices) if the branch len changes ======
         if (seqUpdate || nodeUpdate != Tree.IS_CLEAN || branchTime != branchLengths[nodeNr]) {
-            setTransProbMatrix(daBranchLdCore, node, parent, nodeNr, branchRate, branchTime);
-            nodeUpdate |= Tree.IS_DIRTY;
-        }
-// TODO only some sites are changed
-//       else if (seqUpdate) { }
+            this.branchLengths[nodeNr] = branchTime;
+            daBranchLdCore.setNodeMatrixForUpdate(); // TODO review the index
+            // rate category
+            for (int i = 0; i < siteModel.getCategoryCount(); i++) {
+                final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
+                // pass the reference of array for caching probability,
+                // Note: cannot move it in this class because of multithreading by nodes.
+                double[] probabilities = daBranchLdCore.getProbRef();
 
-        // ====== 2. recalculate likelihood if either child node wasn't clean ======
-        if (nodeUpdate != Tree.IS_CLEAN) {
-            calculateBranchLd(daBranchLdCore, node, nodeNr, parentNum);
-        }
-
-        return nodeUpdate;
-    }
-
-    public boolean isSeqUpdate(int nodeNr, int parentNum) {
-        return nodesStates.isNodeStatesDirty(nodeNr) || nodesStates.isNodeStatesDirty(parentNum);
-    }
-
-    public void setTransProbMatrix(DABranchLikelihoodCore daBranchLdCore, Node node, Node parent, int nodeNr, double branchRate, double branchTime) {
-        this.branchLengths[nodeNr] = branchTime;
-        daBranchLdCore.setNodeMatrixForUpdate(); // TODO review the index
-        // rate category
-        for (int i = 0; i < siteModel.getCategoryCount(); i++) {
-            final double jointBranchRate = siteModel.getRateForCategory(i, node) * branchRate;
-            // pass the reference of array for caching probability,
-            // Note: cannot move it in this class because of multithreading by nodes.
-            double[] probabilities = daBranchLdCore.getProbRef();
-
-            double[] iexp = daBranchLdCore.getIexpRef();
-            // this new code is faster
-            substitutionModel.getTransiProbs(parent.getHeight(), node.getHeight(),
-                    jointBranchRate, iexp, probabilities);
-            //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
+                double[] iexp = daBranchLdCore.getIexpRef();
+                // this new code is faster
+                substitutionModel.getTransiProbs(parent.getHeight(), node.getHeight(),
+                        jointBranchRate, iexp, probabilities);
+                //System.out.println(node.getNr() + " " + Arrays.toString(probabilities));
 
 //                for (int j=0; j < probabilities.length; j++)
 //                    //TODO P(t) cannot be 0, but short branch causes numeric precision error.
@@ -455,27 +436,35 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //                                ", branch Nr = " + nodeNr + ", branchTime = " + branchTime);
 //                    }
 
-            daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy
+                daBranchLdCore.setNodeMatrix(i, probabilities); //cannot rm arraycopy
+            }
+            nodeUpdate |= Tree.IS_DIRTY;
         }
+// TODO only some sites are changed
+//       else if (seqUpdate) { }
+
+        // ====== 2. recalculate likelihood if either child node wasn't clean ======
+        if (nodeUpdate != Tree.IS_CLEAN) {
+            // code in SiteModel, node is not used
+            final double[] proportions = siteModel.getCategoryProportions(node);
+            final int[] nodeStates = nodesStates.getStates(nodeNr);
+            final int[] parentNodeStates = nodesStates.getStates(parentNum);
+
+            // brLD is linked to the child node index down
+            daBranchLdCore.setBranchLdForUpdate();
+            // populate branchLd[][excl. root], nodeIndex is child
+            daBranchLdCore.calculateBranchLd(parentNodeStates, nodeStates, proportions);
+        }
+
+        return nodeUpdate;
     }
 
-    public void calculateBranchLd(DABranchLikelihoodCore daBranchLdCore, Node node, int nodeNr, int parentNum) {
-        // code in SiteModel, node is not used
-        final double[] proportions = siteModel.getCategoryProportions(node);
-        final int[] nodeStates = nodesStates.getStates(nodeNr);
-        final int[] parentNodeStates = nodesStates.getStates(parentNum);
 
-        // brLD is linked to the child node index down
-        daBranchLdCore.setBranchLdForUpdate();
-        // populate branchLd[][excl. root], nodeIndex is child
-        daBranchLdCore.calculateBranchLd(parentNodeStates, nodeStates, proportions);
-    }
-
+    //****** multi-threading ******//
 
     public ThreadHelper getThreadHelper() {
         return threadHelper;
     }
-
 
     // ArithmeticException if branch time < 1e-10
     class DABranchLikelihoodCallable implements Callable<Double> {
