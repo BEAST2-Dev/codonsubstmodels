@@ -94,7 +94,7 @@ public class DALikelihoodBenchmarking1 extends BenchmarkingSetup {
 
         DALikelihoodBenchmarking1 likelihoodBenchmarking = null;
 
-        int threads = 4;
+        int threads = 1;
         try {
             if (args.length > 2)
                 likelihoodBenchmarking = new DALikelihoodBenchmarking1(args[2], iteration,

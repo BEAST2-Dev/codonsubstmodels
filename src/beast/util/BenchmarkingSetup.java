@@ -26,9 +26,9 @@ public abstract class BenchmarkingSetup {
     final int MAX_CODONS;
     final Alignment origAlig;
 
-    final boolean[] symmetric = new boolean[]{true,true,false,true,false,true,true,true,true,true,true,true};//
-    final int[] nTaxa = new int[]{2,4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024};//
-    final int[] nCodons = new int[]{100,200,500,1000};//
+    final boolean[] symmetric = new boolean[]{true};//,true,false,true,false,true,true,true,true,true,true,true
+    final int[] nTaxa = new int[]{64};//2,4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024
+    final int[] nCodons = new int[]{500};//100,200,,1000
 
     protected int nThreads = 1;
 

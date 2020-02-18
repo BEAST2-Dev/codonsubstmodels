@@ -98,6 +98,68 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     }
 
+    public void getTransiProbs(double startTime, double endTime, double rate,
+                               double[] iexp, double[] matrix) {//, boolean normalized) {
+        double distance = (startTime - endTime) * rate;
+
+        int i, j, k;
+        double temp;
+        // this must be synchronized to avoid being called simultaneously by
+        // two different likelihood threads - AJD
+        synchronized (this) {
+            if (updateMatrix) {
+                setupRelativeRates();
+//                if (normalized) {
+                    setupRateMatrix();
+//                } else {
+//                    setupRateMatrixUnnormalized();
+//                }
+                eigenDecomposition = eigenSystem.decomposeMatrix(rateMatrix);
+                updateMatrix = false;
+            }
+        }
+
+        // is the following really necessary?
+        // implemented a pool of iexp matrices to support multiple threads
+        // without creating a new matrix each call. - AJD
+        // a quick timing experiment shows no difference - RRB
+//        double[] iexp = new double[nrOfStates * nrOfStates];
+        double[] Evec = eigenDecomposition.getEigenVectors();
+        // inverse Eigen vectors
+        double[] Ievc = eigenDecomposition.getInverseEigenVectors();
+        // Eigen values
+        double[] Eval = eigenDecomposition.getEigenValues();
+
+        int x = 0;
+        for (i = 0; i < nrOfStates; i++) {
+            temp = Math.exp(distance * Eval[i]);
+            for (j = 0; j < nrOfStates; j++) {
+                // iexp[i * nrOfStates + j] = Ievc[i * nrOfStates + j] * temp;
+                iexp[x] = Ievc[x] * temp;  //TODO bug synchronized
+                x++; // save time, plus once
+            }
+        }
+
+        x = 0;
+        int y;
+        int u = 0;
+        for (i = 0; i < nrOfStates; i++) {
+            for (j = 0; j < nrOfStates; j++) {
+                y = j;
+                temp = 0.0;
+                for (k = 0; k < nrOfStates; k++) {
+//                    temp += Evec[i * nrOfStates + k] * iexp[k * nrOfStates + j];
+                    temp += Evec[x + k] * iexp[y];
+                    y += nrOfStates; // y = k + nrOfStates
+                }
+
+                matrix[u] = Math.abs(temp);
+                u++; // u = u + j
+            }
+            x += nrOfStates; // x = i + nrOfStates
+        }
+    }
+
 
     protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
         return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());

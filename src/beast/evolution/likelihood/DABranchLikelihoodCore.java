@@ -39,6 +39,8 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
      */
     protected double[] probabilities;
 
+    protected double[] iexp;
+
     protected boolean useScaling = false;
 
     protected double[][] scalingFactors; //TODO
@@ -92,6 +94,7 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         probabilities = new double[matrixSize];
         Arrays.fill(probabilities, 1.0);
 
+        iexp = new double[nrOfStates * nrOfStates];
     }
 
     /**
@@ -100,6 +103,10 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
      */
     public double[] getProbRef() {
         return this.probabilities;
+    }
+
+    public double[] getIexpRef() {
+        return this.iexp;
     }
 
     /**

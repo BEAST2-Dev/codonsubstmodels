@@ -66,6 +66,7 @@ public class NodeStatesArray extends StateNode {
     Codon codonDataType; // getStateCount
     int siteCount;
     int nodeCount; // == nodesStates.length
+    int tipCount;
 
     // all nodes, use nodeNr to map the index of nodesStates[]
     protected  NodeStates[] nodesStates;
@@ -113,6 +114,8 @@ public class NodeStatesArray extends StateNode {
         // nodeCount defines rows of 2d matrix
         nodeCount = 2 * codonAlignment.getTaxonCount() - 1;
         assert nodeCount > 2;
+        tipCount = (nodeCount + 1) / 2;
+        assert nodeCount == 2 * tipCount - 1;
 
         // siteCount defines cols of 2d matrix
         // siteCount = num of codon = nucleotides / 3, transformation in CodonAlignment
@@ -499,14 +502,15 @@ public class NodeStatesArray extends StateNode {
      * ({@link #getNodeCount()} + 1) / 2
      */
     public int getTipsCount() {
-        return (getNodeCount() + 1) / 2;
+        return tipCount;
+//        return (getNodeCount() + 1) / 2;
     }
 
     /**
      * {@link #getTipsCount()} - 1
      */
     public int getInternalNodeCount() {
-        return getTipsCount() - 1;
+        return tipCount - 1;
     }
 
     public int getUpper() {

@@ -13,6 +13,7 @@ import beast.evolution.sitemodel.SiteModelInterface;
 import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.NodeStatesArray;
 import beast.evolution.tree.TreeInterface;
+import codonmodels.CodonSubstitutionModel;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,7 @@ public class GenericDATreeLikelihood extends Distribution {
 	/**
 	 * Substitution model, which is from {@link SiteModel}.
 	 */
-	protected SubstitutionModel substitutionModel;
+	protected CodonSubstitutionModel substitutionModel;
 	/**
 	 * molecular clock model, default to {@link StrictClockModel}
 	 */
@@ -74,7 +75,7 @@ public class GenericDATreeLikelihood extends Distribution {
 		siteModel = (SiteModel.Base) siteModelInput.get();
 		// set data type from NodesStates
 		siteModel.setDataType(nodesStates.getCodonDataType());
-		substitutionModel = siteModel.getSubstitutionModel();
+		substitutionModel = (CodonSubstitutionModel) siteModel.getSubstitutionModel();
 
 		if (branchRateModelInput.get() != null) {
 			branchRateModel = branchRateModelInput.get();
