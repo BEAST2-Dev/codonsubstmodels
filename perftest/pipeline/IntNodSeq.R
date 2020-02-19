@@ -222,7 +222,7 @@ p <- ggplot(codon.prob, aes(site, prob, fill = order)) +
   ggtitle(paste("Internal Node", nod.idx)) + ylab("Probability") +
   #theme_minimal() + 
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
-ggsave(paste0("t",n.taxa,tree.prior,"-node",nod.idx,"-prob.pdf"), p, width = 7, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-node",nod.idx,"-prob.pdf"), p, width = 6, height = 5)
 
 ### one site
 site.idx = 1
