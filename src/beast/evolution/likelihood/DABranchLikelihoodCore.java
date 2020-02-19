@@ -250,12 +250,11 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         final double[] matrices = getCurrentMatrix();
 
         //branchLd is defined as the branch above the child node 1
-        double branchLdSite = matrices[i * nrOfStates + j] * proportions[0];
-
+        int w = i * nrOfStates + j;
+        double branchLdSite = matrices[w] * proportions[0]; // i * nrOfStates + j
         for (int l = 1; l < nrOfCategories; l++) {
-            int w = l * matrixSize;
-            //n = w + i * state + j
-            branchLdSite += matrices[w + i * nrOfStates + j] * proportions[l];
+            w += matrixSize; // l * matrixSize + i * nrOfStates + j;
+            branchLdSite += matrices[w] * proportions[l];
         } // end l nrOfCategories
         return branchLdSite;
     }
