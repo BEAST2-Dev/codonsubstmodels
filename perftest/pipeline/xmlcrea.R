@@ -1,3 +1,4 @@
+# pipeline step 2
 # create XML, run simtree before this
 
 WD="~/WorkSpace/codonsubstmodels/perftest/pipeline"
@@ -5,6 +6,13 @@ source(file.path(WD, "nexparser.R"))
 
 # c(8, 64, 512)
 n.taxa = 32
+if (n.taxa == 32) {
+  chain.len.da =  "40000000" 
+  chain.len.std = "12000000" 
+} else {
+  chain.len.da =  "60000000" # 128T 60000000 
+  chain.len.std = "15000000" # 128T 15000000 
+}
 DIR=paste0("T",n.taxa)
 # working dir
 WD="~/WorkSpace/codonsubstmodels/perftest/"
@@ -59,7 +67,9 @@ node<-nodes[xml_has_attr(nodes, "newick")]
 xml_attr(node, "newick") <- TREE
 
 # 4. replace MCMC config
-# TODO
+nodes<-xml_find_all(template, ".//run")
+node<-nodes[xml_has_attr(nodes, "chainLength")]
+xml_attr(node, "chainLength") <- chain.len.da
 
 # 5. replace thread
 THREAD = 4
@@ -98,7 +108,9 @@ node<-nodes[xml_has_attr(nodes, "newick")]
 xml_attr(node, "newick") <- TREE
 
 # 4. replace MCMC config
-# TODO
+nodes<-xml_find_all(template, ".//run")
+node<-nodes[xml_has_attr(nodes, "chainLength")]
+xml_attr(node, "chainLength") <- chain.len.std
 
 # finish XML
 write_xml(template, file = paste0("t", n.taxa, tree.prior,"STD.xml"))

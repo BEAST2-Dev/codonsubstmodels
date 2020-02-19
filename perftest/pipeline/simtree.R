@@ -1,3 +1,4 @@
+# pipeline step 1
 # simulate tree
 
 library(ape)
@@ -16,6 +17,9 @@ setwd(file.path(WD, DIR))
 
 # coal or yulelam10
 tree.prior = "yulelam10"
+if (!dir.exists(tree.prior)) {
+  dir.create(tree.prior)
+}
 
 if (tree.prior == "coal") {
   # simulate coalescent tree
