@@ -44,7 +44,7 @@ edges.map <- mapEdges(stats.list$edges, nod.states$edges)
 internal.nodes <- suppressWarnings(as.integer(names(stats.list)))
 internal.nodes <- internal.nodes[!is.na(internal.nodes)]
 
-# 1. sanity check how true codon falls into x% credible set
+### 1. sanity check how true codon falls into x% credible set
 cred.check <- tibble(node=internal.nodes) 
 for (cred.thre in c(0.05, 0.25, 0.50, 0.75, 0.95)) {
   in.cred = c()
@@ -195,18 +195,34 @@ codon.freq <- stats.list[[as.character(nod.idx)]]
 #  <chr> <int> <int> <int>
 #1 57       37     1 1    
 #2 59       19     1 2    
+unique(codon.freq$order)
 
-# top 5 freq
-codon.freq <- codon.freq %>% filter(order < 6) %>% mutate(order = as.character(order)) 
+# merge less freq codons
+topn = 5
+codon.freq.small <- codon.freq %>% group_by(site) %>% filter(order > topn) %>% 
+  summarise(freq=sum(freq), prob=sum(prob), order = "rest") 
+# add top 5 freq codons
+codon.freq <- codon.freq %>% filter(order < topn+1) %>% select(site,freq,prob,order) %>% 
+  mutate(order = as.character(order)) %>% bind_rows(codon.freq.small) 
 
-p <- ggplot(codon.freq, aes(site, freq, fill = order)) + 
-  geom_bar(stat="identity") + 
+temp <- codon.freq %>% group_by(site) %>% mutate(cred = cumsum(prob)) 
+stopifnot(all(temp[["cred"]] <= 1))
+
+# sort site by MAP prob
+codon.prob <- codon.freq %>% mutate(site = as.character(site)) %>% group_by(site) %>% 
+  mutate(map.prob = max(prob)) %>% arrange(desc(map.prob), site) 
+
+codon.prob[["site"]] <- factor(codon.prob[["site"]], levels = unique(codon.prob[["site"]]))
+
+# codon prob distribution 
+p <- ggplot(codon.prob, aes(site, prob, fill = order)) + 
+  geom_bar(position="stack", stat="identity") + 
   scale_fill_manual(values = c(alpha(c("lightblue"), .2), 
                                alpha(c("red","blue","yellow","purple","orange","brown","green"), .8))) +
-  #  scale_y_log10() +
-  ggtitle(paste("Internal Node", nod.idx)) + ylab("codon frequency") +
-  theme_minimal()
-ggsave(paste0("node",nod.idx,"-freq.pdf"), p, width = 10, height = 5)
+  ggtitle(paste("Internal Node", nod.idx)) + ylab("Probability") +
+  #theme_minimal() + 
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+ggsave(paste0("t",n.taxa,tree.prior,"-node",nod.idx,"-prob.pdf"), p, width = 7, height = 5)
 
 ### one site
 site.idx = 1
@@ -220,5 +236,5 @@ p <- ggplot(freq.site, aes(site, freq, fill = state)) +
   ggtitle(paste("Internal Node", nod.idx, "Site", site.idx)) + ylab("codon frequency") +
   theme_minimal() +
   theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
-ggsave(paste0("node",nod.idx,"-site",site.idx,"-freq.pdf"), p, width = 5, height = 5)
+ggsave(paste0("t",n.taxa,tree.prior,"-node",nod.idx,"-site",site.idx,"-freq.pdf"), p, width = 5, height = 5)
 
