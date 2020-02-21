@@ -15,8 +15,10 @@ if (!dir.exists(DIR)) {
 # working dir
 setwd(file.path(WD, DIR))
 
+lambda=10
 # coal or yulelam10
-tree.prior = "yulelam10"
+tree.prior = paste0("yulelam",lambda)
+
 if (!dir.exists(tree.prior)) {
   dir.create(tree.prior)
 }
@@ -37,7 +39,7 @@ if (tree.prior == "coal") {
 } else {
   require(TreeSim)
   # lambda 10
-  tre <- sim.bd.taxa(n=n.taxa, numbsim=1, lambda=10, mu=0)[[1]]
+  tre <- sim.bd.taxa(n=n.taxa, numbsim=1, lambda=lambda, mu=0)[[1]]
 
 }
 
@@ -57,6 +59,20 @@ write.tree(tre, file=paste0("t",n.taxa,tree.prior,".txt"))
 
 # replace TAXA and tree in the template
 tree.txt <- readLines(paste0("t",n.taxa,tree.prior,".txt"))
+
+### this is for testing longer branches
+# tree.txt <- paste0("t",n.taxa,"yulelam10.txt")
+# tre <- read.tree(text = tree.txt)
+# scale = 20
+# tre$edge.length<- tre$edge.length * scale
+# plot(tre)
+# edgelabels(round(tre$edge.length,4), col="black", font=2)
+# tree.txt <- write.tree(tre, file="")
+# tree.prior = paste0("yuleBrLen", scale)
+# if (!dir.exists(tree.prior)) {
+#   dir.create(tree.prior)
+# }
+### make sure tree.prior changed (define working dir) 
 
 # read evolver config
 template <- readLines(file.path(WD, "CodonTemplate.dat"))

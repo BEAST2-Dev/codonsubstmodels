@@ -193,7 +193,8 @@ getBrLenESSHour <- function(tre.log="m0.trees", screen.log="out.txt", burnin=0.1
   time <- gsub("^.*time: (.*) seconds.*", "\\1", time)
   time <- as.numeric(time) / 3600 # ESS/hour
   
-  list(ess.per.hour.branch.lens = ess / time, ess.per.hour.tot.lens = ess.ttl / time)
+  list(ess.per.hour.branch.lens = ess / time, ess.per.hour.tot.lens = ess.ttl / time, 
+       ess = ess, ess.ttl = ess.ttl, time = time)
 }
 
 

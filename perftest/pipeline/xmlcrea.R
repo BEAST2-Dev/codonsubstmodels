@@ -9,8 +9,11 @@ n.taxa = 32
 if (n.taxa == 32) {
   chain.len.da =  "40000000" 
   chain.len.std = "12000000" 
+} else if (n.taxa == 64) {
+  chain.len.da =  "80000000" 
+  chain.len.std = "14000000" 
 } else {
-  chain.len.da =  "60000000" # 128T 60000000 
+  chain.len.da =  "120000000" # 128T 120000000 
   chain.len.std = "15000000" # 128T 15000000 
 }
 DIR=paste0("T",n.taxa)
@@ -33,6 +36,7 @@ if (tree.prior == "coal") {
 
 # load sequences to a 2-column tibble
 setwd(file.path(WD, DIR, tree.prior))
+cat("Load mc.nex from ", getwd(), "\n")
 nex <- readNex("mc.nex", "t\\d+")
 # create <data> and save to xml
 DATA <- toXMLData(nex, "data.xml", id="alignment")
@@ -50,7 +54,7 @@ node<-nodes[xml_has_attr(nodes, "pi")]
 xml_attr(node, "pi") <- PI
 
 # 3. replace tree
-tre.txt <- paste0("t",n.taxa,tree.prior,".txt")
+tre.txt <- paste0("t",n.taxa,tree.prior,".txt") # t32yulelam10.txt
 TREE <- readLines(tre.txt)
 require(ape)
 start.tree <- read.tree(text = TREE)

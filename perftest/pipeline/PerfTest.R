@@ -12,18 +12,24 @@ tree.prior = "yulelam10"
 
 burnin=0.1
 ### standard tree likelihood
+dir <- paste0("t",n.taxa,tree.prior,"STD")
 # read MCMC trees m0.std.trees
-tre.log <- file.path(paste0("t",n.taxa,tree.prior,"STD"),"m0.std.trees")
+tre.log <- file.path(dir,"m0.std.trees")
 # read screen log
-screen.log <- file.path(paste0("t",n.taxa,tree.prior,"STD"), paste0("t",n.taxa,tree.prior,"STD.xml_out.txt"))
+screen.log <- file.path(dir, paste0("t",n.taxa,tree.prior,"STD.xml_out.txt"))
 # ESS per hour for all branches
 ess.std <- getBrLenESSHour(tre.log, screen.log, burnin)
+min.ess <- min(ess.std[["ess"]])
+stopifnot(min.ess > 200)
 ess.hour.std <- ess.std[["ess.per.hour.branch.lens"]]
 ess.hour.totlen.std <- ess.std[["ess.per.hour.tot.lens"]]
 
-tre.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"), "m0.da.trees")
-screen.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"), paste0("t",n.taxa,tree.prior,"DA.xml_out.txt"))
+dir <- paste0("t",n.taxa,tree.prior,"DA")
+tre.log <- file.path(dir, "m0.da.trees")
+screen.log <- file.path(dir, paste0("t",n.taxa,tree.prior,"DA.xml_out.txt"))
 ess.da <- getBrLenESSHour(tre.log, screen.log, burnin)
+min.ess <- min(ess.da[["ess"]])
+stopifnot(min.ess > 200)
 ess.hour.da <- ess.da[["ess.per.hour.branch.lens"]]
 ess.hour.totlen.da <- ess.da[["ess.per.hour.tot.lens"]]
 

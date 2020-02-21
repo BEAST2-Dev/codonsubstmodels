@@ -210,7 +210,7 @@ stopifnot(all(temp[["cred"]] <= 1))
 
 # sort site by MAP prob
 codon.prob <- codon.freq %>% mutate(site = as.character(site)) %>% group_by(site) %>% 
-  mutate(map.prob = max(prob)) %>% arrange(desc(map.prob), site) 
+  arrange(desc(prob), site) 
 
 codon.prob[["site"]] <- factor(codon.prob[["site"]], levels = unique(codon.prob[["site"]]))
 
@@ -218,7 +218,7 @@ codon.prob[["site"]] <- factor(codon.prob[["site"]], levels = unique(codon.prob[
 p <- ggplot(codon.prob, aes(site, prob, fill = order)) + 
   geom_bar(position="stack", stat="identity") + 
   scale_fill_manual(values = c(alpha(c("lightblue"), .2), 
-                               alpha(c("red","blue","yellow","purple","orange","brown","green"), .8))) +
+                               alpha(c("red","blue","yellow","purple","orange","brown","green"), .9))) +
   ggtitle(paste("Internal Node", nod.idx)) + ylab("Probability") +
   #theme_minimal() + 
   theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())

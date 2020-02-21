@@ -305,7 +305,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
             } // end n loop
             // root special
             this.branchLogLikelihoods[rootIndex] =
-                    daRootLdCores.calculateRootLogLikelihood(rootIndex, rootStates, frequencies);
+                    daRootLdCores.calculateRootLogLikelihood(rootStates, frequencies);
 
         } else {
             try {
@@ -497,7 +497,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                     final double[] freqs = substitutionModel.getFrequencies();
                     NodeStates rootStates = nodesStates.getNodeStates(rootIndex);
 
-                    branchLogLikelihoods[rootIndex] = core.calculateRootLogLikelihood(rootIndex, rootStates, freqs);
+                    branchLogLikelihoods[rootIndex] = core.calculateRootLogLikelihood(rootStates, freqs);
                     logP += branchLogLikelihoods[rootIndex];
                 } else {
                     // caching branchLogLikelihoods[nodeNr]
