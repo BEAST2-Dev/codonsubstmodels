@@ -15,9 +15,10 @@ if (!dir.exists(DIR)) {
 # working dir
 setwd(file.path(WD, DIR))
 
-lambda=10
+# omega values <1, =1, and >1 indicating purifying selection, neutral evolution, and diversifying selection
+omega=10
 # coal or yulelam10
-tree.prior = paste0("yulelam",lambda)
+tree.prior = paste0("yuleOmega",omega)
 
 if (!dir.exists(tree.prior)) {
   dir.create(tree.prior)
@@ -39,7 +40,7 @@ if (tree.prior == "coal") {
 } else {
   require(TreeSim)
   # lambda 10
-  tre <- sim.bd.taxa(n=n.taxa, numbsim=1, lambda=lambda, mu=0)[[1]]
+  tre <- sim.bd.taxa(n=n.taxa, numbsim=1, lambda=10, mu=0)[[1]]
 
 }
 
@@ -82,6 +83,7 @@ setwd(file.path(WD, DIR, tree.prior))
 
 evolver <- gsub(pattern = "TAXA", replace = toString(n.taxa), x = template)
 evolver <- gsub(pattern = "TREE", replace = tree.txt, x = evolver)
+# evolver <- gsub(pattern = "(0\\.08)(.*omega)", replace = paste0(omega,"\\2"), x = evolver)
 writeLines(evolver, con=paste0("t",n.taxa,".evolver.dat"))
 
 # /Applications/paml4.8/bin/evolver 6 t8.evolver.dat > t8.out.txt

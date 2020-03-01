@@ -18,7 +18,8 @@ tree.prior = "yulelam10"
 
 ### BEAST
 # T32/4t32/m0.da.ins.txt
-ins.log <- file.path(paste0("t",n.taxa,tree.prior,"DA"),"m0.da.ins.txt")
+dir <- paste0("t",n.taxa,tree.prior,"DA")
+ins.log <- file.path(dir,"m0.da.ins.txt")
 
 stats.list <- getIntNodeSeqStats(ins.log, burnin=0.1)
 names(stats.list)
