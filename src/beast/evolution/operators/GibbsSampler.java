@@ -85,10 +85,10 @@ public class GibbsSampler extends Operator {
         this.daTreeLd = daTreeLdInput.get();
         validate();
 
-//        this.threadHelper = daTreeLd.getThreadHelper();
-//        if (threadHelper == null) {
-//            threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
-//        }
+        this.threadHelper = daTreeLd.getThreadHelper();
+        if (threadHelper == null) {
+            threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
+        }
 
         if ("TowardsRoot".equalsIgnoreCase(selectionInput.get())) {
             Log.info.println("Gibbs Sampling states at all " + tree.getInternalNodeCount() + " internal nodes.");
@@ -248,11 +248,12 @@ public class GibbsSampler extends Operator {
      * @param node     {@link Node}
      * @param siteNr   the site (codon) index
      * @param daTreeLd the cache to get P(t) in each branch {@link DABranchLikelihoodCore}.
-     * @param pr_w     probability distribution of states, to avoid using <code>new double[]</code>.
+     * @param cpd_w    cumulative probability distribution of states at w,
+     *                 to avoid using <code>new double[]</code>.
      * @return         the proposed state at the node, or -1 if node is null
      */
     protected int gibbsSampling(NodeStatesArray nodesStates, final Node node, final int siteNr,
-                                final DataAugTreeLikelihood daTreeLd, double[] pr_w) {
+                                final DataAugTreeLikelihood daTreeLd, double[] cpd_w) {
         final int nodeNr = node.getNr();
         final int ch1Nr = node.getChild(0).getNr();
         final int ch2Nr = node.getChild(1).getNr();
@@ -263,21 +264,22 @@ public class GibbsSampler extends Operator {
         final double[] proportions = daTreeLd.getSiteModel().getCategoryProportions(node);
         final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
 
-        double pzw,pwx,pwy,sum = 0;
+        double pzw,pwx,pwy,pr_w = 0;
         // w-x branch
         final DABranchLikelihoodCore wxBranchLd = daTreeLd.getDaBranchLdCores(ch1Nr);
         // w-y branch
         final DABranchLikelihoodCore wyBranchLd = daTreeLd.getDaBranchLdCores(ch2Nr);
 
+        cpd_w[0]=0;
         if (node.isRoot()) {
             // no z
-            for (int w=0; w < pr_w.length; w++) {
+            for (int w=0; w < cpd_w.length; w++) {
                 // n = w + i * state + j
                 pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
                 pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
-                pr_w[w] = frequencies[w] * pwx * pwy;
-                sum += pr_w[w];
+                pr_w = frequencies[w] * pwx * pwy;
+                cpd_w[w] += pr_w;
             } // end w loop
 
         } else {
@@ -287,23 +289,21 @@ public class GibbsSampler extends Operator {
             final int parentNr = node.getParent().getNr();
             final int z = nodesStates.getState(parentNr, siteNr);
 
-            for (int w=0; w < pr_w.length; w++) {
+            for (int w=0; w < cpd_w.length; w++) {
                 pzw = zwBranchLd.calculateBranchLdAtSite(z, w, proportions);
                 pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
                 pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
-                pr_w[w] = pzw * pwx * pwy;
-                sum += pr_w[w];
+                pr_w = pzw * pwx * pwy;
+                cpd_w[w] += pr_w;
             } // end w loop
 
         } // end if
-
-        // Renormalise all w
-        for (int w=0; w < pr_w.length; w++)
-            pr_w[w] = pr_w[w] / sum;
-
         // choose final state w from the distribution
-        int w = RandomUtils.randomIntegerFrom(pr_w, false);
+        double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
+
+        int w = RandomUtils.binarySearch(cpd_w, random);
+
         return w;
     }
 

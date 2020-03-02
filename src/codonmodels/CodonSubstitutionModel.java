@@ -176,7 +176,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         }
     }
 
-
     protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
         return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());
     }

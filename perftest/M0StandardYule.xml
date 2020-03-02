@@ -57,7 +57,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-    <run spec="MCMC" id="mcmc" chainLength="20000000"> <!--autoOptimize="true"-->
+    <run spec="MCMC" id="mcmc" chainLength="12000000"> <!--autoOptimize="true"-->
         <state id="state" storeEvery="1000000">
 <!--            <input name='stateNode' idref='m0.omega'/>-->
 <!--            <input name='stateNode' idref='m0.kappa'/>-->
