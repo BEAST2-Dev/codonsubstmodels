@@ -32,9 +32,11 @@ public class RandomUtils {
     /**
      * Binary search to sample an integer given an unnormalized cumulative probabilities.
      * Modified from {@link java.util.Arrays#binarySearch(double[], double)}.
-     * @param cpd       unnormalized cumulative probabilities
+     * @param cpd       unnormalized or normalized cumulative probabilities,
+     *                  which have not to be a probability distribution.
+     *                  If not a distribution (sum > 1), then <code>random = [0, sum)</code>.
      * @param random    the random double between [0, sum), where sum is <code>cpd[cpd.length-1]</code>.
-     *                  <code>double random = Randomizer.nextDouble() * cpd[cpd.length-1];</code>
+     *                  <code>double random = Randomizer.nextDouble() * cpd[cpd.length-1];</code>.
      * @return          a sample (index of <code>cpd[]</code>) according to
      *                  an unnormalized cumulative probabilities.
      */
