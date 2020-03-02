@@ -146,7 +146,7 @@ public class GibbsSampler extends Operator {
     public void gibbsRandomNNodes(final int n, final Tree tree, final Operator operator) {
         int threads = threadHelper.getThreadCount();
         // if n > 1, then n nodes once
-        if (threads > 1 && n > 1) {
+        if (threads > 1 && n > 1) { // TODO change to by sites
             callers.clear();
             // TODO bug, cannot sample parent and child at the same time, if multithreading
             RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n, integerSet);
@@ -207,18 +207,6 @@ public class GibbsSampler extends Operator {
         else // State makes a copy and register this operator
             nodesStates = nodesStatesInput.get(operator);
 
-        int[] states = gibbsSampling(node, nodesStates);
-        final int nodeNr = node.getNr();
-        nodesStates.setStates(nodeNr, states);
-    }
-
-    /**
-     * Sampling all sites for given node, and set new states.
-     * Change states to new states by {@link NodeStatesArray#setStates(int, int[])}.
-     * @param node          {@link Node}
-     * @param nodesStates   {@link NodeStatesArray}
-     */
-    public int[] gibbsSampling(final Node node, final NodeStatesArray nodesStates){
         int[] newStates = new int[nodesStates.getSiteCount()];
         final int stateCount = nodesStates.getStateCount();
         double[] pr_w = new double[stateCount];
@@ -238,7 +226,8 @@ public class GibbsSampler extends Operator {
 //            }
         }
 //        System.out.println("Node " + nodeNr + " changed " + changes + " sites.");
-        return newStates;
+
+        nodesStates.setStates(nodeNr, newStates);
     }
 
     /**
@@ -312,7 +301,7 @@ public class GibbsSampler extends Operator {
         return w;
     }
 
-    // multi-threading
+    // multi-threading // TODO change to by sites
     @Deprecated
     class GibbsSamplingNode implements Callable<NodeStates> {
         private final int nodeNr;
