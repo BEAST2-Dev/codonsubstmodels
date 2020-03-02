@@ -38,7 +38,7 @@ public class RandomUtils {
      * @return          a sample (index of <code>cpd[]</code>) according to
      *                  an unnormalized cumulative probabilities.
      */
-    public static int binarySearch(double[] cpd, double random) {
+    public static int binarySearchSampling(double[] cpd, double random) {
         int low = 0;
         int high = cpd.length - 1;
 
@@ -64,7 +64,7 @@ public class RandomUtils {
     }
 
     /**
-     * Replaced by {@link #binarySearch(double[], double)}.
+     * Replaced by {@link #binarySearchSampling(double[], double)}.
      * Generating a random integer with non-uniform distribution,
      * https://stackoverflow.com/questions/42456115/generating-a-random-integer-with-non-uniform-distribution.
      * Use {@link Randomizer#setSeed(long)} to set seed.
@@ -73,7 +73,7 @@ public class RandomUtils {
      * @return          an integer between 0 and the length of probs[] minus 1.
      */
     @Deprecated
-    public static int randomIntegerFrom(double[] probs, double sum, boolean validate) {
+    public static int linearTimeSampling(double[] probs, double sum, boolean validate) {
         if (sum > 0) {
             // Renormalise all w
             for (int w=0; w < probs.length; w++)

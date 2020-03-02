@@ -264,13 +264,12 @@ public class GibbsSampler extends Operator {
         final double[] proportions = daTreeLd.getSiteModel().getCategoryProportions(node);
         final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
 
-        double pzw,pwx,pwy,pr_w = 0;
         // w-x branch
         final DABranchLikelihoodCore wxBranchLd = daTreeLd.getDaBranchLdCores(ch1Nr);
         // w-y branch
         final DABranchLikelihoodCore wyBranchLd = daTreeLd.getDaBranchLdCores(ch2Nr);
 
-        cpd_w[0]=0;
+        double pzw,pwx,pwy,pr_w = 0;
         if (node.isRoot()) {
             // no z
             for (int w=0; w < cpd_w.length; w++) {
@@ -279,7 +278,10 @@ public class GibbsSampler extends Operator {
                 pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
                 pr_w = frequencies[w] * pwx * pwy;
-                cpd_w[w] += pr_w;
+                if (w==0)
+                    cpd_w[0] = pr_w;
+                else
+                    cpd_w[w] = cpd_w[w-1] + pr_w;
             } // end w loop
 
         } else {
@@ -295,14 +297,17 @@ public class GibbsSampler extends Operator {
                 pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
                 // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
                 pr_w = pzw * pwx * pwy;
-                cpd_w[w] += pr_w;
+                if (w==0)
+                    cpd_w[0] = pr_w;
+                else
+                    cpd_w[w] = cpd_w[w-1] + pr_w;
             } // end w loop
 
         } // end if
         // choose final state w from the distribution
         double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
 
-        int w = RandomUtils.binarySearch(cpd_w, random);
+        int w = RandomUtils.binarySearchSampling(cpd_w, random);
 
         return w;
     }
