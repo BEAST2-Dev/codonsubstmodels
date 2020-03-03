@@ -122,7 +122,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
         <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
-                  DATreeLikelihood="@daTreeLikelihood" weight="15.0" select="RandomN" randomN="1"/>
+                  DATreeLikelihood="@daTreeLikelihood" weight="15.0" select="RandomN"/>
 
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@tree" weight="3.0"/>
 

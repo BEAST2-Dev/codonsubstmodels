@@ -3,7 +3,6 @@ package beast.evolution.operators;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Operator;
-import beast.core.util.Log;
 import beast.evolution.likelihood.DABranchLikelihoodCore;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
 import beast.evolution.tree.Node;
@@ -15,9 +14,7 @@ import beast.util.Randomizer;
 import beast.util.ThreadHelper;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -48,9 +45,6 @@ public class GibbsSampler extends Operator {
             "The method how to select nodes during Gibbs sampling, " +
             "including RandomN, TowardsRoot, AwayRoot", "RandomN");
 
-    final public Input<Integer> randomNInput = new Input<>("randomN",
-            "the number for RandomN", 0);
-
     final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads",
             "maximum number of threads to use, if less than 1 the number of threads " +
                     "in BeastMCMC is used (default -1)", -1);
@@ -66,8 +60,9 @@ public class GibbsSampler extends Operator {
     private ThreadHelper threadHelper;
     private final List<Callable<NodeStates>> callers = new ArrayList<>();
 
-    private int randomN = 0;
-    private Set<Integer> integerSet = new HashSet<>();
+    private int minIndex;
+    private int maxIndex;
+
 
     private void validate() {
         nodesStates.validateTree(tree); // TODO rm for faster speed
@@ -90,23 +85,25 @@ public class GibbsSampler extends Operator {
             threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
         }
 
-        if ("TowardsRoot".equalsIgnoreCase(selectionInput.get())) {
-            Log.info.println("Gibbs Sampling states at all " + tree.getInternalNodeCount() + " internal nodes.");
-
-        } else if ("AwayRoot".equalsIgnoreCase(selectionInput.get())) {
-            Log.info.println("Gibbs Sampling states at all " + tree.getInternalNodeCount() + " internal nodes.");
-
-        } else if ("RandomN".equalsIgnoreCase(selectionInput.get())) {
-            randomN = randomNInput.get();
+//        if ("TowardsRoot".equalsIgnoreCase(selectionInput.get())) {
+//            Log.info.println("Gibbs Sampling states at all " + tree.getInternalNodeCount() + " internal nodes.");
+//
+//        } else if ("AwayRoot".equalsIgnoreCase(selectionInput.get())) {
+//            Log.info.println("Gibbs Sampling states at all " + tree.getInternalNodeCount() + " internal nodes.");
+//
+//        } else
+        if ("RandomN".equalsIgnoreCase(selectionInput.get())) {
+//            randomN = randomNInput.get();
 //            int threads = threadHelper.getThreadCount();
 //            if (randomN < threads) randomN = threads;
             // avoid to access the same internal node
-            assert randomN < tree.getInternalNodeCount();
-            if (randomN > 0)
-                Log.info.println("Gibbs Sampling states at random " + randomN + " internal node(s).");
+//            assert randomN < tree.getInternalNodeCount();
+//            if (randomN > 0)
+//                Log.info.println("Gibbs Sampling states at random " + randomN + " internal node(s).");
 
         } else {
-            throw new IllegalArgumentException("No such method ! " + selectionInput.get());
+            throw new UnsupportedOperationException("Only RandomN method is available at the moment ! ");
+//            throw new IllegalArgumentException("No such method ! " + selectionInput.get());
         }
 
     }
@@ -135,37 +132,27 @@ public class GibbsSampler extends Operator {
             gibbsSamplingAwayRoot(tree.getRoot(), this);// (node, this)
 
         } else { // "Random"
-            gibbsRandomNNodes(randomN, tree, this);
+            gibbsRandomNode(tree, this);
         }
 
         // always be accepted, change to 0.0 for debug store/restore
         return Double.POSITIVE_INFINITY;//0.0;//
     }
 
-    // One node each thread, if threads*2 < tree.getInternalNodeCount()
-    public void gibbsRandomNNodes(final int n, final Tree tree, final Operator operator) {
+    //
+    public void gibbsRandomNode(final Tree tree, final Operator operator) {
         int threads = threadHelper.getThreadCount();
-        // if n > 1, then n nodes once
-        if (threads > 1 && n > 1) { // TODO change to by sites
+        // TODO multithreading by sites
+        if (false && threads > 1) {
             callers.clear();
-            // TODO bug, cannot sample parent and child at the same time, if multithreading
-            RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n, integerSet);
-            for (Integer i : integerSet) {
-                callers.add(new GibbsSamplingNode(i, this));
-            }
+//            for (Integer i : ) {
+//                callers.add(new GibbsSamplingNode(i, this));
+//            }
 
             try {
                 threadHelper.invokeAll(callers);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-        } else if (n > 1) { // 1 thread
-            // internal node Nr = [tipsCount, NodeCount-1]
-            RandomUtils.getRandomInt(tree.getLeafNodeCount(), tree.getNodeCount(), n, integerSet);
-            // if sample nodes one by one, then do not need to worry
-            for (Integer i : integerSet) {
-                final Node node = tree.getNode(i);
-                gibbsSampling(node, operator);
             }
         } else { // 1 thread 1 node
             // nextInt between 0 and n-1
@@ -195,10 +182,11 @@ public class GibbsSampler extends Operator {
     }
 
     /**
-     * Sampling all sites for given node, and set new states.
+     * Gibbs sampling all sites for a given node, and set new states.
      * @param node     {@link Node}
      * @param operator if null, then direct set states without proposal.
-     * @see #gibbsSampling(NodeStatesArray, Node, int, DataAugTreeLikelihood, double[])
+     * @see #gibbsSampling(int, int, DABranchLikelihoodCore, DABranchLikelihoodCore, double[], double[], double[])
+     * @see #gibbsSampling(int, int, int, DABranchLikelihoodCore, DABranchLikelihoodCore, DABranchLikelihoodCore, double[], double[])
      */
     public void gibbsSampling(final Node node, final Operator operator) {
         final NodeStatesArray nodesStates;
@@ -207,18 +195,49 @@ public class GibbsSampler extends Operator {
         else // State makes a copy and register this operator
             nodesStates = nodesStatesInput.get(operator);
 
-        int[] newStates = new int[nodesStates.getSiteCount()];
-        final int stateCount = nodesStates.getStateCount();
-        double[] pr_w = new double[stateCount];
-        final int nodeNr = node.getNr();
+        // get parameters
+        final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
+        final double[] proportions = daTreeLd.getSiteModel().getCategoryProportions(node);
 
-        // sampling all sites for given node
+        final int nodeNr = node.getNr();
+        final int ch1Nr = node.getChild(0).getNr();
+        final int ch2Nr = node.getChild(1).getNr();
+
+        // w-x branch
+        final DABranchLikelihoodCore wxBranchLd = daTreeLd.getDaBranchLdCores(ch1Nr);
+        // w-y branch
+        final DABranchLikelihoodCore wyBranchLd = daTreeLd.getDaBranchLdCores(ch2Nr);
+
+        final boolean isRoot = node.isRoot();
+        // z-w branch
+        int parentNr = -1;
+        DABranchLikelihoodCore zwBranchLd = null;
+        if (!isRoot) {
+            // z-w branch
+            zwBranchLd = daTreeLd.getDaBranchLdCores(nodeNr);
+            parentNr = node.getParent().getNr();
+        }
+
+        int[] newStates = new int[nodesStates.getSiteCount()];
+        double[] cpd_w = new double[nodesStates.getStateCount()];
+
+        // sampling all sites for a given node
 //        int oldState;
 //        int changes = 0;
-        for (int k = 0; k < newStates.length; k++) {
-//            oldState = nodesStates.getState(nodeNr, k);
-            newStates[k] = gibbsSampling(nodesStates, node, k, daTreeLd, pr_w);
+        for (int k = 0; k < newStates.length; k++) { // the site (codon) index
 
+            // states at child nodes
+            final int x = nodesStates.getState(ch1Nr, k);
+            final int y = nodesStates.getState(ch2Nr, k);
+            if (isRoot) {
+                newStates[k] = gibbsSampling(x, y, wxBranchLd, wyBranchLd, cpd_w, frequencies, proportions);
+            } else {
+                final int z = nodesStates.getState(parentNr, k);
+
+                newStates[k] = gibbsSampling(x, y, z, wxBranchLd, wyBranchLd, zwBranchLd, cpd_w, proportions);
+            }
+
+//            oldState = nodesStates.getState(nodeNr, k);
 //            if (newStates[k] != oldState) {
 //                System.out.println("Node " + nodeNr + " site " + k + " : state changes from " +
 //                        oldState + " to " + newStates[k]);
@@ -227,82 +246,89 @@ public class GibbsSampler extends Operator {
         }
 //        System.out.println("Node " + nodeNr + " changed " + changes + " sites.");
 
-        nodesStates.setStates(nodeNr, newStates);
+        nodesStates.setStates(nodeNr, newStates); // array copy
     }
 
     /**
-     * Gibbs sampling state at a given site and node.
-     * If root, then use equilibrium frequencies.
-     * @param nodesStates   {@link NodeStatesArray}
-     * @param node     {@link Node}
-     * @param siteNr   the site (codon) index
-     * @param daTreeLd the cache to get P(t) in each branch {@link DABranchLikelihoodCore}.
-     * @param cpd_w    cumulative probability distribution of states at w,
-     *                 to avoid using <code>new double[]</code>.
-     * @return         the proposed state at the node, or -1 if node is null
+     * Gibbs sampling state at 1 site and the root.
+     * As no parent, the equilibrium frequencies are used.
+     * @param x            codon state at 1 site in child node x
+     * @param y            codon state at 1 site in child node y
+     * @param wxBranchLd   branch likelihood calculation core at branch w->x
+     * @param wyBranchLd   branch likelihood calculation core at branch w->y
+     * @param cpd_w        cumulative probability distribution of states at w,
+     *                     to avoid using <code>new double[]</code>.
+     * @param frequencies  equilibrium frequencies
+     * @param proportions  the array of proportions of sites in different categories.
+     * @return the proposed state sampled prob from 3 branch likelihoods,
+     *         or negative if something is wrong.
      */
-    protected int gibbsSampling(NodeStatesArray nodesStates, final Node node, final int siteNr,
-                                final DataAugTreeLikelihood daTreeLd, double[] cpd_w) {
-        final int nodeNr = node.getNr();
-        final int ch1Nr = node.getChild(0).getNr();
-        final int ch2Nr = node.getChild(1).getNr();
-        // states at child nodes
-        final int x = nodesStates.getState(ch1Nr, siteNr);
-        final int y = nodesStates.getState(ch2Nr, siteNr);
+    protected int gibbsSampling(final int x, final int y, final DABranchLikelihoodCore wxBranchLd,
+                                final DABranchLikelihoodCore wyBranchLd, double[] cpd_w,
+                                final double[] frequencies, final double[] proportions) {
 
-        final double[] proportions = daTreeLd.getSiteModel().getCategoryProportions(node);
-        final double[] frequencies = daTreeLd.getSubstitutionModel().getFrequencies();
+        double pwx,pwy,pr_w = 0;
+        // no z
+        for (int w=0; w < cpd_w.length; w++) {
+            // n = w + i * state + j
+            pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
+            pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
+            // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
+            pr_w = frequencies[w] * pwx * pwy;
+            // cumulate pr_w
+            cumulatePr(cpd_w, pr_w, w);
+        } // end w loop
 
-        // w-x branch
-        final DABranchLikelihoodCore wxBranchLd = daTreeLd.getDaBranchLdCores(ch1Nr);
-        // w-y branch
-        final DABranchLikelihoodCore wyBranchLd = daTreeLd.getDaBranchLdCores(ch2Nr);
-
-        double pzw,pwx,pwy,pr_w = 0;
-        if (node.isRoot()) {
-            // no z
-            for (int w=0; w < cpd_w.length; w++) {
-                // n = w + i * state + j
-                pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
-                pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
-                // w_i ~ P_{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
-                pr_w = frequencies[w] * pwx * pwy;
-                if (w==0)
-                    cpd_w[0] = pr_w;
-                else
-                    cpd_w[w] = cpd_w[w-1] + pr_w;
-            } // end w loop
-
-        } else {
-            // z-w branch
-            final DABranchLikelihoodCore zwBranchLd = daTreeLd.getDaBranchLdCores(nodeNr);
-
-            final int parentNr = node.getParent().getNr();
-            final int z = nodesStates.getState(parentNr, siteNr);
-
-            for (int w=0; w < cpd_w.length; w++) {
-                pzw = zwBranchLd.calculateBranchLdAtSite(z, w, proportions);
-                pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
-                pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
-                // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
-                pr_w = pzw * pwx * pwy;
-                if (w==0)
-                    cpd_w[0] = pr_w;
-                else
-                    cpd_w[w] = cpd_w[w-1] + pr_w;
-            } // end w loop
-
-        } // end if
         // choose final state w from the distribution
         double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
 
-        int w = RandomUtils.binarySearchSampling(cpd_w, random);
-
-        return w;
+        return RandomUtils.binarySearchSampling(cpd_w, random);
     }
 
-    // multi-threading // TODO change to by sites
-    @Deprecated
+    /**
+     * Gibbs sampling state at 1 site 1 node. The node is not the root.
+     * @param x            codon state at 1 site in child node x
+     * @param y            codon state at 1 site in child node y
+     * @param z            codon state at 1 site in parent node x
+     * @param wxBranchLd   branch likelihood calculation core at branch w->x
+     * @param wyBranchLd   branch likelihood calculation core at branch w->y
+     * @param zwBranchLd   branch likelihood calculation core at branch z->w
+     * @param cpd_w        cumulative probability distribution of states at w,
+     *                     to avoid using <code>new double[]</code>.
+     * @param proportions  the array of proportions of sites in different categories.
+     * @return the proposed state sampled prob from 3 branch likelihoods,
+     *         or negative if something is wrong.
+     */
+    protected int gibbsSampling( final int x, final int y, final int z, final DABranchLikelihoodCore wxBranchLd,
+                                 final DABranchLikelihoodCore wyBranchLd, final DABranchLikelihoodCore zwBranchLd,
+                                 double[] cpd_w, final double[] proportions) {
+        double pzw,pwx,pwy,pr_w = 0;
+        for (int w=0; w < cpd_w.length; w++) {
+            pzw = zwBranchLd.calculateBranchLdAtSite(z, w, proportions);
+            pwx = wxBranchLd.calculateBranchLdAtSite(w, x, proportions);
+            pwy = wyBranchLd.calculateBranchLdAtSite(w, y, proportions);
+            // w_i ~ P_z{w_i}(t) * P_{w_i}x(t) * P_{w_i}y(t)
+            pr_w = pzw * pwx * pwy;
+            // cumulate pr_w
+            cumulatePr(cpd_w, pr_w, w);
+        } // end w loop
+
+        // choose final state w from the distribution
+        double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
+
+        return RandomUtils.binarySearchSampling(cpd_w, random);
+    }
+
+    // cumulate pr in cpd[], w is the index of cpd[]
+    private void cumulatePr(double[] cpd, double pr, int w) {
+        if (w == 0)
+            cpd[0] = pr;
+        else
+            cpd[w] = cpd[w - 1] + pr;
+    }
+
+
+    // TODO multi-threading by sites
     class GibbsSamplingNode implements Callable<NodeStates> {
         private final int nodeNr;
         private final Operator operator;
@@ -317,6 +343,7 @@ public class GibbsSampler extends Operator {
             return nodesStates.getNodeStates(nodeNr);
         }
     }
+
 
     @Deprecated
     public void gibbsSamplingTowardsRoot(final Node node, final Operator operator) {

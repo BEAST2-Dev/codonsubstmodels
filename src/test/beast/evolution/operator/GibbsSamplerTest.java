@@ -12,7 +12,7 @@ public class GibbsSamplerTest {
     public void setUp() throws Exception {
     }
 
-    
+
 
     @Test
     public void gibbsSampling() {
