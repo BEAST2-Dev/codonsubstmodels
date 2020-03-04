@@ -431,6 +431,16 @@ public class NodeStatesArray extends StateNode {
         nodeIsDirty[nodeNr] = true;
     }
 
+    public void setStates(final int nodeNr, int startInclusive, int endExclusive, final int[] states) {
+        // internal node index starts from getTipsCount();
+        assert nodeNr >= getTipsCount();
+
+        startEditing(null);
+
+        nodesStates[nodeNr].setStates(startInclusive, endExclusive, states);
+        nodeIsDirty[nodeNr] = true;
+    }
+
     /**
      * Set a codon state to the site at the internal node.
      * The state starts from 0.

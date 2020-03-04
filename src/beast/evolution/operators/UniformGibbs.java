@@ -78,7 +78,7 @@ public class UniformGibbs extends Uniform {
 //        NodeStatesArray nodesStates = nodesStatesInput.get(this);
 //        int[] states = gibbsSampler.gibbsSampling(node, nodesStates);
 //        nodesStates.setStates(opNodeNr, states);
-        gibbsSampler.gibbsSampling(node, this);
+//        gibbsSampler.gibbsSampling(node, this);
 
         return 0.0;
     }

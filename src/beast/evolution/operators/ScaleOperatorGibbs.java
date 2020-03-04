@@ -68,14 +68,14 @@ public class ScaleOperatorGibbs extends ScaleOperator {
                     }
                     root.setHeightDA(newHeight);
 
-                    gibbsSampler.gibbsSampling(root, this);
+//                    gibbsSampler.gibbsSampling(root, this);
 
                     return -Math.log(scale);
                 } else {
                     // scale the beast.tree
                     final int internalNodes = tree.scale(scale);
 
-                    gibbsSampler.gibbsSamplingAwayRoot(tree.getRoot(), this);
+//                    gibbsSampler.gibbsSamplingAwayRoot(tree.getRoot(), this);
 
                     return Math.log(scale) * (internalNodes - 2);
                 }

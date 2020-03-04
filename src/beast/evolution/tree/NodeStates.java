@@ -205,6 +205,19 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     }
 
     /**
+     * Set a section of states to an internal node.
+     * @param startInclusive  start position (included) in the whole sequence
+     * @param endExclusive    end position (excluded) in the whole sequence
+     * @param states
+     */
+    public void setStates(int startInclusive, int endExclusive, final int[] states) {
+        // internal node index starts from getTipsCount();
+//        startEditing(null);
+        System.arraycopy(states, 0, this.states, startInclusive, states.length);
+        Arrays.fill(siteIsDirty, startInclusive, endExclusive, true);
+    }
+
+    /**
      * Get a codon state from the site at the node.
      * The state starts from 0.
      *
