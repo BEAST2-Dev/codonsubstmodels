@@ -23,9 +23,9 @@ import beast.util.Randomizer;
 @Description("Gibbs sampler to sample the internal node states.")
 public class GibbsSampler {
 
+    /*** they need to be updated each proposal ***/
     // DATreeLikelihood is calculation engine
     private DataAugTreeLikelihood daTreeLd;
-    /*** node, nodesStates need to be updated each proposal ***/
     private Node node; // the node Gibbs operates on
     private NodeStatesArray nodesStates; // to get sequences, never change it here
 
@@ -44,11 +44,10 @@ public class GibbsSampler {
      * @param startInclusive
      * @param endExclusive
      */
-    public GibbsSampler(int stateCount, int startInclusive, int endExclusive, DataAugTreeLikelihood daTreeLd) {
+    public GibbsSampler(int stateCount, int startInclusive, int endExclusive) {
         assert endExclusive > startInclusive;
         this.startInclusive = startInclusive;
         this.endExclusive = endExclusive;
-        this.daTreeLd = daTreeLd;
 
         newStates = new int[endExclusive - startInclusive];
         cpd_w = new double[stateCount];
@@ -58,14 +57,15 @@ public class GibbsSampler {
      * node, nodesStates need to be updated each proposal.
      * @param node
      */
-    public void update(Node node, NodeStatesArray nodesStates) {
+    public void update(Node node, NodeStatesArray nodesStates, DataAugTreeLikelihood daTreeLd) {
         this.node = node;
         this.nodesStates = nodesStates;
+        this.daTreeLd = daTreeLd;
     }
 
     /**
      * This method is used for multithreading.
-     * Need to {@link #update(Node, NodeStatesArray)} before this.
+     * Need to {@link #update(Node, NodeStatesArray, DataAugTreeLikelihood)} before this.
      * @return
      */
     public int[] gibbsSampling() {
@@ -79,8 +79,7 @@ public class GibbsSampler {
      * @param nodesStates
      * @return
      */
-    public int[] gibbsSampling(Node node, NodeStatesArray nodesStates) {
-//        update(node, nodesStates);
+    public int[] gibbsSampling(Node node, NodeStatesArray nodesStates, DataAugTreeLikelihood daTreeLd) {
         gibbsSampling(newStates, node, nodesStates, daTreeLd, startInclusive, endExclusive, cpd_w);
         return newStates;
     }

@@ -105,25 +105,31 @@ public class GibbsSamplingOperator extends Operator {
         if (threads <= 1) {
             gibbsSamplers = new GibbsSampler[1];
             gibbsSamplers[0] = new GibbsSampler(nodesStates.getStateCount(),
-                    0, siteCount, daTreeLd);
+                    0, siteCount);
 
         } else { // TODO multithreading by sites
-            gibbsSamplers = new GibbsSampler[threads];
             Log.info("Gibbs sampling at " + threads + " threads.");
 
             int chunks = threads; //TODO more chunks per thread
-            int endExclusive = 0;
+            gibbsSamplers = new GibbsSampler[chunks];
+            String msg = "Split codons into " + chunks + " chunks (startInclusive - endExclusive) : ";
+
+            int endExclusive;
             for (int i = 0; i < chunks; ++i) {
                 int startInclusive = siteCount / chunks * i;
                 endExclusive = siteCount / chunks * (i + 1);
-                System.out.print(startInclusive + "-" + endExclusive + ", ");
+                // in case chunks is the factor of siteCount
+                if (i == chunks-1 && endExclusive != siteCount)
+                    endExclusive = siteCount;
+
+                msg += startInclusive + "-" + endExclusive + ", ";
 
                 gibbsSamplers[i] = new GibbsSampler(nodesStates.getStateCount(),
-                        startInclusive, endExclusive, daTreeLd);
+                        startInclusive, endExclusive);
                 callers.add(new GibbsSamplingByChunks(gibbsSamplers[i]));
             }
-            System.out.println("\n");
-            assert endExclusive == siteCount;
+            msg = msg.substring(0, msg.length()-2);
+            Log.info(msg);
 
         }
 
@@ -150,15 +156,15 @@ public class GibbsSamplingOperator extends Operator {
         if (threads <= 1) {
 //            gibbsSamplers[0].update(node, nodesStates, daTreeLd);
             // proposed states in newStates[]
-            int[] newStates = gibbsSamplers[0].gibbsSampling(node, nodesStates);
+            int[] newStates = gibbsSamplers[0].gibbsSampling(node, nodesStates, daTreeLd);
             // array copy newStates to nodesStates, which is in the State that registers this operator
             nodesStates.setStates(nodeNr, newStates);
 
-        } else { // TODO multithreading by sites
+        } else { // multithreading by sites
             for (int i = 0; i < callers.size(); ++i) {
                 GibbsSamplingByChunks gsByChunks = (GibbsSamplingByChunks) callers.get(i);
                 // Note: Need to {@link #update(Node, NodeStatesArray)} before each call.
-                gsByChunks.update(node, nodesStates);
+                gsByChunks.update(node, nodesStates, daTreeLd);
             }
 
             // Execute all tasks and get reference to Future objects
@@ -179,7 +185,7 @@ public class GibbsSamplingOperator extends Operator {
                     int startInclusive = gs.getStartInclusive();
                     int endExclusive = gs.getEndExclusive();
 
-                    nodesStates.setStates(nodeNr, newStates);
+                    nodesStates.setStates(nodeNr, startInclusive, endExclusive, newStates);
 
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
@@ -199,22 +205,22 @@ public class GibbsSamplingOperator extends Operator {
 
     // multi-threading by chunks of sites
     class GibbsSamplingByChunks implements Callable<GibbsSampler> {
-        private final GibbsSampler gibbsSampler;
+        private GibbsSampler gibbsSampler;
 
         public GibbsSamplingByChunks(GibbsSampler gibbsSampler){
             this.gibbsSampler = gibbsSampler;
         }
 
-        public void update(Node node, NodeStatesArray nodesStates) {
-            this.gibbsSampler.update(node, nodesStates);
+        public void update(Node node, NodeStatesArray nodesStates, DataAugTreeLikelihood daTreeLd) {
+            this.gibbsSampler.update(node, nodesStates, daTreeLd);
         }
 
         /**
-         * Need to {@link #update(Node, NodeStatesArray)} before each call.
+         * Need to {@link #update(Node, NodeStatesArray, DataAugTreeLikelihood)} before each call.
          * @return
          * @throws Exception
          */
-        public GibbsSampler call() throws Exception { //TODO pass arguments
+        public GibbsSampler call() throws Exception {
             // internal nodes only
             gibbsSampler.gibbsSampling();
             return gibbsSampler;
