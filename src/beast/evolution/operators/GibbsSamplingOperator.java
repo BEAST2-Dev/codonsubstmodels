@@ -160,7 +160,7 @@ public class GibbsSamplingOperator extends Operator {
             // array copy newStates to nodesStates, which is in the State that registers this operator
             nodesStates.setStates(nodeNr, newStates);
 
-        } else { // multithreading by sites
+        } else { // TODO bug in multithreading by sites
             for (int i = 0; i < callers.size(); ++i) {
                 GibbsSamplingByChunks gsByChunks = (GibbsSamplingByChunks) callers.get(i);
                 // Note: Need to {@link #update(Node, NodeStatesArray)} before each call.
