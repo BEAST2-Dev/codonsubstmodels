@@ -11,6 +11,13 @@ import java.util.Arrays;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
+ * {@link Randomizer#randomChoice(double[])} seems faster than
+ * {@link RandomUtils#binarySearchSampling(double[], double)}
+ * at about 60 states.
+ * But the input will be an unnormalized probabilities, and
+ * the former has to take the normalized cpd, so the total
+ * speed is slower.
+ * 
  * @author Walter Xie
  */
 public class BinarySearchSamplingTest {
