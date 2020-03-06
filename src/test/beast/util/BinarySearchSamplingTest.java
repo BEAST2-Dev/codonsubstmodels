@@ -3,6 +3,7 @@ package test.beast.util;
 import beast.util.DistributionUtils;
 import beast.util.RandomUtils;
 import beast.util.Randomizer;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -14,10 +15,15 @@ import static org.junit.Assert.assertArrayEquals;
  */
 public class BinarySearchSamplingTest {
 
+    final int nrOfStates = 60;
+    final int ite = 100000000; // 100 million
+
+
     double[] prob;
     double[] cf;
 
-    public void setUp(int nrOfStates) {
+    @Before
+    public void setUp() {
         // unnormalized probabilities
         double[] freq = new double[nrOfStates];
         for (int i = 0; i < nrOfStates; i++)
@@ -39,15 +45,11 @@ public class BinarySearchSamplingTest {
     }
 
     @Test
-    public void binarySearch() {
-        final int nrOfStates = 60;
-        final int ite = 100000000; // 100 million
-
-        setUp(nrOfStates);
-
+    public void linearSampling() {
         //++++++  Linear time sampling ++++++//
         int w;
         int[] freq1 = new int[nrOfStates];
+
         long start = System.currentTimeMillis();
         for (int i = 0; i < ite; i++) {
             w = RandomUtils.linearTimeSampling(prob, -1, false);
@@ -55,6 +57,7 @@ public class BinarySearchSamplingTest {
         }
         long timeLinear = System.currentTimeMillis() - start;
         System.out.println("Linear sampling time : " + timeLinear + " milliseconds.");
+
         System.out.println("Freq : " + Arrays.toString(freq1) + "\n");
 
         double[] prob1 = new double[nrOfStates];
@@ -63,10 +66,46 @@ public class BinarySearchSamplingTest {
 
         assertArrayEquals(prob, prob1, 1E-4);
 
+    }
+
+    @Test
+    public void linearSampling2() {
+
+        //++++++  Linear time sampling ++++++//
+        int w;
+        int[] freq1 = new int[nrOfStates];
+
+        long start = System.currentTimeMillis();
+        double[] cpd = new double[cf.length];
+        for (int i = 0; i < ite; i++) {
+            // count the time to normalise
+            for (int j = 0; j < cf.length; j++)
+                cpd[j] = cf[j] / cf[cf.length-1];
+
+            w = Randomizer.randomChoice(cpd);
+            freq1[w]++;
+        }
+        long timeLinear = System.currentTimeMillis() - start;
+        System.out.println("Linear sampling time : " + timeLinear + " milliseconds.");
+
+        System.out.println("Freq : " + Arrays.toString(freq1) + "\n");
+
+        double[] prob1 = new double[nrOfStates];
+        DistributionUtils.computeDistribution(freq1, prob1);
+        System.out.println("Normalized probability : " + Arrays.toString(prob1) + "\n");
+
+        assertArrayEquals(prob, prob1, 1E-4);
+
+    }
+
+    @Test
+    public void binarySearch() {
+        int w;
         //++++++  Binary search sampling ++++++//
         double random;
         int[] freq2 = new int[nrOfStates];
-        start = System.currentTimeMillis();
+
+        long start = System.currentTimeMillis();
         for (int i = 0; i < ite; i++) {
             random = Randomizer.nextDouble() * cf[cf.length-1];
             w = RandomUtils.binarySearchSampling(cf, random);
@@ -74,6 +113,7 @@ public class BinarySearchSamplingTest {
         }
         long timeBiSearch = System.currentTimeMillis() - start;
         System.out.println("Binary search sampling time : " + timeBiSearch + " milliseconds.");
+
         System.out.println("Freq : " + Arrays.toString(freq2) + "\n");
 
         double[] prob2 = new double[nrOfStates];

@@ -28,7 +28,10 @@ public class BinarySearchBenchmarking {
 
         BinarySearchBenchmarking benchmarking = new BinarySearchBenchmarking();
 
-        int m = BINARY_SEARCH;//LINEAR;//
+        //++++++  Binary search sampling ++++++//
+        int m = BINARY_SEARCH;
+        //++++++  Linear time sampling ++++++//
+//        int m = LINEAR;
 
         long[][] time = new long[STATES.length][TESTS];
 
@@ -40,20 +43,15 @@ public class BinarySearchBenchmarking {
                 double[] trueProbs = benchmarking.setUpProbs(state);
                 double[] cpd = benchmarking.getCPD(trueProbs);
 
-//                //++++++  Binary search sampling ++++++//
-//                benchmarking.benchmark(BINARY_SEARCH, n, t, cpd, trueProbs);
-                //++++++  Linear time sampling ++++++//
-                time[n][t] = benchmarking.benchmark(m, n, t, cpd, trueProbs);
+                time[n][t] = benchmarking.benchmark(m, n, cpd, trueProbs);
 
             }
         } // end n loop
 
         benchmarking.printTime(m, time);
-//        benchmarking.printTime(BINARY_SEARCH);
-
     }
 
-    public long benchmark(int method, int stateIndex, int testIndex, double[] cpd, double[] trueProbs) {
+    public long benchmark(int method, int stateIndex, double[] cpd, double[] trueProbs) {
         int state = STATES[stateIndex];
         int w;
         int[] freq1 = new int[state];
