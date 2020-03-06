@@ -17,7 +17,7 @@ public class BinarySearchBenchmarking {
     static final int TESTS = 50;
     final int ITE = 20000000; // 20 million
 
-    private static int[] STATES = new int[]{4,21,40,60,80, 100, 128, 256};
+    private static int[] STATES = new int[]{4,21,40,60,80,100,128,256};
 
     public BinarySearchBenchmarking() {
 //        for (int n = 0; n < states.length; n++)
@@ -28,7 +28,7 @@ public class BinarySearchBenchmarking {
 
         BinarySearchBenchmarking benchmarking = new BinarySearchBenchmarking();
 
-        int m = LINEAR;//BINARY_SEARCH;//
+        int m = BINARY_SEARCH;//LINEAR;//
 
         long[][] time = new long[STATES.length][TESTS];
 
