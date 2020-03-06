@@ -35,30 +35,32 @@ public class RandomUtils {
      * @param cpd       unnormalized or normalized cumulative probabilities,
      *                  which have not to be a probability distribution.
      *                  If not a distribution (sum > 1), then <code>random = [0, sum)</code>.
-     * @param random    the random double between [0, sum), where sum is <code>cpd[cpd.length-1]</code>.
+     * @param randDoub  the random double between [0, sum), where sum is <code>cpd[cpd.length-1]</code>.
      *                  <code>double random = Randomizer.nextDouble() * cpd[cpd.length-1];</code>.
      * @return          a sample (index of <code>cpd[]</code>) according to
      *                  an unnormalized cumulative probabilities.
      */
-    public static int binarySearchSampling(double[] cpd, double random) {
-        int low = 0;
-        int high = cpd.length - 1;
-
-        if (random <= cpd[0])
+    public static int binarySearchSampling(double[] cpd, double randDoub) {
+        if (randDoub <= cpd[0])
             return 0;
 
+        int mid,low = 0;
+        int high = cpd.length - 1;
+        double midVal;
         while (low <= high) {
-            int mid = (low + high) >>> 1;
-            double midVal = cpd[mid];
+            mid = (low + high) >>> 1;
+            midVal = cpd[mid];
 
-            if (random <= midVal && random > cpd[mid - 1])
-                return mid; // take i where cpd[i - 1] < random <= cpd[i]
+//            if (randDoub <= cpd[mid] && randDoub > cpd[mid - 1])
+//                return mid; // take i where cpd[i - 1] < randDoub <= cpd[i]
 
-            if (midVal < random)
+            if (midVal < randDoub)
                 low = mid + 1;
-            else if (midVal > random)
+            else if (midVal > randDoub) {
+                if (cpd[mid - 1] < randDoub)
+                    return mid;
                 high = mid - 1;
-            else
+            } else
                 return mid; // cpd == random
 
         }
