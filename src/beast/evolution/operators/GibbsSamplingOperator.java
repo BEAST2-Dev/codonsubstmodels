@@ -99,8 +99,8 @@ public class GibbsSamplingOperator extends Operator {
         if (threadHelper == null) {
             threadHelper = new ThreadHelper(maxNrOfThreadsInput.get(), null);
         }
-        threads = threadHelper.getThreadCount();
-
+        threads = 1;//threadHelper.getThreadCount();
+//TODO multithreading bug, need to split nodesStates into partitions
         int siteCount = nodesStates.getSiteCount();
         if (threads <= 1) {
             gibbsSamplers = new GibbsSampler[1];

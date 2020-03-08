@@ -70,7 +70,7 @@ public class NodeStatesArray extends StateNode {
 
     // all nodes, use nodeNr to map the index of nodesStates[]
     protected  NodeStates[] nodesStates;
-    protected  NodeStates[] storedNodesStates;
+//    protected  NodeStates[] storedNodesStates;
 
     /**
      * isDirty array flags for each node
@@ -123,7 +123,7 @@ public class NodeStatesArray extends StateNode {
 
         // init from constructor
         nodesStates = new NodeStates[nodeCount];
-        storedNodesStates = new NodeStates[nodeCount];
+//        storedNodesStates = new NodeStates[nodeCount];
         nodeIsDirty = new boolean[nodeCount];
 
         // fix ID
@@ -673,7 +673,8 @@ public class NodeStatesArray extends StateNode {
             }
         } else {
             for (int i = getTipsCount(); i < getNodeCount(); i++) {
-                storedNodesStates[i] = nodesStates[i].deepCopy();
+//                storedNodesStates[i] = nodesStates[i].deepCopy();
+                nodesStates[i].store();
             }
         }
     }
@@ -689,10 +690,11 @@ public class NodeStatesArray extends StateNode {
             }
         } else {
             for (int i = getTipsCount(); i < getNodeCount(); i++) {
-//                nodesStates[i] = storedNodesStates[i].CopyStates();
-            final NodeStates tmp = storedNodesStates[i];
-            storedNodesStates[i] = nodesStates[i];
-            nodesStates[i] = tmp;
+//            final NodeStates tmp = storedNodesStates[i];
+//            storedNodesStates[i] = nodesStates[i];
+//            nodesStates[i] = tmp;
+
+                nodesStates[i].restore();
                 nodeIsDirty[i] = false;
                 //TODO implement nodesStates[i].siteIsDirty[] ?
             }
@@ -776,8 +778,10 @@ public class NodeStatesArray extends StateNode {
         }
         public NodeStates call() throws Exception {
             // internal nodes only
-            storedNodesStates[nodeNr] = nodesStates[nodeNr].deepCopy();
-            return storedNodesStates[nodeNr];
+//            storedNodesStates[nodeNr] = nodesStates[nodeNr].deepCopy();
+//            return storedNodesStates[nodeNr];
+            nodesStates[nodeNr].store();
+            return nodesStates[nodeNr];
         }
     }
 
@@ -788,10 +792,10 @@ public class NodeStatesArray extends StateNode {
         }
         public NodeStates call() throws Exception {
             // internal nodes only
-//            nodesStates[nodeNr] = storedNodesStates[nodeNr].CopyStates();
-            final NodeStates tmp = storedNodesStates[nodeNr];
-            storedNodesStates[nodeNr] = nodesStates[nodeNr];
-            nodesStates[nodeNr] = tmp;
+//            final NodeStates tmp = storedNodesStates[nodeNr];
+//            storedNodesStates[nodeNr] = nodesStates[nodeNr];
+//            nodesStates[nodeNr] = tmp;
+            nodesStates[nodeNr].restore();
             nodeIsDirty[nodeNr] = false;
             return nodesStates[nodeNr];
         }

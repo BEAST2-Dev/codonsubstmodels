@@ -5,8 +5,7 @@ import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.DataType;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -44,7 +43,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
      * states[sites], the int states for this node.
      */
     protected int[] states;
-//    protected int[] storedStates;
+    protected int[] storedStates;
 
     /**
      * upper & lower bound These are located before the inputs (instead of
@@ -56,7 +55,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     /**
      * isDirty flags for each site
      */
-    protected boolean[] siteIsDirty; // TODO setASiteDirty
+//    protected boolean[] siteIsDirty; // TODO setASiteDirty
 
 
     /**
@@ -106,13 +105,13 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     private void initParam(int stateCount, int siteCount) {
         // siteCount = num of codons, overwrite in CodonAlignment /= 3
         states = new int[siteCount];
-//        storedStates = new int[siteCount];
+        storedStates = new int[siteCount];
 
         // 0 - 59/60, ignore lowerValueInput upperValueInput
         lower = 0;
         upper = stateCount - 1; // not deal unknown codon
 
-        siteIsDirty = new boolean[siteCount];
+//        siteIsDirty = new boolean[siteCount];
 
 //        Log.info.println("Create node states array length = " + siteCount);
 
@@ -201,7 +200,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
         // internal node index starts from getTipsCount();
 //        startEditing(null);
         System.arraycopy(states, 0, this.states, 0, states.length);
-        Arrays.fill(siteIsDirty, true);
+//        Arrays.fill(siteIsDirty, true);
     }
 
     /**
@@ -213,9 +212,8 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     public void setStates(int startInclusive, int endExclusive, final int[] states) {
         // internal node index starts from getTipsCount();
 //        startEditing(null);
-//        System.arraycopy(states, 0, this.states, startInclusive, states.length);
-
-        Arrays.fill(siteIsDirty, startInclusive, endExclusive, true);
+        System.arraycopy(states, 0, this.states, startInclusive, states.length);
+//        Arrays.fill(siteIsDirty, startInclusive, endExclusive, true);
     }
 
     /**
@@ -242,7 +240,7 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
 //        startEditing(null);
 
         states[codonNr] = state;
-        siteIsDirty[codonNr] = true;
+//        siteIsDirty[codonNr] = true;
     }
 
     /**
@@ -309,7 +307,26 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     public void finalize() throws Throwable {
         states = null;
 //        storedStates = null;
-        siteIsDirty = null;
+//        siteIsDirty = null;
+    }
+
+
+    public void store() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+
+        System.arraycopy(states, 0, storedStates, 0, states.length);
+    }
+
+    public void restore() {
+//        if (tipID != null)
+//            throw new UnsupportedOperationException("Can not sample tip states yet !");
+
+        final int[] tmp = storedStates;
+        storedStates = states;
+        states = tmp;
+//        hasStartedEditing = false;
+//        Arrays.fill(siteIsDirty, false);
     }
 
     /**
@@ -319,9 +336,9 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
     public NodeStates deepCopy() {
         NodeStates copy = null;
         try {
-            copy = new NodeStates(nodeNr, states, upper+1);
-//            final NodeStates copy = (NodeStates) this.clone();
-//TODO not working            System.arraycopy(this.states, 0, copy.states, 0, states.length);
+//            copy = new NodeStates(nodeNr, states, upper+1);
+            copy = (NodeStates) this.clone();
+            copy.setStates(this.states);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -415,31 +432,6 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
 //        throw new UnsupportedOperationException("Unsupported");
 //    }
 
-
-
-//    @Override
-//    protected void store() {
-//        if (tipID != null)
-//            throw new UnsupportedOperationException("Can not sample tip states yet !");
-//
-//        System.arraycopy(states, 0, storedStates, 0, states.length);
-//    }
-//
-//    @Override
-//    public void restore() {
-//        if (tipID != null)
-//            throw new UnsupportedOperationException("Can not sample tip states yet !");
-//
-//        final int[] tmp = storedStates;
-//        storedStates = states;
-//        states = tmp;
-////        hasStartedEditing = false;
-//
-//        if (siteIsDirty.length != getSiteCount()) {
-//            siteIsDirty = new boolean[getSiteCount()];
-//        }
-//
-//    }
 //    @Override
 //    public void setEverythingDirty(boolean isDirty) {
 //        setSomethingIsDirty(isDirty);
