@@ -68,9 +68,9 @@ public class GibbsSampler {
      * Need to {@link #update(Node, NodeStatesArray, DataAugTreeLikelihood)} before this.
      * @return
      */
-    public int[] gibbsSampling() {
+    public void gibbsSampling() {
         gibbsSampling(newStates, node, nodesStates, daTreeLd, startInclusive, endExclusive, cpd_w);
-        return newStates;
+//        return newStates;
     }
 
     /**
@@ -191,7 +191,9 @@ public class GibbsSampler {
         // choose final state w from the distribution
         double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
 
-        return RandomUtils.binarySearchSampling(cpd_w, random);
+//        return RandomUtils.binarySearchSampling(cpd_w, random);
+        // linear faster than binary search implementation nrOfState < 100
+        return RandomUtils.randomChoice(cpd_w, random);
     }
 
     /**

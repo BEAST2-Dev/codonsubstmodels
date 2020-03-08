@@ -68,6 +68,26 @@ public class RandomUtils {
     }
 
     /**
+     * Chooses one category if a cumulative probability distribution is given.
+     * Modified from {@link Randomizer#randomChoice(double[])}.
+     * @param cf
+     * @return
+     */
+    public static int randomChoice(double[] cf, double randDoub) {
+        int s;
+        if (randDoub <= cf[0]) {
+            s = 0;
+        } else {
+            for (s = 1; s < cf.length; s++) {
+                if (randDoub <= cf[s] && randDoub > cf[s - 1]) {
+                    break;
+                }
+            }
+        }
+        return s;
+    }
+
+    /**
      * Replaced by {@link #binarySearchSampling(double[], double)}.
      * Generating a random integer with non-uniform distribution,
      * https://stackoverflow.com/questions/42456115/generating-a-random-integer-with-non-uniform-distribution.

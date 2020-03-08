@@ -17,7 +17,7 @@ import static org.junit.Assert.assertArrayEquals;
  * But the input will be an unnormalized probabilities, and
  * the former has to take the normalized cpd, so the total
  * speed is slower.
- * 
+ *
  * @author Walter Xie
  */
 public class BinarySearchSamplingTest {
@@ -77,19 +77,20 @@ public class BinarySearchSamplingTest {
 
     @Test
     public void linearSampling2() {
-
         //++++++  Linear time sampling ++++++//
+        // about 5589 milliseconds, after use RandomUtils.randomChoice(cf, random)
         int w;
         int[] freq1 = new int[nrOfStates];
+        double random;
 
         long start = System.currentTimeMillis();
-        double[] cpd = new double[cf.length];
+//        double[] cpd = new double[cf.length];
         for (int i = 0; i < ite; i++) {
             // count the time to normalise
-            for (int j = 0; j < cf.length; j++)
-                cpd[j] = cf[j] / cf[cf.length-1];
-
-            w = Randomizer.randomChoice(cpd);
+//            for (int j = 0; j < cf.length; j++)
+//                cpd[j] = cf[j] / cf[cf.length-1];
+            random = Randomizer.nextDouble() * cf[cf.length-1];
+            w = RandomUtils.randomChoice(cf, random);
             freq1[w]++;
         }
         long timeLinear = System.currentTimeMillis() - start;
@@ -109,6 +110,7 @@ public class BinarySearchSamplingTest {
     public void binarySearch() {
         int w;
         //++++++  Binary search sampling ++++++//
+        // about 6363 milliseconds
         double random;
         int[] freq2 = new int[nrOfStates];
 
