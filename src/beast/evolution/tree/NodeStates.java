@@ -205,11 +205,10 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
 
     /**
      * Set a section of states to an internal node.
-     * @param startInclusive  start position (included) in the whole sequence
-     * @param endExclusive    end position (excluded) in the whole sequence
-     * @param states
+     * @param startInclusive  start position (included) in the whole sequence.
+     * @param states          the length to determine where is the endExclusive.
      */
-    public void setStates(int startInclusive, int endExclusive, final int[] states) {
+    public void setStates(int startInclusive, final int[] states) {
         // internal node index starts from getTipsCount();
 //        startEditing(null);
         System.arraycopy(states, 0, this.states, startInclusive, states.length);
@@ -235,13 +234,13 @@ public class NodeStates implements Cloneable {// cannot extend StateNode
      *
      * @param codonNr the site index.
      * @param state   new state to set.
-     */
+     *
     public void setState(final int codonNr, final int state) {
 //        startEditing(null);
 
         states[codonNr] = state;
-//        siteIsDirty[codonNr] = true;
-    }
+//        siteIsDirty[codonNr] = true; // TODO need to fire nodeIsDirty flag
+    }*/
 
     /**
      * @param ns  another NodeStates

@@ -437,7 +437,7 @@ public class NodeStatesArray extends StateNode {
 
         startEditing(null);
 
-        nodesStates[nodeNr].setStates(startInclusive, endExclusive, states);
+        nodesStates[nodeNr].setStates(startInclusive, states);
         nodeIsDirty[nodeNr] = true;
     }
 

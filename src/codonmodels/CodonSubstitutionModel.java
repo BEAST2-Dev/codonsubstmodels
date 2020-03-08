@@ -108,11 +108,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      * Faster code to replace
      * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
      *
-     * @param startTime
-     * @param endTime
-     * @param rate
-     * @param iexp
-     * @param matrix
+     * @param startTime parent.getHeight()
+     * @param endTime   node.getHeight()
+     * @param rate      joint rate = rate for a site category * mean branch rate.
+     * @param iexp      iexp, without creating a new matrix each call.
+     * @param matrix    P(t), without creating a new matrix each call.
      */
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
@@ -137,7 +137,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
         // is the following really necessary?
         // implemented a pool of iexp matrices to support multiple threads
-        // without creating a new matrix each call. - AJD
         // a quick timing experiment shows no difference - RRB
 //        double[] iexp = new double[nrOfStates * nrOfStates];
         double[] Evec = eigenDecomposition.getEigenVectors();
@@ -146,12 +145,13 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         // Eigen values
         double[] Eval = eigenDecomposition.getEigenValues();
 
+        // faster computation, reviewed by AJD
         int x = 0;
         for (i = 0; i < nrOfStates; i++) {
             temp = Math.exp(distance * Eval[i]);
             for (j = 0; j < nrOfStates; j++) {
                 // iexp[i * nrOfStates + j] = Ievc[i * nrOfStates + j] * temp;
-                iexp[x] = Ievc[x] * temp;  //TODO bug synchronized
+                iexp[x] = Ievc[x] * temp;
                 x++; // save time, plus once
             }
         }

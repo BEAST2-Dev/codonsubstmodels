@@ -397,7 +397,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         int nodeUpdate = node.isDirty() | parent.isDirty();
 
         final double branchRate = branchRateModel.getRateForBranch(node);
-        // do not use getLength
+        // do not use getLength, code below to save time
         final double branchTime = (parent.getHeight() - node.getHeight()) * branchRate;
 
 //TODO deal with 0 branch length, such as SA
