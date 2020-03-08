@@ -420,7 +420,6 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
                 // pass the reference of array for caching probability,
                 // Note: cannot move it in this class because of multithreading by nodes.
                 double[] probabilities = daBranchLdCore.getProbRef();
-
                 double[] iexp = daBranchLdCore.getIexpRef();
                 // this new code is faster
                 substitutionModel.getTransiProbs(parent.getHeight(), node.getHeight(),

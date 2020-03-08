@@ -43,6 +43,11 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
      * size = stateCount * stateCount
      */
     protected double[] iexp;
+    /**
+     * caching likelihood per site at one node.
+     * size = siteCount
+     */
+    protected double[] siteLd;
 
     protected boolean useScaling = false;
 
@@ -98,6 +103,8 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         Arrays.fill(probabilities, 1.0);
 
         iexp = new double[matrixSize];
+
+        siteLd = new double[nrOfSites];
     }
 
     /**
@@ -380,7 +387,7 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
             product *= siteLd[k];
 
             // hard code to log when product is too small, Double.MAX_VALUE 1.79...e+308
-            if (product < SCALING_THRESHOLD || siteLd[k] < SCALING_THRESHOLD) {
+            if (product < SCALING_THRESHOLD ) { // || siteLd[k] < SCALING_THRESHOLD
                 // important check before implement log scaling
                 if (product == 0)
                     throw new RuntimeException("Likelihood product -Inf ! " +
@@ -411,17 +418,17 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
 
     // log likelihood at root given codon frequencies
     public double calculateRootLogLikelihood(NodeStates rootStates, double[] frequencies) {
-        int siteCount = rootStates.getSiteCount();
-        double[] siteLdAtRoot = new double[siteCount];
+//        int siteCount = rootStates.getSiteCount();
+//        double[] siteLdAtRoot = new double[siteCount];
 
         int state;
-        for (int k = 0; k < siteCount; k++) {
+        for (int k = 0; k < nrOfSites; k++) {
             // hard code for root node
             state = rootStates.getState(k); // 0-63
-            siteLdAtRoot[k] = frequencies[state];
+            siteLd[k] = frequencies[state];
         }
 
-        return logIntegratedLikelihood(siteLdAtRoot); //+ getLogScalingFactor(k); TODO
+        return logIntegratedLikelihood(siteLd); //+ getLogScalingFactor(k); TODO
     }
 
 

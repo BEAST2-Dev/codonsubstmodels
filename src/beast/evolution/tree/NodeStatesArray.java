@@ -369,7 +369,7 @@ public class NodeStatesArray extends StateNode {
      * @param tipsStates    States array to fill in. Tips nr = [0, TipsCount-1].
      */
     public void getTipsStatesAtSite(int nrOfSite, int[] tipsStates) {
-        assert tipsStates.length == getTipsCount();
+        assert tipsStates.length == tipCount;
         int state;
         // BEAST tips nr = [0, TipsCount-1]
         for (int i=0; i < getTipsCount() ; i++) {
@@ -418,7 +418,7 @@ public class NodeStatesArray extends StateNode {
      * @param states int[] states
      */
     public void setStates(final int nodeNr, final int[] states) {
-        assert nodeNr >= getTipsCount();
+        assert nodeNr >= tipCount;
         if (nodesStates[nodeNr] == null) {
             // internal node not init
             nodesStates[nodeNr] = new NodeStates(nodeNr, states, getStateCount());
@@ -433,7 +433,7 @@ public class NodeStatesArray extends StateNode {
 
     public void setStates(final int nodeNr, int startInclusive, int endExclusive, final int[] states) {
         // internal node index starts from getTipsCount();
-        assert nodeNr >= getTipsCount();
+        assert nodeNr >= tipCount;
 
         startEditing(null);
 
@@ -473,7 +473,7 @@ public class NodeStatesArray extends StateNode {
      *         where <code>nodeIndex < {@link #getTipsCount()}</code>.
      */
     public boolean isNodeStatesDirty(final int nodeIndex) {
-        if (nodeIndex < getTipsCount())
+        if (nodeIndex < tipCount)
             return false;
         return nodeIsDirty[nodeIndex];
     }
