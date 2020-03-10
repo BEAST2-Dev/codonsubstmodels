@@ -70,8 +70,12 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     protected int rateCount;
 
 
+    /**
+     * for linear approximation
+     */
     double[][] p_d_;
     double[] intervals;
+
 
     public CodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally

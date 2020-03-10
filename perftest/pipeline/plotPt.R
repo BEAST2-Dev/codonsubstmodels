@@ -7,7 +7,7 @@ library(reshape2)
 WD=paste0("~/WorkSpace/codonsubstmodels/perftest/")
 setwd(WD)
 
-pt.all <- read_delim("../p_t_.txt", "\t", comment = "#", col_names = F)
+pt.all <- read_delim("../p_d_.txt", "\t", comment = "#", col_names = F)
 # 3601 is NA
 pt.all <- pt.all[colSums(!is.na(pt.all)) > 0]
 # equal freq, 0.0167  
@@ -34,6 +34,6 @@ p <- ggplot(pt.melt, aes(distance, value, colour=variable)) +
   guides(colour=guide_legend(title="i->j")) +
   theme_minimal() 
 
-ggsave("../figures/pt.pdf", p, width = 6, height = 5)  
+ggsave("../figures/p_d_.pdf", p, width = 6, height = 5)  
   
   

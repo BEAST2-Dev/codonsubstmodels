@@ -96,7 +96,7 @@ public class LinearApproxP_dist_ {
         double[] intervals = pd.createTimeIntervals(maxDistance);
         pd.getTransiProbsByTime(intervals);
 
-        Path path = Paths.get("p_t_.txt");
+        Path path = Paths.get("p_d_.txt");
         try {
             pd.write(path, intervals);
         } catch (IOException e) {
