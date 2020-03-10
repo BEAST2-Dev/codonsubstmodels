@@ -35,6 +35,7 @@ import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 import beast.evolution.tree.Node;
+import beast.util.RandomUtils;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -69,7 +70,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     protected int rateCount;
 
 
-    double[][] p_t_;
+    double[][] p_d_;
     double[] intervals;
 
     public CodonSubstitutionModel() {
@@ -113,16 +114,15 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
         /*** ***/
         if (approxInput.get()) {
-            Pt pt = new Pt((CodonFrequencies) frequencies);
+            P_dist_ pd = new P_dist_((CodonFrequencies) frequencies);
 
-            // TODO how to sample rate ?
-            double jointRate = 1.0;
+            double maxDistance = pd.getMaxDistance();
+            intervals = pd.createTimeIntervals(maxDistance);
+            pd.getTransiProbsByTime(intervals);
 
-            double maxTime = pt.getMaxTime(jointRate);
-            intervals = pt.createTimeIntervals(maxTime);
-            pt.getTransiProbsByTime(intervals,jointRate);
+            p_d_ = pd.getP_dist_();
 
-            p_t_ = pt.getPt();
+            assert p_d_[0].length == nrOfStates * nrOfStates;
         }
 
     }
@@ -139,10 +139,10 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      */
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
+        double distance = (startTime - endTime) * rate;
         if (approxInput.get())
-            getTransiProbs(startTime, endTime, rate, matrix);
+            getTransiProbs(distance, matrix);
         else {
-            double distance = (startTime - endTime) * rate;
             getTransiProbs(distance, iexp, matrix);
         }
 
@@ -208,10 +208,29 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
 
-    public void getTransiProbs(double startTime, double endTime, double rate, double[] matrix) {
+    public void getTransiProbs(double distance, double[] matrix) {
+        // > biggest distance
+        int i = intervals.length-1;
+        if (distance == intervals[i])
+            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
 
+        //  <= i <=
+        i = RandomUtils.binarySearchSampling(intervals, distance);
 
+        if (distance == intervals[i]) {
+            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
+        } else { // approximation
 
+            double[] probs1 = p_d_[i-1]; // y1
+            double[] probs2 = p_d_[i]; // y2
+
+            for (int j = 0; j < p_d_[i].length; j++) {
+                // y = (x-a) * (d-c) / (b-a) + c, where a < x < b, c < y < d
+                matrix[j] = (distance - intervals[i - 1]) * (p_d_[i][j] - p_d_[i-1][j]) /
+                        (intervals[i] - intervals[i-1]) + p_d_[i-1][j];
+            }
+
+        }
 
     }
 

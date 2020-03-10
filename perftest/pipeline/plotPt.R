@@ -16,7 +16,7 @@ nrow(pt.all)
 
 # 4 cols
 pt <- pt.all %>% select(1:4,7) 
-colnames(pt)[1] <- "time"
+colnames(pt)[1] <- "distance"
 # 		 AAA AAC AAG
 # 		  K   N   K
 #AAA	K	.   4   1	
@@ -25,12 +25,12 @@ colnames(pt)[2:ncol(pt)] <- c("AAA->AAA","AAA->AAC","AAA->AAG","AAA->ACC")
 #"AAA->AAG", K -> K, synonymous transition
 #"AAA->ACC", K -> T, non-synonymous transversion
 
-pt.melt <- melt(pt, id = c("time"))
+pt.melt <- melt(pt, id = c("distance"))
 
-p <- ggplot(pt.melt, aes(time, value, colour=variable)) + 
+p <- ggplot(pt.melt, aes(distance, value, colour=variable)) + 
   geom_point(shape=1, size=0.5, alpha=.5) +  # geom_point(size=.2, alpha=.5)
   ylim(0,0.5) +
-  ggtitle("") + xlab("time") + ylab("P(t)") + 
+  ggtitle("") + xlab("distance") + ylab("P(d)") + 
   guides(colour=guide_legend(title="i->j")) +
   theme_minimal() 
 

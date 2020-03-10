@@ -15,11 +15,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Create points to plot P(t) by fixing other parameters.
+ * Create points to plot P(dist) by fixing other parameters.
+ * dist = time * rate
  *
  * @author Walter Xie
  */
-public class Pt {
+public class P_dist_ {
 
     private double omega = 0.08;
     private double kappa = 15;
@@ -33,7 +34,7 @@ public class Pt {
 
     List<double[]> ptList = new ArrayList<>();
 
-    public Pt() {
+    public P_dist_() {
         CodonAlignment codonAlignment = initCodonAlignment();
 
         // equal
@@ -43,7 +44,7 @@ public class Pt {
         initM0(codonFreq);
     }
 
-    public Pt(CodonFrequencies codonFreq) {
+    public P_dist_(CodonFrequencies codonFreq) {
         initM0(codonFreq);
     }
 
@@ -86,29 +87,29 @@ public class Pt {
 
 
     public static void main(final String[] args) {
-        Pt pt = new Pt();
+        P_dist_ pd = new P_dist_();
 
         // rate = 1
-        double jointRate = 1.0;
+//        double jointRate = 1.0;
 
-        double maxTime = pt.getMaxTime(jointRate);
-        double[] intervals = pt.createTimeIntervals(maxTime);
-        pt.getTransiProbsByTime(intervals,jointRate);
+        double maxDistance = pd.getMaxDistance();
+        double[] intervals = pd.createTimeIntervals(maxDistance);
+        pd.getTransiProbsByTime(intervals);
 
         Path path = Paths.get("p_t_.txt");
         try {
-            pt.write(path, intervals);
+            pd.write(path, intervals);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public double getMaxTime(double rate) {
+    public double getMaxDistance() {
 
-        int t;
-        for (t = 10; t < 1000; t+=10) {
-            // startTime > endTime, intervals[0] > 0
-            m0Model.getTransiProbs(t, 0, rate, iexp, prob);
+        int d; // distance = time * rate
+        for (d = 10; d < 1000; d+=10) {
+            // intervals[0] > 0
+            m0Model.getTransiProbs(d, iexp, prob);
 
             boolean all = true;
             for (int i = 0; i < freq.length; i++) {
@@ -117,26 +118,26 @@ public class Pt {
             }
 
             if (all)
-                return t;
+                return d;
         }
         throw new IllegalArgumentException("Cannot find the max time !");
     }
 
 
     // intervals[0] > 0
-    public double[] createTimeIntervals(double maxTime){
-        System.out.println("Max time = " + maxTime);
+    public double[] createTimeIntervals(double maxDistance){
+        System.out.println("Max distance = " + maxDistance);
 
         int first = 3;
         int second = 30;
-        int third = (int) maxTime / 4;
+        int third = (int) maxDistance / 4;
         List<Double> intervals = new ArrayList<>();
 
         int i = -1; // list index
-        double end = 0;
+        double end = -0.02;
         while (end < first) {
             i++;
-            end += 0.05;
+            end += 0.02;
             end = Math.round(end*100) / 100.0;
             intervals.add(end);
         }
@@ -163,7 +164,7 @@ public class Pt {
         System.out.println("Create " + (intervals.size()-j+1) + " intervals from " + intervals.get(j+1) +
                 " to " + intervals.get(k));
 
-        while (end < maxTime) {
+        while (end < maxDistance) {
             end += 20;
             end = Math.round(end);
             intervals.add(end);
@@ -174,12 +175,12 @@ public class Pt {
         return intervals.stream().mapToDouble(d -> d).toArray();
     }
 
-    public void getTransiProbsByTime(double[] intervals, double rate) {
+    public void getTransiProbsByTime(double[] intervals) {
 
         for (int i = 0; i < intervals.length; i++) {
 
             // startTime > endTime, intervals[0] > 0
-            m0Model.getTransiProbs(intervals[i], 0, rate, iexp, prob);
+            m0Model.getTransiProbs(intervals[i], iexp, prob);
 //            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
             double[] tmp = new double[prob.length];
             System.arraycopy(prob, 0, tmp, 0, prob.length);
@@ -209,17 +210,17 @@ public class Pt {
     }
 
     // 1st[] is time, 2nd[] is flattened array of P(t)
-    public double[][] getPt() {
-        double[][] p_t_ = new double[ptList.size()][];
+    public double[][] getP_dist_() {
+        double[][] p_d_ = new double[ptList.size()][];
 
         for (int i = 0; i < ptList.size(); i++) {
             double[] probs = ptList.get(i);
-            p_t_[i] = new double[probs.length];
+            p_d_[i] = new double[probs.length];
             for (int j = 0; j < probs.length; j++) {
-                p_t_[i][j] = probs[j];
+                p_d_[i][j] = probs[j];
             }
         }
-        return p_t_;
+        return p_d_;
     }
 
 
