@@ -97,7 +97,7 @@ public class GibbsSampler {
      * @param startInclusive   the site (codon) index to start in loop
      * @param endExclusive     the site (codon) index to end in loop
      * @param cpd_w        avoid to create new double[]
-     * @see #gibbsSampling(int, int, DABranchLikelihoodCore, DABranchLikelihoodCore,
+     * @see #gibbsSamplingRoot(int, int, DABranchLikelihoodCore, DABranchLikelihoodCore,
      *                     double[], double[], double[])
      * @see #gibbsSampling(int, int, int, DABranchLikelihoodCore, DABranchLikelihoodCore,
      *                     DABranchLikelihoodCore, double[], double[])
@@ -139,7 +139,7 @@ public class GibbsSampler {
             // match index i in newStates[] to the site index k in the whole sequence
             i = k - startInclusive;
             if (isRoot) {
-                newStates[i] = gibbsSampling(x, y, wxBranchLd, wyBranchLd,
+                newStates[i] = gibbsSamplingRoot(x, y, wxBranchLd, wyBranchLd,
                         cpd_w, frequencies, proportions);
             } else {
                 z = nodesStates.getState(parentNr, k);
@@ -172,9 +172,9 @@ public class GibbsSampler {
      * @return the proposed state sampled prob from 3 branch likelihoods,
      *         or negative if something is wrong.
      */
-    protected int gibbsSampling(final int x, final int y, final DABranchLikelihoodCore wxBranchLd,
-                                final DABranchLikelihoodCore wyBranchLd, double[] cpd_w,
-                                final double[] frequencies, final double[] proportions) {
+    protected int gibbsSamplingRoot(final int x, final int y, final DABranchLikelihoodCore wxBranchLd,
+                                    final DABranchLikelihoodCore wyBranchLd, double[] cpd_w,
+                                    final double[] frequencies, final double[] proportions) {
 
         double pwx,pwy,pr_w = 0;
         // no z
@@ -229,7 +229,9 @@ public class GibbsSampler {
         // choose final state w from the distribution
         double random = Randomizer.nextDouble() * cpd_w[cpd_w.length-1];
 
-        return RandomUtils.binarySearchSampling(cpd_w, random);
+//        return RandomUtils.binarySearchSampling(cpd_w, random);
+        // linear faster than binary search implementation nrOfState < 100
+        return RandomUtils.randomChoice(cpd_w, random);
     }
 
     // cumulate pr in cpd[], w is the index of cpd[]

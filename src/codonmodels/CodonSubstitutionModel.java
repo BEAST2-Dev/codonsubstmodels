@@ -128,9 +128,10 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     /**
-     * Faster code to replace
-     * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
-     *
+     * The interface to choose either to use the accurate computation but slow
+     * {@link #getTransiProbs(double, double[], double[])},
+     * or to use approximation but much faster {@link #getTransiProbs(double, double[])}.
+     * The flag is <code>approxInput</code>
      * @param startTime parent.getHeight()
      * @param endTime   node.getHeight()
      * @param rate      joint rate = rate for a site category * mean branch rate.
@@ -148,6 +149,13 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
     }
 
+    /**
+     * Faster code to replace
+     * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
+     * @param distance  distance = (startTime - endTime) * mean branch rate * rate for a site category.
+     * @param iexp      iexp, without creating a new matrix each call.
+     * @param matrix    P(t), without creating a new matrix each call.
+     */
     public void getTransiProbs(double distance, double[] iexp, double[] matrix) {
         int i, j, k;
         double temp;
@@ -208,21 +216,22 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
 
+    /**
+     * Approximate P(t) by caching the list of P(t) matrices in time intervals.
+     * @param distance  distance = (startTime - endTime) * mean branch rate * rate for a site category.
+     * @param matrix    P(t), without creating a new matrix each call.
+     */
     public void getTransiProbs(double distance, double[] matrix) {
         // > biggest distance
         int i = intervals.length-1;
         if (distance == intervals[i])
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
 
-        //  <= i <=
+        // intervals[i-1] <= distance <= intervals[i]
         i = RandomUtils.binarySearchSampling(intervals, distance);
-
         if (distance == intervals[i]) {
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
         } else { // approximation
-
-            double[] probs1 = p_d_[i-1]; // y1
-            double[] probs2 = p_d_[i]; // y2
 
             for (int j = 0; j < p_d_[i].length; j++) {
                 // y = (x-a) * (d-c) / (b-a) + c, where a < x < b, c < y < d
