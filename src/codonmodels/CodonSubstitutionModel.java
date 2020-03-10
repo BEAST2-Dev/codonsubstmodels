@@ -57,11 +57,20 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             "Print the rate classes in the rate matrix, etc.",
             Boolean.TRUE);
 
+    final public Input<Boolean> approxInput = new Input<>("approx",
+            "Approximate transition probabilities",
+            Boolean.FALSE);
+
+
     protected byte[] rateMap;
 
     protected Codon codonDataType;
 //    protected GeneticCode geneticCode; // get from codon
     protected int rateCount;
+
+
+    double[][] p_t_;
+    double[] intervals;
 
     public CodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
@@ -102,6 +111,20 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         if (verboseInput.get())
             printRateMap(codonDataType); // debug
 
+        /*** ***/
+        if (approxInput.get()) {
+            Pt pt = new Pt((CodonFrequencies) frequencies);
+
+            // TODO how to sample rate ?
+            double jointRate = 1.0;
+
+            double maxTime = pt.getMaxTime(jointRate);
+            intervals = pt.createTimeIntervals(maxTime);
+            pt.getTransiProbsByTime(intervals,jointRate);
+
+            p_t_ = pt.getPt();
+        }
+
     }
 
     /**
@@ -116,8 +139,16 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      */
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
-        double distance = (startTime - endTime) * rate;
+        if (approxInput.get())
+            getTransiProbs(startTime, endTime, rate, matrix);
+        else {
+            double distance = (startTime - endTime) * rate;
+            getTransiProbs(distance, iexp, matrix);
+        }
 
+    }
+
+    public void getTransiProbs(double distance, double[] iexp, double[] matrix) {
         int i, j, k;
         double temp;
         // this must be synchronized to avoid being called simultaneously by
@@ -126,7 +157,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             if (updateMatrix) {
                 setupRelativeRates();
 //                if (normalized) {
-                    setupRateMatrix();
+                setupRateMatrix();
 //                } else {
 //                    setupRateMatrixUnnormalized();
 //                }
@@ -175,6 +206,15 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             x += nrOfStates; // x = i + nrOfStates
         }
     }
+
+
+    public void getTransiProbs(double startTime, double endTime, double rate, double[] matrix) {
+
+
+
+
+    }
+
 
     protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
         return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());

@@ -7,27 +7,29 @@ library(reshape2)
 WD=paste0("~/WorkSpace/codonsubstmodels/perftest/")
 setwd(WD)
 
-pt.all <- read_delim("../pt.txt", "\t", comment = "#", col_names = F)
+pt.all <- read_delim("../p_t_.txt", "\t", comment = "#", col_names = F)
 # 3601 is NA
 pt.all <- pt.all[colSums(!is.na(pt.all)) > 0]
+# equal freq, 0.0167  
+tail(pt.all, 10)
+nrow(pt.all)
 
-step = 0.01
-
-pt <- pt.all %>% select(1,2,3,6) 
+# 4 cols
+pt <- pt.all %>% select(1:4,7) 
+colnames(pt)[1] <- "time"
 # 		 AAA AAC AAG
 # 		  K   N   K
 #AAA	K	.   4   1	
-colnames(pt) <- c("AAA->AAA","AAA->AAC","AAA->AAG","AAA->ACC")
+colnames(pt)[2:ncol(pt)] <- c("AAA->AAA","AAA->AAC","AAA->AAG","AAA->ACC")
 #"AAA->AAC", K -> N, codon changes in more than one codon position
 #"AAA->AAG", K -> K, synonymous transition
 #"AAA->ACC", K -> T, non-synonymous transversion
-pt[["x"]] = 1:nrow(pt.all) * step
 
-pt.melt <- melt(pt, id = c("x"))
-colnames(pt.melt) <- c("x","i->j","P(t)")
+pt.melt <- melt(pt, id = c("time"))
 
-p <- ggplot(pt.melt, aes(x, value, colour=variable)) + 
-  geom_line(size=1, alpha=.5) + ylim(0,0.5) +
+p <- ggplot(pt.melt, aes(time, value, colour=variable)) + 
+  geom_point(shape=1, size=0.5, alpha=.5) +  # geom_point(size=.2, alpha=.5)
+  ylim(0,0.5) +
   ggtitle("") + xlab("time") + ylab("P(t)") + 
   guides(colour=guide_legend(title="i->j")) +
   theme_minimal() 
