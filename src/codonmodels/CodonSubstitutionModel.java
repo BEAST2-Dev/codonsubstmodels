@@ -58,9 +58,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             "Print the rate classes in the rate matrix, etc.",
             Boolean.TRUE);
 
-    final public Input<Boolean> approxInput = new Input<>("approx",
-            "Approximate transition probabilities",
-            Boolean.FALSE);
+    final public Input<String> approxInput = new Input<>("approx",
+            "Approximate transition probabilities including " +
+                    "'linear', 'interpolate', or 'no' as default", "no");
 
 
     protected byte[] rateMap;
@@ -113,8 +113,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             printRateMap(codonDataType); // debug
 
         /*** ***/
-        if (approxInput.get()) {
-            P_dist_ pd = new P_dist_((CodonFrequencies) frequencies);
+        if ("linear".equalsIgnoreCase(approxInput.get())) {
+            LinearApproxP_dist_ pd = new LinearApproxP_dist_((CodonFrequencies) frequencies);
 
             double maxDistance = pd.getMaxDistance();
             intervals = pd.createTimeIntervals(maxDistance);
@@ -123,6 +123,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             p_d_ = pd.getP_dist_();
 
             assert p_d_[0].length == nrOfStates * nrOfStates;
+        } else if ("interpolate".equalsIgnoreCase(approxInput.get())) {
+
         }
 
     }
@@ -130,7 +132,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     /**
      * The interface to choose either to use the accurate computation but slow
      * {@link #getTransiProbs(double, double[], double[])},
-     * or to use approximation but much faster {@link #getTransiProbs(double, double[])}.
+     * or to use approximation but much faster {@link #getTransiProbsLinearApprox(double, double[])}.
      * The flag is <code>approxInput</code>
      * @param startTime parent.getHeight()
      * @param endTime   node.getHeight()
@@ -141,8 +143,10 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
         double distance = (startTime - endTime) * rate;
-        if (approxInput.get())
-            getTransiProbs(distance, matrix);
+        if ("linear".equalsIgnoreCase(approxInput.get()))
+            getTransiProbsLinearApprox(distance, matrix);
+        else if ("interpolate".equalsIgnoreCase(approxInput.get()))
+            return;
         else {
             getTransiProbs(distance, iexp, matrix);
         }
@@ -221,7 +225,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      * @param distance  distance = (startTime - endTime) * mean branch rate * rate for a site category.
      * @param matrix    P(t), without creating a new matrix each call.
      */
-    public void getTransiProbs(double distance, double[] matrix) {
+    public void getTransiProbsLinearApprox(double distance, double[] matrix) {
         // > biggest distance
         int i = intervals.length-1;
         if (distance == intervals[i])
