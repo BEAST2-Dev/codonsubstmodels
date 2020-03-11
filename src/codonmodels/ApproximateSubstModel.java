@@ -1,7 +1,5 @@
 package codonmodels;
 
-import java.util.Arrays;
-
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
@@ -9,9 +7,12 @@ import beast.evolution.datatype.DataType;
 import beast.evolution.substitutionmodel.EigenDecomposition;
 import beast.evolution.tree.Node;
 
+import java.util.Arrays;
+
 @Description("Substitution model that approximates transition probability matrix of another model through splines")
 public class ApproximateSubstModel extends CodonSubstitutionModel {
-	final public Input<CodonSubstitutionModel> substModelInput = new Input<>("substModel", "substitution model we want to approximate", Validate.REQUIRED);
+	final public Input<CodonSubstitutionModel> substModelInput = new Input<>("substModel",
+			"substitution model we want to approximate", Validate.REQUIRED);
 	
 	boolean needsUpdate = true;
 	CodonSubstitutionModel substModel;
@@ -19,7 +20,9 @@ public class ApproximateSubstModel extends CodonSubstitutionModel {
 
 	// temporary arrays for SplineInterpolator
 	// knots
-	double [] x = new double[] {0.0, 1.0E-4, 0.10010000000000001, 0.30010000000000003, 0.5001, 0.7001, 0.9000999999999999, 1.2001000000000002, 1.5001000000000004, 1.9001000000000008, 2.400100000000001, 3.1001000000000016, 4.100100000000002, 5.600099999999997, 7.60009999999999, 9.900099999999982};
+	double [] x = new double[] {0.0, 1.0E-4, 0.10010000000000001, 0.30010000000000003, 0.5001, 0.7001,
+			0.9000999999999999, 1.2001000000000002, 1.5001000000000004, 1.9001000000000008, 2.400100000000001,
+			3.1001000000000016, 4.100100000000002, 5.600099999999997, 7.60009999999999, 9.900099999999982};
 	// function values
 	double [] y;
     // Differences between knot points
@@ -69,9 +72,15 @@ public class ApproximateSubstModel extends CodonSubstitutionModel {
         iexp = new double[stateCount * stateCount];
 	}
 
-	
+	// called in TreeLikelihood
 	@Override
 	public void getTransitionProbabilities(Node node, double startTime, double endTime, double rate, double[] matrix) {
+		getTransiProbs(startTime, endTime, rate, iexp, matrix);
+	}
+
+	// called in DataAugTreeLikelihood
+	@Override
+	public void getTransiProbs(double startTime, double endTime, double rate, double[] iexp, double[] matrix) {
 		if (needsUpdate) {
 			update();
 		}

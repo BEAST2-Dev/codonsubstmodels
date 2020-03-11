@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Walter Xie
  */
-public class LinearApproxP_dist_ {
+public class ApproxP_dist_Linear {
 
     private double omega = 0.08;
     private double kappa = 15;
@@ -34,7 +34,7 @@ public class LinearApproxP_dist_ {
 
     List<double[]> ptList = new ArrayList<>();
 
-    public LinearApproxP_dist_() {
+    public ApproxP_dist_Linear() {
         CodonAlignment codonAlignment = initCodonAlignment();
 
         // equal
@@ -44,7 +44,7 @@ public class LinearApproxP_dist_ {
         initM0(codonFreq);
     }
 
-    public LinearApproxP_dist_(CodonFrequencies codonFreq) {
+    public ApproxP_dist_Linear(CodonFrequencies codonFreq) {
         initM0(codonFreq);
     }
 
@@ -87,7 +87,7 @@ public class LinearApproxP_dist_ {
 
 
     public static void main(final String[] args) {
-        LinearApproxP_dist_ pd = new LinearApproxP_dist_();
+        ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
 
         // rate = 1
 //        double jointRate = 1.0;

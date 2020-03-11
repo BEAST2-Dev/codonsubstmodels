@@ -118,7 +118,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
         /*** ***/
         if ("linear".equalsIgnoreCase(approxInput.get())) {
-            LinearApproxP_dist_ pd = new LinearApproxP_dist_((CodonFrequencies) frequencies);
+            ApproxP_dist_Linear pd = new ApproxP_dist_Linear((CodonFrequencies) frequencies);
 
             double maxDistance = pd.getMaxDistance();
             intervals = pd.createTimeIntervals(maxDistance);
@@ -149,8 +149,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         double distance = (startTime - endTime) * rate;
         if ("linear".equalsIgnoreCase(approxInput.get()))
             getTransiProbsLinearApprox(distance, matrix);
-        else if ("interpolate".equalsIgnoreCase(approxInput.get()))
-            return;
+//        else if ("interpolate".equalsIgnoreCase(approxInput.get()))
+//            throw new UnsupportedOperationException("");
         else {
             getTransiProbs(distance, iexp, matrix);
         }
