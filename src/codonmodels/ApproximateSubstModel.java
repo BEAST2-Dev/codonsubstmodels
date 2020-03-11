@@ -7,15 +7,15 @@ import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.evolution.datatype.DataType;
 import beast.evolution.substitutionmodel.EigenDecomposition;
-import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.Node;
 
 @Description("Substitution model that approximates transition probability matrix of another model through splines")
-public class ApproximateSubstModel extends SubstitutionModel.Base {
-	final public Input<SubstitutionModel.Base> substModelInput = new Input<>("substModel", "substitution model we want to approximate", Validate.REQUIRED);
+public class ApproximateSubstModel extends CodonSubstitutionModel {
+	final public Input<CodonSubstitutionModel> substModelInput = new Input<>("substModel", "substitution model we want to approximate", Validate.REQUIRED);
 	
 	boolean needsUpdate = true;
-	SubstitutionModel.Base substModel;
+	CodonSubstitutionModel substModel;
+	double [] iexp;
 
 	// temporary arrays for SplineInterpolator
 	// knots
@@ -65,7 +65,10 @@ public class ApproximateSubstModel extends SubstitutionModel.Base {
         b = new double[n];
         c = new double[n + 1];
         d = new double[n];
+        
+        iexp = new double[stateCount * stateCount];
 	}
+
 	
 	@Override
 	public void getTransitionProbabilities(Node node, double startTime, double endTime, double rate, double[] matrix) {
@@ -99,7 +102,8 @@ public class ApproximateSubstModel extends SubstitutionModel.Base {
 	private void update() {
 		// gather prob matrices
 		for (int k = 0; k < x.length; k++) {
-			substModel.getTransitionProbabilities(null, x[k], 0, 1.0, matrix[k]);
+//			substModel.getTransitionProbabilities(null, x[k], 0, 1.0, matrix[k]);
+			substModel.getTransiProbs(x[k], 0, 1.0, iexp, matrix[k]);
 		}
 		// TODO: make sure last matrix contains base frequencies?
 		
@@ -132,12 +136,12 @@ public class ApproximateSubstModel extends SubstitutionModel.Base {
 
 	
 	@Override
-	protected void store() {
+	public void store() {
 		super.store();
 	}
 	
 	@Override
-	protected void restore() {
+	public void restore() {
 		needsUpdate = true;
 	}
 	
