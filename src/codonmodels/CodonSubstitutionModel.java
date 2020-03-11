@@ -35,7 +35,6 @@ import beast.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
 import beast.evolution.tree.Node;
-import beast.util.RandomUtils;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -58,24 +57,11 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             "Print the rate classes in the rate matrix, etc.",
             Boolean.TRUE);
 
-    final public Input<String> approxInput = new Input<>("approx",
-            "Approximate transition probabilities including " +
-                    "'linear', 'interpolate', or 'no' as default", "no");
-
-
     protected byte[] rateMap;
 
     protected Codon codonDataType;
 //    protected GeneticCode geneticCode; // get from codon
     protected int rateCount;
-
-
-    /**
-     * for linear approximation
-     */
-    double[][] p_d_;
-    double[] intervals;
-
 
     public CodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
@@ -116,28 +102,12 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         if (verboseInput.get())
             printRateMap(codonDataType); // debug
 
-        /*** ***/
-        if ("linear".equalsIgnoreCase(approxInput.get())) {
-            ApproxP_dist_Linear pd = new ApproxP_dist_Linear((CodonFrequencies) frequencies);
-
-            double maxDistance = pd.getMaxDistance();
-            intervals = pd.createTimeIntervals(maxDistance);
-            pd.getTransiProbsByTime(intervals);
-
-            p_d_ = pd.getP_dist_();
-
-            assert p_d_[0].length == nrOfStates * nrOfStates;
-        } else if ("interpolate".equalsIgnoreCase(approxInput.get())) {
-
-        }
-
     }
 
     /**
-     * The interface to choose either to use the accurate computation but slow
-     * {@link #getTransiProbs(double, double[], double[])},
-     * or to use approximation but much faster {@link #getTransiProbsLinearApprox(double, double[])}.
-     * The flag is <code>approxInput</code>
+     * Faster code to replace
+     * {@link GeneralSubstitutionModel#getTransitionProbabilities(Node, double, double, double, double[], boolean)}.
+     *
      * @param startTime parent.getHeight()
      * @param endTime   node.getHeight()
      * @param rate      joint rate = rate for a site category * mean branch rate.
@@ -147,14 +117,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     public void getTransiProbs(double startTime, double endTime, double rate,
                                double[] iexp, double[] matrix) {//, boolean normalized) {
         double distance = (startTime - endTime) * rate;
-        if ("linear".equalsIgnoreCase(approxInput.get()))
-            getTransiProbsLinearApprox(distance, matrix);
-//        else if ("interpolate".equalsIgnoreCase(approxInput.get()))
-//            throw new UnsupportedOperationException("");
-        else {
-            getTransiProbs(distance, iexp, matrix);
-        }
 
+        getTransiProbs(distance, iexp, matrix);
     }
 
     /**
@@ -222,35 +186,6 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             x += nrOfStates; // x = i + nrOfStates
         }
     }
-
-
-    /**
-     * Approximate P(t) by caching the list of P(t) matrices in time intervals.
-     * @param distance  distance = (startTime - endTime) * mean branch rate * rate for a site category.
-     * @param matrix    P(t), without creating a new matrix each call.
-     */
-    public void getTransiProbsLinearApprox(double distance, double[] matrix) {
-        // > biggest distance
-        int i = intervals.length-1;
-        if (distance == intervals[i])
-            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
-
-        // intervals[i-1] <= distance <= intervals[i]
-        i = RandomUtils.binarySearchSampling(intervals, distance);
-        if (distance == intervals[i]) {
-            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
-        } else { // approximation
-
-            for (int j = 0; j < p_d_[i].length; j++) {
-                // y = (x-a) * (d-c) / (b-a) + c, where a < x < b, c < y < d
-                matrix[j] = (distance - intervals[i - 1]) * (p_d_[i][j] - p_d_[i-1][j]) /
-                        (intervals[i] - intervals[i-1]) + p_d_[i-1][j];
-            }
-
-        }
-
-    }
-
 
     protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
         return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());

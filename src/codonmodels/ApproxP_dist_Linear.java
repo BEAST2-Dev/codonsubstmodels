@@ -1,9 +1,11 @@
 package codonmodels;
 
+import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
+import beast.util.RandomUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -20,44 +22,42 @@ import java.util.List;
  *
  * @author Walter Xie
  */
-public class ApproxP_dist_Linear {
+public class ApproxP_dist_Linear extends CodonSubstitutionModel {
+    final public Input<CodonSubstitutionModel> substModelInput = new Input<>("substModel",
+            "substitution model we want to approximate", Input.Validate.REQUIRED);
 
-    private double omega = 0.08;
-    private double kappa = 15;
+    final public Input<String> filePathInput = new Input<>("file",
+            "file path to save all data points used in the linear approximation");
 
-    private double[] freq;
+    CodonSubstitutionModel codonSubstModel; // such as MO
 
-    M0Model m0Model;
+    double[][] p_d_;
+    double[] intervals;
 
     double[] prob;
     double[] iexp;
 
-    List<double[]> ptList = new ArrayList<>();
-
     public ApproxP_dist_Linear() {
-        CodonAlignment codonAlignment = initCodonAlignment();
-
-        // equal
-        CodonFrequencies codonFreq = new CodonFrequencies();
-        codonFreq.initByName("pi", "equal", "data", codonAlignment, "verbose", true);
-
-        initM0(codonFreq);
+        frequenciesInput.setRule(Input.Validate.OPTIONAL);
     }
 
-    public ApproxP_dist_Linear(CodonFrequencies codonFreq) {
-        initM0(codonFreq);
-    }
+    @Override
+    public void initAndValidate() {
+        codonSubstModel = substModelInput.get();
+        frequenciesInput.setValue(codonSubstModel.frequenciesInput.get(), this);
+        super.initAndValidate();
+        eigenDecomposition = null;
 
-    private void initM0(CodonFrequencies codonFreq) {
-        // omega 0.1, kappa 1
-        RealParameter omegaPara = new RealParameter(Double.toString(omega));
-        RealParameter kappaPara = new RealParameter(Double.toString(kappa));
+        System.out.println("\nLinear approximate " + codonSubstModel.getID());
+        if (codonSubstModel instanceof M0Model)
+            System.out.println("\nomega = " + ((M0Model) codonSubstModel).omegaInput.get() +
+                    ", kappa = " + ((M0Model) codonSubstModel).kappaInput.get());
 
-        m0Model = new M0Model();
-        m0Model.initByName("omega", omegaPara, "kappa", kappaPara,
-                "frequencies", codonFreq, "verbose", true);
+        // for caching
+        prob = new double[nrOfStates * nrOfStates];
+        iexp = new double[nrOfStates * nrOfStates];
 
-        freq = m0Model.getFrequencies();
+        double[] freq = getFrequencies();
         System.out.println("\nfreqs = \n" + Arrays.toString(freq) + "\n");
         for (int i = 0; i < freq.length; i++) {
             if (freq[i] == 0)
@@ -66,12 +66,53 @@ public class ApproxP_dist_Linear {
                 System.err.println("Small frequency (< 1E-5) found at codon index " + i);
         }
 
-        int len = m0Model.getStateCount();
-        prob = new double[len*len];
-        iexp = new double[len*len];
+        double maxDistance = getMaxDistance(freq);
+        createTimeIntervals(maxDistance);
+        computeTransiProbsByTime();
+
+        assert p_d_[0].length == nrOfStates * nrOfStates;
+
+        if (filePathInput.get() != null) { // "p_d_.txt"
+            Path path = Paths.get(filePathInput.get());
+            try {
+                writeP_d_(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
-    private CodonAlignment initCodonAlignment() {
+    /**
+     * Approximate P(t) by caching the list of P(t) matrices in time intervals.
+     */
+    public void getTransiProbs(double startTime, double endTime, double rate, double[] iexp, double[] matrix) {
+        // distance = (startTime - endTime) * mean branch rate * rate for a site category.
+        double distance = (startTime - endTime) * rate;
+        // > biggest distance
+        int i = intervals.length-1;
+        if (distance == intervals[i])
+            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
+
+        // intervals[i-1] <= distance <= intervals[i]
+        i = RandomUtils.binarySearchSampling(intervals, distance);
+        if (distance == intervals[i]) {
+            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
+        } else { // approximation
+
+            for (int j = 0; j < p_d_[i].length; j++) {
+                // y = (x-a) * (d-c) / (b-a) + c, where a < x < b, c < y < d
+                matrix[j] = (distance - intervals[i - 1]) * (p_d_[i][j] - p_d_[i-1][j]) /
+                        (intervals[i] - intervals[i-1]) + p_d_[i-1][j];
+            }
+
+        }
+
+    }
+
+
+    public static void main(final String[] args) {
+
         // Not use sequence, but have to init
         Sequence s1 = new Sequence("aaa", "AAA");
         Sequence s2 = new Sequence("aac", "AAA");
@@ -82,38 +123,38 @@ public class ApproxP_dist_Linear {
         CodonAlignment codonAlignment = new CodonAlignment();
         codonAlignment.initByName("data", data, "dataType", "codon",
                 "geneticCode", "vertebrateMitochondrial");
-        return codonAlignment;
-    }
 
+        // equal
+        CodonFrequencies codonFreq = new CodonFrequencies();
+        codonFreq.initByName("pi", "equal", "data", codonAlignment, "verbose", true);
 
-    public static void main(final String[] args) {
+        RealParameter omegaPara = new RealParameter("0.08");
+        RealParameter kappaPara = new RealParameter("15");
+
+        M0Model m0Model = new M0Model();
+        m0Model.initByName("omega", omegaPara, "kappa", kappaPara,
+                "frequencies", codonFreq, "verbose", true);
+
         ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
+        pd.initByName("substModel", m0Model, "file", "p_d_1.txt");
 
-        // rate = 1
-//        double jointRate = 1.0;
-
-        double maxDistance = pd.getMaxDistance();
-        double[] intervals = pd.createTimeIntervals(maxDistance);
-        pd.getTransiProbsByTime(intervals);
-
-        Path path = Paths.get("p_d_.txt");
-        try {
-            pd.write(path, intervals);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public double getMaxDistance() {
-
+    /**
+     * Find max distance in x-axis when the P(d) closes to equilibrium freq.
+     * @param freq
+     * @return
+     */
+    public double getMaxDistance(double[] freq) {
+        double err = 1E-4;
         int d; // distance = time * rate
         for (d = 10; d < 1000; d+=10) {
             // intervals[0] > 0
-            m0Model.getTransiProbs(d, iexp, prob);
+            codonSubstModel.getTransiProbs(d, iexp, prob);
 
             boolean all = true;
             for (int i = 0; i < freq.length; i++) {
-               if (prob[i]-freq[i] > 1E-4) // TODO check i->j
+               if (prob[i]-freq[i] > err) // TODO check i->j in matrix
                    all = false;
             }
 
@@ -125,13 +166,13 @@ public class ApproxP_dist_Linear {
 
 
     // intervals[0] > 0
-    public double[] createTimeIntervals(double maxDistance){
+    public void createTimeIntervals(double maxDistance){
         System.out.println("Max distance = " + maxDistance);
 
         int first = 3;
         int second = 30;
         int third = (int) maxDistance / 4;
-        List<Double> intervals = new ArrayList<>();
+        List<Double> intervalList = new ArrayList<>();
 
         int i = -1; // list index
         double end = -0.02;
@@ -139,48 +180,53 @@ public class ApproxP_dist_Linear {
             i++;
             end += 0.02;
             end = Math.round(end*100) / 100.0;
-            intervals.add(end);
+            intervalList.add(end);
         }
-        System.out.println("Create " + intervals.size() + " intervals from " + intervals.get(0) +
-                " to " + intervals.get(i));
+        System.out.println("Create " + intervalList.size() + " intervals from " + intervalList.get(0) +
+                " to " + intervalList.get(i));
 
         int j = i;
         while (end < second) {
             j++;
             end += 0.5;
             end = Math.round(end*10) / 10.0;
-            intervals.add(end);
+            intervalList.add(end);
         }
-        System.out.println("Create " + (intervals.size()-i+1) + " intervals from " + intervals.get(i+1) +
-                " to " + intervals.get(j));
+        System.out.println("Create " + (intervalList.size()-i+1) + " intervals from " + intervalList.get(i+1) +
+                " to " + intervalList.get(j));
 
         int k = j;
         while (end < third) {
             k++;
             end += 2;
             end = Math.round(end);
-            intervals.add(end);
+            intervalList.add(end);
         }
-        System.out.println("Create " + (intervals.size()-j+1) + " intervals from " + intervals.get(j+1) +
-                " to " + intervals.get(k));
+        System.out.println("Create " + (intervalList.size()-j+1) + " intervals from " + intervalList.get(j+1) +
+                " to " + intervalList.get(k));
 
         while (end < maxDistance) {
             end += 20;
             end = Math.round(end);
-            intervals.add(end);
+            intervalList.add(end);
         }
-        System.out.println("Create last intervals " + (intervals.size()-k+1) +
-                " intervals from " + intervals.get(k+1) + " to " + intervals.get(intervals.size()-1));
+        System.out.println("Create last intervals " + (intervalList.size()-k+1) +
+                " intervals from " + intervalList.get(k+1) + " to " + intervalList.get(intervalList.size()-1));
 
-        return intervals.stream().mapToDouble(d -> d).toArray();
+        this.intervals = intervalList.stream().mapToDouble(d -> d).toArray();
     }
 
-    public void getTransiProbsByTime(double[] intervals) {
+    /**
+     * Compute the exact value of P(t) at each time interval.
+     */
+    public void computeTransiProbsByTime() {
+
+        List<double[]> ptList = new ArrayList<>();
 
         for (int i = 0; i < intervals.length; i++) {
-
+            // eigen decomp to get points
             // startTime > endTime, intervals[0] > 0
-            m0Model.getTransiProbs(intervals[i], iexp, prob);
+            codonSubstModel.getTransiProbs(intervals[i], iexp, prob);
 //            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
             double[] tmp = new double[prob.length];
             System.arraycopy(prob, 0, tmp, 0, prob.length);
@@ -188,29 +234,32 @@ public class ApproxP_dist_Linear {
 
         }
 
+        p_d_ = getP_dist_(ptList);
     }
 
-    public void getTransiProbsByOmega(double maxOmega, double maxTime, double rate) {
-        final double step = 0.01;
-        final double endTime = 0; // startTime > endTime
-        double startTime = endTime + step;
-
-        while (startTime < maxTime) {
-
-            m0Model.getTransiProbs(startTime, endTime, rate, iexp, prob);
-//            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
-            double[] tmp = new double[prob.length];
-            System.arraycopy(prob, 0, tmp, 0, prob.length);
-            ptList.add(tmp);
-
-            startTime += step;
-
-        }
-
-    }
+//    public void getTransiProbsByOmega(double maxOmega, double maxTime, double rate) {
+//        List<double[]> ptList = new ArrayList<>();
+//
+//        final double step = 0.01;
+//        final double endTime = 0; // startTime > endTime
+//        double startTime = endTime + step;
+//
+//        while (startTime < maxTime) {
+//            // eigen decomp
+//            codonSubstModel.getTransiProbs(startTime, endTime, rate, iexp, prob);
+////            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
+//            double[] tmp = new double[prob.length];
+//            System.arraycopy(prob, 0, tmp, 0, prob.length);
+//            ptList.add(tmp);
+//
+//            startTime += step;
+//
+//        }
+//
+//    }
 
     // 1st[] is time, 2nd[] is flattened array of P(t)
-    public double[][] getP_dist_() {
+    public double[][] getP_dist_(List<double[]> ptList) {
         double[][] p_d_ = new double[ptList.size()][];
 
         for (int i = 0; i < ptList.size(); i++) {
@@ -224,14 +273,14 @@ public class ApproxP_dist_Linear {
     }
 
 
-    public void write(Path path, double[] intervals) throws IOException {
+    public void writeP_d_(Path path) throws IOException {
 
-        assert intervals.length == ptList.size();
+        assert intervals.length == p_d_.length;
 
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
             for (int i = 0; i < intervals.length; i++) {
                 writer.write(intervals[i] + "\t");
-                double[] probs = ptList.get(i);
+                double[] probs = p_d_[i];
                 for (double pr : probs) {
                     writer.write("\t" + pr);
                 }
