@@ -2,6 +2,7 @@ package codonmodels;
 
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
+import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.alignment.Sequence;
@@ -13,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,13 +31,13 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
     CodonSubstitutionModel codonSubstModel; // such as MO
 
-    double MaxDistance = 100;
-    double err = 5E-1;
-    double step = 0.01;
-    int multiply = 10;
+    double MaxDistance = 1000;
+    final double DIFF = 1E-4;
+    final double STEP = 0.01;
+    final int multiply = 10;
 
     double[][] p_d_; // 1st time interval, 2nd flattened P(t) index
-    double[] intervals;
+    double[] intervals; // sorted
 
     double[] prob;
     double[] iexp;
@@ -53,7 +53,6 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         super.initAndValidate();
         eigenDecomposition = null;
 
-        System.out.println("\nLinear approximate " + codonSubstModel.getID());
         if (codonSubstModel instanceof M0Model)
             System.out.println("\nomega = " + ((M0Model) codonSubstModel).omegaInput.get() +
                     ", kappa = " + ((M0Model) codonSubstModel).kappaInput.get());
@@ -63,15 +62,19 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         iexp = new double[nrOfStates * nrOfStates];
 
         double[] freq = getFrequencies();
-        System.out.println("\nfreqs = \n" + Arrays.toString(freq) + "\n");
+//        System.out.println("\nfreqs = \n" + Arrays.toString(freq) + "\n");
         for (int i = 0; i < freq.length; i++) {
             if (freq[i] == 0)
-                throw new IllegalArgumentException("Frequency at codon index " + i + " is 0 !");
+                throw new IllegalArgumentException("Illegal 0 frequency at codon index " + i + " !");
             if (freq[i] < 1E-5)
-                System.err.println("Small frequency (< 1E-5) found at codon index " + i);
+                System.err.println("Small frequency (< 1E-5) at codon index " + i);
         }
 
-        createIntervals(freq);
+        // intervals for approx
+        createIntervals(); // need double[] freq ?
+
+        Log.info.println("Linear approximation of codon substitution model " + codonSubstModel.getID() +
+                ", creating " + intervals.length + " data points.\n");
 
         assert p_d_[0].length == nrOfStates * nrOfStates;
 
@@ -101,8 +104,8 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         i = RandomUtils.binarySearchSampling(intervals, distance);
         if (distance == intervals[i]) {
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
-        } else { // approximation
-
+        } else {
+            // approximation
             for (int j = 0; j < p_d_[i].length; j++) {
                 matrix[j] = LinearApproximation(distance, intervals[i - 1], intervals[i],
                         p_d_[i-1][j], p_d_[i][j]);
@@ -149,51 +152,70 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
     }
 
-    public void createIntervals(double[] freq){
+    public void createIntervals(){
         List<Double> intervalList = new ArrayList<>();
         List<double[]> p_d_List = new ArrayList<>();
 
-        double rate = 1.0;
-        double t=0,d = 0;
-        int k;
-        double[] tmp = new double[prob.length];
+//        double t=0,rate = 1.0;
+        double x1, xPre=0, d = 0;
+        int k,r=0;
+        double[] mid = new double[prob.length];
         double[] tru = new double[prob.length];
-        double x1,x2;
+        double[] yPre = new double[prob.length];
         double[] y1Array;
 
+        // add 1st point 0
+        codonSubstModel.getTransiProbs(d, iexp, prob);
+        add(intervalList, p_d_List, 0, prob);
+        // 2nd point
+        d = 1E-4;
+        codonSubstModel.getTransiProbs(d, iexp, prob);
+        add(intervalList, p_d_List, d, prob);
+
+        double step = STEP;
+        // 3rd point
+        d = step;
+        // 3-point proposal: last point, new proposed point, and the middle point between them
         while (d < MaxDistance) {
-            d = Math.round(t * rate * 100000.0) / 100000.0;
+            // propose a new point, d ~ prob
+            d = Math.round(d * 100000.0) / 100000.0; // round precision error
             // eigen decomp to get points, startTime > endTime
             codonSubstModel.getTransiProbs(d, iexp, prob);
-            // approx value test in mid point
+
+            // retrieve last point
             k = intervalList.size() - 1;
+            x1 = intervalList.get(k);
+            y1Array = p_d_List.get(k);
+//            System.arraycopy(p_d_List.get(k), 0, y1Array, 0, prob.length);
 
-            if (k > 2) { // start with 3 points
-                x1 = intervalList.get(k);
-                x2 = d;
-                y1Array = p_d_List.get(k);
+            // middle point
+            for (int j = 0; j < prob.length; j++)
+                mid[j] = LinearApproximation((d+x1)/2, x1, d, y1Array[j], prob[j]);
+            codonSubstModel.getTransiProbs((d+x1)/2, iexp, tru);
 
-                for (int j = 0; j < prob.length; j++)
-                    tmp[j] = LinearApproximation(x2-x1, x1, x2, y1Array[j], prob[j]);
-                codonSubstModel.getTransiProbs(x2-x1, iexp, tru);
-
-                if (largeErr(tmp, tru))
-                    // keep previous last element, work on this newly added element
+            // test diff in the middle point
+            if (largeDiff(mid, tru)) {
+                if (xPre == x1) {
+                    // no proposed point(s) previously
                     add(intervalList, p_d_List, d, prob);
-                else // replace last
-                    set(intervalList, p_d_List, d, k, prob);
+                    step /= multiply;
+                } else
+                    // add previous proposed point
+                    add(intervalList, p_d_List, xPre, yPre);
+                r = 0;
+            } else
+                r++;
 
-            } else {
-                add(intervalList, p_d_List, d, prob);
-            }
+            // save it for next ite
+            xPre = d;
+            System.arraycopy(prob, 0, yPre, 0, prob.length);
 
-            if (t == 0) {
-                t += 1e-4;
-            } else if (t < step) {
-                t = step;
-            } else {
-                t += step;
+            if (r > 10 && step <= 10) {
+                step *= multiply; // jumping 10 grids, then increase step
+                r = 0;
             }
+            d += step;
+
         }
 
         intervals = intervalList.stream().mapToDouble(i -> i).toArray();
@@ -208,19 +230,11 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         p_d_List.add(tmp);
     }
 
-    private void set(List<Double> intervalList, List<double[]> p_d_List, double d, int k, double[] prob) {
-//        d = Math.round(d * 100000.0) / 100000.0;
-        intervalList.set(k, d);
-        double[] tmp = new double[prob.length];
-        System.arraycopy(prob, 0, tmp, 0, prob.length);
-        p_d_List.set(k, tmp);
-    }
-
-    private boolean largeErr(double[] val, double[] trueVal) {
+    private boolean largeDiff(double[] val, double[] trueVal) {
 
         for (int i = 0; i < val.length; i++) {
-            double error = Math.abs(val[i] - trueVal[i]) / trueVal[i];
-            if (error > err)
+            double diff = Math.abs(val[i] - trueVal[i]);
+            if (diff > DIFF)
                 return true;
         }
         return false;
@@ -228,7 +242,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
 
     // 1st[] is time, 2nd[] is flattened array of P(t)
-    public double[][] getP_dist_(List<double[]> ptList) {
+    private double[][] getP_dist_(List<double[]> ptList) {
         double[][] p_d_ = new double[ptList.size()][];
 
         for (int i = 0; i < ptList.size(); i++) {
@@ -242,7 +256,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
     }
 
 
-    public void writeP_d_(Path path) throws IOException {
+    private void writeP_d_(Path path) throws IOException {
 
         assert intervals.length == p_d_.length;
 
@@ -263,7 +277,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
         assert intervals.length == p_d_.length;
 
-        for (int i = 0; i < 5; i++) {//intervals.length
+        for (int i = 0; i < intervals.length; i++) {//intervals.length
             System.out.print(intervals[i] + "\t");
             double[] probs = p_d_[i];
             for (double pr : probs) {
@@ -271,15 +285,15 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
             }
             System.out.println();
         }
-        System.out.println("\n");
-        for (int i = intervals.length-5; i < intervals.length; i++) {//
-            System.out.print(intervals[i] + "\t");
-            double[] probs = p_d_[i];
-            for (double pr : probs) {
-                System.out.print("\t" + pr);
-            }
-            System.out.println();
-        }
+//        System.out.println("\n");
+//        for (int i = intervals.length-5; i < intervals.length; i++) {//
+//            System.out.print(intervals[i] + "\t");
+//            double[] probs = p_d_[i];
+//            for (double pr : probs) {
+//                System.out.print("\t" + pr);
+//            }
+//            System.out.println();
+//        }
 
         System.out.println("\n" + intervals.length + " data points.");
     }
