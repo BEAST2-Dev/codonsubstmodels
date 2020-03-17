@@ -50,6 +50,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
     public void initAndValidate() {
         codonSubstModel = substModelInput.get();
         frequenciesInput.setValue(codonSubstModel.frequenciesInput.get(), this);
+        verboseInput.setValue(false, this); // avoid to print rate matrix twice
         super.initAndValidate();
         eigenDecomposition = null;
 
@@ -92,9 +93,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
     /**
      * Approximate P(t) by caching the list of P(t) matrices in time intervals.
      */
-    public void getTransiProbs(double startTime, double endTime, double rate, double[] iexp, double[] matrix) {
-        // distance = (startTime - endTime) * mean branch rate * rate for a site category.
-        double distance = (startTime - endTime) * rate;
+    public void getTransiProbs(double distance, double[] matrix) {
         // > biggest distance
         int i = intervals.length-1;
         if (distance == intervals[i])
@@ -111,7 +110,16 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
                         p_d_[i-1][j], p_d_[i][j]);
             }
         }
+    }
 
+    /**
+     * Approximate P(t) by caching the list of P(t) matrices in time intervals.
+     */
+    public void getTransiProbs(double startTime, double endTime, double rate, double[] iexp, double[] matrix) {
+        // distance = (startTime - endTime) * mean branch rate * rate for a site category.
+        double distance = (startTime - endTime) * rate;
+
+        this.getTransiProbs(distance, matrix);
     }
 
     // return linear approximation, distance = (startTime - endTime) * rate,
@@ -138,7 +146,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "equal", "data", codonAlignment, "verbose", true);
 
-        RealParameter omegaPara = new RealParameter("0.08");
+        RealParameter omegaPara = new RealParameter("1");
         RealParameter kappaPara = new RealParameter("15");
 
         M0Model m0Model = new M0Model();
@@ -146,10 +154,10 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
                 "frequencies", codonFreq, "verbose", true);
 
         ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
-//        pd.initByName("substModel", m0Model, "file", "p_d_1.txt");
-        pd.initByName("substModel", m0Model);
-        pd.printP_d_();
-
+        pd.initByName("substModel", m0Model, "file", "p_d_1_15.txt");
+//        pd.initByName("substModel", m0Model);
+//        pd.printP_d_();
+//        pd.printStd();
     }
 
     public void createIntervals(){
@@ -298,6 +306,47 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         System.out.println("\n" + intervals.length + " data points.");
     }
 
+    public void printStd() {
+
+        List<Double> intervalList = new ArrayList<>();
+        intervalList.add(1E-5);
+        intervalList.add(1E-4);
+        intervalList.add(1E-3);
+
+        double max = intervals[intervals.length-1];
+        double d = 0;
+        while (d < max) {
+            intervalList.add(d);
+            d += STEP;
+        }
+
+        double[] trueP_d_ = new double[nrOfStates * nrOfStates];
+        double[] approxP_d_ = new double[nrOfStates * nrOfStates];
+        double[] std = new double[nrOfStates * nrOfStates];
+        double diff,minSd=1000,maxSd=0;
+        for (int i = 0; i < intervalList.size(); i++) {
+            d = intervalList.get(i);
+            // true
+            codonSubstModel.getTransiProbs(d, iexp, trueP_d_);
+            // approx
+            this.getTransiProbs(d, approxP_d_);
+
+            for (int j = 0; j < std.length; j++) {
+                diff = approxP_d_[j] - trueP_d_[j];
+                std[j] += diff * diff;
+            }
+        }
+        for (int j = 0; j < std.length; j++) {
+            std[j] = Math.sqrt(std[j] / std.length);
+            System.out.println(j + "\t" + std[j]);
+            if (minSd > std[j])
+                minSd = std[j];
+            if (maxSd < std[j])
+                maxSd = std[j];
+        }
+        System.out.println("\nTesting accuracy at " + intervalList.size() + " points.");
+        System.out.println("Max std = " + maxSd + ", min std = " + minSd);
+    }
 
 }
 
