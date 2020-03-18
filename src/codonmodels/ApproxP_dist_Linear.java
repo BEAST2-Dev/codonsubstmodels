@@ -130,7 +130,21 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
 
     public static void main(final String[] args) {
+        String omega = "0.08";
+//        String kappa = "15";
+        String[] kappas = new String[]{"1","5","15","30"};
+        for (String kappa : kappas) {
+            M0Model m0Model = getM0Model(omega, kappa);
 
+            ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
+            pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
+//        pd.initByName("substModel", m0Model);
+//        pd.printP_d_();
+//        pd.printStd();
+        }
+    }
+
+    protected static M0Model getM0Model(String omega, String kappa) {
         // Not use sequence, but have to init
         Sequence s1 = new Sequence("aaa", "AAA");
         Sequence s2 = new Sequence("aac", "AAA");
@@ -146,18 +160,13 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         CodonFrequencies codonFreq = new CodonFrequencies();
         codonFreq.initByName("pi", "equal", "data", codonAlignment, "verbose", true);
 
-        RealParameter omegaPara = new RealParameter("1");
-        RealParameter kappaPara = new RealParameter("15");
+        RealParameter omegaPara = new RealParameter(omega);
+        RealParameter kappaPara = new RealParameter(kappa);
 
         M0Model m0Model = new M0Model();
         m0Model.initByName("omega", omegaPara, "kappa", kappaPara,
                 "frequencies", codonFreq, "verbose", true);
-
-        ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
-        pd.initByName("substModel", m0Model, "file", "p_d_1_15.txt");
-//        pd.initByName("substModel", m0Model);
-//        pd.printP_d_();
-//        pd.printStd();
+        return m0Model;
     }
 
     public void createIntervals(){
