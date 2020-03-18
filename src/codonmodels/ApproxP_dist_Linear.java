@@ -128,19 +128,21 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         return (distance - x1) * (y2 - y1) / (x2 - x1) + y1;
     }
 
-
+    // use plotPt.R to observe data space
     public static void main(final String[] args) {
-        String omega = "0.08";
-//        String kappa = "15";
+//        String omega = "0.08", kappa = "15";
+        String[] omegas = new String[]{"0.01","0.08","0.1","1"};
         String[] kappas = new String[]{"1","5","15","30"};
-        for (String kappa : kappas) {
-            M0Model m0Model = getM0Model(omega, kappa);
+        for (String omega : omegas) {
+            for (String kappa : kappas) {
+                M0Model m0Model = getM0Model(omega, kappa);
 
-            ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
-            pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
+                ApproxP_dist_Linear pd = new ApproxP_dist_Linear();
+                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
 //        pd.initByName("substModel", m0Model);
 //        pd.printP_d_();
 //        pd.printStd();
+            }
         }
     }
 
