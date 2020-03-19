@@ -29,7 +29,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
     final public Input<String> filePathInput = new Input<>("file",
             "file path to save all data points used in the linear approximation");
 
-    CodonSubstitutionModel codonSubstModel; // such as MO
+    protected CodonSubstitutionModel codonSubstModel; // such as MO
 
     double MaxDistance = 1000;
     final double DIFF = 1E-4;
@@ -72,7 +72,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         }
 
         // intervals for approx
-        createIntervals(); // need double[] freq ?
+        createApproximations(); // need double[] freq ?
 
         Log.info.println("Linear approximation of codon substitution model " + codonSubstModel.getID() +
                 ", creating " + intervals.length + " data points.\n");
@@ -119,7 +119,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         // distance = (startTime - endTime) * mean branch rate * rate for a site category.
         double distance = (startTime - endTime) * rate;
 
-        this.getTransiProbs(distance, matrix);
+        getTransiProbs(distance, matrix);
     }
 
     // return linear approximation, distance = (startTime - endTime) * rate,
@@ -171,7 +171,11 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         return m0Model;
     }
 
-    public void createIntervals(){
+    /**
+     * Create approx which can be used by {@link #getTransiProbs(double, double[])}.
+     * Here is <code>double[][] p_d_<code/> and <code>double[] intervals<code/>.
+     */
+    protected void createApproximations(){
         List<Double> intervalList = new ArrayList<>();
         List<double[]> p_d_List = new ArrayList<>();
 
@@ -249,7 +253,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
         p_d_List.add(tmp);
     }
 
-    private boolean largeDiff(double[] val, double[] trueVal) {
+    protected boolean largeDiff(double[] val, double[] trueVal) {
 
         for (int i = 0; i < val.length; i++) {
             double diff = Math.abs(val[i] - trueVal[i]);
@@ -261,7 +265,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
 
 
     // 1st[] is time, 2nd[] is flattened array of P(t)
-    private double[][] getP_dist_(List<double[]> ptList) {
+    protected double[][] getP_dist_(List<double[]> ptList) {
         double[][] p_d_ = new double[ptList.size()][];
 
         for (int i = 0; i < ptList.size(); i++) {
@@ -275,7 +279,7 @@ public class ApproxP_dist_Linear extends CodonSubstitutionModel {
     }
 
 
-    private void writeP_d_(Path path) throws IOException {
+    protected void writeP_d_(Path path) throws IOException {
 
         assert intervals.length == p_d_.length;
 
