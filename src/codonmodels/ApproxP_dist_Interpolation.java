@@ -36,22 +36,7 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 
         double maxDist = getMaxDist(freq, 1E-3);
 
-        if (X[X.length-1] < maxDist) { // add extra 8 points uniformly distributed
-            int add = 8;
-            knots = new double[X.length + add];
-            System.arraycopy(X, 0 , knots, 0, X.length);
-            for (int i = 0; i < knots.length-X.length; i++)
-                knots[X.length+i] = X[X.length-1] + (maxDist - X[X.length-1]) / add * (i + 1);
-
-        } else { // add X[i] until > maxDist
-            List<Double> knotPointsList = new ArrayList<>();
-            int i = 0;
-            while (X[i] <= maxDist) {
-                knotPointsList.add(X[i]);
-                i++;
-            }
-            knots = knotPointsList.stream().mapToDouble(j -> j).toArray();
-        }
+        createKnots(maxDist);
 
         // cache y, TODO use UnivariateFunction.value(double)
         p_d_ = new double[knots.length][prob.length];
@@ -88,6 +73,25 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 
     }
 
+
+    protected void createKnots(double maxDist) {
+        if (X[X.length-1] < maxDist) { // add extra 8 points uniformly distributed
+            int add = 8;
+            knots = new double[X.length + add];
+            System.arraycopy(X, 0 , knots, 0, X.length);
+            for (int i = 0; i < knots.length-X.length; i++)
+                knots[X.length+i] = X[X.length-1] + (maxDist - X[X.length-1]) / add * (i + 1);
+
+        } else { // add X[i] until > maxDist
+            List<Double> knotPointsList = new ArrayList<>();
+            int i = 0;
+            while (X[i] <= maxDist) {
+                knotPointsList.add(X[i]);
+                i++;
+            }
+            knots = knotPointsList.stream().mapToDouble(j -> j).toArray();
+        }
+    }
 
     protected void createUnivariateFunctions() {
 
