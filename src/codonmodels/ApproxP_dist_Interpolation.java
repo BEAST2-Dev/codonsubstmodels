@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 
-    // knots
+    // knots TODO Natural Spline
     final double [] X = new double[] {0.0, 1.0E-4, 0.1, 0.3, 0.5, 0.7, 0.9, 1.2,
             1.5, 1.9, 2.4, 3.1, 4.1, 5.6, 7.6, 9.9,   13, 17, 22, 27, 35, 45, 55, 60};
 
