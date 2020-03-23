@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Find best approximation of P(dist) function by piecewise regression.
@@ -31,10 +30,10 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     protected CodonSubstitutionModel codonSubstModel; // such as MO
 
-    double MaxDistance = 1000;
-    final double DIFF = 1E-4;
-    final double STEP = 0.01;
-    final int multiply = 10;
+    protected double MaxDistance = 1000;
+    protected final double DIFF = 1E-4;
+    protected final double STEP = 0.01;
+    protected final int multiply = 10;
 
     protected double[] knots; // sorted
     // each p_d_[] is a 60*60 flattened P(t).
@@ -49,20 +48,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     @Override
     public void initAndValidate() {
-        initCodonSubstInput();
-
-        // for caching
-        prob = new double[nrOfStates * nrOfStates];
-        iexp = new double[nrOfStates * nrOfStates];
-
-        double[] freq = getFrequencies();
-//        System.out.println("\nfreqs = \n" + Arrays.toString(freq) + "\n");
-        for (int i = 0; i < freq.length; i++) {
-            if (freq[i] == 0)
-                throw new IllegalArgumentException("Illegal 0 frequency at codon index " + i + " !");
-            if (freq[i] < 1E-5)
-                System.err.println("Small frequency (< 1E-5) at codon index " + i);
-        }
+        double[] freq = initCodonSubstInput();
 
         // core method to create approx model
         createKnotsPd(); // need double[] freq ?
@@ -83,7 +69,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         }
     }
 
-    protected void initCodonSubstInput() {
+    protected double[] initCodonSubstInput() {
         codonSubstModel = substModelInput.get();
         frequenciesInput.setValue(codonSubstModel.frequenciesInput.get(), this);
         verboseInput.setValue(false, this); // avoid to print rate matrix twice
@@ -94,6 +80,20 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             System.out.println("\nomega = " + ((M0Model) codonSubstModel).omegaInput.get() +
                     ", kappa = " + ((M0Model) codonSubstModel).kappaInput.get());
 
+        // for caching
+        prob = new double[nrOfStates * nrOfStates];
+        iexp = new double[nrOfStates * nrOfStates];
+
+        double[] freq = getFrequencies();
+//        System.out.println("\nfreqs = \n" + Arrays.toString(freq) + "\n");
+        for (int i = 0; i < freq.length; i++) {
+            if (freq[i] == 0)
+                throw new IllegalArgumentException("Illegal 0 frequency at codon index " + i + " !");
+            if (freq[i] < 1E-5)
+                System.err.println("Small frequency (< 1E-5) at codon index " + i);
+        }
+
+        return freq;
     }
 
     /**
@@ -102,8 +102,10 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
     public void getTransiProbs(double distance, double[] matrix) {
         // > biggest distance
         int i = knots.length-1;
-        if (distance == knots[i])
+        if (distance == knots[i]) {
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
+            return;
+        }
 
         // intervals[i-1] <= distance <= intervals[i]
         i = RandomUtils.binarySearchSampling(knots, distance);
@@ -212,6 +214,12 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     }
 
+    private void add(List<Double> knotList, List<double[]> p_d_List, double d, double[] prob) {
+        knotList.add(d);
+        double[] tmp = new double[prob.length];
+        System.arraycopy(prob, 0, tmp, 0, prob.length);
+        p_d_List.add(tmp);
+    }
 
     // use plotPt.R to observe data space
     public static void main(final String[] args) {
@@ -226,7 +234,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
         pd.printP_d_();
-        pd.printStd();
+        pd.testAccuracy(-1);
 //            }
 //        }
     }
@@ -256,13 +264,6 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         return m0Model;
     }
 
-
-    private void add(List<Double> knotList, List<double[]> p_d_List, double d, double[] prob) {
-        knotList.add(d);
-        double[] tmp = new double[prob.length];
-        System.arraycopy(prob, 0, tmp, 0, prob.length);
-        p_d_List.add(tmp);
-    }
 
     // the difference between estimated val[] and true values trueVal[].
     protected boolean largeDiff(double[] val, double[] trueVal) {
@@ -333,14 +334,15 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         System.out.println("\n" + knots.length + " data points.");
     }
 
-    public void printStd() {
+    public void testAccuracy(double max) {
 
         List<Double> intervalList = new ArrayList<>();
         intervalList.add(1E-5);
         intervalList.add(1E-4);
         intervalList.add(1E-3);
 
-        double max = knots[knots.length-1];
+        if (max <= 0) max = knots[knots.length-1];
+
         double d = 0;
         while (d < max) {
             intervalList.add(d);
@@ -372,122 +374,71 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             if (maxSd < std[j])
                 maxSd = std[j];
         }
-        System.out.println("\nTesting accuracy at " + intervalList.size() + " points.");
+        System.out.println("\nTesting accuracy at " + intervalList.size() + " points up to d = " + max + ".");
         System.out.println("Max std = " + maxSd + ", min std = " + minSd);
     }
 
+    /*** analyse the curve to plot 3 x and y: min, max, last of P(d) ***/
+
+    protected double[][] getXYMinMax() {
+        // 0 x min x index, 1 x min, 2 y min, 3 x max x index, ...
+        double[][] xy = new double[nrOfStates * nrOfStates][9];
+        for (int c = 0; c < p_d_[0].length; c++){
+            xy[c][1] = 100000; // x min
+            xy[c][2] = 2; // y min
+        }
+        for (int x = 0; x < p_d_.length; x++) {
+            for (int c = 0; c < p_d_[x].length; c++) {
+                if (p_d_[x][c] < xy[c][2]) {
+                    xy[c][0] = x;
+                    xy[c][1] = knots[x]; // x min
+                    xy[c][2] = p_d_[x][c]; // y min
+                }
+                if (p_d_[x][c] > xy[c][5]) {
+                    xy[c][3] = x;
+                    xy[c][4] = knots[x]; // x max
+                    xy[c][5] = p_d_[x][c]; // y max
+                }
+                if (x == p_d_.length - 1) {
+                    xy[c][6] = x;
+                    xy[c][7] = knots[x]; // x last
+                    xy[c][8] = p_d_[x][c]; // y last
+                }
+            }
+        }
+        return xy;
+    }
+
+    // 3 x max x index, 4 x max, 5 y max, 8 y last
+    protected void printXYMax(double[][] xy) {
+        Set<Integer> xMaxId = new TreeSet<>();
+        Set<Double> xMax = new TreeSet<>();
+        for (int x = 0; x < xy.length; x++) {
+            double yMax = Math.round(xy[x][5] * 1000.0) / 1000.0;
+            double last = Math.round(xy[x][8] * 1000.0) / 1000.0;
+            if (yMax != last) {
+                xMaxId.add((int) xy[x][3]);
+                xMax.add(xy[x][4]);
+            }
+        }
+        // unique mapping
+        System.out.println(xMax.size() + " x = " + Arrays.toString(xMax.toArray()));
+        System.out.println(xMaxId.size() + " x index = " + Arrays.toString(xMaxId.toArray()));
+    }
+
+    protected void printXY(double[][] xy) {
+        for (int x = 0; x < xy.length; x++) {
+            System.out.print(x);
+            for (int i = 0; i < xy[x].length; i++) {
+                System.out.print("\t");
+                if (i % 3 == 0)
+                    System.out.print((int) xy[x][i]);
+                else
+                    System.out.print(xy[x][i]);
+            }
+            System.out.println();
+        }
+    }
 }
 
-/**
- * Find max distance in x-axis when the P(d) closes to equilibrium freq.
- public double getMaxDistance(double[] freq) {
- double err = 1E-4;
- int d; // distance = time * rate
- for (d = 10; d < 1000; d+=10) {
- // intervals[0] > 0
- codonSubstModel.getTransiProbs(d, iexp, prob);
 
- boolean all = true;
- for (int i = 0; i < freq.length; i++) {
- if (prob[i]-freq[i] > err) // TODO check i->j in matrix
- all = false;
- }
-
- if (all)
- return d;
- }
- throw new IllegalArgumentException("Cannot find the max time !");
- }
-
- // intervals[0] > 0
- public void createTimeIntervals(double maxDistance){
- System.out.println("Max distance = " + maxDistance);
-
- int first = 3;
- int second = 30;
- int third = (int) maxDistance / 4;
- List<Double> intervalList = new ArrayList<>();
-
- int i = -1; // list index
- double end = -0.02;
- while (end < first) {
- i++;
- end += 0.02;
- end = Math.round(end*100) / 100.0;
- intervalList.add(end);
- }
- System.out.println("Create " + intervalList.size() + " intervals from " + intervalList.get(0) +
- " to " + intervalList.get(i));
-
- int j = i;
- while (end < second) {
- j++;
- end += 0.5;
- end = Math.round(end*10) / 10.0;
- intervalList.add(end);
- }
- System.out.println("Create " + (intervalList.size()-i+1) + " intervals from " + intervalList.get(i+1) +
- " to " + intervalList.get(j));
-
- int k = j;
- while (end < third) {
- k++;
- end += 2;
- end = Math.round(end);
- intervalList.add(end);
- }
- System.out.println("Create " + (intervalList.size()-j+1) + " intervals from " + intervalList.get(j+1) +
- " to " + intervalList.get(k));
-
- while (end < maxDistance) {
- end += 20;
- end = Math.round(end);
- intervalList.add(end);
- }
- System.out.println("Create last intervals " + (intervalList.size()-k+1) +
- " intervals from " + intervalList.get(k+1) + " to " + intervalList.get(intervalList.size()-1));
-
- this.intervals = intervalList.stream().mapToDouble(d -> d).toArray();
- }
-
-
- * Compute the exact value of P(t) at each time interval.
-
- public void computeTransiProbsByTime() {
-
- List<double[]> ptList = new ArrayList<>();
-
- for (int i = 0; i < intervals.length; i++) {
- // eigen decomp to get points
- // startTime > endTime, intervals[0] > 0
- codonSubstModel.getTransiProbs(intervals[i], iexp, prob);
- //            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
- double[] tmp = new double[prob.length];
- System.arraycopy(prob, 0, tmp, 0, prob.length);
- ptList.add(tmp);
-
- }
-
- p_d_ = getP_dist_(ptList);
- }*/
-
-//    public void getTransiProbsByOmega(double maxOmega, double maxTime, double rate) {
-//        List<double[]> ptList = new ArrayList<>();
-//
-//        final double step = 0.01;
-//        final double endTime = 0; // startTime > endTime
-//        double startTime = endTime + step;
-//
-//        while (startTime < maxTime) {
-//            // eigen decomp
-//            codonSubstModel.getTransiProbs(startTime, endTime, rate, iexp, prob);
-////            m0Model.getTransitionProbabilities(null, startTime, endTime, rate, prob);
-//            double[] tmp = new double[prob.length];
-//            System.arraycopy(prob, 0, tmp, 0, prob.length);
-//            ptList.add(tmp);
-//
-//            startTime += step;
-//
-//        }
-//
-//    }

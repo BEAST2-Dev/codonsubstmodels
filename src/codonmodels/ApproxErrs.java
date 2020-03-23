@@ -62,7 +62,7 @@ public class ApproxErrs {
             if (maxErr < error)
                 maxErr = error;
         }
-        System.out.println("\nMax error = " + maxErr + ", min error = " + minErr);
+        System.out.println("\nMax variance = " + maxErr + ", min variance = " + minErr);
 
     }
 
