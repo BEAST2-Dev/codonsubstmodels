@@ -30,7 +30,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     protected CodonSubstitutionModel codonSubstModel; // such as MO
 
-    protected double MaxDistance = 1000;
+    protected final double MaxDistance = 1000.0;
     protected final double DIFF = 1E-4;
     protected final double STEP = 0.01;
     protected final int multiply = 10;
@@ -234,7 +234,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
         pd.printP_d_();
-        pd.testAccuracy(-1);
+        pd.testAccuracy(pd.getLastKnot());
 //            }
 //        }
     }
@@ -264,6 +264,9 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         return m0Model;
     }
 
+    public double getLastKnot() {
+        return knots[knots.length-1];
+    }
 
     // the difference between estimated val[] and true values trueVal[].
     protected boolean largeDiff(double[] val, double[] trueVal) {
@@ -334,17 +337,15 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         System.out.println("\n" + knots.length + " data points.");
     }
 
-    public void testAccuracy(double max) {
+    public void testAccuracy(final double maxX) {
 
         List<Double> intervalList = new ArrayList<>();
         intervalList.add(1E-5);
         intervalList.add(1E-4);
         intervalList.add(1E-3);
 
-        if (max <= 0) max = knots[knots.length-1];
-
         double d = 0;
-        while (d < max) {
+        while (d < maxX) {
             intervalList.add(d);
             d += STEP;
         }
@@ -374,7 +375,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             if (maxSd < std[j])
                 maxSd = std[j];
         }
-        System.out.println("\nTesting accuracy at " + intervalList.size() + " points up to d = " + max + ".");
+        System.out.println("\nTesting accuracy at " + intervalList.size() + " points up to d = " + maxX + ".");
         System.out.println("Max std = " + maxSd + ", min std = " + minSd);
     }
 

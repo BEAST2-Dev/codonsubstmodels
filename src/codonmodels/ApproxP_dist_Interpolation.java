@@ -6,6 +6,10 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Interpolation
  * @author Walter Xie
@@ -14,8 +18,7 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 
     // knots
     final double [] X = new double[] {0.0, 1.0E-4, 0.1, 0.3, 0.5, 0.7, 0.9, 1.2,
-            1.5, 1.9, 2.4, 3.1, 4.1, 5.6, 7.6, 9.9,
-            13, 17, 22, 27, 35, 45, 55, 60};
+            1.5, 1.9, 2.4, 3.1, 4.1, 5.6, 7.6, 9.9,   13, 17, 22, 27, 35, 45, 55, 60};
 
     // 3600
     UnivariateFunction[] functions; // replace double[][] p_d_
@@ -31,16 +34,26 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 
         double[] freq = initCodonSubstInput();
 
-        double xMax = knots[knots.length-1];
-        if (X[X.length-1] < xMax) {
-            knots = new double[X.length+8];
+        double maxDist = getMaxDist(freq, 1E-3);
+
+        if (X[X.length-1] < maxDist) { // add extra 8 points uniformly distributed
+            int add = 8;
+            knots = new double[X.length + add];
             System.arraycopy(X, 0 , knots, 0, X.length);
             for (int i = 0; i < knots.length-X.length; i++)
-                knots[X.length+i] = X[X.length-1] + (xMax - X[X.length-1]) / 8.0 * (i + 1);
-        } else {
-            knots = X;
+                knots[X.length+i] = X[X.length-1] + (maxDist - X[X.length-1]) / add * (i + 1);
+
+        } else { // add X[i] until > maxDist
+            List<Double> knotPointsList = new ArrayList<>();
+            int i = 0;
+            while (X[i] <= maxDist) {
+                knotPointsList.add(X[i]);
+                i++;
+            }
+            knots = knotPointsList.stream().mapToDouble(j -> j).toArray();
         }
 
+        // cache y, TODO use UnivariateFunction.value(double)
         p_d_ = new double[knots.length][prob.length];
         assert p_d_[0].length == nrOfStates * nrOfStates;
 
@@ -48,7 +61,8 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
         createUnivariateFunctions();
 
         Log.info.println("Spline approximation of codon substitution model " + codonSubstModel.getID() +
-                ", creating " + knots.length + " data points.\n");
+                ", creating " + knots.length + " data points.");
+        Log.info.println(Arrays.toString(knots));
 
     }
 
@@ -118,5 +132,31 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 //        }
     }
 
+
+    protected double getMaxDist(double[] freq, final double diff) {
+        final double step = 10.0;
+        double dist = 10.0;
+        // backwards search to 10
+        while (dist < MaxDistance) {
+            // eigen decomp to get points, startTime > endTime
+            codonSubstModel.getTransiProbs(dist, iexp, prob);
+
+            boolean isDiff = false;
+            for (int c = 0; c < prob.length; c++) {
+                int i = 0;
+                if (Math.abs(prob[c] - freq[i]) > diff) {
+                    isDiff = true;
+                    break;
+                }
+                i++;
+            }
+            if (!isDiff)
+                return dist;
+
+            dist += step;
+        }
+
+        return dist;
+    }
 
 }
