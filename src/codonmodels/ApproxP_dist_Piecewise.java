@@ -117,6 +117,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
                 matrix[j] = linearApproximation(distance, knots[i - 1], knots[i],
                         p_d_[i-1][j], p_d_[i][j]);
             }
+            // no need to normalise, sum is very close to 1
         }
     }
 

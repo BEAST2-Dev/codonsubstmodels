@@ -2,9 +2,8 @@ package codonmodels;
 
 import beast.core.util.Log;
 import beast.util.RandomUtils;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,14 +13,14 @@ import java.util.List;
  * Interpolation
  * @author Walter Xie
  */
-public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
+public class ApproxP_dist_CubicSpline extends ApproxP_dist_Piecewise {
 
     // knots TODO Natural Spline
     final double [] X = new double[] {0.0, 1.0E-4, 0.1, 0.3, 0.5, 0.7, 0.9, 1.2,
             1.5, 1.9, 2.4, 3.1, 4.1, 5.6, 7.6, 9.9,   13, 17, 22, 27, 35, 45, 55, 60};
 
     // 3600
-    UnivariateFunction[] functions; // replace double[][] p_d_
+    PolynomialSplineFunction[] cubicSpline; // replace double[][] p_d_
 
     @Override
     public void initAndValidate() {
@@ -42,8 +41,8 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
         p_d_ = new double[knots.length][prob.length];
         assert p_d_[0].length == nrOfStates * nrOfStates;
 
-        functions = new UnivariateFunction[prob.length];
-        createUnivariateFunctions();
+        cubicSpline = new PolynomialSplineFunction[prob.length];
+        createCubicSplineFunctions();
 
         Log.info.println("Spline approximation of codon substitution model " + codonSubstModel.getID() +
                 ", creating " + knots.length + " data points.");
@@ -66,8 +65,19 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
         } else {
             // approximation
-            for (int j = 0; j < p_d_[i].length; j++) {
-                matrix[j] = functions[j].value(distance);
+            int a,b,j;
+            double sum;
+            for (a = 0; a < nrOfStates; a++) {
+                sum = 0;
+                for (b = 0; b < nrOfStates; b++) {
+                    j = a * nrOfStates + b;
+                    matrix[j] = cubicSpline[j].value(distance);
+                    sum += matrix[j];
+                }
+                // normalise TODO it seems not improve much.
+                for (b = 0; b < nrOfStates; b++) {
+                    matrix[a * nrOfStates + b] /= sum;
+                }
             }
         }
 
@@ -93,10 +103,10 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
         }
     }
 
-    protected void createUnivariateFunctions() {
+    protected void createCubicSplineFunctions() {
 
 //        List<Double> intervalList = new ArrayList<>();
-        UnivariateInterpolator interpolator = new SplineInterpolator();
+        SplineInterpolator interpolator = new SplineInterpolator();
 
         for (int i = 0; i < knots.length; i++) {
             // true y
@@ -110,7 +120,9 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
             for (int i = 0; i < knots.length; i++)
                y[i] = p_d_[i][j];
 
-            functions[j] = interpolator.interpolate(knots, y);
+            cubicSpline[j] = interpolator.interpolate(knots, y);
+
+//            Log.info.println(Arrays.toString(cubicSpline[j].getPolynomials()));
         }
 
 
@@ -127,7 +139,7 @@ public class ApproxP_dist_Interpolation extends ApproxP_dist_Piecewise {
 //            for (String kappa : kappas) {
         M0Model m0Model = getM0Model(omega, kappa);
 
-        ApproxP_dist_Interpolation pd = new ApproxP_dist_Interpolation();
+        ApproxP_dist_CubicSpline pd = new ApproxP_dist_CubicSpline();
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
 //        pd.printP_d_();
