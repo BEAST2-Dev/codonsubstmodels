@@ -83,7 +83,7 @@ public class ApproxP_dist_CubicSpline extends ApproxP_dist_Piecewise {
 
     }
 
-
+//TODO different knots of each curve?
     protected void createKnots(double maxDist) {
         if (X[X.length-1] < maxDist) { // add extra 8 points uniformly distributed
             int add = 8;
@@ -143,7 +143,7 @@ public class ApproxP_dist_CubicSpline extends ApproxP_dist_Piecewise {
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
 //        pd.printP_d_();
-        pd.testAccuracy(450);
+        pd.testAccuracy(450, 0.01); //STEP
 //            }
 //        }
     }

@@ -32,7 +32,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     protected final double MaxDistance = 1000.0;
     protected final double DIFF = 1E-4;
-    protected final double STEP = 0.01;
+    protected final double STEP = 0.001;
     protected final int multiply = 10;
 
     protected double[] knots; // sorted
@@ -102,7 +102,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
     public void getTransiProbs(double distance, double[] matrix) {
         // > biggest distance
         int i = knots.length-1;
-        if (distance == knots[i]) {
+        if (distance >= knots[i]) {
             System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
             return;
         }
@@ -144,7 +144,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
      * and true value in the curve.
      * Less computation, but need many points.
      */
-    private void createKnotsPd(){
+    protected void createKnotsPd(){
         List<Double> knotPointsList = new ArrayList<>();
         List<double[]> p_d_List = new ArrayList<>();
 
@@ -170,7 +170,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         // 3-point proposal: last point, new proposed point, and the middle point between them
         while (d < MaxDistance) {
             // propose a new point, d ~ prob
-            d = Math.round(d * 100000.0) / 100000.0; // round precision error
+            d = roundPrecision(d); // round precision error
             // eigen decomp to get points, startTime > endTime
             codonSubstModel.getTransiProbs(d, iexp, prob);
 
@@ -202,7 +202,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             xPre = d;
             System.arraycopy(prob, 0, yPre, 0, prob.length);
 
-            if (r > 10 && step <= 10) {
+            if (r > 5 && step <= 10) {
                 step *= multiply; // jumping 10 grids, then increase step
                 r = 0;
             }
@@ -235,7 +235,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
         pd.printP_d_();
-        pd.testAccuracy(pd.getLastKnot());
+        pd.testAccuracy(pd.getLastKnot()+50, 0.01); //STEP
 //            }
 //        }
     }
@@ -335,21 +335,39 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 //            System.out.println();
 //        }
 
-        System.out.println("\n" + knots.length + " data points.");
+        System.out.println("\nPiecewise linear model " + knots.length +
+                " data points, last dist = " + getLastKnot() + ".");
     }
 
-    public void testAccuracy(final double maxX) {
+    // round precision error
+    protected double roundPrecision(double d) {
+        return Math.round(d * 100000.0) / 100000.0;
+    }
 
+    public void testAccuracy(final double maxX, double step) {
         List<Double> intervalList = new ArrayList<>();
+        intervalList.add(0.0);
         intervalList.add(1E-5);
         intervalList.add(1E-4);
-        intervalList.add(1E-3);
+        if (step > 1E-3)  intervalList.add(1E-3);
 
-        double d = 0;
-        while (d < maxX) {
+        List<Double> stepList = new ArrayList<>();
+        List<Double> uptoList = new ArrayList<>();
+        double r = 10;
+        double d = step;
+        stepList.add(step);
+        while (d <= maxX) {
+            d = roundPrecision(d);
             intervalList.add(d);
-            d += STEP;
+            d += step;
+            if (d > r && step < 10) {
+                uptoList.add(d);
+                step *= multiply;
+                stepList.add(step);
+                r *= 5;
+            }
         }
+        uptoList.add(d-step);
 
         double[] trueP_d_ = new double[nrOfStates * nrOfStates];
         double[] approxP_d_ = new double[nrOfStates * nrOfStates];
@@ -370,18 +388,21 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
         }
         for (int j = 0; j < std.length; j++) {
             std[j] = Math.sqrt(std[j] / std.length);
-            System.out.println(j + "\t" + std[j]);
-            if (minSd > std[j])
-                minSd = std[j];
-            if (maxSd < std[j])
-                maxSd = std[j];
+//            System.out.println(j + "\t" + std[j]);
+
+            if (minSd > std[j])  minSd = std[j];
+            if (maxSd < std[j])  maxSd = std[j];
         }
-        System.out.println("\nTesting accuracy at " + intervalList.size() + " points up to d = " + maxX + ".");
+        System.out.println("\nTesting accuracy at " + intervalList.size() +
+                " points, last dist = " + intervalList.get(intervalList.size()-1) + ".");
+        System.out.println("Steps used " + stepList);
+        System.out.println("Up to d =  " + uptoList);
         System.out.println("Max std = " + maxSd + ", min std = " + minSd);
     }
 
     /*** analyse the curve to plot 3 x and y: min, max, last of P(d) ***/
 
+    // 1st[] is codon index 3600, 2nd[] is min max
     protected double[][] getXYMinMax() {
         // 0 x min x index, 1 x min, 2 y min, 3 x max x index, ...
         double[][] xy = new double[nrOfStates * nrOfStates][9];
