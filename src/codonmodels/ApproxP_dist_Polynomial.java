@@ -19,7 +19,7 @@ public class ApproxP_dist_Polynomial extends ApproxP_dist_Piecewise {
     // 3600, 2nd[] is quantiles
     PolynomialFunction[][] polynomials; // replace double[][] p_d_
 
-    final int breaks = 8;
+    final int breaks = 10;
     double[] frequencies;
 
     @Override

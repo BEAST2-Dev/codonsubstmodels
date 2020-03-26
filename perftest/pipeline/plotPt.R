@@ -45,7 +45,7 @@ ggsave("../figures/p_d_.pdf", p, width = 6, height = 5)
 
 pt.omega <- pt[,1:2]
 pt.omega$omega = 0.08
-for (omega in c(0.01,0.5,1) {
+for (omega in c(0.01,0.5,1)) {
   pt <- getPt(paste0("../p_d_",omega,"_15.txt")) 
   pt.tmp <- pt[,1:2]
   pt.tmp$omega = omega
