@@ -31,7 +31,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
     protected CodonSubstitutionModel codonSubstModel; // such as MO
 
     protected final double MaxDistance = 1000.0;
-    protected final double DIFF = 1E-4;
+    protected final double DIFF = 1E-5;
     protected final double STEP = 0.001;
     protected final int multiply = 10;
 

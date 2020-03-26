@@ -7,6 +7,7 @@ import org.apache.commons.math3.fitting.WeightedObservedPoint;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,8 +19,9 @@ public class ApproxP_dist_Polynomial extends ApproxP_dist_Piecewise {
 
     // 3600, 2nd[] is quantiles
     PolynomialFunction[][] polynomials; // replace double[][] p_d_
+    private final int degree = 3;
 
-    final int breaks = 10;
+    final int breaks = 8;
     double[] frequencies;
 
     @Override
@@ -51,13 +53,13 @@ public class ApproxP_dist_Polynomial extends ApproxP_dist_Piecewise {
         for (int i = 0; i < prob.length; i++) {
             for (int j = 0; j < y.length; j++)
                 y[j] = p_d_[j][i];
-            polynomials[i] = createSegmentedPolynomials(x, y);
+            polynomials[i] = createSegmentedPolynomials(degree, x, y);
         }
 
         Log.info.println("Polynomial fit " + breaks + " breaks for " +
                 "approximation of codon substitution model " + codonSubstModel.getID());
-//        for (int i = 0; i < prob.length; i++)
-//            System.out.println(i + "\t" + Arrays.toString(polynomials[i]));
+        for (int i = 0; i < 5; i++)
+            System.out.println(i + "\t" + Arrays.toString(polynomials[i]));
 
         // reassign p_d_?
         double[][] p_d_new = new double[knots.length][prob.length];
@@ -73,25 +75,33 @@ public class ApproxP_dist_Polynomial extends ApproxP_dist_Piecewise {
     @Override
     public void getTransiProbs(double distance, double[] matrix) {
         // > biggest distance
-        int i = knots.length-1;
-        if (distance >= knots[i]) { // TODO replace p_d_[knots.length-1] by freq[]?
-            System.arraycopy(p_d_[i], 0 , matrix, 0, matrix.length);
+        int b = knots.length-1;
+        if (distance >= knots[b]) { // TODO replace p_d_[knots.length-1] by freq[]?
+            System.arraycopy(p_d_[b], 0 , matrix, 0, matrix.length);
+            return;
+        }
+        if (distance == 0.0) {
+            System.arraycopy(p_d_[0], 0 , matrix, 0, matrix.length);
             return;
         }
 
         // intervals[i-1] <= distance <= intervals[i]
-        for (i = 1; i < knots.length; i++) {
+        for (b = 1; b < knots.length; b++) {
 //        i = RandomUtils.binarySearchSampling(knots, distance);
-            if (distance == knots[i]) {
-                System.arraycopy(p_d_[i], 0, matrix, 0, matrix.length);
-            } else if (distance < knots[i] && distance > knots[i-1]) {
+            if (distance == knots[b]) {
+                System.arraycopy(p_d_[b], 0, matrix, 0, matrix.length);
+                return;
+            } else if (distance < knots[b] && distance > knots[b-1]) {
                 // approximation
                 for (int j = 0; j < matrix.length; j++) {
                     // polynomials[j].length == breaks == knots.length-1
-                    matrix[j] = polynomials[j][i-1].value(distance);
+                    matrix[j] = polynomials[j][b-1].value(distance);
                 }
+                return;
             }
         }
+        throw new IllegalArgumentException("Invalid distance " + distance +
+                " not in knot[]" + Arrays.toString(knots));
     }
 
 
@@ -111,12 +121,12 @@ public class ApproxP_dist_Polynomial extends ApproxP_dist_Piecewise {
 
 
     // create segmented polynomials at one curve from points learnt in linear piecewise
-    protected PolynomialFunction[] createSegmentedPolynomials(double[] xObs, double[] yObs) {
+    protected PolynomialFunction[] createSegmentedPolynomials(int degree, double[] xObs, double[] yObs) {
         assert knots.length == breaks + 1;
 
         PolynomialFunction[] polynFuns = new PolynomialFunction[breaks];
         WeightedObservedPoints obs = new WeightedObservedPoints();
-        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(2);
+        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree);
         double[] coeff;
         List<WeightedObservedPoint> obsList;
         int i = 0;
