@@ -188,8 +188,9 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             // test diff in the middle point
             if (largeDiff(mid, tru)) {
                 if (xPre == x1) {
-                    // no proposed point(s) previously
+                    // no previous proposed point(s) previously
                     add(knotPointsList, p_d_List, d, prob);
+                    // step too big
                     step /= multiply;
                 } else
                     // add previous proposed point
@@ -234,7 +235,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
                 ApproxP_dist_Piecewise pd = new ApproxP_dist_Piecewise();
 //                pd.initByName("substModel", m0Model, "file", "p_d_" + omega + "_" + kappa + ".txt");
         pd.initByName("substModel", m0Model);
-        pd.printP_d_();
+        pd.printP_d_("Piecewise linear model");
         pd.testAccuracy(pd.getLastKnot()+50, 0.01); //STEP
 //            }
 //        }
@@ -313,7 +314,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     }
 
-    public void printP_d_() {
+    public void printP_d_(String model) {
 
         assert knots.length == p_d_.length;
 
@@ -335,7 +336,7 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 //            System.out.println();
 //        }
 
-        System.out.println("\nPiecewise linear model " + knots.length +
+        System.out.println("\n" + model + " " + knots.length +
                 " data points, last dist = " + getLastKnot() + ".");
     }
 
@@ -346,40 +347,27 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
 
     public void testAccuracy(final double maxX, double step) {
         List<Double> intervalList = new ArrayList<>();
-        intervalList.add(0.0);
-        intervalList.add(1E-5);
-        intervalList.add(1E-4);
-        if (step > 1E-3)  intervalList.add(1E-3);
-
         List<Double> stepList = new ArrayList<>();
         List<Double> uptoList = new ArrayList<>();
-        double r = 10;
-        double d = step;
-        stepList.add(step);
-        while (d <= maxX) {
-            d = roundPrecision(d);
-            intervalList.add(d);
-            d += step;
-            if (d > r && step < 10) {
-                uptoList.add(d);
-                step *= multiply;
-                stepList.add(step);
-                r *= 5;
-            }
-        }
-        uptoList.add(d-step);
 
+        initTest(maxX, step, intervalList, stepList, uptoList);
+
+        printTestResult(intervalList);
+    }
+
+    protected void printTestResult(List<Double> intervalList) {
         double[] trueP_d_ = new double[nrOfStates * nrOfStates];
         double[] approxP_d_ = new double[nrOfStates * nrOfStates];
         double[] std = new double[nrOfStates * nrOfStates];
         double diff,minSd=1,maxSd=0;
 
+        double dist;
         for (int i = 0; i < intervalList.size(); i++) {
-            d = intervalList.get(i);
+            dist = intervalList.get(i);
             // true
-            codonSubstModel.getTransiProbs(d, iexp, trueP_d_);
+            codonSubstModel.getTransiProbs(dist, iexp, trueP_d_);
             // approx
-            this.getTransiProbs(d, approxP_d_);
+            this.getTransiProbs(dist, approxP_d_);
 
             for (int j = 0; j < std.length; j++) {
                 diff = approxP_d_[j] - trueP_d_[j];
@@ -393,11 +381,38 @@ public class ApproxP_dist_Piecewise extends CodonSubstitutionModel {
             if (minSd > std[j])  minSd = std[j];
             if (maxSd < std[j])  maxSd = std[j];
         }
-        System.out.println("\nTesting accuracy at " + intervalList.size() +
-                " points, last dist = " + intervalList.get(intervalList.size()-1) + ".");
-        System.out.println("Steps used " + stepList);
-        System.out.println("Up to d =  " + uptoList);
+        System.out.println("\nTesting accuracy at " + intervalList.size() + " points, dist = [" +
+                intervalList.get(0) + ", " + intervalList.get(intervalList.size()-1) + "].");
         System.out.println("Max std = " + maxSd + ", min std = " + minSd);
+    }
+
+    protected void initTest(double maxX, double step, List<Double> intervalList,
+                            List<Double> stepList, List<Double> uptoList) {
+        intervalList.add(0.0);
+        intervalList.add(1E-5);
+        intervalList.add(1E-4);
+        if (step > 1E-3)  intervalList.add(1E-3);
+
+        double r = 10;
+        double dist = step;
+        stepList.add(step);
+        while (dist <= maxX) {
+            dist = roundPrecision(dist);
+            intervalList.add(dist);
+            dist += step;
+            if (dist > r && step < 10) {
+                uptoList.add(dist);
+                step *= multiply;
+                stepList.add(step);
+                r *= 5;
+            }
+        }
+        uptoList.add(dist-step);
+
+        System.out.println("\nInitialise test at " + intervalList.size() + " points, dist = [" +
+                intervalList.get(0) + ", " + intervalList.get(intervalList.size()-1) + "].");
+        System.out.println("Steps used         " + stepList);
+        System.out.println("Step increased at  " + uptoList);
     }
 
     /*** analyse the curve to plot 3 x and y: min, max, last of P(d) ***/
