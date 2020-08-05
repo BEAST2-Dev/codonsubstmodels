@@ -56,7 +56,7 @@ public class ScaleOperatorGibbs extends ScaleOperator {
             double hastingsRatio = 0.0;
             final double scale = getScaler();
 
-            if (m_bIsTreeScaler) {
+            if (isTreeScaler()) {
 
                 final Tree tree = treeInput.get(this);
                 if (rootOnlyInput.get()) {
