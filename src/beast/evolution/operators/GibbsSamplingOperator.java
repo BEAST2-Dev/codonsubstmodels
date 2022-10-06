@@ -1,14 +1,15 @@
 package beast.evolution.operators;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Operator;
-import beast.core.util.Log;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.Operator;
+import beast.base.core.Log;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.tree.Node;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
+//import beast.base.evolution.tree.NodeStatesArray;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
 import beast.util.ThreadHelper;
 
 import java.util.ArrayList;
@@ -147,9 +148,10 @@ public class GibbsSamplingOperator extends Operator {
         final Node node = tree.getNode(nodeNr);
 
         final NodeStatesArray nodesStates;
-        if (storeNodesStates) // State makes a copy and register this operator
-            nodesStates = nodesStatesInput.get(this);
-        else {
+        if (storeNodesStates) { // State makes a copy and register this operator
+            nodesStates = nodesStatesInput.get();
+        	nodesStates.startEditing(this);
+        } else {
             nodesStates = this.nodesStates;
         }
 

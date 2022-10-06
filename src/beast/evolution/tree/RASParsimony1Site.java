@@ -1,5 +1,7 @@
 package beast.evolution.tree;
 
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
 import beast.util.RandomUtils;
 
 import java.util.*;

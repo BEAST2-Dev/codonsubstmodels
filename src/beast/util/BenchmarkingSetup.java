@@ -1,13 +1,17 @@
 package beast.util;
 
-import beast.core.BEASTInterface;
-import beast.core.BEASTObject;
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.BEASTInterface;
+import beast.base.core.BEASTObject;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.parser.XMLParser;
+import beast.base.parser.XMLParserException;
+import beast.base.util.Randomizer;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.alignment.Sequence;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.Tree;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
 
@@ -426,7 +430,7 @@ public abstract class BenchmarkingSetup {
         };
 
         StringBuilder xml = new StringBuilder();
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><beast beautitemplate='Standard' beautistatus='' namespace=\"beast.core:beast.evolution.alignment:beast.core.util:beast.evolution.nuc\" required=\"\" version=\"2.6\">\n").
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><beast beautitemplate='Standard' beautistatus='' namespace=\"beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc\" required=\"\" version=\"2.6\">\n").
                 append("<data id=\"taxa").append(nTaxa).append("\" spec=\"Alignment\" name=\"alignment\">\n");
 
         for (int i = 0; i < nTaxa; i++) {

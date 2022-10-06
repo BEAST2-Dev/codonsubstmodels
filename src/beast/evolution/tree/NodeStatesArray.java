@@ -1,15 +1,17 @@
 package beast.evolution.tree;
 
-import beast.core.CalculationNode;
-import beast.core.Input;
-import beast.core.StateNode;
-import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
+import beast.base.inference.CalculationNode;
+import beast.base.core.Input;
+import beast.base.inference.StateNode;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.TreeInterface;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.util.Randomizer;
+import beast.base.util.Randomizer;
 import beast.util.ThreadHelper;
 
 import java.io.PrintStream;

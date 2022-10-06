@@ -1,15 +1,20 @@
 package beast.util;
 
-import beast.core.*;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.operators.ScaleOperator;
-import beast.evolution.operators.Uniform;
-import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeStatLogger;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.operator.ScaleOperator;
+import beast.base.evolution.operator.Uniform;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeStatLogger;
+import beast.base.inference.Distribution;
+import beast.base.inference.Logger;
+import beast.base.inference.MCMC;
+import beast.base.inference.OperatorSchedule;
+import beast.base.inference.State;
+import beast.base.parser.XMLParserException;
 
 import java.io.IOException;
 import java.text.DecimalFormat;

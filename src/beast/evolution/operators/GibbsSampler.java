@@ -1,12 +1,12 @@
 package beast.evolution.operators;
 
-import beast.core.Description;
+import beast.base.core.Description;
 import beast.evolution.likelihood.DABranchLikelihoodCore;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.tree.Node;
 import beast.evolution.tree.NodeStatesArray;
+import beast.base.evolution.tree.Node;
 import beast.util.RandomUtils;
-import beast.util.Randomizer;
+import beast.base.util.Randomizer;
 
 /**
  * Gibbs sampler to sample the internal node states.

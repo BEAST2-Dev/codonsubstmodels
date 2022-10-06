@@ -1,8 +1,8 @@
 package test.beast.evolution.likelihood;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.likelihood.TreeLikelihood;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
 import org.junit.Test;

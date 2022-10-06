@@ -1,9 +1,9 @@
 package beast.evolution.tree;
 
-import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.datatype.DataType;
+import beast.base.evolution.datatype.DataType;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -18,10 +18,10 @@ import java.util.List;
  * For internal nodes, they are ranged from the number of leaf nodes
  * to the nodeCount - 1.<br>
  *
- * Not use {@link beast.core.parameter.IntegerParameter}, because of performance.
+ * Not use {@link beast.base.inference.parameter.IntegerParameter}, because of performance.
  * https://softwareengineering.stackexchange.com/questions/203970/when-to-use-primitive-vs-class-in-java/203974.
  *
- * No {@link beast.core.Input} here.
+ * No {@link beast.base.core.Input} here.
  * Init and validate in {@link NodeStatesArray#initAndValidate()}.
  */
 public class NodeStates implements Cloneable {// cannot extend StateNode

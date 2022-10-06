@@ -2,10 +2,11 @@ package beast.util;
 
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.Tree;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.parser.XMLParserException;
 
 import java.io.IOException;
 

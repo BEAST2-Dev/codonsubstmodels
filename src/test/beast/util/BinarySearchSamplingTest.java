@@ -2,7 +2,7 @@ package test.beast.util;
 
 import beast.util.DistributionUtils;
 import beast.util.RandomUtils;
-import beast.util.Randomizer;
+import beast.base.util.Randomizer;
 import org.junit.Before;
 import org.junit.Test;
 

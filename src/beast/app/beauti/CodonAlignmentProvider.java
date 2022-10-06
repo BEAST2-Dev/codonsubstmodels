@@ -1,12 +1,14 @@
 package beast.app.beauti;
 
 
-import beast.core.BEASTInterface;
-import beast.core.Description;
-import beast.core.Input;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.GeneticCode;
+import beastfx.app.inputeditor.BeautiAlignmentProvider;
+import beastfx.app.inputeditor.BeautiDoc;
 
 import javax.swing.*;
 import java.util.LinkedHashSet;
@@ -75,6 +77,7 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
     }
 
     @Override
+	public
     void editAlignment(Alignment alignment, BeautiDoc doc) {
         if (alignment instanceof CodonAlignment) {
             try {

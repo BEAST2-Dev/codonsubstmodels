@@ -1,15 +1,15 @@
 
 package codonmodels;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.core.Log;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.evolution.datatype.GeneticCode;
-import beast.evolution.substitutionmodel.Frequencies;
+import beast.base.evolution.substitutionmodel.Frequencies;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;

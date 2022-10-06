@@ -1,6 +1,6 @@
 package codonmodels;
 
-import beast.core.util.Log;
+import beast.base.core.Log;
 import beast.util.RandomUtils;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;

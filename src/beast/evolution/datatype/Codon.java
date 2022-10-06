@@ -25,10 +25,12 @@
 
 package beast.evolution.datatype;
 
-import beast.core.Input;
-import beast.core.util.Log;
+
+import beast.base.core.Input;
+import beast.base.core.Log;
 
 import java.util.Arrays;
+import beast.base.evolution.datatype.DataType;
 
 /**
  * Implements DataType for codon,

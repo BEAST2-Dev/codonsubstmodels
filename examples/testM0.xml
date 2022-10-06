@@ -1,4 +1,4 @@
-<beast version="2.0" namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:
+<beast version="2.0" namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:
 beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
     <!-- ntax=6 nchar=768                                                        -->
@@ -148,25 +148,25 @@ beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.ev
         <data name="data" idref="codon.alignment"/>
         <tree name="tree" idref="tree"/>
         <siteModel name="siteModel" idref="siteModel"/>
-        <branchRateModel id="StrictClock.m0" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
+        <branchRateModel id="StrictClock.m0" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
     </distribution>
 
-    <tree spec='beast.util.ClusterTree' id='tree' clusterType='upgma'>
+    <tree spec='beast.base.evolution.tree.ClusterTree' id='tree' clusterType='upgma'>
         <!--<input name='taxa' idref='codon.alignment'/>-->
         <data name='taxa' idref='alignment'/>
     </tree>
 
 
-    <map name="Uniform" >beast.math.distributions.Uniform</map>
-    <map name="Exponential" >beast.math.distributions.Exponential</map>
-    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
-    <map name="Normal" >beast.math.distributions.Normal</map>
-    <map name="Beta" >beast.math.distributions.Beta</map>
-    <map name="Gamma" >beast.math.distributions.Gamma</map>
-    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
-    <map name="prior" >beast.math.distributions.Prior</map>
-    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
-    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
 
     <run spec="MCMC" id="mcmc" chainLength="1000000"> <!--autoOptimize="true"-->
@@ -177,11 +177,11 @@ beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.ev
             <input name='stateNode' idref='tree'/>
         </state>
 
-        <distribution spec="util.CompoundDistribution" id="posterior">
-            <distribution id="prior" spec="util.CompoundDistribution">
+        <distribution spec="beast.base.inference.CompoundDistribution" id="posterior">
+            <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
                 <distribution id="coalescent" spec="Coalescent">
                     <populationModel id="ConstantPopulation" spec="ConstantPopulation" popSize="@popSize"/>
-                    <treeIntervals spec='TreeIntervals' id='TreeIntervals' tree="@tree"/>
+                    <treeIntervals spec="beast.base.evolution.tree.TreeIntervals" id="beast.base.evolution.tree.TreeIntervals" tree="@tree"/>
                 </distribution>
                 <prior id="OmegaPrior" name="distribution" x="@m0.omega">
                     <LogNormal id="LogNormalDistributionModel.0" name="distr">
@@ -201,7 +201,7 @@ beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.ev
                     <OneOnX id="OneOnX.1" name="distr"/>
                 </prior>
             </distribution>
-            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+            <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="true">
                 <distribution idref="treeLikelihood"/>
             </distribution>
         </distribution>
@@ -258,7 +258,7 @@ beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.ev
         </logger>
 
         <logger logEvery="5000" fileName="test.m0.trees" mode="tree">
-            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree"/>
+            <log id="TreeWithMetaDataLogger.t:Dengue4" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@tree"/>
         </logger>
     </run>
 

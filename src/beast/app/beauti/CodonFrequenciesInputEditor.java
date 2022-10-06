@@ -1,14 +1,16 @@
 package beast.app.beauti;
 
 
-import beast.app.draw.BEASTObjectInputEditor;
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
+import beastfx.app.inputeditor.BEASTObjectInputEditor;
+import beastfx.app.inputeditor.BeautiDoc;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
 import beast.evolution.alignment.CodonAlignment;
 import codonmodels.CodonFrequencies;
+import javafx.scene.control.ComboBox;
+import javafx.scene.layout.Pane;
 
-import javax.swing.*;
 import java.util.Arrays;
 
 
@@ -16,8 +18,6 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
     RealParameter freqsParameter;
     CodonAlignment alignment;
 
-    private static final long serialVersionUID = 1L;
-//    boolean useDefaultBehavior;
 
 	public CodonFrequenciesInputEditor(BeautiDoc doc) {
 		super(doc);
@@ -37,24 +37,26 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
 
     @Override
     /** suppress combobox **/
-    protected void addComboBox(JComponent box, Input<?> input, BEASTInterface beastObject) {
+    protected void addComboBox(Pane box, Input<?> input, BEASTInterface beastObject0) {
         CodonFrequencies freqs = (CodonFrequencies) input.get();
 
         String[] freqsString = new String[]{"equal", "F1X4", "F3X4", "F60/F61"};
-        JComboBox<String> comboBox = new JComboBox<>(freqsString);
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.getItems().addAll(freqsString);
+        
         String pi = freqs.piInput.get();
         int idx = Arrays.asList(freqsString).indexOf(pi);
         if (idx > 0) {
-            comboBox.setSelectedIndex(idx);
+            comboBox.getSelectionModel().select(idx);
         } else {
-            comboBox.setSelectedIndex(0);
+            comboBox.getSelectionModel().select(0);
         }
         freqsParameter = freqs.frequenciesInput.get();
         alignment = (CodonAlignment) getCandidate(freqs.dataInput, freqs);
 
-        comboBox.addActionListener(e -> {
+        comboBox.setOnAction(e -> {
                 //@SuppressWarnings("unchecked")
-                int selected = comboBox.getSelectedIndex();
+                int selected = comboBox.getSelectionModel().getSelectedIndex();
                 try {
                     freqs.piInput.setValue(freqsString[selected], freqs);
                     freqs.frequenciesInput.setValue(freqsParameter, freqs);
@@ -63,7 +65,7 @@ public class CodonFrequenciesInputEditor extends BEASTObjectInputEditor {
                 }
                 //System.err.println(freqs.frequencies.get() + " " + freqs.m_data.get() + " " + freqs.m_bEstimate.get());
             });
-        box.add(comboBox);
+        box.getChildren().add(comboBox);
     }
 
     private BEASTInterface getCandidate(Input<?> input, CodonFrequencies freqs) {

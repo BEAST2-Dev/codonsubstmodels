@@ -1,13 +1,13 @@
 package test.beast.evolution.likelihood;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.alignment.Sequence;
+import beast.base.evolution.alignment.Sequence;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.Tree;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;
 import org.junit.Test;

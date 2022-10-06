@@ -1,5 +1,5 @@
 <beast version='2.0'
-       namespace='beast.app.beauti:beast.core:beast.evolution.branchratemodel
+       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel
        :beast.evolution.speciation:beast.evolution.tree.coalescent:beast.core.util
        :beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
        :beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
@@ -8,7 +8,7 @@
 
     <mergewith point='codonSubstModelTemplates'>
         <!-- gamma site model -->
-        <subtemplate id='Gamma Site Model' class='beast.evolution.sitemodel.SiteModel' mainid='SiteModel.s:$(n)'>
+        <subtemplate id='Gamma Site Model' class='beast.base.evolution.sitemodel.SiteModel' mainid='SiteModel.s:$(n)'>
             <![CDATA[
             <plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>
                 <!--substModel will be automatically detected /-->
@@ -18,15 +18,15 @@
             </plugin>
 
                 <prior id='MutationRatePrior.s:$(n)' x='@mutationRate.s:$(n)'><distr spec="OneOnX"/></prior>
-            <prior id='GammaShapePrior.s:$(n)' x='@gammaShape.s:$(n)'><distr spec="beast.math.distributions.Exponential" mean='1'/></prior>
-            <prior id='PropInvariantPrior.s:$(n)' x='@proportionInvariant.s:$(n)'><distr spec="beast.math.distributions.Uniform" lower='0' upper='1'/></prior>
+            <prior id='GammaShapePrior.s:$(n)' x='@gammaShape.s:$(n)'><distr spec="beast.base.inference.distribution.Exponential" mean='1'/></prior>
+            <prior id='PropInvariantPrior.s:$(n)' x='@proportionInvariant.s:$(n)'><distr spec="beast.base.inference.distribution.Uniform" lower='0' upper='1'/></prior>
 
             <operator id='proportionInvariantScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="0.1" parameter="@proportionInvariant.s:$(n)"/>
             <operator id='mutationRateScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="0.1" parameter="@mutationRate.s:$(n)"/>
             <operator id='gammaShapeScaler.s:$(n)' spec='ScaleOperator' scaleFactor="0.5" weight="0.1" parameter="@gammaShape.s:$(n)"/>
             ]]>
 
-            <connect method="beast.app.beauti.SiteModelInputEditor.customConnector"/>
+            <connect method="beastfx.app.inputeditor.SiteModelInputEditor.customConnector"/>
 
             <!-- when FixMeanMutationRatesOperator, the prior is uniform due to the operator -->
             <connect srcID='MutationRatePrior.s:$(n)'         targetID='prior' inputName='distribution' if='nooperator(FixMeanMutationRatesOperator) and inlikelihood(mutationRate.s:$(n)) and mutationRate.s:$(n)/estimate=true'/>

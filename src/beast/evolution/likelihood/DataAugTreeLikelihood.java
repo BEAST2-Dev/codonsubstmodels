@@ -1,11 +1,12 @@
 package beast.evolution.likelihood;
 
-import beast.core.Input;
-import beast.core.State;
-import beast.core.util.Log;
-import beast.evolution.tree.Node;
+import beast.base.core.Input;
+import beast.base.inference.State;
 import beast.evolution.tree.NodeStates;
-import beast.evolution.tree.Tree;
+import beast.base.core.Log;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 import beast.util.ThreadHelper;
 
 import java.util.*;
@@ -28,7 +29,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
 //            "name of class that implements this treelikelihood potentially more efficiently. " +
 //            "This class will be tried first, with the TreeLikelihood as fallback implementation. " +
 //            "When multi-threading, multiple objects can be created.",
-//            "beast.evolution.likelihood.BeagleTreeLikelihood");
+//            "beast.base.evolution.likelihood.BeagleTreeLikelihood");
 
 //    public static enum Scaling {none, always, _default};
     final public Input<TreeLikelihood.Scaling> scaling = new Input<>("scaling",

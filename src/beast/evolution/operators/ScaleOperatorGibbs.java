@@ -1,8 +1,9 @@
 package beast.evolution.operators;
 
-import beast.core.Input;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
+import beast.base.core.Input;
+import beast.base.evolution.operator.ScaleOperator;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
 
 /**
  * run Gibbs sampler {@link GibbsSampler} after {@link ScaleOperator}
@@ -58,7 +59,8 @@ public class ScaleOperatorGibbs extends ScaleOperator {
 
             if (isTreeScaler()) {
 
-                final Tree tree = treeInput.get(this);
+                final Tree tree = treeInput.get();
+                tree.startEditing(this);
                 if (rootOnlyInput.get()) {
                     final Node root = tree.getRoot();
                     final double newHeight = root.getHeight() * scale;

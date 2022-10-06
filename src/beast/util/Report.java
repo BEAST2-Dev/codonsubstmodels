@@ -1,10 +1,10 @@
 package beast.util;
 
 
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.Logger;
-import beast.core.util.Log;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.inference.Logger;
+import beast.base.core.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Walter Xie
  */
-public class Report extends beast.core.Runnable {
+public class Report extends beast.base.inference.Runnable {
 
     public Input<Distribution> distributionInput = new Input<>("distribution",
             "Distribution to calculate log likelihood.",

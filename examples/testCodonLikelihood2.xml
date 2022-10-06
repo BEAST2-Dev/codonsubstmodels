@@ -1,5 +1,5 @@
-<beast version="2.0" namespace="beast.evolution.alignment:beast.core:beast.evolution.tree.coalescent:
-                                beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
+<beast version="2.0" namespace="beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:
+                                beast.base.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
                                 beast.evolution.substitutionmodel:beast.evolution.likelihood">
 
 	<!-- ntax=6 nchar=768                                                        -->
@@ -124,7 +124,7 @@
           geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
 
     <!--maximum likelihood tree from codeml -->
-    <tree spec="beast.util.TreeParser" id="tree"
+    <tree spec="beast.base.evolution.tree.TreeParser" id="tree"
           newick="((Human_Horai: 0.012988, Human_Arnason: 0.012988): 0.245731, (Chimp_Horai: 0.002959,
     Chimp_Arnason: 0.002959): 0.255761, (Gorilla_Horai: 0.003918, Gorilla_Arnason: 0.003918): 0.254801);"
           IsLabelledNewick="true"/>

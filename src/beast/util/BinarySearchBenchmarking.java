@@ -2,6 +2,8 @@ package beast.util;
 
 import java.util.Arrays;
 
+import beast.base.util.Randomizer;
+
 import static org.junit.Assert.assertArrayEquals;
 
 /**

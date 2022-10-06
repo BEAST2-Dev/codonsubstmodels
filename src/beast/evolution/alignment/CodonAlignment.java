@@ -26,12 +26,14 @@
 package beast.evolution.alignment;
 
 
-import beast.core.Input;
-import beast.core.util.Log;
+import beast.base.core.Input;
+import beast.base.core.Log;
 import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.DataType;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
-import beast.evolution.datatype.Nucleotide;
+import beast.base.evolution.datatype.Nucleotide;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -159,7 +161,7 @@ public class CodonAlignment extends Alignment {
         stateCounts.clear();
         counts.clear();
         try {
-            for (Sequence seq : alignment.sequences) {
+            for (Sequence seq : alignment.sequenceInput.get()) {
                 // TODO need to distinguish ? and -, cannot just replace all ? to -
                 String data = seq.getData().replaceAll("\\?", "-");
                 seq.dataInput.setValue(data, seq);
@@ -189,7 +191,7 @@ public class CodonAlignment extends Alignment {
                 }
                 taxaNames.add(seq.getTaxon());
 
-                if (seq.uncertain)
+                if (seq.uncertainInput.get())
                     throw new UnsupportedOperationException("Uncertain feature in sequence is not supported in this version !");
 
                     //TODO how to deal with uncertain? seq here is Nucleotide sequences not codons.

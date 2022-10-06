@@ -1,8 +1,8 @@
 package test.beast.evolution.alignment;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.alignment.Sequence;
+import beast.base.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
 import org.junit.Test;
 import test.beast.evolution.CodonData;

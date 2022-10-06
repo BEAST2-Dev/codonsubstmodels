@@ -1,11 +1,11 @@
 package codonmodels;
 
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.alignment.Alignment;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.alignment.Sequence;
+import beast.base.evolution.alignment.Sequence;
 import beast.util.RandomUtils;
 
 import java.io.BufferedWriter;

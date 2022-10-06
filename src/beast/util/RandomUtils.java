@@ -2,6 +2,8 @@ package beast.util;
 
 import java.util.Set;
 
+import beast.base.util.Randomizer;
+
 /**
  * @author Walter Xie
  */

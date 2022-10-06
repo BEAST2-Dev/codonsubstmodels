@@ -1,13 +1,13 @@
 package test.beast.evolution;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Sequence;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
 import beast.evolution.datatype.Codon;
-import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.tree.Tree;
-import beast.util.TreeParser;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeParser;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
 

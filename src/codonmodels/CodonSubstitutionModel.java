@@ -26,15 +26,15 @@
 package codonmodels;
 
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.util.Log;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Log;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.DataType;
+import beast.base.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
-import beast.evolution.substitutionmodel.GeneralSubstitutionModel;
-import beast.evolution.tree.Node;
+import beast.base.evolution.substitutionmodel.GeneralSubstitutionModel;
+import beast.base.evolution.tree.Node;
 
 import java.lang.reflect.InvocationTargetException;
 

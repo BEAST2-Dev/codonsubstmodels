@@ -12,10 +12,10 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.substitutionmodel.Frequencies;
-import beast.evolution.substitutionmodel.GTR;
-import beast.util.Randomizer;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.evolution.substitutionmodel.GTR;
+import beast.base.util.Randomizer;
 
 public class ApproximateSubstModelTest {
 

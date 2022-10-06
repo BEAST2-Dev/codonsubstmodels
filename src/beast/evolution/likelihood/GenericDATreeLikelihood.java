@@ -1,18 +1,19 @@
 package beast.evolution.likelihood;
 
 
-import beast.core.Description;
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.State;
-import beast.evolution.branchratemodel.BranchRateModel;
-import beast.evolution.branchratemodel.StrictClockModel;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.sitemodel.SiteModelInterface;
-import beast.evolution.substitutionmodel.SubstitutionModel;
+
+import beast.base.core.Description;
+import beast.base.inference.Distribution;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.State;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.TreeInterface;
+import beast.base.evolution.branchratemodel.BranchRateModel;
+import beast.base.evolution.branchratemodel.StrictClockModel;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.sitemodel.SiteModelInterface;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
+import beast.base.evolution.tree.TreeInterface;
 import codonmodels.CodonSubstitutionModel;
 
 import java.util.Collections;

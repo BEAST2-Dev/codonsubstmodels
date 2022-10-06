@@ -1,12 +1,12 @@
 package test.beast.evolution.likelihood;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.likelihood.DataAugTreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
 import beast.evolution.tree.NodeStatesArray;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
 import codonmodels.CodonFrequencies;
 import org.junit.After;
 import org.junit.Before;

@@ -26,7 +26,9 @@
 package beast.evolution.datatype;
 
 
-import beast.core.Description;
+import beast.base.core.Description;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.Nucleotide;
 
 import java.util.ArrayList;
 import java.util.List;

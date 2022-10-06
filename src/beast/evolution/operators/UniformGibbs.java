@@ -1,9 +1,10 @@
 package beast.evolution.operators;
 
-import beast.core.Input;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.Randomizer;
+import beast.base.core.Input;
+import beast.base.evolution.operator.Uniform;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.util.Randomizer;
 
 /**
  * run Gibbs sampler {@link GibbsSampler} after {@link Uniform}
@@ -55,7 +56,8 @@ public class UniformGibbs extends Uniform {
      */
     @Override
     public double proposal() {
-        final Tree tree = treeInput.get(this);
+        final Tree tree = treeInput.get();
+        tree.startEditing(this);
 
         // randomly select internal node
         final int nodeCount = tree.getNodeCount();

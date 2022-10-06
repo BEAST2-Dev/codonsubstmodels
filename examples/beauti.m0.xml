@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonModels' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.4">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonModels' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="" version="2.4">
 
 
     <data
@@ -19,16 +19,16 @@ id="codon">
 
 
     
-<map name="Uniform" >beast.math.distributions.Uniform</map>
-<map name="Exponential" >beast.math.distributions.Exponential</map>
-<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Normal" >beast.math.distributions.Normal</map>
-<map name="Beta" >beast.math.distributions.Beta</map>
-<map name="Gamma" >beast.math.distributions.Gamma</map>
-<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
-<map name="prior" >beast.math.distributions.Prior</map>
-<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
-<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+<map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+<map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+<map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Normal" >beast.base.inference.distribution.Normal</map>
+<map name="Beta" >beast.base.inference.distribution.Beta</map>
+<map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+<map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+<map name="prior" >beast.base.inference.distribution.Prior</map>
+<map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+<map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
 
 <run id="mcmc" spec="MCMC" chainLength="500000">
@@ -45,17 +45,17 @@ id="codon">
         <parameter id="popSize.t:ca.codon" name="stateNode">0.3</parameter>
     </state>
 
-    <init id="RandomTree.t:ca.codon" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@Tree.t:ca.codon" taxa="@ca.codon">
+    <init id="RandomTree.t:ca.codon" spec="beast.base.evolution.tree.coalescent.RandomTree" estimate="false" initial="@Tree.t:ca.codon" taxa="@ca.codon">
         <populationModel id="ConstantPopulation0.t:ca.codon" spec="ConstantPopulation">
             <parameter id="randomPopSize.t:ca.codon" name="popSize">1.0</parameter>
         </populationModel>
     </init>
 
-    <distribution id="posterior" spec="util.CompoundDistribution">
-        <distribution id="prior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
             <distribution id="CoalescentConstant.t:ca.codon" spec="Coalescent">
                 <populationModel id="ConstantPopulation.t:ca.codon" spec="ConstantPopulation" popSize="@popSize.t:ca.codon"/>
-                <treeIntervals id="TreeIntervals.t:ca.codon" spec="TreeIntervals" tree="@Tree.t:ca.codon"/>
+                <treeIntervals id="TreeIntervals.t:ca.codon" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:ca.codon"/>
             </distribution>
             <prior id="KappaPrior.s:ca.codon" name="distribution" x="@M0.kappa.s:ca.codon">
                 <LogNormal id="LogNormalDistributionModel.1" name="distr">
@@ -73,7 +73,7 @@ id="codon">
                 <OneOnX id="OneOnX.1" name="distr"/>
             </prior>
         </distribution>
-        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution" useThreads="true">
             <distribution id="treeLikelihood.ca.codon" spec="ThreadedTreeLikelihood" data="@ca.codon" tree="@Tree.t:ca.codon">
                 <siteModel id="SiteModel.s:ca.codon" spec="SiteModel">
                     <parameter id="mutationRate.s:ca.codon" estimate="false" name="mutationRate">1.0</parameter>
@@ -83,7 +83,7 @@ id="codon">
                         <frequencies id="F3X4Freqs.s:ca.codon" spec="codonmodels.CodonFrequencies" data="@ca.codon" estimate="false"/>
                     </substModel>
                 </siteModel>
-                <branchRateModel id="StrictClock.c:ca.codon" spec="beast.evolution.branchratemodel.StrictClockModel">
+                <branchRateModel id="StrictClock.c:ca.codon" spec="beast.base.evolution.branchratemodel.StrictClockModel">
                     <parameter id="clockRate.c:ca.codon" estimate="false" name="clock.rate">1.0</parameter>
                 </branchRateModel>
             </distribution>
@@ -114,7 +114,7 @@ id="codon">
         <log idref="posterior"/>
         <log idref="likelihood"/>
         <log idref="prior"/>
-        <log id="TreeHeight.t:ca.codon" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:ca.codon"/>
+        <log id="TreeHeight.t:ca.codon" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:ca.codon"/>
         <log idref="M0.omega.s:ca.codon"/>
         <log idref="M0.kappa.s:ca.codon"/>
         <log idref="popSize.t:ca.codon"/>
@@ -131,7 +131,7 @@ id="codon">
     </logger>
 
     <logger id="treelog.t:ca.codon" fileName="m0.trees" logEvery="1000" mode="tree">
-        <log id="TreeWithMetaDataLogger.t:ca.codon" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:ca.codon"/>
+        <log id="TreeWithMetaDataLogger.t:ca.codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:ca.codon"/>
     </logger>
 
 </run>

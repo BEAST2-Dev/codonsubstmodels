@@ -1,9 +1,9 @@
 package beast.evolution.likelihood;
 
 
-import beast.evolution.tree.NodeStates;
-
 import java.util.Arrays;
+
+import beast.evolution.tree.NodeStates;
 
 /**
  * data augmentation likelihood core based on a branch for multithreading.

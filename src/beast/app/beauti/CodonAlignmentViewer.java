@@ -1,9 +1,9 @@
 package beast.app.beauti;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.DataType;
+import beast.base.evolution.datatype.DataType;
 import beast.evolution.datatype.GeneticCode;
 
 import javax.swing.*;

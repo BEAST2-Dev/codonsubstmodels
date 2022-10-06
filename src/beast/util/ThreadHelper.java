@@ -1,6 +1,6 @@
 package beast.util;
 
-import beast.app.BeastMCMC;
+import beastfx.app.beast.BeastMCMC;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,6 +8,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import beast.base.core.ProgramStatus;
 
 /**
  * @author Walter Xie
@@ -30,10 +32,10 @@ public class ThreadHelper {
      */
     public ThreadHelper(int maxNrOfThreads) {
         // init threadCount
-        threadCount = BeastMCMC.m_nThreads;
+        threadCount = ProgramStatus.m_nThreads;
         // overwritten by max(maxNrOfThreadsInput, BEAST thread in command line)
         if (maxNrOfThreads > 0) {
-            threadCount = Math.max(maxNrOfThreads, BeastMCMC.m_nThreads);
+            threadCount = Math.max(maxNrOfThreads, ProgramStatus.m_nThreads);
         }
         // threadCount is overwritten by instanceCount
         String instanceCount = System.getProperty("beast.instance.count");

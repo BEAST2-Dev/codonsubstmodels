@@ -25,10 +25,10 @@
 
 package codonmodels;
 
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
 
 /**
  * Yang model of codon evolution
@@ -75,7 +75,7 @@ public class M0Model extends CodonSubstitutionModel {//implements Loggable {
     }
 
     @Override
-    protected void setupRelativeRates() {
+	public void setupRelativeRates() {
         double kappa = kappaInput.get().getValue();
         double omega = omegaInput.get().getValue();
 

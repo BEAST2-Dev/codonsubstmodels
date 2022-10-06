@@ -1,6 +1,6 @@
 package test.beast.evolution.substmodel;
 
-import beast.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import codonmodels.CodonFrequencies;
 import org.junit.Before;

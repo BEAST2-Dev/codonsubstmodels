@@ -1,7 +1,7 @@
 package test.beast.evolution.substmodel;
 
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Alignment;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.alignment.Alignment;
 import beast.evolution.alignment.CodonAlignment;
 import beast.evolution.datatype.Codon;
 import beast.util.StringUtils;

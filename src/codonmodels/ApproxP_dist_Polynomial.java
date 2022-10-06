@@ -1,6 +1,6 @@
 package codonmodels;
 
-import beast.core.util.Log;
+import beast.base.core.Log;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoint;
