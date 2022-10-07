@@ -1,6 +1,6 @@
 <beast version="2.0" namespace="beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:
-                                beast.base.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:
-                                beast.evolution.substitutionmodel:beast.evolution.likelihood">
+                                beast.base.util:beast.evolution.nuc:beast.base.evolution.operators:beast.base.evolution.sitemodel:
+                                beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood">
 
 	<!-- ntax=6 nchar=768                                                        -->
     <data id="alignment" dataType="nucleotide">
@@ -121,7 +121,7 @@
 	</data>
 
     <data id="codon.alignment" data="@alignment" dataType="codon"
-          geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
+          geneticCode="vertebrateMitochondrial" spec="codonmodels.evolution.alignment.CodonAlignment"/>
 
     <!--maximum likelihood tree from codeml -->
     <tree spec="beast.base.evolution.tree.TreeParser" id="tree"
@@ -159,7 +159,7 @@
         <input name="siteModel" idref="siteModel"/>
     </distribution>
 
-    <run spec="beast.util.Report">
+    <run spec="codonmodels.util.Report">
         <distribution idref="treeLikelihood" />
 
         <logger>

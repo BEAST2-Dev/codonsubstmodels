@@ -1,8 +1,8 @@
 package codonmodels;
 
 import beast.base.inference.parameter.RealParameter;
+import codonmodels.evolution.alignment.CodonAlignment;
 import beast.base.evolution.alignment.Alignment;
-import beast.evolution.alignment.CodonAlignment;
 import beast.base.evolution.alignment.Sequence;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;

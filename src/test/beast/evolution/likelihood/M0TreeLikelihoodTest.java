@@ -1,9 +1,10 @@
 package test.beast.evolution.likelihood;
 
 import beast.base.evolution.alignment.Alignment;
-import beast.evolution.alignment.CodonAlignment;
 import beast.base.evolution.likelihood.TreeLikelihood;
 import codonmodels.CodonFrequencies;
+import codonmodels.evolution.alignment.CodonAlignment;
+
 import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonData;

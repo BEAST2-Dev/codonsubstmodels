@@ -1,9 +1,9 @@
 package test.beast.evolution.tree;
 
-import beast.evolution.tree.RASParsimony1Site;
+import codonmodels.evolution.tree.RASParsimony1Site;
+import codonmodels.util.RandomUtils;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeInterface;
-import beast.util.RandomUtils;
 import beast.base.util.Randomizer;
 import org.junit.Before;
 import org.junit.Test;

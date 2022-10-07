@@ -2,11 +2,12 @@ package test.beast.evolution.substmodel;
 
 import beast.base.inference.parameter.RealParameter;
 import beast.base.evolution.alignment.Alignment;
-import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.datatype.Codon;
-import beast.util.StringUtils;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
+import codonmodels.evolution.alignment.CodonAlignment;
+import codonmodels.evolution.datatype.Codon;
+import codonmodels.util.StringUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonData;

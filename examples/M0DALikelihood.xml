@@ -122,7 +122,7 @@ beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.like
     </data>
 
     <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial"
-          spec="CodonAlignment"  verbose="false"/>
+          spec="codonmodels.evolution.alignment.CodonAlignment"  verbose="false"/>
 
     <parameter id="m0.omega" value="0.08"/>
     <parameter id="m0.kappa" value="15.0"/>

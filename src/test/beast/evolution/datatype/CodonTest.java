@@ -1,8 +1,9 @@
 package test.beast.evolution.datatype;
 
-import beast.evolution.datatype.Codon;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
+import codonmodels.evolution.datatype.Codon;
+
 import org.junit.Before;
 import org.junit.Test;
 import test.beast.evolution.CodonData;

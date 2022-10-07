@@ -4,7 +4,7 @@
         [SeqsHere]
     </data>
 
-    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="universal" spec="CodonAlignment"/>
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="universal" spec="codonmodels.evolution.alignment.CodonAlignment"/>
 
     <parameter id="m0.omega" value="[OmegaHere]"/>
     <parameter id="m0.kappa" value="[KappaHere]"/>

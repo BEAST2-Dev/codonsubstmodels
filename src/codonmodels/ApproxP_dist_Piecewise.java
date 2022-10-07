@@ -4,9 +4,9 @@ import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
-import beast.evolution.alignment.CodonAlignment;
+import codonmodels.evolution.alignment.CodonAlignment;
+import codonmodels.util.RandomUtils;
 import beast.base.evolution.alignment.Sequence;
-import beast.util.RandomUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

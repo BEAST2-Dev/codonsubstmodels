@@ -35,7 +35,7 @@ id="codon">
     <state id="state" storeEvery="5000">
         <tree id="Tree.t:ca.codon" name="stateNode">
             <taxonset id="TaxonSet.ca.codon" spec="TaxonSet">
-                <alignment id="ca.codon" spec="CodonAlignment" dataType="codon" geneticCode="vertebrateMitochondrial">
+                <alignment id="ca.codon" spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCode="vertebrateMitochondrial">
                     <data idref="codon"/>
                 </alignment>
             </taxonset>

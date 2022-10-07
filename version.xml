@@ -1,4 +1,42 @@
-<addon name='CodonSubstModels' version='1.1.3'>
-    <depends on='beast2' atleast='2.5.0'/>
+<addon name='CodonSubstModels' version='1.2.0'>
+        <depends on='BEAST.base' atleast='2.7.0'/>
+        <depends on='BEAST.app' atleast='2.7.0'/>
+
+    <service type="beast.base.core.BEASTInterface">
+        <provider classname="codonmodels.app.beauti.CodonAlignmentProvider"/>
+        <provider classname="codonmodels.ApproximateSubstModel"/>
+        <provider classname="codonmodels.ApproxP_dist_CubicSpline"/>
+        <provider classname="codonmodels.ApproxP_dist_Piecewise"/>
+        <provider classname="codonmodels.ApproxP_dist_Polynomial"/>
+        <provider classname="codonmodels.CodonFrequencies"/>
+        <provider classname="codonmodels.CodonSubstitutionModel"/>
+        <provider classname="codonmodels.evolution.alignment.CodonAlignment"/>
+        <provider classname="codonmodels.evolution.datatype.Codon"/>
+        <provider classname="codonmodels.evolution.likelihood.DataAugTreeLikelihood"/>
+        <provider classname="codonmodels.evolution.likelihood.GenericDATreeLikelihood"/>
+        <provider classname="codonmodels.evolution.operators.GibbsSamplingOperator"/>
+        <provider classname="codonmodels.evolution.operators.ScaleOperatorGibbs"/>
+        <provider classname="codonmodels.evolution.operators.UniformGibbs"/>
+        <provider classname="codonmodels.evolution.tree.NodeStatesArray"/>
+        <provider classname="codonmodels.evolution.tree.NodeStatesLogger"/>
+        <provider classname="codonmodels.util.Report"/>
+        <provider classname="codonmodels.ApproximateSubstModel"/>
+        <provider classname="codonmodels.ApproxP_dist_CubicSpline"/>
+        <provider classname="codonmodels.ApproxP_dist_Piecewise"/>
+        <provider classname="codonmodels.ApproxP_dist_Polynomial"/>
+        <provider classname="codonmodels.CodonFrequencies"/>
+        <provider classname="codonmodels.CodonSubstitutionModel"/>
+        <provider classname="codonmodels.M0Model"/>
+    </service>
+
+    <service type="beast.base.evolution.datatype.DataType">
+        <provider classname="codonmodels.evolution.datatype.Codon"/>
+    </service>
+
+    <service type="beastfx.app.inputeditor.InputEditor">
+        <provider classname="codonmodels.app.beauti.CodonFrequenciesInputEditor"/>
+    </service>
+
+
 </addon>
 

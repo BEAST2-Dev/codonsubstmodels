@@ -119,7 +119,7 @@ beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.ev
         </sequence>
     </data>
 
-    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
+    <data id="codon.alignment" data="@alignment" dataType="codon" geneticCode="vertebrateMitochondrial" spec="codonmodels.evolution.alignment.CodonAlignment"/>
 
     <parameter id="m0.omega" value="1.0"/>
     <parameter id="m0.kappa" value="2.0"/>

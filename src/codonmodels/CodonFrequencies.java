@@ -6,9 +6,9 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.inference.parameter.RealParameter;
 import beast.base.core.Log;
-import beast.evolution.alignment.CodonAlignment;
-import beast.evolution.datatype.Codon;
-import beast.evolution.datatype.GeneticCode;
+import codonmodels.evolution.alignment.CodonAlignment;
+import codonmodels.evolution.datatype.Codon;
+import codonmodels.evolution.datatype.GeneticCode;
 import beast.base.evolution.substitutionmodel.Frequencies;
 
 import java.text.DecimalFormat;

@@ -1,9 +1,10 @@
 package test.beast.evolution.likelihood;
 
 
-import beast.evolution.likelihood.DABranchLikelihoodCore;
 import org.junit.Before;
 import org.junit.Test;
+
+import codonmodels.evolution.likelihood.DABranchLikelihoodCore;
 
 import java.util.Arrays;
 
