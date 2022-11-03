@@ -1,6 +1,11 @@
-<beast version="2.6" namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree:
-beast.evolution.tree.coalescent:beast.base.util:beast.evolution.nuc:beast.evolution.operators:
-beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood">
+<beast version="2.7" namespace="beast.base.core:beast.base.inference:beast.base.evolution.alignment:
+                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:beast.base.util:
+                     beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:
+                     beast.base.evolution.likelihood:beast.base.evolution.operators:
+                     codonmodels.evolution.alignment:codonmodels.evolution.datatype:
+                     codonmodels.evolution.likelihood:codonmodels.evolution.operators:
+                     codonmodels.evolution.tree:codonmodels.evolution.operators:
+                     codonmodels:codonmodels.util">
 
 
     <!-- ntax=6 nchar=768                                                        -->

@@ -1,4 +1,4 @@
-<beast version="2.0" namespace="beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:
+<beast version="2.7" namespace="beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:
                                 beast.base.util:beast.evolution.nuc:beast.base.evolution.operators:beast.base.evolution.sitemodel:
                                 beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood">
 
