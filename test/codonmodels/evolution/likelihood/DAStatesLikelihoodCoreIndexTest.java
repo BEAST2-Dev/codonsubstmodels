@@ -1,10 +1,8 @@
-package test.beast.evolution.likelihood;
+package codonmodels.evolution.likelihood;
 
 
 import org.junit.Before;
 import org.junit.Test;
-
-import codonmodels.evolution.likelihood.DABranchLikelihoodCore;
 
 import java.util.Arrays;
 

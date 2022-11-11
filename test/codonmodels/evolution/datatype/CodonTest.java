@@ -1,12 +1,10 @@
-package test.beast.evolution.datatype;
+package codonmodels.evolution.datatype;
 
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
-import codonmodels.evolution.datatype.Codon;
-
+import codonmodels.evolution.CodonData;
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonData;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,12 +1,11 @@
-package test.beast.evolution.substmodel;
+package codonmodels.evolution.substmodel;
 
 import beast.base.evolution.alignment.Alignment;
 import codonmodels.CodonFrequencies;
+import codonmodels.evolution.CodonData;
 import codonmodels.evolution.alignment.CodonAlignment;
-
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonData;
 
 import static org.junit.Assert.assertArrayEquals;
 

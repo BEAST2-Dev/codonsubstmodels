@@ -1,9 +1,6 @@
-package test.beast.util;
+package codonmodels.util;
 
 import beast.base.util.Randomizer;
-import codonmodels.util.DistributionUtils;
-import codonmodels.util.RandomUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 

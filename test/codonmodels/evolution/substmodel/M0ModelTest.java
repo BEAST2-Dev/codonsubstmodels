@@ -1,16 +1,15 @@
-package test.beast.evolution.substmodel;
+package codonmodels.evolution.substmodel;
 
-import beast.base.inference.parameter.RealParameter;
 import beast.base.evolution.alignment.Alignment;
+import beast.base.inference.parameter.RealParameter;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
+import codonmodels.evolution.CodonData;
 import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.util.StringUtils;
-
 import org.junit.Before;
 import org.junit.Test;
-import test.beast.evolution.CodonData;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;

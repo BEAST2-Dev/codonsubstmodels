@@ -1,4 +1,4 @@
-package test.beast.evolution.operator;
+package codonmodels.evolution.operator;
 
 import org.junit.Before;
 import org.junit.Test;

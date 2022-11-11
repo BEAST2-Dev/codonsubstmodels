@@ -1,9 +1,12 @@
-<beast version='2.0'
-       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel
-       :beast.evolution.speciation:beast.evolution.tree.coalescent:beast.core.util
-       :beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
-       :beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
-       :beast.evolution.alignment:beast.evolution.datatype:codonmodels'>
+<beast version='2.7'
+       namespace='beast.base.core:beast.base.inference:beast.base.inference.util:
+       beast.evolution.nuc:beast.base.evolution.alignment:beast.base.evolution.datatype:
+       beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:
+       beast.base.evolution.operator:beast.base.inference.operator:beast.evolution:beast.base.math.distributions:
+       beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:
+       codonmodels:codonmodels.evolution:codonmodels.evolution.alignment:codonmodels.evolution.datatype:
+       codonmodels.evolution.likelihood:codonmodels.evolution.operators:codonmodels.evolution.tree'
+       templateinfo='sub-template for codon substitution models'>
 
 
     <mergewith point='codonSubstModelTemplates'>

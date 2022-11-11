@@ -1,6 +1,9 @@
-package test.beast.evolution.substmodel;
-import java.util.Arrays;
+package codonmodels.evolution.substmodel;
 
+import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.evolution.substitutionmodel.GTR;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.util.Randomizer;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -12,10 +15,7 @@ import org.apache.commons.math3.optim.univariate.SearchInterval;
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction;
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair;
 
-import beast.base.inference.parameter.RealParameter;
-import beast.base.evolution.substitutionmodel.Frequencies;
-import beast.base.evolution.substitutionmodel.GTR;
-import beast.base.util.Randomizer;
+import java.util.Arrays;
 
 public class ApproximateSubstModelTest {
 

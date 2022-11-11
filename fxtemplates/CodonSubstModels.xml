@@ -1,9 +1,11 @@
-<beast version='2.0'
-       namespace='beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel
-       :beast.evolution.speciation:beast.evolution.tree.coalescent:beast.base.util:beast.util
-       :beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
-       :beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions
-       :beast.evolution.alignment:beast.evolution.datatype:codonmodels'
+<beast version='2.7'
+       namespace='beast.base.core:beast.base.inference:beast.base.inference.util:
+       beast.evolution.nuc:beast.base.evolution.alignment:beast.base.evolution.datatype:
+       beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:
+       beast.base.evolution.operator:beast.base.inference.operator:beast.evolution:beast.base.math.distributions:
+       beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:
+       codonmodels:codonmodels.evolution:codonmodels.evolution.alignment:codonmodels.evolution.datatype:
+       codonmodels.evolution.likelihood:codonmodels.evolution.operators:codonmodels.evolution.tree'
 	templateinfo='template for codon substitution models'>
 
 <map name='connect' reserved='true'>beastfx.app.inputeditor.BeautiConnector</map>
@@ -19,7 +21,7 @@
 <map name='InverseGamma'>beast.base.inference.distribution.InverseGamma</map>
 <map name='prior'>beast.base.inference.distribution.Prior</map>
 
-    <beauticonfig spec='BeautiConfig'
+    <beauticonfig spec='beastfx.app.inputeditor.BeautiConfig'
         inputLabelMap='beast.base.inference.MCMC.operator=Operators,
 	        beast.base.inference.MCMC.logger=Loggers,
 			beast.base.evolution.sitemodel.SiteModel.mutationRate =Substitution Rate,
@@ -82,10 +84,7 @@
 	        beast.base.evolution.substitutionmodel.MTREV.frequencies,
 	        beast.base.evolution.substitutionmodel.GTR.rates,
 	        beast.base.evolution.substitutionmodel.JukesCantor.frequencies,
-	        codonmodels.M0Model.rates,
-	        codonmodels.M0Model.eigenSystem,
-	        codonmodels.M0Model.verbose,
-            beast.base.inference.distribution.Prior.x,
+	        beast.base.inference.distribution.Prior.x,
             beast.base.evolution.tree.MRCAPrior.tree,
             beast.base.evolution.tree.MRCAPrior.monophyletic,
             beast.base.evolution.tree.MRCAPrior.taxonset,
@@ -101,71 +100,73 @@
             beast.base.evolution.tree.coalescent.BayesianSkyline.treeIntervals,
             beast.base.evolution.tree.coalescent.BayesianSkyline.groupSizes,
             beast.base.evolution.tree.coalescent.BayesianSkyline.popSizes,
-            beast.base.evolution.speciation.YuleModel.originHeight
-            '
+            beast.base.evolution.speciation.YuleModel.originHeight,
+            codonmodels.M0Model.rates,
+	        codonmodels.M0Model.eigenSystem,
+	        codonmodels.M0Model.verbose'
         buttonLabelMap='beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters'
     >
         <!--disableMenus='Mode'-->
 
-        <panel spec='BeautiPanelConfig' panelname="Partitions" tiptext="Codon Data Partitions"
+        <panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Partitions" tiptext="Codon Data Partitions"
             path='distribution/distribution[id="likelihood"]/distribution/data'
             hasPartitions="none" icon='2220.png.x' forceExpansion='FALSE'
             type='beast.base.evolution.alignment.Alignment'
         />
 		<mergepoint id='aux-partitions-panels'/>
 
-		<panel spec='BeautiPanelConfig' panelname="Tip Dates" tiptext="Allows to specify data that a taxon was sampled"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Tip Dates" tiptext="Allows to specify data that a taxon was sampled"
             path='tree'
             hasPartitions="Tree" icon='2.png.x' forceExpansion='TRUE'
             isVisible='true'
         />
 		<mergepoint id='aux-tipdates-panels'/>
 
-        <panel spec='BeautiPanelConfig' panelname="Site Model"
+        <panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Site Model"
                tiptext="Site model and codon substitution model specifications"
                path='siteModel' hasPartitions="SiteModel" icon='3.png.x' forceExpansion='TRUE'
         />
 
 		<mergepoint id='aux-sitemodel-panels'/>
 
-		<panel spec='BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Clock Model" tiptext="Clock model"
             path='branchRateModel'
             hasPartitions="ClockModel" icon='4.png.x' forceExpansion='TRUE'
         />
 		<mergepoint id='aux-clockmodel-panels'/>
-		<panel spec='BeautiPanelConfig' panelname="Initialization" tiptext="Initial state"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Initialization" tiptext="Initial state"
             path='state/stateNode'
             hasPartitions="none" icon='6.png.x' forceExpansion='TRUE_START_COLLAPSED'
             isVisible='false'
         />
 		<mergepoint id='aux-initilisation-panels'/>
-		<panel spec='BeautiPanelConfig' panelname="Starting tree" tiptext="Starting tree"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Starting tree" tiptext="Starting tree"
             path='init'
             hasPartitions="none" icon='6.png.x' forceExpansion='TRUE'
             isVisible='false'
         />
 
-		<panel spec='BeautiPanelConfig' panelname="Priors" tiptext="Other priors"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Priors" tiptext="Other priors"
             path='distribution/distribution[id="prior"]/distribution'
             hasPartitions="none" icon='7.png.x' forceExpansion='TRUE_START_COLLAPSED'
             type='beast.base.inference.Distribution'
         />
 		<mergepoint id='aux-priors-panels'/>
 
-		<panel spec='BeautiPanelConfig' panelname="Operators" tiptext="MCMC Operator details"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="Operators" tiptext="MCMC Operator details"
             path='operator'
             hasPartitions="none" icon='8.png.x' forceExpansion='TRUE_START_COLLAPSED'
             isVisible='false' buttonStatus='ADD_ONLY'
         />
 		<mergepoint id='aux-operators-panels'/>
 
-		<panel spec='BeautiPanelConfig' panelname="MCMC" tiptext="MCMC parameters"
+		<panel spec='beastfx.app.inputeditor.BeautiPanelConfig' panelname="MCMC" tiptext="MCMC parameters"
             path=''
             hasPartitions="none" icon='9.png.x' forceExpansion='TRUE'
         />
 		<mergepoint id='aux-panels'/>
 
-		<alignmentProvider id="Codon Alignment" spec='CodonAlignmentProvider' template='@CodonPartitionTemplate'/>
+		<alignmentProvider id="Codon Alignment" spec='codonmodels.app.beauti.CodonAlignmentProvider' template='@CodonPartitionTemplate'/>
 
 
         <partitiontemplate id='CodonPartitionTemplate' spec='BeautiSubTemplate' class='beast.base.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>

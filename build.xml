@@ -7,10 +7,14 @@
 
     <!-- Location to check for local copy of beast2 repository -->
     <property name="beastDir" location="../beast2"/>
+    <property name="beastFX" location="../BeastFX" />
+    <property name="lib" location="lib" />
 
-    <!-- BEAST 2 currently uses Java 1.8 -->
-    <property name="sourceVersion" value="1.8"/>
-    <property name="targetVersion" value="1.8"/>
+    <!-- BEAST 2 currently uses Java 17 -->
+    <property name="sourceVersion" value="17"/>
+    <property name="targetVersion" value="17"/>
+
+    <property name="ZuluJDK" location="../../Downloads/zulu17.36.13-ca-fx-jdk17.0.4-macosx_x64/zulu-17.jdk/Contents/Home/bin/javac" />
 
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="doc" location="doc"/>
@@ -33,7 +37,7 @@
     <property name="pack" location="${dist}/package"/>
 
     <!-- Prepare for compilation -->
-    <target name="init">
+    <target name="init" depends="clean">
 
         <available file="version.xml" property="versionAvailable"/>
         <fail unless="versionAvailable">
@@ -45,16 +49,13 @@
 
         <!-- Read package name and version from xml file -->
         <xmlproperty file="version.xml" prefix="fromVersionFile" />
-        <property name="projName" value="${fromVersionFile.addon(name)}" />
-        <property name="projVersion" value="${fromVersionFile.addon(version)}" />
+        <property name="projName" value="${fromVersionFile.package(name)}" />
+        <property name="projVersion" value="${fromVersionFile.package(version)}" />
 
         <mkdir dir="${build}"/>
         <mkdir dir="${build-lib}"/>
         <mkdir dir="${dist}"/>
 
-        <!--copy todir="${build-lib}">
-            <fileset dir="${lib}" includes="*.jar"/>
-        </copy-->
     </target>
 
     <!-- Get beast -->
@@ -83,6 +84,7 @@
         <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}/beast2-${beast-version}/build" />
         <copy todir="${build-lib}">
             <fileset dir="${build-beast}/beast2-${beast-version}/lib" includes="*.jar"/>
+            <fileset dir="${build-beast}/beast2-${beast-version}/lib/junit" includes="junit-*.jar"/>
         </copy>
 
         <delete dir="${build-beast}" />
@@ -91,19 +93,25 @@
     <target name="build-local-beast" depends="find-beast" if="localBeastAvailable">
         <echo>Compiling against beast2 source found at ${beastDir}.</echo>
 
+        <!-- Read package name and version from xml file -->
+        <xmlproperty file="${beastDir}/version.xml" prefix="BeastVersionFile" />
+        <property name="beastName" value="${BeastVersionFile.package(name)}" />
+        <property name="beastVersion" value="${BeastVersionFile.package(version)}" />
+
         <mkdir dir="${build-beast}"/>
 
         <javac target="${targetVersion}" source="${sourceVersion}"
-            srcdir="${beastDir}/src"
-            destdir="${build-beast}" includeantruntime="false">
+               srcdir="${beastDir}/src" destdir="${build-beast}"
+               includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${beastDir}/lib" includes="*.jar"/>
             </classpath>
         </javac>
-        <jar jarfile="${build-lib}/beast2.jar" basedir="${build-beast}" />
+        <jar jarfile="${build-lib}/beast.v${beastVersion}.jar" basedir="${build-beast}" />
         <copy todir="${build-lib}">
             <fileset dir="${beastDir}/lib" includes="*.jar"/>
+            <fileset dir="${beastDir}/lib/junit" includes="junit-*.jar"/>
         </copy>
 
         <delete dir="${build-beast}" />
@@ -111,22 +119,57 @@
 
     <target name="build-beast" depends="build-local-beast,build-remote-beast"/>
 
-    <!-- Compile -->
-    <target name="compile" depends="build-beast">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${src}" destdir="${build}" includeantruntime="false">
+    <target name="build-BeastFX" depends="build-beast">
+        <echo>Compiling BeastFX source found at ${beastFX}.</echo>
+
+        <!-- Read package name and version from xml file -->
+        <xmlproperty file="${beastFX}/version.xml" prefix="BeastFXVersionFile" />
+        <property name="beastFXName" value="${BeastFXVersionFile.package(name)}" />
+        <property name="beastFXVersion" value="${BeastFXVersionFile.package(version)}" />
+
+        <mkdir dir="${build-beast}"/>
+
+        <javac target="${targetVersion}" source="${sourceVersion}"
+               srcdir="${beastFX}/src" destdir="${build-beast}"
+               executable="${ZuluJDK}" fork="true" includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${build-lib}" includes="*.jar"/>
             </classpath>
+            <include name="beastfx/**/**" />
+        </javac>
+
+        <jar jarfile="${build-lib}/beastFX.v${beastFXVersion}.jar" basedir="${build-beast}" />
+        <copy todir="${build-lib}">
+<!--            <fileset dir="${beastFX}/locallib" includes="*.jar"/>-->
+            <fileset dir="${beastFX}/src" includes="**/*.png" />
+            <fileset dir="${beastFX}/src" includes="**/*.fxml" />
+            <fileset dir="${beastFX}/resources" includes="**/*.css" />
+        </copy>
+
+        <delete dir="${build-beast}" />
+
+        <echo message="Successfully compiled beastFX v${beastFXVersion}." />
+    </target>
+
+    <!-- Compile -->
+    <target name="compile" depends="build-BeastFX">
+        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${src}" destdir="${build}"
+               executable="${ZuluJDK}" fork="true" includeantruntime="false">
+            <classpath>
+                <pathelement path="${classpath}"/>
+                <fileset dir="${build-lib}" includes="*.jar"/>
+            </classpath>
+            <include name="codonmodels/**/**" />
         </javac>
     </target>
 
-    <target name="copy-resources" depends="compile">
-        <copy todir="${build}">
-            <fileset dir="${src}"
-                     includes="**/*.png" />
-        </copy>
-    </target>
+<!--    <target name="copy-resources" depends="compile">-->
+<!--        <copy todir="${build}">-->
+<!--            <fileset dir="${src}"-->
+<!--                     includes="**/*.png" />-->
+<!--        </copy>-->
+<!--    </target>-->
 
     <!-- Prepare for unit test compilation -->
     <target name="init-test" depends="init">
@@ -136,7 +179,7 @@
 
 
     <!-- Compile unit tests -->
-    <target name="compile-test" depends="init-test,compile,copy-resources">
+    <target name="compile-test" depends="init-test,compile">
         <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${test}" destdir="${build-test}" includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
@@ -151,7 +194,6 @@
     <target name="test" depends="compile-test">
         <junit printsummary="yes" failureproperty="testFailed" showoutput="true">
             <classpath>
-                <pathelement path="${classpath}"/>
                 <pathelement path="${build}" />
                 <pathelement path="${build-test}" />
                 <fileset dir="${build-lib}" includes="*.jar"/>
@@ -170,7 +212,7 @@
 
 
     <!-- Create BEAST 2 package -->
-    <target name="build" depends="compile,copy-resources">
+    <target name="build" depends="compile">
         <property name="fullName" value="${projName}.v${projVersion}"/>
 
         <mkdir dir="${pack}"/>
@@ -181,30 +223,24 @@
 
         <jar jarfile="${pack}/${fullName}.src.jar" basedir="${src}" />
 
-        <!--mkdir dir="${lib}" />
+        <!--
         <copy todir="${pack}/lib">
             <fileset dir="${lib}" includes="*.jar" />
         </copy-->
         <jar jarfile="${pack}/lib/${fullName}.jar" basedir="${build}" />
 
         <copy file="README.md" tofile="${pack}/README" />
-        <!--copy file="COPYING" todir="${pack}" /-->
-        <!--copy todir="${pack}">
-            <fileset dir="${lib}" includes="LICENSE*" />
-        </copy-->
+        <copy file="LICENSE" tofile="${pack}/LICENSE" />
 
-        <mkdir dir="${examples}" />
         <copy todir="${pack}/examples">
             <fileset dir="${examples}" includes="**/*.xml" />
             <fileset dir="${examples}" includes="**/*.nex" />
         </copy>
 
-        <mkdir dir="${templates}" />
         <copy todir="${pack}/fxtemplates">
             <fileset dir="${fxtemplates}" includes="*.xml" />
         </copy>
 
-        <mkdir dir="${doc}" />
         <copy todir="${pack}/doc">
             <fileset dir="${doc}" includes="*.tex,*.doc,*.lyx,*.txt"/>
         </copy>
