@@ -12,6 +12,7 @@
         <provider classname="codonmodels.CodonSubstitutionModel"/>
         <provider classname="codonmodels.evolution.alignment.CodonAlignment"/>
         <provider classname="codonmodels.evolution.datatype.Codon"/>
+<!--        <provider classname="codonmodels.evolution.datatype.GeneticCode"/>-->
         <provider classname="codonmodels.evolution.likelihood.DataAugTreeLikelihood"/>
         <provider classname="codonmodels.evolution.likelihood.GenericDATreeLikelihood"/>
         <provider classname="codonmodels.evolution.operators.GibbsSamplingOperator"/>

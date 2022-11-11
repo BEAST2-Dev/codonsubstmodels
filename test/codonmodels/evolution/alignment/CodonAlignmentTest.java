@@ -2,13 +2,18 @@ package codonmodels.evolution.alignment;
 
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
+import beast.base.evolution.datatype.DataType;
+import beast.pkgmgmt.BEASTClassLoader;
 import codonmodels.evolution.CodonData;
 import codonmodels.evolution.datatype.Codon;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author Walter Xie
@@ -28,6 +33,13 @@ public class CodonAlignmentTest {
             int tripletState = codonStates.get(i);
             assertEquals("Triplets states : ", i, tripletState);
         }
+    }
+
+    @Test
+    public void testGettingDataType() {
+        Set<String> dataTypes = BEASTClassLoader.loadService(DataType.class);
+        System.out.println(dataTypes);
+        assertTrue("Cannot load Codon data type !", dataTypes.contains(Codon.CODON));
     }
 
     @Test

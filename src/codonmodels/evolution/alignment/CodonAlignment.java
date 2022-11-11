@@ -92,8 +92,8 @@ public class CodonAlignment extends Alignment {
         if (this.m_dataType == null || !this.m_dataType.getTypeDescription().equals(Codon.CODON)) {
             DataType oldType = this.m_dataType;
             this.m_dataType = new Codon(geneticCode);
-            Log.warning.println("Warning: CodonAlignment (" + this.getID() + ") original data type was " +
-                    oldType + ", is corrected to " + this.m_dataType + " - " + geneticCode.getDescription() + " !");
+            Log.warning.println("Warning: find CodonAlignment (" + this.getID() + ") is not a Codon data type (" +
+                    oldType + "), so set it to : " + this.m_dataType + " - " + geneticCode.getDescription() + " !");
         }
         initAndValidate();
     }

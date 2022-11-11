@@ -28,9 +28,10 @@ package codonmodels.evolution.datatype;
 
 import beast.base.core.Input;
 import beast.base.core.Log;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.datatype.Nucleotide;
 
 import java.util.Arrays;
-import beast.base.evolution.datatype.DataType;
 
 /**
  * Implements DataType for codon,

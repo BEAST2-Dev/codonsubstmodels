@@ -8,7 +8,7 @@ import codonmodels.evolution.alignment.CodonAlignment;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Walter Xie

@@ -104,7 +104,7 @@
             codonmodels.M0Model.rates,
 	        codonmodels.M0Model.eigenSystem,
 	        codonmodels.M0Model.verbose'
-        buttonLabelMap='beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters'
+        buttonLabelMap='beastfx.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters'
     >
         <!--disableMenus='Mode'-->
 
@@ -169,7 +169,7 @@
 		<alignmentProvider id="Codon Alignment" spec='codonmodels.app.beauti.CodonAlignmentProvider' template='@CodonPartitionTemplate'/>
 
 
-        <partitiontemplate id='CodonPartitionTemplate' spec='BeautiSubTemplate' class='beast.base.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>
+        <partitiontemplate id='CodonPartitionTemplate' spec='beastfx.app.inputeditor.BeautiSubTemplate' class='beast.base.evolution.likelihood.ThreadedTreeLikelihood' mainid='mcmc'>
 <![CDATA[
             <!-- site model                                                              -->
             <plugin spec='SiteModel' id="SiteModel.s:$(n)" gammaCategoryCount='0'>
@@ -247,7 +247,7 @@
 
             <connect srcID='treelog.t:$(n)'                 targetID='mcmc' inputName='logger' if='inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true'/>
             <connect srcID='RandomTree.t:$(n)'                targetID='mcmc' inputName='init'   if='isInitializing'/>
-			<connect method="beast.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
+			<connect method="beastfx.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
 
             <connect srcID='ClockPrior.c:$(n)'                targetID='prior' inputName='distribution' if='inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true'/>
 <!-- when FixMeanMutationRatesOperator, the prior is uniform due to the operator -->
