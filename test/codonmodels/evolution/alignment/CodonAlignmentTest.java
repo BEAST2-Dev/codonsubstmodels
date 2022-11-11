@@ -37,6 +37,7 @@ public class CodonAlignmentTest {
 
     @Test
     public void testGettingDataType() {
+        //TODO
         Set<String> dataTypes = BEASTClassLoader.loadService(DataType.class);
         System.out.println(dataTypes);
         assertTrue("Cannot load Codon data type !", dataTypes.contains(Codon.CODON));
@@ -47,6 +48,7 @@ public class CodonAlignmentTest {
         Alignment data = CodonData.getAlig6T333();
         // create Codon Alignment
         CodonAlignment codonAlignment = new CodonAlignment();
+        //TODO
         codonAlignment.initByName("data", data, "dataType", "codon", "geneticCode", "vertebrateMitochondrial");
 
         Codon codon = codonAlignment.getDataType();
