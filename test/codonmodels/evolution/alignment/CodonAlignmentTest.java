@@ -4,12 +4,11 @@ import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.datatype.DataType;
 import beast.pkgmgmt.BEASTClassLoader;
-import beast.pkgmgmt.PackageManager;
 import codonmodels.evolution.CodonData;
 import codonmodels.evolution.datatype.Codon;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +20,11 @@ import static org.junit.Assert.assertTrue;
  * @author Walter Xie
  */
 public class CodonAlignmentTest {
+
+    @Before
+    public void setUp() throws Exception {
+        CodonData.initDataTypes();
+    }
 
     @Test
     public void testGetSequence() {
@@ -39,13 +43,6 @@ public class CodonAlignmentTest {
 
     @Test
     public void testGettingDataType() {
-        String PROJECT_DIR = System.getProperty("user.dir");
-        System.out.println("user.dir = " + PROJECT_DIR);
-        File versionXML = new File(PROJECT_DIR + File.separator + "version.xml");
-        if (!versionXML.exists())
-            throw new IllegalArgumentException("Cannot locate codonsubstmodels/version.xml !");
-        BEASTClassLoader.initServices();
-        BEASTClassLoader.addServices(versionXML.getAbsolutePath());
         Set<String> dataTypes = BEASTClassLoader.loadService(DataType.class);
         System.out.println(dataTypes);
         assertTrue("Cannot load Codon data type !", dataTypes.contains(Codon.class.getName()));

@@ -1,6 +1,7 @@
 package codonmodels.evolution.likelihood;
 
 
+import codonmodels.evolution.CodonData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +28,8 @@ public class DAStatesLikelihoodCoreIndexTest {
 
     @Before
     public void setUp() throws Exception {
+        CodonData.initDataTypes();
+
         final int nrOfState = 61;
 
         // ======= transition probability matrix =======

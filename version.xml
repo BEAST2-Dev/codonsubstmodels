@@ -12,12 +12,13 @@
         <provider classname="codonmodels.CodonSubstitutionModel"/>
         <provider classname="codonmodels.evolution.alignment.CodonAlignment"/>
         <provider classname="codonmodels.evolution.datatype.Codon"/>
-<!--        <provider classname="codonmodels.evolution.datatype.GeneticCode"/>-->
+        <provider classname="codonmodels.evolution.datatype.GeneticCode"/>
         <provider classname="codonmodels.evolution.likelihood.DataAugTreeLikelihood"/>
         <provider classname="codonmodels.evolution.likelihood.GenericDATreeLikelihood"/>
         <provider classname="codonmodels.evolution.operators.GibbsSamplingOperator"/>
         <provider classname="codonmodels.evolution.operators.ScaleOperatorGibbs"/>
         <provider classname="codonmodels.evolution.operators.UniformGibbs"/>
+        <provider classname="codonmodels.evolution.tree.NodeStates"/>
         <provider classname="codonmodels.evolution.tree.NodeStatesArray"/>
         <provider classname="codonmodels.evolution.tree.NodeStatesLogger"/>
         <provider classname="codonmodels.util.Report"/>

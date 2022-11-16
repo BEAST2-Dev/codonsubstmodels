@@ -217,9 +217,10 @@
 
         <mkdir dir="${pack}"/>
         <mkdir dir="${pack}/examples"/>
+        <mkdir dir="${pack}/examples/data"/>
         <mkdir dir="${pack}/fxtemplates"/>
         <!--mkdir dir="${pack}/lib"/-->
-        <mkdir dir="${pack}/doc"/>
+<!--        <mkdir dir="${pack}/doc"/>-->
 
         <jar jarfile="${pack}/${fullName}.src.jar" basedir="${src}" />
 
@@ -234,16 +235,19 @@
 
         <copy todir="${pack}/examples">
             <fileset dir="${examples}" includes="**/*.xml" />
-            <fileset dir="${examples}" includes="**/*.nex" />
+        </copy>
+        <copy todir="${pack}/examples/data">
+            <fileset dir="${examples}/data" includes="benchmarkData1024T1K.xml" />
+            <fileset dir="${examples}/data" includes="**/*.nex" />
         </copy>
 
         <copy todir="${pack}/fxtemplates">
             <fileset dir="${fxtemplates}" includes="*.xml" />
         </copy>
 
-        <copy todir="${pack}/doc">
-            <fileset dir="${doc}" includes="*.tex,*.doc,*.lyx,*.txt"/>
-        </copy>
+<!--        <copy todir="${pack}/doc">-->
+<!--            <fileset dir="${doc}" includes="*.tex,*.doc,*.lyx,*.txt"/>-->
+<!--        </copy>-->
 
         <copy file="version.xml" todir="${pack}" />
 

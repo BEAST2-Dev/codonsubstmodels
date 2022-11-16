@@ -31,6 +31,7 @@ public class DALikelihoodTest {
 
     @Before
     public void setUp() {
+        CodonData.initDataTypes();
 //        String newickTree = "(t1:0.5, t2:0.0):0.0;"; // TODO bug for 0 branch length ?
         String newickTree = "(t1:0.5, t2:0.1):0.0;";
 //        boolean adjustTipHeights = true;

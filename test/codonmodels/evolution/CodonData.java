@@ -7,9 +7,12 @@ import beast.base.evolution.sitemodel.SiteModel;
 import beast.base.evolution.tree.Tree;
 import beast.base.evolution.tree.TreeParser;
 import beast.base.inference.parameter.RealParameter;
+import beast.pkgmgmt.BEASTClassLoader;
 import codonmodels.CodonFrequencies;
 import codonmodels.M0Model;
 import codonmodels.evolution.datatype.Codon;
+
+import java.io.File;
 
 /**
  * @author Walter Xie
@@ -17,6 +20,16 @@ import codonmodels.evolution.datatype.Codon;
 public class CodonData {
 
     public static final Codon codonUNIVERSAL = new Codon();
+
+    public static void initDataTypes() {
+        String PROJECT_DIR = System.getProperty("user.dir");
+        System.out.println("user.dir = " + PROJECT_DIR);
+        File versionXML = new File(PROJECT_DIR + File.separator + "version.xml");
+        if (!versionXML.exists())
+            throw new IllegalArgumentException("Cannot locate codonsubstmodels/version.xml !");
+        BEASTClassLoader.initServices();
+        BEASTClassLoader.addServices(versionXML.getAbsolutePath());
+    }
 
 
     // create a Sequence obj using Codon.codeMap

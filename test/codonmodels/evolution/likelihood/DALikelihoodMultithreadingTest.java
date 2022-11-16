@@ -29,6 +29,8 @@ public class DALikelihoodMultithreadingTest {
 
     @Before
     public void setUp() {
+        CodonData.initDataTypes();
+
         Alignment data = CodonData.getAlig6T333();
         // create Codon Alignment
         CodonAlignment codonAlignment = new CodonAlignment();

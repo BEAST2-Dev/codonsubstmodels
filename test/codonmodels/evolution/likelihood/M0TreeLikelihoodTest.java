@@ -18,6 +18,8 @@ public class M0TreeLikelihoodTest {
 
     @Before
     public void setUp() {
+        CodonData.initDataTypes();
+
         Alignment data = CodonData.getAlig6T333();
         // create Codon Alignment
         codonAlignment = new CodonAlignment();
