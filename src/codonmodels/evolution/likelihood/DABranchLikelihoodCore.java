@@ -1,9 +1,9 @@
 package codonmodels.evolution.likelihood;
 
 
-import java.util.Arrays;
-
 import codonmodels.evolution.tree.NodeStates;
+
+import java.util.Arrays;
 
 /**
  * data augmentation likelihood core based on a branch for multithreading.
@@ -66,7 +66,9 @@ public class DABranchLikelihoodCore extends AbstrDALikelihoodCore {
         this.branchNr = branchNr;
         this.nrOfStates = nrOfStates;
         this.matrixSize = nrOfStates * nrOfStates;
-        this.nrOfSites = nrOfSites; // TODO impl data range to multithread by sites
+        this.nrOfSites = nrOfSites; // TODO impl data range to multithreading by sites
+
+        siteLd = new double[nrOfSites]; // need init siteLd[] here
     }
 
     /**

@@ -4,12 +4,12 @@ package codonmodels;
 import beast.base.core.Citation;
 import beast.base.core.Description;
 import beast.base.core.Input;
-import beast.base.inference.parameter.RealParameter;
 import beast.base.core.Log;
+import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.inference.parameter.RealParameter;
 import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
-import beast.base.evolution.substitutionmodel.Frequencies;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -86,11 +86,13 @@ public class CodonFrequencies extends Frequencies {
 
     @Override
     protected void update() {
+        // 60/61 codon frequencies (separated by white space) are in fixed order AAA AAC AAG AAT ... TTA TTC TTG TTT
+        RealParameter freqsInput = frequenciesInput.get();
 
-        if (frequenciesInput.get() != null) {
-            // 60/61 codon frequencies (separated by white space) are in fixed order AAA AAC AAG AAT ... TTA TTC TTG TTT
-            RealParameter freqsInput = frequenciesInput.get();
-            assert freqsInput.getDimension() == codonStateCount;
+        if (freqsInput != null) {
+            if (freqsInput.getDimension() != codonStateCount)
+                throw new IllegalArgumentException("frequencies input has " + freqsInput.getDimension() +
+                        " entries, but state count = " + codonStateCount + " !" );
 
             freqs = new double[freqsInput.getDimension()];
             double sum = 0;

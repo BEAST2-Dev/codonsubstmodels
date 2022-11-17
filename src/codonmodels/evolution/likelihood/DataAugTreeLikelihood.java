@@ -1,13 +1,13 @@
 package codonmodels.evolution.likelihood;
 
 import beast.base.core.Input;
-import beast.base.inference.State;
-import codonmodels.evolution.tree.NodeStates;
-import codonmodels.util.ThreadHelper;
 import beast.base.core.Log;
 import beast.base.evolution.likelihood.TreeLikelihood;
 import beast.base.evolution.tree.Node;
 import beast.base.evolution.tree.Tree;
+import beast.base.inference.State;
+import codonmodels.evolution.tree.NodeStates;
+import codonmodels.util.ThreadHelper;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -174,7 +174,7 @@ public class DataAugTreeLikelihood extends GenericDATreeLikelihood {
         for (int n = 0; n < getRootIndex(); n++) {
             final Node node = tree.getNode(n);
             assert node.getNr() == n;
-            // make every nodes dirty
+            // make every node dirty
             node.makeDirty(Tree.IS_FILTHY);
             // init by the node below the branch
             daBranchLdCores[n] = new DABranchLikelihoodCore(n, stateCount, siteCount, siteModel.getCategoryCount());

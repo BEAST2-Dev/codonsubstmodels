@@ -7,7 +7,9 @@ import codonmodels.evolution.alignment.CodonAlignment;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Walter Xie
@@ -60,6 +62,35 @@ public class CodonFrequenciesTest {
                         .03003003, .01201201, .002002, .00850851, .01851852, .003003, .003003, .001001,
                         .02552553, .02152152, .002002, .01551552 },
                 freq, 0.00000001);
+    }
+
+    @Test
+    public void testCodonFrequenciesInputDimension(){
+        assertEquals("vertebrateMitochondrial", codonAlignment.getGeneticCode().getName());
+
+        int stateCount = codonAlignment.getMaxStateCount();
+        assertEquals(60, stateCount);
+
+        // test dim
+        CodonFrequencies codonFreq = new CodonFrequencies();
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> codonFreq.initByName("data", codonAlignment, "frequencies",
+                        String.join(" ", Arrays.toString(new double[61]).replaceAll("[,\\[\\]]", "")))
+        );
+        assertTrue(ex.getMessage().contains("frequencies input has 61 entries, but state count = 60"));
+
+        RuntimeException ex2 = assertThrows(RuntimeException.class,
+                () -> codonFreq.initByName("data", codonAlignment, "frequencies",
+                        String.join(" ", Arrays.toString(new double[60]).replaceAll("[,\\[\\]]", "")))
+        );
+        assertTrue(ex2.getMessage().contains("The codon frequencies do not sum up to 1"));
+
+        double[] freq = new double[60];
+        Arrays.fill(freq, 1.0/60.0);
+        // Asserts that all supplied executables do not throw exceptions.
+        assertAll(() -> codonFreq.initByName("data", codonAlignment, "frequencies",
+                String.join(" ", Arrays.toString(freq).replaceAll("[,\\[\\]]", ""))));
+
     }
 
 }
