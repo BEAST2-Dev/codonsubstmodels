@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="" version="2.6">
+<beast version="2.7" namespace="beast.base.core:beast.base.inference:
+                     beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:
+                     beast.base.core:beast.base.inference.util:beast.evolution.nuc:
+                     beast.base.evolution.operator:beast.base.inference.operator:
+                     beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:
+                     beast.base.evolution.likelihood">
 
 <!-- used as data only for Benchmarking 1 and 2  -->
 <!-- 1024 taxa, 3000 nucleotides, 886 patterns -->

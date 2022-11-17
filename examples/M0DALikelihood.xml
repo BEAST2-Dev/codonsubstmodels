@@ -1,7 +1,8 @@
 <beast version="2.7" namespace="beast.base.core:beast.base.inference:beast.base.evolution.alignment:
-                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:beast.base.util:
+                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:
                      beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:
-                     beast.base.evolution.likelihood:beast.base.evolution.operators:
+                     beast.base.evolution.likelihood:beast.base.util:
+                     beast.base.evolution.operator:beast.base.inference.operator:
                      codonmodels.evolution.alignment:codonmodels.evolution.datatype:
                      codonmodels.evolution.likelihood:codonmodels.evolution.operators:
                      codonmodels.evolution.tree:codonmodels.evolution.operators:
@@ -160,7 +161,6 @@
 
     <nodesStates spec="NodeStatesArray" id="nodesStates" >
         <data idref="codon.alignment"/>
-        <tree idref="tree"/>
     </nodesStates>
 
     <distribution id="daTreeLikelihood" spec="DataAugTreeLikelihood" threads="4">
@@ -242,7 +242,7 @@
 
 <!--        <operator id='treeScaler' spec='ScaleOperator' scaleFactor="0.5" tree="@tree" weight="3.0"/>-->
 
-        <operator id="GibbsSampler" spec="GibbsSampler" nodesStates="@nodesStates" tree="@tree"
+        <operator id="GibbsSampler" spec="GibbsSamplingOperator" nodesStates="@nodesStates" tree="@tree"
                   DATreeLikelihood="@daTreeLikelihood" weight="15.0"/>
 
         <operator id="TreeRootScaler" spec="ScaleOperator" rootOnly="true" scaleFactor="0.75" tree="@tree" weight="3.0"/>

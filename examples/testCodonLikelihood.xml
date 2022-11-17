@@ -1,7 +1,12 @@
-<beast version="2.7" namespace="beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:
-                                beast.base.util:beast.evolution.nuc:beast.base.evolution.operators:beast.base.evolution.sitemodel:
-                                beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood">
-
+<beast version="2.7" namespace="beast.base.core:beast.base.inference:beast.base.evolution.alignment:
+                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:
+                     beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:
+                     beast.base.evolution.likelihood:beast.base.util:
+                     beast.base.evolution.operator:beast.base.inference.operator:
+                     codonmodels.evolution.alignment:codonmodels.evolution.datatype:
+                     codonmodels.evolution.likelihood:codonmodels.evolution.operators:
+                     codonmodels.evolution.tree:codonmodels.evolution.operators:
+                     codonmodels:codonmodels.util">
 	<!-- ntax=6 nchar=768                                                        -->
     <data id="alignment" dataType="nucleotide">
         <sequence taxon="Human_Horai">

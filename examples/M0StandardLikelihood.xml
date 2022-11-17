@@ -1,7 +1,8 @@
 <beast version="2.7" namespace="beast.base.core:beast.base.inference:beast.base.evolution.alignment:
-                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:beast.base.util:
+                     beast.base.evolution.tree:beast.base.evolution.tree.coalescent:
                      beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:
-                     beast.base.evolution.likelihood:beast.base.evolution.operators:
+                     beast.base.evolution.likelihood:beast.base.util:
+                     beast.base.evolution.operator:beast.base.inference.operator:
                      codonmodels.evolution.alignment:codonmodels.evolution.datatype:
                      codonmodels.evolution.likelihood:codonmodels.evolution.operators:
                      codonmodels.evolution.tree:codonmodels.evolution.operators:
