@@ -115,4 +115,4 @@ http://doi.org/10.5281/zenodo.1217169
 
 ## Note
 
-This package is depending on BEAST 2.5.x.
+This package dependencies are in [version.xml](version.xml).
