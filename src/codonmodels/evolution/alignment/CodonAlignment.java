@@ -90,10 +90,9 @@ public class CodonAlignment extends Alignment {
         geneticCodeInput.setValue(geneticCode.getName(), this);
 
         if (this.m_dataType == null || !this.m_dataType.getTypeDescription().equals(Codon.CODON)) {
-            DataType oldType = this.m_dataType;
             this.m_dataType = new Codon(geneticCode);
-            Log.warning.println("Warning: find CodonAlignment (" + this.getID() + ") is not a Codon data type (" +
-                    oldType + "), so set it to : " + this.m_dataType + " - " + geneticCode.getDescription() + " !");
+            Log.info.println("Set CodonAlignment (" + this.getID() + ") to data type : " +
+                    this.m_dataType + " - " + geneticCode.getDescription() + " !");
         }
         initAndValidate();
     }
@@ -119,7 +118,8 @@ public class CodonAlignment extends Alignment {
         setGeneticCode(geneticCode);
 
 //        convertCodonToState(unknownCodeExceptionInput.get()); // default to true
-        convertCodonToState();
+        if (counts.size() < 1)
+            convertCodonToState();
 
         // after convertCodonToState
         if (alignmentInput.get().siteWeightsInput.get() != null) {
@@ -174,9 +174,11 @@ public class CodonAlignment extends Alignment {
                 // unknownCodeException false to treat codons with partial ambiguities (-TA) as missing data
 //                List<Integer> codonStates = getCodonStates(seq, getDataType(), unknownCodeException);
                 } catch (IllegalArgumentException e) {
-                    Log.warning.println("Warning: " + seq.getTaxon() + " sequence contains a stop codon at triplets ! \n" +
-                            "Please use either the codon alignment or the correct genetic code.");
-                    e.printStackTrace();
+                    Log.err.println("Error: sequence " + seq.getTaxon() + " contains a stop codon : " +
+                            e.getMessage() + " ! \n" +
+                            "Please use the correct genetic code, current genetic code = " +
+                            getGeneticCode().getDescription());
+                    throw new RuntimeException(e);
                 }
 
 //                int stopCodon = findStopCodon(codonStates);
@@ -287,6 +289,9 @@ public class CodonAlignment extends Alignment {
             Log.info.println("Change genetic code from " + currentCode.getName() + " to " + geneticCode.getName());
             ((Codon) m_dataType).setGeneticCode(geneticCode);
             geneticCodeInput.setValue(geneticCode.getName(), this);
+
+            // refresh states after changing GeneticCode
+            convertCodonToState();
         }
     }
 

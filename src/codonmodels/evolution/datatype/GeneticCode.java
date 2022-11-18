@@ -31,6 +31,7 @@ import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -200,6 +201,12 @@ public final class GeneticCode {
      */
     public String getDescription() {
         return GENETIC_CODE_DESCRIPTIONS[geneticCodeId];
+    }
+
+    public static GeneticCode findByDescription(String desc) {
+        int idx = Arrays.asList(GENETIC_CODE_DESCRIPTIONS).indexOf(desc);
+        if (idx >= 0) return findByName(GENETIC_CODE_NAMES[idx]);
+        throw new RuntimeException("Unknown genetics code");
     }
 
     public static GeneticCode findByName(String codeStr) {
@@ -406,4 +413,8 @@ public final class GeneticCode {
     private int geneticCodeId;
     private String codeTable;
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

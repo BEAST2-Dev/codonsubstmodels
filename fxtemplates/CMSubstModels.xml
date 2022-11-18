@@ -60,7 +60,7 @@
         <plugin spec="codonmodels.M0Model" id="M0.s:$(n)">
             <parameter id="M0.omega.s:$(n)" name="omega" value="1.0"/>
             <parameter id="M0.kappa.s:$(n)" name="kappa" value="2.0"/>
-            <frequencies id="F3X4Freqs.s:$(n)" spec="codonmodels.CodonFrequencies">
+            <frequencies id="codonFreqs.s:$(n)" spec="codonmodels.CodonFrequencies">
                 <data idref="$(n)"/>
             </frequencies>
         </plugin>

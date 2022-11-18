@@ -2,13 +2,25 @@ package codonmodels.app.beauti;
 
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
+import beast.base.parser.NexusParser;
+import beast.pkgmgmt.BEASTClassLoader;
+import beastfx.app.beauti.ThemeProvider;
 import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.embed.swing.SwingNode;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import java.awt.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +33,7 @@ public class CodonAlignmentViewer extends JPanel {
     boolean useColor = false;
     // flag to indicate that the most frequently occurring character is shown as a dot
     boolean useDots = true;
-    CodonAlignment m_alignment;
+    final CodonAlignment m_alignment;
     Map<Character, Color> m_customColorMap = new HashMap<>();
 
     JTable mainTable;
@@ -39,15 +51,14 @@ public class CodonAlignmentViewer extends JPanel {
         int siteCount = data.getSiteCount();
         int taxonCount = data.getTaxonCount();
         tableData = new Object[taxonCount][siteCount + 1];
-        char[] headerChar = updateTableData();
-
         // set up row labels
         for (int i = 0; i < taxonCount; i++) {
             tableData[i][0] = data.getTaxaNames().get(i);
         }
-
         // set up column labels
         columnData = new Object[siteCount + 1];
+
+        char[] headerChar = updateTableData();
         updateColumnData(headerChar);
 
         // create table in scrollpane with first column fixed
@@ -131,9 +142,85 @@ public class CodonAlignmentViewer extends JPanel {
         scrollPane.setCorner(ScrollPaneConstants.UPPER_LEFT_CORNER, fixedTable.getTableHeader());
         scrollPane.setRowHeaderView(viewport);
 
-
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
+
+
+
+        Box buttonBox = Box.createHorizontalBox();
+        JCheckBox useDotsCheckBox = new JCheckBox("Use dots", true);
+        useDotsCheckBox.addActionListener(e -> {
+            JCheckBox _useDots = (JCheckBox) e.getSource();
+            useDots = _useDots.isSelected();
+            updateTableData();
+            repaint();
+        });
+        buttonBox.add(useDotsCheckBox);
+
+        JCheckBox useColorCheckBox = new JCheckBox("Use Color");
+        useColorCheckBox.setName("UseColor");
+        useColorCheckBox.addActionListener(e -> {
+            JCheckBox hasColor = (JCheckBox) e.getSource();
+            useColor = hasColor.isSelected();
+            updateTableData();
+            repaint();
+        });
+        buttonBox.add(useColorCheckBox);
+
+        JLabel label = new JLabel("  Genetic code : " + m_alignment.getGeneticCode().getDescription());
+        buttonBox.add(label);
+
+        /* after BEAST 2.7 exception thrown if stop codon.
+        JComboBox geneticCodeComboBox = new JComboBox(GeneticCode.GENETIC_CODE_NAMES);
+        int idx = 0;
+        for (int i = 0; i < GeneticCode.GENETIC_CODE_NAMES.length; i++) {
+            String gcName = GeneticCode.GENETIC_CODE_NAMES[i];
+            if (gcName.equalsIgnoreCase(m_alignment.getGeneticCode().getName())) {
+                idx = i;
+                break;
+            }
+        }
+        geneticCodeComboBox.setSelectedIndex(idx);
+        geneticCodeComboBox.addActionListener(e -> {
+            JComboBox cb = (JComboBox)e.getSource();
+            String geneticCodeName = (String)cb.getSelectedItem();
+            GeneticCode geneticCode = GeneticCode.findByName(geneticCodeName);
+            try {
+                m_alignment.setGeneticCode(geneticCode);
+            } catch (RuntimeException ex) {
+                JOptionPane.showMessageDialog(this,
+                        ex.getMessage(),"Find stop codon", JOptionPane.ERROR_MESSAGE);
+            }
+            char[] header = updateTableData();
+//            System.out.println(header);
+            updateColumnData(header);
+            JTableHeader th = mainTable.getTableHeader();
+            TableColumnModel tcm = th.getColumnModel();
+            for (int i = 0; i < tcm.getColumnCount(); i++) {
+                TableColumn tc = tcm.getColumn(i);
+                tc.setHeaderValue( columnData[i+1] );
+            }
+            th.repaint();
+            repaint();
+        });
+        buttonBox.add(geneticCodeComboBox);
+
+        JButton checkStopCodonJButton = new JButton("Check Stop Codon");
+        checkStopCodonJButton.addActionListener(e -> {
+            if (stopCodonSite < 0) {
+                JOptionPane.showMessageDialog(this,
+                        "There is no stop codon,\nthe genetic code is valid for this alignment.",
+                        "No stop codon", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Find a stop codon at triplet " + (stopCodonSite+1) +
+                                ",\nplease choose the correct genetic code or use codon alignment!",
+                        "Find stop codon", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        buttonBox.add(checkStopCodonJButton);
+*/
+        add(buttonBox, BorderLayout.SOUTH);
     }
 
     private void updateColumnData(char[] headerChar) {
@@ -254,82 +341,35 @@ public class CodonAlignmentViewer extends JPanel {
     }
 
     public void showInDialog() {
-        JDialog dlg = new JDialog();
-        dlg.setName("CodonAlignmentViewer");
-        dlg.add(this);
-
-        Box buttonBox = Box.createHorizontalBox();
-        JCheckBox useDotsCheckBox = new JCheckBox("Use dots", true);
-        useDotsCheckBox.addActionListener(e -> {
-            JCheckBox _useDots = (JCheckBox) e.getSource();
-            useDots = _useDots.isSelected();
-            updateTableData();
-            repaint();
-        });
-        buttonBox.add(useDotsCheckBox);
-
-        JCheckBox useColorCheckBox = new JCheckBox("Use Color");
-        useColorCheckBox.setName("UseColor");
-        useColorCheckBox.addActionListener(e -> {
-            JCheckBox hasColor = (JCheckBox) e.getSource();
-            useColor = hasColor.isSelected();
-            updateTableData();
-            repaint();
-        });
-        buttonBox.add(useColorCheckBox);
-
-        JComboBox geneticCodeComboBox = new JComboBox(GeneticCode.GENETIC_CODE_NAMES);
-        int idx = 0;
-        for (int i = 0; i < GeneticCode.GENETIC_CODE_NAMES.length; i++) {
-            String gcName = GeneticCode.GENETIC_CODE_NAMES[i];
-            if (gcName.equalsIgnoreCase(m_alignment.getGeneticCode().getName())) {
-                idx = i;
-                break;
-            }
-        }
-        geneticCodeComboBox.setSelectedIndex(idx);
-        geneticCodeComboBox.addActionListener(e -> {
-            JComboBox cb = (JComboBox)e.getSource();
-            String geneticCodeName = (String)cb.getSelectedItem();
-            GeneticCode geneticCode = GeneticCode.findByName(geneticCodeName);
-            m_alignment.setGeneticCode(geneticCode);
-
-            char[] headerChar = updateTableData();
-//            System.out.println(headerChar);
-            updateColumnData(headerChar); // not refresh
-            JTableHeader th = mainTable.getTableHeader();
-            TableColumnModel tcm = th.getColumnModel();
-            for (int i = 0; i < tcm.getColumnCount(); i++) {
-                TableColumn tc = tcm.getColumn(i);
-                tc.setHeaderValue( columnData[i+1] );
-            }
-            th.repaint();
-            repaint();
-        });
-        buttonBox.add(geneticCodeComboBox);
-
-        JButton checkStopCodonJButton = new JButton("Check Stop Codon");
-        checkStopCodonJButton.addActionListener(e -> {
-            if (stopCodonSite < 0) {
-                JOptionPane.showMessageDialog(this,
-                        "There is no stop codon,\nthe genetic code is valid for this alignment.",
-                        "No stop codon", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Find a stop codon at triplet " + (stopCodonSite+1) +
-                                ",\nplease choose the correct genetic code or use codon alignment!",
-                        "Find stop codon", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        buttonBox.add(checkStopCodonJButton);
-
-        dlg.add(buttonBox, BorderLayout.SOUTH);
-
-        int size = UIManager.getFont("Label.font").getSize();
-        dlg.setSize(1024 * size / 13, 600 * size / 13);
-        dlg.setModal(true);
-        dlg.setVisible(true);
-        dlg.dispose();
+        Dialog dialog = new Dialog();
+        DialogPane pane = dialog.getDialogPane();
+        pane.getButtonTypes().add(ButtonType.CLOSE);
+        pane.setId("CodonAlignmentViewer");
+        SwingNode swingNode = new SwingNode();
+        swingNode.setContent(this);
+        pane.setContent(swingNode);
+        pane.setPrefSize(1024, 600);
+        dialog.setResizable(true);
+        ThemeProvider.loadStyleSheet(pane.getScene());
+        dialog.showAndWait();
     }
 
+    public static void main(String[] args) {
+        BEASTClassLoader.initServices();
+        // set user.dir = ~/WorkSpace/codonsubstmodels
+        BEASTClassLoader.addServices(System.getProperty("user.dir") +
+                File.separator + "version.xml");
+
+        try {
+            NexusParser parser = new NexusParser();
+            parser.parseFile(new File(args[0]));
+            Alignment data = parser.m_alignment;
+            CodonAlignment codonAlignment = new CodonAlignment(data, GeneticCode.VERTEBRATE_MT);
+            CodonAlignmentViewer panel = new CodonAlignmentViewer(codonAlignment);
+            new JFXPanel();
+            Platform.runLater(panel::showInDialog);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
