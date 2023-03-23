@@ -349,7 +349,7 @@ public final class GeneticCode {
     //++++++++ Note: codeState != index +++++++++
 
     /**
-     * Get amino acid corresponding to corresponding to a given index which includes stop codons.
+     * Get amino acid corresponding to a given index which includes stop codons.
      * @see #GENETIC_CODE_TABLES
      * @param index the Amino Acid character index in the currently used genetic code table
      *              including stop codons, also the same index to the {@link Codon Codon} triplets.
@@ -376,8 +376,10 @@ public final class GeneticCode {
      *        including stop codons, also the same index to the {@link Codon Codon} triplets.
      */
     public boolean isStopCodonIndex(int index) {
-        if (index >= getCodeTableLength()) // TODO >= 64
-            throw new UnsupportedOperationException("Uncertain codon index >= 64 is not supported !");
+        if (index >= getCodeTableLength())
+            // TODO >= 64,
+            // which must expand the standard genetic code table to handle ambiguous nucleotides
+            throw new UnsupportedOperationException("Ambiguous nucleotides are not supported at the moment !");
 //            return false;
         return (getAminoAcidFromCodeTable(index) == Codon.STOP_CHARACTER);
     }
