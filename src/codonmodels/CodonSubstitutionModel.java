@@ -26,10 +26,14 @@
 package codonmodels;
 
 
+import beast.base.core.BEASTInterface;
 import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.core.Log;
+import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
 import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
@@ -70,10 +74,27 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     @Override
     public void initAndValidate() {
         this.frequencies = frequenciesInput.get();
-        if (! (frequencies instanceof CodonFrequencies) )
-            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
+//        if (! (frequencies instanceof CodonFrequencies) )
+//            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
 
-        CodonAlignment alignment = getCodonAlignment((CodonFrequencies) frequencies);
+        Alignment data = null;
+        if (frequencies instanceof CodonFrequencies) {
+        	data = frequencies.dataInput.get();
+        } else {
+        	for (BEASTInterface o : getOutputs()) {
+        		if (o instanceof SiteModel) {
+        			SiteModel sitemodel = (SiteModel) o;
+                	for (BEASTInterface o2 : sitemodel.getOutputs()) {
+                		if (o2 instanceof GenericTreeLikelihood) {
+                			GenericTreeLikelihood tl = (GenericTreeLikelihood) o2;
+                			data = tl.dataInput.get();
+                		}
+                	}        			
+        		}
+        	}
+        }
+        
+        CodonAlignment alignment = getCodonAlignment(data);
         this.codonDataType = alignment.getDataType();
 
         //====== init states and rates ======
@@ -187,8 +208,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         }
     }
 
-    protected CodonAlignment getCodonAlignment(CodonFrequencies codonFreqs) {
-        return CodonAlignment.toCodonAlignment(codonFreqs.dataInput.get());
+    protected CodonAlignment getCodonAlignment(Alignment data) {
+        return CodonAlignment.toCodonAlignment(data);
     }
 
     //TODO move to GeneralSubstitutionModel ?

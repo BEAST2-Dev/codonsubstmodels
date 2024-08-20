@@ -167,7 +167,7 @@ public class CodonFrequencies extends Frequencies {
     /**
      * Codon frequencies from codon usage (AAA AAC AAG AAT ... TTT), excluding stop codon.
      * @param usage i is taxon, j is state. Not include totals.
-     *              If ambiguous states exit, then their counts are equally distributed to
+     *              If ambiguous states exist, then their counts are equally distributed to
      *              possible unambiguous states using {@link Codon#getStatesForCode(int)}.
      * @return 1d frequency array freqs[60]
      */

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonSubstModels' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.4:CodonSubstModels v2.0.0" version="2.7">
+
+    <data
+id="codon"
+spec="Alignment" dataType="aminoacid">
+        <sequence id="seq_Cow" spec="Sequence" taxon="Cow" totalcount="20" value="MAYPMQLGFQDATSPIMEELLHFHDHTLMIVFLISSLVLYIISLMLTTKLTHTSTMDAQEVETIWTILPAIILILIALPSLRILYMMDEINNPSLTVKTMGHQWYWSYEYTDYEDLSFDSYMIPTSELKPGELRLLEVDNRVVLPMEMTIRMLVSSEDVLHSWAVPSLGLKTDAIPGRLNQTTLMSSRPGLYYGQCSEICGSNHSFMPIVLELVPLKYFEKWSASML-------"/>
+        <sequence id="seq_Carp" spec="Sequence" taxon="Carp" totalcount="20" value="MAHPTQLGFKDAAMPVMEELLHFHDHALMIVLLISTLVLYIITAMVSTKLTNKYILDSQEIEIVWTILPAVILVLIALPSLRILYLMDEINDPHLTIKAMGHQWYWSYEYTDYENLGFDSYMVPTQDLAPGQFRLLETDHRMVVPMESPVRVLVSAEDVLHSWAVPSLGVKMDAVPGRLNQAAFIASRPGVFYGQCSEICGANHSFMPIVVEAVPLEHFENWSSLMLEDASLGS"/>
+        <sequence id="seq_Chicken" spec="Sequence" taxon="Chicken" totalcount="20" value="MANHSQLGFQDASSPIMEELVEFHDHALMVALAICSLVLYLLTLMLMEKLS-SNTVDAQEVELIWTILPAIVLVLLALPSLQILYMMDEIDEPDLTLKAIGHQWYWTYEYTDFKDLSFDSYMTPTTDLPLGHFRLLEVDHRIVIPMESPIRVIITADDVLHSWAVPALGVKTDAIPGRLNQTSFITTRPGVFYGQCSEICGANHSYMPIVVESTPLKHFEAWSSL------LSS"/>
+        <sequence id="seq_Human" spec="Sequence" taxon="Human" totalcount="20" value="MAHAAQVGLQDATSPIMEELITFHDHALMIIFLICFLVLYALFLTLTTKLTNTNISDAQEMETVWTILPAIILVLIALPSLRILYMTDEVNDPSLTIKSIGHQWYWTYEYTDYGGLIFNSYMLPPLFLEPGDLRLLDVDNRVVLPIEAPIRMMITSQDVLHSWAVPTLGLKTDAIPGRLNQTTFTATRPGVYYGQCSEICGANHSFMPIVLELIPLKIFEM-------GPVFTL"/>
+        <sequence id="seq_Loach" spec="Sequence" taxon="Loach" totalcount="20" value="MAHPTQLGFQDAASPVMEELLHFHDHALMIVFLISALVLYVIITTVSTKLTNMYILDSQEIEIVWTVLPALILILIALPSLRILYLMDEINDPHLTIKAMGHQWYWSYEYTDYENLSFDSYMIPTQDLTPGQFRLLETDHRMVVPMESPIRILVSAEDVLHSWALPAMGVKMDAVPGRLNQTAFIASRPGVFYGQCSEICGANHSFMPIVVEAVPLSHFENWSTLMLKDASLGS"/>
+        <sequence id="seq_Mouse" spec="Sequence" taxon="Mouse" totalcount="20" value="MAYPFQLGLQDATSPIMEELMNFHDHTLMIVFLISSLVLYIISLMLTTKLTHTSTMDAQEVETIWTILPAVILIMIALPSLRILYMMDEINNPVLTVKTMGHQWYWSYEYTDYEDLCFDSYMIPTNDLKPGELRLLEVDNRVVLPMELPIRMLISSEDVLHSWAVPSLGLKTDAIPGRLNQATVTSNRPGLFYGQCSEICGSNHSFMPIVLEMVPLKYFENWSASMI-------"/>
+        <sequence id="seq_Rat" spec="Sequence" taxon="Rat" totalcount="20" value="MAYPFQLGLQDATSPIMEELTNFHDHTLMIVFLISSLVLYIISLMLTTKLTHTSTMDAQEVETIWTILPAVILILIALPSLRILYMMDEINNPVLTVKTMGHQWYWSYEYTDYEDLCFDSYMIPTNDLKPGELRLLEVDNRVVLPMELPIRMLISSEDVLHSWAIPSLGLKTDAIPGRLNQATVTSNRPGLFYGQCSEICGSNHSFMPIVLEMVPLKYFENWSASMI-------"/>
+        <sequence id="seq_Seal" spec="Sequence" taxon="Seal" totalcount="20" value="MAYPLQMGLQDATSPIMEELLHFHDHTLMIVFLISSLVLYIISLMLTTKLTHTSTMDAQEVETVWTILPAIILILIALPSLRILYMMDEINNPSLTVKTMGHQWYWSYEYTDYEDLNFDSYMIPTQELKPGELRLLEVDNRVVLPMEMTIRMLISSEDVLHSWAVPSLGLKTDAIPGRLNQTTLMTMRPGLYYGQCSEICGSNHSFMPIVLELVPLSHFEKWSTSML-------"/>
+        <sequence id="seq_Whale" spec="Sequence" taxon="Whale" totalcount="20" value="MAYPFQLGFQDAASPIMEELLHFHDHTLMIVFLISSLVLYIITLMLTTKLTHTSTMDAQEVETVWTILPAIILILIALPSLRILYMMDEVNNPSLTVKTMGHQWYWSYEYTDYEDLSFDSYMIPTSDLKPGELRLLEVDNRVVLPMEMTIRMLVSSEDVLHSWAVPSLGLKTDAIPGRLNQTTLMSTRPGLFYGQCSEICGSNHSFMPIVLELVPLEVFEKWSVSML-------"/>
+        <sequence id="seq_Frog" spec="Sequence" taxon="Frog" totalcount="20" value="MAHPSQLGFQDAASPIMEELLHFHDHTLMAVFLISTLVLYIITIMMTTKLTNTNLMDAQEIEMVWTIMPAISLIMIALPSLRILYLMDEVNDPHLTIKAIGHQWYWSYEYTNYEDLSFDSYMIPTNDLTPGQFRLLEVDNRMVVPMESPTRLLVTAEDVLHSWAVPSLGVKTDAIPGRLHQTSFIATRPGVFYGQCSEICGANHSFMPIVVEAVPLTDFENWSSSML-EASL--"/>
+    </data>
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <run id="mcmc" spec="MCMC" chainLength="2000000">
+        <state id="state" spec="State" storeEvery="5000">
+            <tree id="Tree.t:ca.codon" spec="beast.base.evolution.tree.Tree" name="stateNode">
+                <taxonset id="TaxonSet.ca.codon" spec="TaxonSet">
+                    <alignment id="ca.codon" spec="codonmodels.evolution.alignment.CodonAlignmentFromAminoAcids" dataType="codon" geneticCode="vertebrateMitochondrial">
+                        <data idref="codon"/>
+                    </alignment>
+                </taxonset>
+            </tree>
+            <parameter id="M0.omega.s:ca.codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="M0.kappa.s:ca.codon" spec="parameter.RealParameter" name="stateNode">2.0</parameter>
+            <parameter id="gammaShape.s:ca.codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="popSize.t:ca.codon" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.3</parameter>
+        </state>
+        <init id="RandomTree.t:ca.codon" spec="RandomTree" estimate="false" initial="@Tree.t:ca.codon" taxa="@ca.codon">
+            <populationModel id="ConstantPopulation0.t:ca.codon" spec="ConstantPopulation">
+                <parameter id="randomPopSize.t:ca.codon" spec="parameter.RealParameter" name="popSize">1.0</parameter>
+            </populationModel>
+        </init>
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+                <distribution id="CoalescentConstant.t:ca.codon" spec="Coalescent">
+                    <populationModel id="ConstantPopulation.t:ca.codon" spec="ConstantPopulation" popSize="@popSize.t:ca.codon"/>
+                    <treeIntervals id="TreeIntervals.t:ca.codon" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:ca.codon"/>
+                </distribution>
+                <prior id="KappaPrior.s:ca.codon" name="distribution" x="@M0.kappa.s:ca.codon">
+                    <LogNormal id="LogNormalDistributionModel.1" name="distr">
+                        <parameter id="RealParameter.2" spec="parameter.RealParameter" estimate="false" name="M">2.0</parameter>
+                        <parameter id="RealParameter.3" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="OmegaPrior.s:ca.codon" name="distribution" x="@M0.omega.s:ca.codon">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <parameter id="RealParameter.0" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
+                        <parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="GammaShapePrior.s:ca.codon" name="distribution" x="@gammaShape.s:ca.codon">
+                    <Exponential id="Exponential.0" name="distr">
+                        <parameter id="RealParameter.4" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
+                    </Exponential>
+                </prior>
+                <prior id="PopSizePrior.t:ca.codon" name="distribution" x="@popSize.t:ca.codon">
+                    <OneOnX id="OneOnX.1" name="distr"/>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+                <distribution id="treeLikelihood.ca.codon" spec="ThreadedTreeLikelihood" data="@ca.codon" tree="@Tree.t:ca.codon" useAmbiguities="true">
+                    <siteModel id="SiteModel.s:ca.codon" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:ca.codon">
+                        <parameter id="mutationRate.s:ca.codon" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                        <parameter id="proportionInvariant.s:ca.codon" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                        <substModel id="M0.s:ca.codon" spec="codonmodels.M0Model" kappa="@M0.kappa.s:ca.codon" omega="@M0.omega.s:ca.codon">
+                            <frequencies id="codonFreqs.s:ca.codon" spec="Frequencies" estimate="false"> 
+                            	<frequencies spec="beast.base.inference.parameter.RealParameter" dimension="60" value="0.0166666666666667"/>
+                            </frequencies>
+                        </substModel>
+                    </siteModel>
+                    <branchRateModel id="StrictClock.c:ca.codon" spec="beast.base.evolution.branchratemodel.StrictClockModel">
+                        <parameter id="clockRate.c:ca.codon" spec="parameter.RealParameter" estimate="false" name="clock.rate">1.0</parameter>
+                    </branchRateModel>
+                </distribution>
+            </distribution>
+        </distribution>
+        <operator id="OmegaScaler.s:ca.codon" spec="ScaleOperator" parameter="@M0.omega.s:ca.codon" scaleFactor="0.5" weight="1.0"/>
+        <operator id="KappaScaler.s:ca.codon" spec="ScaleOperator" parameter="@M0.kappa.s:ca.codon" scaleFactor="0.5" weight="1.0"/>
+        <operator id="gammaShapeScaler.s:ca.codon" spec="ScaleOperator" parameter="@gammaShape.s:ca.codon" scaleFactor="0.5" weight="0.1"/>
+        <operator id="CoalescentConstantBICEPSEpochTop.t:ca.codon" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:ca.codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSEpochAll.t:ca.codon" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:ca.codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSTreeFlex.t:ca.codon" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:ca.codon" weight="2.0"/>
+        <operator id="CoalescentConstantTreeRootScaler.t:ca.codon" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:ca.codon" upper="10.0" weight="3.0"/>
+        <operator id="CoalescentConstantUniformOperator.t:ca.codon" spec="kernel.BactrianNodeOperator" tree="@Tree.t:ca.codon" weight="30.0"/>
+        <operator id="CoalescentConstantSubtreeSlide.t:ca.codon" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:ca.codon" weight="15.0"/>
+        <operator id="CoalescentConstantNarrow.t:ca.codon" spec="Exchange" tree="@Tree.t:ca.codon" weight="15.0"/>
+        <operator id="CoalescentConstantWide.t:ca.codon" spec="Exchange" isNarrow="false" tree="@Tree.t:ca.codon" weight="3.0"/>
+        <operator id="CoalescentConstantWilsonBalding.t:ca.codon" spec="WilsonBalding" tree="@Tree.t:ca.codon" weight="3.0"/>
+        <operator id="PopSizeScaler.t:ca.codon" spec="kernel.BactrianScaleOperator" parameter="@popSize.t:ca.codon" upper="10.0" weight="3.0"/>
+        <logger id="tracelog" spec="Logger" fileName="ca.codon.log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log id="TreeHeight.t:ca.codon" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:ca.codon"/>
+            <log idref="M0.omega.s:ca.codon"/>
+            <log idref="M0.kappa.s:ca.codon"/>
+            <log idref="gammaShape.s:ca.codon"/>
+            <log idref="popSize.t:ca.codon"/>
+            <log idref="CoalescentConstant.t:ca.codon"/>
+        </logger>
+        <logger id="screenlog" spec="Logger" logEvery="1000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="M0.omega.s:ca.codon"/>
+            <log idref="M0.kappa.s:ca.codon"/>
+        </logger>
+        <logger id="treelog.t:ca.codon" spec="Logger" fileName="$(tree).trees" logEvery="1000" mode="tree">
+            <log id="TreeWithMetaDataLogger.t:ca.codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:ca.codon"/>
+        </logger>
+    </run>
+
+</beast>
