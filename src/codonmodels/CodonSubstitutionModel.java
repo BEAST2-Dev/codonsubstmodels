@@ -66,6 +66,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     protected Codon codonDataType;
 //    protected GeneticCode geneticCode; // get from codon
     protected int rateCount;
+    
+    protected GeneticCode geneticCode;
 
     public CodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
@@ -78,7 +80,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 //            throw new IllegalArgumentException("Codon frequencies is required by CodonSubstitutionModel !");
 
         Alignment data = null;
-        if (frequencies instanceof CodonFrequencies) {
+        if (frequencies.dataInput.get() != null && frequencies.dataInput.get() instanceof CodonAlignment) {
         	data = frequencies.dataInput.get();
         } else {
         	for (BEASTInterface o : getOutputs()) {
@@ -96,6 +98,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         
         CodonAlignment alignment = getCodonAlignment(data);
         this.codonDataType = alignment.getDataType();
+        geneticCode = codonDataType.getGeneticCode();
 
         //====== init states and rates ======
         updateMatrix = true;
@@ -123,6 +126,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         if (verboseInput.get())
             printRateMap(codonDataType); // debug
 
+        
     }
 
     /**
@@ -266,7 +270,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     // return i1, j1, k1, aa1, given codonState
-    private int[] getCodonStatesForRateClass(int codonState, Codon codon) {
+    public int[] getCodonStatesForRateClass(int codonState, Codon codon) {
         int i1, j1, k1, cs1, aa1;
 //        int codonState = codon.getCodonState(stateMapIndex);
         int[] nucStates  = codon.getTripletNucStates(codonState);
@@ -276,13 +280,13 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 
         cs1 = codon.getCodonState(i1, j1, k1);
 
-        GeneticCode geneticCode = codon.getGeneticCode();
-        aa1 = geneticCode.getAminoAcidState(cs1);
+        // GeneticCode geneticCode = codon.getGeneticCode();
+        aa1 = getGeneticCode().getAminoAcidState(cs1);
         return new int[]{i1, j1, k1, aa1};
     }
 
     // get rateClass for constructRateMap, i,j = {A,C,G,T}
-    private byte getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
+    public byte getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
         byte rateClass = -1;
         if (i1 != i2) {
             if ( (i1 == 0 && i2 == 2) || (i1 == 2 && i2 == 0) || // A <-> G
@@ -414,5 +418,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
 //            Log.info.println();
 //        }
     }
+
+	public GeneticCode getGeneticCode() {
+		return geneticCode;
+	}
 
 }

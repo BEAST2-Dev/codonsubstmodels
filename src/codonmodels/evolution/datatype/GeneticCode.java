@@ -46,7 +46,7 @@ import java.util.List;
  * Merged and modified from BEAST 1 GeneticCode, AminoAcids, Nucleotides.
  */
 @Description("A set of standard genetic codes.")
-public final class GeneticCode {
+public class GeneticCode {
 
 //    public static final String GENETIC_CODE = "geneticCode";
     
@@ -412,8 +412,8 @@ public final class GeneticCode {
         return count;
     }
 
-    private int geneticCodeId;
-    private String codeTable;
+    protected int geneticCodeId;
+    protected String codeTable;
 
     @Override
     public String toString() {
