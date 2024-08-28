@@ -419,4 +419,8 @@ public class GeneticCode {
     public String toString() {
         return getName();
     }
+
+	public int getGeneticCodeID() {
+		return geneticCodeId;
+	}
 }
