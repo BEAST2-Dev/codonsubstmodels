@@ -61,7 +61,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
             "Print the rate classes in the rate matrix, etc.",
             Boolean.TRUE);
 
-    protected byte[] rateMap;
+    protected short[] rateMap;
 
     protected Codon codonDataType;
 //    protected GeneticCode geneticCode; // get from codon
@@ -238,9 +238,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      * @param codon  {@link Codon Codon}
      * @return
      */
-    protected byte[] constructRateMap(int rateCount, int stateCount, Codon codon)	{
-        byte rateClass;
-        byte[] rateMap = new byte[rateCount];
+    protected short[] constructRateMap(int rateCount, int stateCount, Codon codon)	{
+        short rateClass;
+        short[] rateMap = new short[rateCount];
 
         // this needs to match rateMatrix[i][j] <= relativeRates[] in setupRateMatrix()
         // i j is codonState
@@ -286,8 +286,8 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     // get rateClass for constructRateMap, i,j = {A,C,G,T}
-    public byte getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
-        byte rateClass = -1;
+    public short getRateClass(int i1, int j1, int k1, int i2, int j2, int k2, int aa1, int aa2) {
+        short rateClass = -1;
         if (i1 != i2) {
             if ( (i1 == 0 && i2 == 2) || (i1 == 2 && i2 == 0) || // A <-> G
                     (i1 == 1 && i2 == 3) || (i1 == 3 && i2 == 1) ) { // C <-> T
@@ -350,7 +350,7 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
      * @param codon
      */
     protected void printRateMap(Codon codon) {
-        byte rateClass;
+        short rateClass;
         int stateCount = nrOfStates;
         GeneticCode geneticCode = codon.getGeneticCode();
 

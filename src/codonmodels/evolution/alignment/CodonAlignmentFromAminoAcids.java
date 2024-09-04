@@ -37,6 +37,7 @@ import beast.base.evolution.datatype.DataType;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +66,6 @@ public class CodonAlignmentFromAminoAcids extends CodonAlignment {
 //            Boolean.TRUE);
 
 
-    protected Alignment alignment;
 
     public CodonAlignmentFromAminoAcids() {
         sequenceInput.setRule(Input.Validate.OPTIONAL);
@@ -141,7 +141,24 @@ public class CodonAlignmentFromAminoAcids extends CodonAlignment {
 
         if (isAscertained)
             throw new UnsupportedOperationException("Ascertainment correction is not available !");
+        
+        
+        
+        
+        String aaCodes = new Aminoacid().getCodeMap();
+        String codonCodes = geneticCode.getCodeTableNoStopCodons();
+        stateSet = new boolean[21][codonCodes.length()];
+    	for (int i = 0; i < codonCodes.length(); i++) {
+    		char codonChar = codonCodes.charAt(i);
+    		int j = aaCodes.indexOf(codonChar);
+    		stateSet[j][i] = true;
+    	}
+        for (int i = 0; i < codonCodes.length(); i++) {
+        	stateSet[20][i] = true;
+        }
     }
+    
+    private boolean [][] stateSet; 
 
     /**
      * modified from Alignment private initializeWithSequenceList(List<Sequence>, boolean)
@@ -206,6 +223,7 @@ public class CodonAlignmentFromAminoAcids extends CodonAlignment {
         }
     }
 
+     
     @Override
     public Codon getDataType() {
         if (!(m_dataType instanceof Codon))
@@ -295,6 +313,12 @@ public class CodonAlignmentFromAminoAcids extends CodonAlignment {
         return freqs;
     }
 
-
+    @Override
+    public boolean[] getStateSet(int state) {
+    	if (state > 20) {
+    		return stateSet[20];
+    	}
+    	return stateSet[state];
+    }
 
 }

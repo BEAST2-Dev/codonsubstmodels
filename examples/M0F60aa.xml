@@ -16,30 +16,22 @@ spec="Alignment" dataType="aminoacid">
     </data>
 
     <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
-
     <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
-
     <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
-
     <map name="Normal" >beast.base.inference.distribution.Normal</map>
-
     <map name="Beta" >beast.base.inference.distribution.Beta</map>
-
     <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
-
     <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
-
     <map name="prior" >beast.base.inference.distribution.Prior</map>
-
     <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
-
     <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
     <run id="mcmc" spec="MCMC" chainLength="2000000">
         <state id="state" spec="State" storeEvery="5000">
             <tree id="Tree.t:ca.codon" spec="beast.base.evolution.tree.Tree" name="stateNode">
                 <taxonset id="TaxonSet.ca.codon" spec="TaxonSet">
-                    <alignment id="ca.codon" spec="codonmodels.evolution.alignment.CodonAlignmentFromAminoAcids" dataType="codon" geneticCode="vertebrateMitochondrial">
+                    <alignment id="ca.codon" spec="codonmodels.evolution.alignment.CodonAlignmentFromAminoAcids" geneticCode="vertebrateMitochondrial"
+                    	dataType="codon">
                         <data idref="codon"/>
                     </alignment>
                 </taxonset>
@@ -49,11 +41,13 @@ spec="Alignment" dataType="aminoacid">
             <parameter id="gammaShape.s:ca.codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
             <parameter id="popSize.t:ca.codon" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.3</parameter>
         </state>
+        
         <init id="RandomTree.t:ca.codon" spec="RandomTree" estimate="false" initial="@Tree.t:ca.codon" taxa="@ca.codon">
             <populationModel id="ConstantPopulation0.t:ca.codon" spec="ConstantPopulation">
                 <parameter id="randomPopSize.t:ca.codon" spec="parameter.RealParameter" name="popSize">1.0</parameter>
             </populationModel>
         </init>
+        
         <distribution id="posterior" spec="CompoundDistribution">
             <distribution id="prior" spec="CompoundDistribution">
                 <distribution id="CoalescentConstant.t:ca.codon" spec="Coalescent">
@@ -98,6 +92,7 @@ spec="Alignment" dataType="aminoacid">
                 </distribution>
             </distribution>
         </distribution>
+        
         <operator id="OmegaScaler.s:ca.codon" spec="ScaleOperator" parameter="@M0.omega.s:ca.codon" scaleFactor="0.5" weight="1.0"/>
         <operator id="KappaScaler.s:ca.codon" spec="ScaleOperator" parameter="@M0.kappa.s:ca.codon" scaleFactor="0.5" weight="1.0"/>
         <operator id="gammaShapeScaler.s:ca.codon" spec="ScaleOperator" parameter="@gammaShape.s:ca.codon" scaleFactor="0.5" weight="0.1"/>
@@ -111,6 +106,7 @@ spec="Alignment" dataType="aminoacid">
         <operator id="CoalescentConstantWide.t:ca.codon" spec="Exchange" isNarrow="false" tree="@Tree.t:ca.codon" weight="3.0"/>
         <operator id="CoalescentConstantWilsonBalding.t:ca.codon" spec="WilsonBalding" tree="@Tree.t:ca.codon" weight="3.0"/>
         <operator id="PopSizeScaler.t:ca.codon" spec="kernel.BactrianScaleOperator" parameter="@popSize.t:ca.codon" upper="10.0" weight="3.0"/>
+        
         <logger id="tracelog" spec="Logger" fileName="ca.codon.log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
             <log idref="likelihood"/>
@@ -122,6 +118,7 @@ spec="Alignment" dataType="aminoacid">
             <log idref="popSize.t:ca.codon"/>
             <log idref="CoalescentConstant.t:ca.codon"/>
         </logger>
+        
         <logger id="screenlog" spec="Logger" logEvery="1000">
             <log idref="posterior"/>
             <log idref="likelihood"/>
@@ -129,6 +126,7 @@ spec="Alignment" dataType="aminoacid">
             <log idref="M0.omega.s:ca.codon"/>
             <log idref="M0.kappa.s:ca.codon"/>
         </logger>
+        
         <logger id="treelog.t:ca.codon" spec="Logger" fileName="$(tree).trees" logEvery="1000" mode="tree">
             <log id="TreeWithMetaDataLogger.t:ca.codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:ca.codon"/>
         </logger>
