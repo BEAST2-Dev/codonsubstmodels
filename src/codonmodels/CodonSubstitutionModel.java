@@ -104,6 +104,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
         updateMatrix = true;
         double[] freqs = frequencies.getFreqs();
         nrOfStates = freqs.length;
+        if (nrOfStates != geneticCode.getStateCount()) {
+        	throw new IllegalArgumentException("state count of genetic code and frequencies do not match");
+        }
 
         try {
             eigenSystem = createEigenSystem();

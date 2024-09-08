@@ -318,6 +318,9 @@ public class CodonAlignmentFromAminoAcids extends CodonAlignment {
     	if (state > 20) {
     		return stateSet[20];
     	}
+    	if (state == 20) {
+    		return stateSet[20];
+    	}
     	return stateSet[state];
     }
 

@@ -28,6 +28,7 @@ package codonmodels.evolution.datatype;
 
 import beast.base.core.Input;
 import beast.base.core.Log;
+import beast.base.evolution.datatype.Aminoacid;
 import beast.base.evolution.datatype.DataType;
 import beast.base.evolution.datatype.Nucleotide;
 
@@ -98,6 +99,9 @@ public class CodonFromAminoAcid extends DataType.Base {
 //    }
 
 
+    /** maps amino acid to state set **/
+    private int [][] stateSet;
+
     /**
      * This character represents the amino acid equivalent of a stop codon to cater for
      * situations arising from converting coding DNA to an amino acid sequence.
@@ -110,6 +114,27 @@ public class CodonFromAminoAcid extends DataType.Base {
     public void initAndValidate() {
         GeneticCode geneticCode = GeneticCode.findByName(geneticCodeInput.get());
         setGeneticCode(geneticCode);
+        
+        String aaCodes = new Aminoacid().getCodeMap();
+        String codonCodes = geneticCode.getCodeTableNoStopCodons();
+        List<Integer>[] s = new List[20];
+        for (int i = 0; i < 20; i++) {
+        	s[i] = new ArrayList<>();
+        }
+    	for (int i = 0; i < codonCodes.length(); i++) {
+    		char codonChar = codonCodes.charAt(i);
+    		int j = aaCodes.indexOf(codonChar);
+    		s[j].add(i);
+    	}
+        stateSet = new int[20][];
+        for (int i = 0; i < 20; i++) {
+        	stateSet[i] = new int[s[i].size()];
+        	for (int j = 0; j < stateSet[i].length; j++) {
+        		stateSet[i][j] = s[i].get(j);
+        	}
+        	
+        }
+
     }
 
     // ambiguous states > 60 or 61
@@ -397,6 +422,12 @@ public class CodonFromAminoAcid extends DataType.Base {
     public GeneticCode getGeneticCode() {
         return geneticCode;
     }
+
+    
+    @Override
+	public int[] getStatesForCode(int code) {
+    	return stateSet[code];
+	}
 
 
 }
