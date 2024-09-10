@@ -2,22 +2,14 @@
 package codonmodels;
 
 
-import beast.base.core.BEASTInterface;
 import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
-import beast.base.core.Log;
-import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.datatype.DataType;
-import beast.base.evolution.likelihood.GenericTreeLikelihood;
-import beast.base.evolution.sitemodel.SiteModel;
-import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
-import beast.base.evolution.substitutionmodel.Frequencies;
 import beast.base.evolution.substitutionmodel.GeneralSubstitutionModel;
-import beast.base.evolution.substitutionmodel.SubstitutionModel;
 import beast.base.evolution.tree.Node;
 import beast.base.inference.parameter.RealParameter;
 
@@ -33,10 +25,13 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
 	final public Input<List<GeneralSubstitutionModel>> substmodelInput = new Input<>("substModel", 
 			"nucleotide subsitution model, either 1 shared among codon positions, "
 			+ "or 3 seperate for each codon position", new ArrayList<>());
+	
 	final public Input<RealParameter> mnmPenaltyInput = new Input<>("mnmPenalty", "multi-nucleotide mutation pentalty (multiplied with rate) "
 			+ "Set to zero if no more than 1 mutation is allowed (as in the M0 model). "
 			+ "if dimension=2: multiplier penalty for 2 mutations + multiplier penalty for 3 mutations."
 			+ "if dimension=1: multiplier penalties for both 2 and 3 mutations", Validate.REQUIRED);
+	
+	final public Input<RealParameter> substRateInput = new Input<>("substitutionRate","substitution rate for the three codon positions, if specified");
 	
 	final public Input<RealParameter> omegaInput = new Input<>("omega",
             "omega parameter to represent the nonsynonymous-synonymous rate ratio", Input.Validate.REQUIRED);
@@ -47,9 +42,10 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
 	protected int [] nucMutation1, nucMutation2, nucMutation3;
 	protected int [] fromAA, toAA;
 	
-	List<GeneralSubstitutionModel> substModels;
+	protected List<GeneralSubstitutionModel> substModels;
 	
     protected GeneticCode geneticCode;
+    protected RealParameter substRate;
 
     public GeneralCodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
@@ -61,26 +57,7 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         if (!(frequencies instanceof GeneralCodonFrequencies)) {
             throw new IllegalArgumentException("GeneralCodonFrequencies is required by GeneralCodonSubstitutionModel");
         }
-
-        Alignment data = null;
-        if (frequencies.dataInput.get() != null && frequencies.dataInput.get() instanceof CodonAlignment) {
-        	data = frequencies.dataInput.get();
-        } else {
-        	for (BEASTInterface o : getOutputs()) {
-        		if (o instanceof SiteModel) {
-        			SiteModel sitemodel = (SiteModel) o;
-                	for (BEASTInterface o2 : sitemodel.getOutputs()) {
-                		if (o2 instanceof GenericTreeLikelihood) {
-                			GenericTreeLikelihood tl = (GenericTreeLikelihood) o2;
-                			data = tl.dataInput.get();
-                		}
-                	}        			
-        		}
-        	}
-        }
-        
-        CodonAlignment alignment = CodonAlignment.toCodonAlignment(data);
-        Codon codonDataType = alignment.getDataType();
+        Codon codonDataType = ((GeneralCodonFrequencies) frequencies).codonDataType;
         geneticCode = codonDataType.getGeneticCode();
 
         //====== init states and rates ======
@@ -110,6 +87,11 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         constructStateMap(rateCount, nrOfStates, codonDataType);
         
         substModels = substmodelInput.get();
+        
+        substRate = substRateInput.get();
+        if (substRate == null) {
+        	substRate = new RealParameter("1.0");
+        }
     }
 
     /**
@@ -288,10 +270,30 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         double mnmPenalty3 = mnmPenalty == null ? 0.0 : 
         	(mnmPenalty.getDimension() > 1 ? mnmPenalty.getArrayValue(1) : mnmPenalty2);
 
+        substModels.get(0).setupRelativeRates();
+        if (substModels.size() > 1) {
+            substModels.get(1).setupRelativeRates();
+            substModels.get(2).setupRelativeRates();
+        }
+        
         double [] r1 = substModels.get(0).getRelativeRates();
         double [] r2 = substModels.size() > 1 ? substModels.get(1).getRelativeRates() : r1;
         double [] r3 = substModels.size() > 1 ? substModels.get(2).getRelativeRates() : r1;
         
+        if (substRate.getDimension() == 3) {
+	        double s = substRate.getValue(0);
+	        for (int i = 0; i < r1.length; i++) {
+	        	r1[i] *= s;
+	        }
+	        s = substRate.getValue(1);
+	        for (int i = 0; i < r2.length; i++) {
+	        	r2[i] *= s;
+	        }
+	        s = substRate.getValue(2);
+	        for (int i = 0; i < r3.length; i++) {
+	        	r3[i] *= s;
+	        }
+        }
         
         for (int i = 0; i < rateCount; i++) {
         	double rate = 1.0;

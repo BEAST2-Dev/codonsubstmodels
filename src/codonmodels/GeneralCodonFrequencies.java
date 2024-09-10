@@ -1,10 +1,17 @@
 
 package codonmodels;
 
+import beast.base.core.BEASTInterface;
 import beast.base.core.Description;
+import beast.base.core.Function;
 import beast.base.core.Input;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.likelihood.GenericTreeLikelihood;
 import beast.base.evolution.substitutionmodel.Frequencies;
+import beast.base.inference.CalculationNode;
+import beast.base.inference.StateNode;
 import beast.base.inference.parameter.RealParameter;
+import beast.base.inference.util.InputUtil;
 import codonmodels.evolution.alignment.CodonAlignment;
 import codonmodels.evolution.datatype.Codon;
 
@@ -15,7 +22,7 @@ import java.util.List;
 @Description("Frequencies for codon models that cna be estimated")
 public class GeneralCodonFrequencies extends Frequencies {
 
-	final public Input<List<RealParameter>> freqInput = new Input<>("freq", 
+	final public Input<List<Function>> freqInput = new Input<>("freq", 
 			"determines base frequencies:"
 			+ "single freq with dim=4: F1x4 "
 			+ "three freq with dim=3: F3x4 "
@@ -25,13 +32,42 @@ public class GeneralCodonFrequencies extends Frequencies {
     protected Codon codonDataType; // contain selected genetic code
     protected int codonStateCount;
 
+    
+    public GeneralCodonFrequencies() {
+        frequenciesInput.setRule(Input.Validate.OPTIONAL);
+        dataInput.setRule(Input.Validate.OPTIONAL); 
+    }
+    
     @Override
     public void initAndValidate() {
-    	codonDataType = CodonAlignment.toCodonAlignment(dataInput.get()).getDataType();
+        Alignment data = null;
+        if (dataInput.get() != null && dataInput.get() instanceof CodonAlignment) {
+        	data = dataInput.get();
+        } else {
+        	data = getData(this);
+        }
+        
+     	codonDataType = CodonAlignment.toCodonAlignment(data).getDataType();
         codonStateCount = codonDataType.getStateCount();
+        needsUpdate = true;
    }
 
-    @Override
+    private Alignment getData(BEASTInterface o2) {
+		if (o2 instanceof GenericTreeLikelihood) {
+			GenericTreeLikelihood tl = (GenericTreeLikelihood) o2;
+			return tl.dataInput.get();
+		}
+		
+    	for (BEASTInterface o : o2.getOutputs()) {
+    		Alignment data = getData(o);
+    		if (data != null) {
+    			return data;
+    		}
+    	}
+    	return null;
+	}
+
+	@Override
     protected void update() {
         // 60/61 codon frequencies (separated by white space) are in fixed order AAA AAC AAG AAT ... TTA TTC TTG TTT
         RealParameter freqsInput = frequenciesInput.get();
@@ -56,7 +92,7 @@ public class GeneralCodonFrequencies extends Frequencies {
         	}
 
         } else {
-        	List<RealParameter> freqList = freqInput.get();
+        	List<Function> freqList = freqInput.get();
         	switch (freqList.size()) {
         	case 1:
         		double [] freqs0 = freqList.get(0).getDoubleValues();
@@ -99,6 +135,17 @@ public class GeneralCodonFrequencies extends Frequencies {
             freqs[i] = freqs[i] / sum;
         }
         return freqs;
+    }
+    
+    @Override
+    protected boolean requiresRecalculation() {
+        if (frequenciesInput.get() != null && frequenciesInput.get().somethingIsDirty()) {
+            needsUpdate = true;
+        }
+    	if (InputUtil.isDirty(freqInput)) {
+			needsUpdate = true;
+    	}
+    	return needsUpdate;
     }
 
 } // class Frequencies
