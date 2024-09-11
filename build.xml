@@ -100,7 +100,7 @@
         <xmlproperty file="${beastDir}/version.xml" prefix="BeastVersionFile" />
         <property name="beastName" value="${BeastVersionFile.package(name)}" />
         <property name="beastVersion" value="${BeastVersionFile.package(version)}" />
-
+<!-->
         <mkdir dir="${build-beast}"/>
 
         <javac target="${targetVersion}" source="${sourceVersion}"
@@ -118,6 +118,7 @@
         </copy>
 
         <delete dir="${build-beast}" />
+-->        
     </target>
 
     <target name="build-beast" depends="build-local-beast,build-remote-beast"/>
@@ -129,7 +130,7 @@
         <xmlproperty file="${beastFX}/version.xml" prefix="BeastFXVersionFile" />
         <property name="beastFXName" value="${BeastFXVersionFile.package(name)}" />
         <property name="beastFXVersion" value="${BeastFXVersionFile.package(version)}" />
-
+<!-->
         <mkdir dir="${build-beast}"/>
 
         <javac target="${targetVersion}" source="${sourceVersion}"
@@ -144,14 +145,13 @@
 
         <jar jarfile="${build-lib}/beastFX.v${beastFXVersion}.jar" basedir="${build-beast}" />
         <copy todir="${build-lib}">
-<!--            <fileset dir="${beastFX}/locallib" includes="*.jar"/>-->
             <fileset dir="${beastFX}/src" includes="**/*.png" />
             <fileset dir="${beastFX}/src" includes="**/*.fxml" />
             <fileset dir="${beastFX}/resources" includes="**/*.css" />
         </copy>
 
         <delete dir="${build-beast}" />
-
+-->
         <echo message="Successfully compiled beastFX v${beastFXVersion}." />
     </target>
 
@@ -162,6 +162,9 @@
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${build-lib}" includes="*.jar"/>
+                <fileset dir="../beast2/lib/junit/" includes="*.jar"/>
+                <fileset dir="../beast2/build"/>
+                <fileset dir="../BeastFX/build"/>
             </classpath>
             <include name="codonmodels/**/**" />
         </javac>
