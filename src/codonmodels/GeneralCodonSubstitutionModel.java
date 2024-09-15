@@ -6,6 +6,7 @@ import beast.base.core.Description;
 import beast.base.core.Function;
 import beast.base.core.Input;
 import beast.base.core.Input.Validate;
+import beast.base.evolution.datatype.Aminoacid;
 import beast.base.evolution.datatype.DataType;
 import codonmodels.evolution.datatype.Codon;
 import codonmodels.evolution.datatype.GeneticCode;
@@ -36,11 +37,16 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
 	final public Input<RealParameter> omegaInput = new Input<>("omega",
             "omega parameter to represent the nonsynonymous-synonymous rate ratio", Input.Validate.REQUIRED);
 
+	final public Input<String> categoriesInput = new Input<>("categories",
+            "comma separated list of amino acids falling in the same category. "
+            + "If not specified, assume all amino acids are in their own category. ");
+
 	
 	protected int [] mutationCount;
 	// nucleotide mutation for rate i, for codon position j. If negative, no mutation, otherwise index into relative rates matrix 
 	protected int [] nucMutation1, nucMutation2, nucMutation3;
 	protected int [] fromAA, toAA;
+	protected int [] category;
 	
 	protected List<GeneralSubstitutionModel> substModels;
 	
@@ -50,6 +56,8 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
     public GeneralCodonSubstitutionModel() {
         ratesInput.setRule(Input.Validate.FORBIDDEN); // only use internally
     }
+
+    protected String [] categories;
 
     @Override
     public void initAndValidate() {
@@ -84,6 +92,12 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         relativeRates = new double[rateCount];
         storedRelativeRates = new double[rateCount];
 
+        if (categoriesInput.get() != null) {
+        	categories = categoriesInput.get().split(",");
+        } else {
+        	categories = new String[] {};
+        }
+
         constructStateMap(rateCount, nrOfStates, codonDataType);
         
         substModels = substmodelInput.get();
@@ -91,6 +105,10 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         substRate = substRateInput.get();
         if (substRate == null) {
         	substRate = new RealParameter("1.0");
+        }
+    
+        if (omegaInput.get().getDimension() != categories.length + 1) {
+        	omegaInput.get().setDimension(categories.length + 1);
         }
     }
 
@@ -177,6 +195,7 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         nucMutation3 = new int[rateCount]; 
         fromAA = new int[rateCount];
         toAA = new int[rateCount];
+        category = new int[rateCount];
         
 
         // this needs to match rateMatrix[i][j] <= relativeRates[] in setupRateMatrix()
@@ -218,6 +237,8 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
 	                
 	                fromAA[index] = ids1[3];
 	                toAA[index] = ids2[3];
+	                
+	                category[index] = getCategory(ids1[3], ids2[3]);
             	} else {
             		offset = 1;
             	}
@@ -226,7 +247,23 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         }
     }
 
-    private int nucMutation(int i1, int i2) {
+    private int getCategory(int i, int j) {
+		String aa =  new Aminoacid().getCodeMap();
+		String a1 = aa.charAt(i) + "";
+		String a2 = aa.charAt(j) + "";
+        if (i == j) { 
+        	return -1;
+        } else {
+    		for (int k = 0; k < categories.length; k++) {
+    			if (categories[k].contains(a1) && categories[k].contains(a2)) {
+    				return k;
+    			}
+    		}
+        }
+		return categories.length;
+	}
+
+	private int nucMutation(int i1, int i2) {
         if (i1 == i2) {
         	return -1;
         } else {
@@ -264,7 +301,7 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
     @Override
 	public void setupRelativeRates() {
     	int rateCount = mutationCount.length;
-        double omega = omegaInput.get().getValue();
+        RealParameter omega = omegaInput.get();
         Function mnmPenalty = mnmPenaltyInput.get();
         double mnmPenalty2 = mnmPenalty == null ? 0.0 : mnmPenalty.getArrayValue();
         double mnmPenalty3 = mnmPenalty == null ? 0.0 : 
@@ -296,10 +333,8 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         }
         
         for (int i = 0; i < rateCount; i++) {
-        	double rate = 1.0;
-        	if (fromAA[i] != toAA[i]) {
-        		rate *= omega;
-        	}
+        	double rate = aaRate(i);
+
         	if (mutationCount[i] == 2) {
         		rate *= mnmPenalty2;
         	} else if (mutationCount[i] == 3) {
@@ -328,4 +363,13 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
             relativeRates[i] = rate;
         }
     }
+
+    /** contribution of amino acid mutation to rate **/
+	protected double aaRate(int i) {
+		int index = category[i];
+		if (index < 0) {
+			return 1.0;
+		}
+		return omegaInput.get().getArrayValue(index);
+	}
 }
