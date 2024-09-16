@@ -369,9 +369,10 @@ public class Codon extends DataType.Base {
     public final int[] getTripletNucStates(int state) {
         int[] triplet = new int[3];
 
-        triplet[0] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(0));
-        triplet[1] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(1));
-        triplet[2] = geneticCode.getNucleotideState(stateToTriplet(state).charAt(2));
+        String tripletStr = stateToTriplet(state);
+        triplet[0] = geneticCode.getNucleotideState(tripletStr.charAt(0));
+        triplet[1] = geneticCode.getNucleotideState(tripletStr.charAt(1));
+        triplet[2] = geneticCode.getNucleotideState(tripletStr.charAt(2));
 
         return triplet;
     }

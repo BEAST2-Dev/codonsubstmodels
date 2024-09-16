@@ -58,6 +58,7 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     protected String [] categories;
+    public String[] getCategories() {return categories;}
 
     @Override
     public void initAndValidate() {
@@ -247,13 +248,13 @@ public class GeneralCodonSubstitutionModel extends GeneralSubstitutionModel {
         }
     }
 
-    private int getCategory(int i, int j) {
-		String aa =  new Aminoacid().getCodeMap();
-		String a1 = aa.charAt(i) + "";
-		String a2 = aa.charAt(j) + "";
+    protected int getCategory(int i, int j) {
         if (i == j) { 
         	return -1;
         } else {
+    		String aa =  new Aminoacid().getCodeMap();
+    		String a1 = aa.charAt(i) + "";
+    		String a2 = aa.charAt(j) + "";
     		for (int k = 0; k < categories.length; k++) {
     			if (categories[k].contains(a1) && categories[k].contains(a2)) {
     				return k;

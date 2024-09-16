@@ -111,7 +111,8 @@ public class CodonAlignmentProvider extends BeautiAlignmentProvider {
     @Override
     public
     void editAlignment(Alignment alignment, BeautiDoc doc) {
-        if (alignment instanceof CodonAlignment codonAlignment) {
+        if (alignment instanceof CodonAlignment) {
+        	CodonAlignment codonAlignment = (CodonAlignment) alignment;
             try {
                 CodonAlignmentViewer viewer = new CodonAlignmentViewer(codonAlignment);
                 viewer.showInDialog();

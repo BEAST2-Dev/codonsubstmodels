@@ -273,9 +273,9 @@ public class CodonSubstitutionModel extends GeneralSubstitutionModel {
     }
 
     // return i1, j1, k1, aa1, given codonState
-    public int[] getCodonStatesForRateClass(int codonState, Codon codon) {
+    public int[] getCodonStatesForRateClass(int stateMapIndex, Codon codon) {
         int i1, j1, k1, cs1, aa1;
-//        int codonState = codon.getCodonState(stateMapIndex);
+        int codonState = codon.getCodonState(stateMapIndex);
         int[] nucStates  = codon.getTripletNucStates(codonState);
         i1 = nucStates[0];
         j1 = nucStates[1];

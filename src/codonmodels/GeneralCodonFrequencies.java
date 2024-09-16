@@ -148,4 +148,7 @@ public class GeneralCodonFrequencies extends Frequencies {
     	return needsUpdate;
     }
 
+    public Codon getDataType() {
+    	return codonDataType;
+    }
 } // class Frequencies
