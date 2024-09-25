@@ -33,6 +33,7 @@
         <provider classname="codonmodels.M0Model"/>
         <provider classname="codonmodels.GeneralCodonFrequencies"/>
         <provider classname="codonmodels.GeneralCodonSubstitutionModel"/>
+        <provider classname="codonmodels.EmpiricalCodonModel"/>
     </service>
 
     <service type="beast.base.evolution.datatype.DataType">
@@ -45,4 +46,5 @@
 
 
 </package>
+
 

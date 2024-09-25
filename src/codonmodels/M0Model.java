@@ -58,19 +58,23 @@ public class M0Model extends CodonSubstitutionModel {//implements Loggable {
     public void initAndValidate() {
         super.initAndValidate();
 
-        double value = omegaInput.get().getValue();
-        if(value < 0) {
-            throw new RuntimeException("Negative Omega parameter value " + value);
-        }//END: negative check
+        if (omegaInput.get() != null) {
+	        double value = omegaInput.get().getValue();
+	        if(value < 0) {
+	            throw new RuntimeException("Negative Omega parameter value " + value);
+	        }//END: negative check
+	
+	        omegaInput.get().setBounds(Math.max(0.0, omegaInput.get().getLower()), omegaInput.get().getUpper());
+        }
 
-        omegaInput.get().setBounds(Math.max(0.0, omegaInput.get().getLower()), omegaInput.get().getUpper());
-
-        value = kappaInput.get().getValue();
-        if(value < 0) {
-            throw new RuntimeException("Negative kappa parameter value value " + value);
-        }//END: negative check
-
-        kappaInput.get().setBounds(Math.max(0.0, kappaInput.get().getLower()), kappaInput.get().getUpper());
+        if (kappaInput.get() != null) {
+	        double value = kappaInput.get().getValue();
+	        if(value < 0) {
+	            throw new RuntimeException("Negative kappa parameter value value " + value);
+	        }//END: negative check
+	
+	        kappaInput.get().setBounds(Math.max(0.0, kappaInput.get().getLower()), kappaInput.get().getUpper());
+        }
 
     }
 
