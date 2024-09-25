@@ -36,12 +36,17 @@ import beast.base.inference.parameter.RealParameter;
 /**
  * Empirical model of codon evolution
  *
- * adapter from BEAST-X
+ * Adapted from BEAST-X
  * @author Stefan Zoller
  */
 @Description("Empirical model of codon evolution")
 public class EmpiricalCodonModel extends M0Model {
-	final public Input<RealParameter> mntParamInput = new Input<>("multi-nt", "Parameter: Multi-nt");
+	
+	final public Input<RealParameter> mnmPenaltyInput = new Input<>("mnm-penalty", "multi-nucleotide mutation penalty. "
+			+ "If specified, when 2 or 3 mutations are involved the rate is penalised by this parameter. "
+			+ "Lower values mean lower likelihood of MNMs. "
+			+ "If not specified, all mnm rates are set to 0.");
+	
 	final public Input<File> matrixDirInput = new Input<>("matrixDir", "director containing files with "
 			+ "empirical rate matrix and empirical frequencies. Some examples can be found here: "
 			+ "https://github.com/beast-dev/beast-mcmc/tree/master/examples/CodonModels/EmpiricalCodonModels/codon-data/ecmdata", Validate.REQUIRED);
@@ -50,7 +55,7 @@ public class EmpiricalCodonModel extends M0Model {
 	final public Input<String> freqFileInput = new Input<>("freqFile", "name of comma separated file containing "
 			+ "empirical frequencies", "freqs.csv");
 		
-	private RealParameter multintParameter;
+	private RealParameter mnmPenalty;
 	private EmpiricalRateMatrixReader rateMat;
 	
 	private int modelType;
@@ -81,7 +86,7 @@ public class EmpiricalCodonModel extends M0Model {
 		super.initAndValidate();
 
 		this.geneticCode = codonDataType.getGeneticCode();
-		this.multintParameter = mntParamInput.get();
+		this.mnmPenalty = mnmPenaltyInput.get();
 				
 		EmpiricalRateMatrixReader rMat = new EmpiricalRateMatrixReader(codonDataType, matrixDirInput.get().getPath(), freqFileInput.get(), rateFileInput.get());
 		this.rateMat = rMat;
@@ -114,11 +119,11 @@ public class EmpiricalCodonModel extends M0Model {
 				Log.info("Using model ECM+omega+9k");
 			}
 		}
-		if(multintParameter != null){
+		if(mnmPenalty != null){
 			this.modelType = ECM_OMEGA_NU;
 			Log.info("Using model ECM+omega+nu");
 		}
-		if(kappaInput.get() == null && multintParameter == null) {
+		if(kappaInput.get() == null && mnmPenalty == null) {
 			this.modelType = ECM_OMEGA;
 			Log.info("Using model ECM+omega");
 		}
@@ -289,8 +294,8 @@ public class EmpiricalCodonModel extends M0Model {
     
 
     public double getMultiNt() { 
-    	if(multintParameter != null) {
-    		return multintParameter.getValue(0);
+    	if(mnmPenalty != null) {
+    		return mnmPenalty.getValue(0);
     	} else {
     		return 0.0;
     	}
@@ -410,7 +415,6 @@ public class EmpiricalCodonModel extends M0Model {
 				rateMap[i] = rateClass;
 				i++;
 			}
-
 		}
 	}
 
