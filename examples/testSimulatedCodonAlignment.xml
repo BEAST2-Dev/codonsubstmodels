@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonSubstModels' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.4:CodonSubstModels v2.0.0" version="2.7">
+
+    <data
+id="codon0"
+spec="Alignment" dataType="nucleotide">
+<plate var="n" range="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20">
+                        <sequence id="seq_t$(n)" spec="Sequence" taxon="t$(n)" totalcount="4" value="AAA"/>
+</plate>                        
+    </data>
+
+
+
+    <!-- The simulated sequence alignment. -->
+    <data spec='codonmodels.evolution.alignment.SimulatedCodonAlignment' 
+		id="codon"
+		dataType="codon" 
+        sequencelength="$(sl=100)">
+
+      <!-- The true tree down which sequences are simulated. -->
+      <tree spec='beast.base.evolution.tree.TreeParser'
+            newick="((((((((t1:0.09424627063705637,(t2:0.0013769462769668284,t4:0.0013769462769668284):0.09286932436008977):0.005806350489915069,t19:0.10005262112697166):0.03268054829468592,t12:0.13273316942165758):0.1652538821296019,t6:0.2979870515512595):0.014774405928076995,t7:0.3127614574793365):0.013397531419257369,(t5:0.18937963604839836,(t17:0.011721100632887227,t18:0.011721100632887227):0.17765853541551113):0.1367793528501955):1.0047306375487395,t3:1.3308896264473333):0.648988159539925,((((((t8:0.03089121823767771,t15:0.03089121823767771):0.04096626092269373,(t16:0.03456702360276376,t20:0.03456702360276376):0.03729045555760768):0.1515128101219374,(t9:0.007018074130338059,t10:0.007018074130338059):0.21635221515197078):0.21117054029650117,t13:0.43454082957881024):0.06617402531586758,t14:0.5007148548946778):0.824625488120923,t11:1.3253403430156008):0.6545374429716575):0.0"
+            IsLabelledNewick="true" adjustTipHeights="false"/>
+
+      <data idref="codon0"/>
+
+                    <siteModel id="trueSiteModel.s:codon" spec="SiteModel" gammaCategoryCount="4" shape="0.3639569748087765">
+                        <parameter id="truemutationRate.s:codon" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                        <parameter id="trueproportionInvariant.s:codon" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                        
+                        <substModel id="trueGCS.s:codon" spec="codonmodels.GeneralCodonSubstitutionModel" omega="0.03092812548417194"
+        	                substitutionRate="1 1 1"
+                        	mnmPenalty="0 0">
+                        	
+                        	<substModel id="trueRevJump.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="1" 
+        	                rates="0.7584865383228111 1.4830269233543767 0.8704941111561588 0.15953675795454386 1.238574299147703 0.08283905597541787"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="trueBMTfreqs.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+		            	    
+                        	<substModel id="trueRevJump2.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="13" 
+        	                rates="0.03083397519968288 2.4276845123522217 0.2793792431865226 0.8035837817096685 0.7906232696759422 0.6621065010809529"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="trueBMTfreqs2.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+		            	    
+                        	<substModel id="trueRevJump3.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="28" 
+        	                rates="0.6698491053978358 2.4386033683150514 0.5985384747787752 1.5661653597377772 0.12830521699178224 0.13057457375854534"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="trueBMTfreqs3.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+		            	    
+		            	    
+                            <frequencies id="truecodonFreqs.s:codon" spec="codonmodels.GeneralCodonFrequencies" estimate="false"> 
+                            	<freq id="trueBMT_frequencies1.s:codon" spec="beast.base.inference.parameter.RealParameter" lower="0.0" upper="1.0" dimension="4" value="0.23235855412189937 0.2855395395151793 0.21533710349891638 0.266764802864005"/>
+                            </frequencies>
+                        </substModel>
+                    </siteModel>
+       <branchRateModel id="trueStrictClock.c:dna" spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="1.0"/>
+    </data>
+
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <run id="mcmc" spec="MCMC" chainLength="1000000">
+        <state id="state" spec="State" storeEvery="5000">
+            <tree id="Tree.t:codon" spec="beast.base.evolution.tree.Tree" name="stateNode">
+                <taxonset id="TaxonSet.codon" spec="TaxonSet" alignment="@codon">
+                </taxonset>
+            </tree>
+            <parameter id="M0.omega.s:codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="gammaShape.s:codon" spec="parameter.RealParameter" lower="0.1" name="stateNode">1.0</parameter>
+            <parameter id="popSize.t:codon" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.3</parameter>
+	        <stateNode id="BMT_ModelIndicator.s:codon" spec="parameter.IntegerParameter" lower="0" upper="5">5</stateNode>
+    	    <parameter id="BMT_Rates.s:codon" dimension="6" lower="0.01" name="stateNode" upper="100.0">1.0</parameter>
+
+	        <stateNode id="BMT_ModelIndicator2.s:codon" spec="parameter.IntegerParameter" lower="0" upper="5">5</stateNode>
+    	    <parameter id="BMT_Rates2.s:codon" dimension="6" lower="0.01" name="stateNode" upper="100.0">1.0</parameter>
+	        <stateNode id="BMT_ModelIndicator3.s:codon" spec="parameter.IntegerParameter" lower="0" upper="5">5</stateNode>
+    	    <parameter id="BMT_Rates3.s:codon" dimension="6" lower="0.01" name="stateNode" upper="100.0">1.0</parameter>
+
+            <stateNode idref="BMT_frequencies1.s:codon"/>
+            <parameter id="mnmPenalty.s:codon" dimension="2" spec="parameter.RealParameter" name="stateNode">0.0</parameter>
+            <parameter id="substitutionRate.s:codon" dimension="3" lower="0" upper="3" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+        </state>
+        
+        <init id="RandomTree.t:codon" spec="RandomTree" estimate="false" initial="@Tree.t:codon" taxa="@codon">
+            <populationModel id="ConstantPopulation0.t:codon" spec="ConstantPopulation">
+                <parameter id="randomPopSize.t:codon" spec="parameter.RealParameter" name="popSize">1.0</parameter>
+            </populationModel>
+        </init>
+        
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+                <distribution id="CoalescentConstant.t:codon" spec="Coalescent">
+                    <populationModel id="ConstantPopulation.t:codon" spec="ConstantPopulation" popSize="@popSize.t:codon"/>
+                    <treeIntervals id="TreeIntervals.t:codon" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:codon"/>
+                </distribution>
+                
+		        <distribution id="BMT_RatesPrior.s:codon" spec="bmodeltest.math.distributions.NucleotideRevJumpSubstModelRatePrior" modelIndicator="@BMT_ModelIndicator.s:codon" x="@BMT_Rates.s:codon"
+        		    priorType="onTransitionsAndTraversals" substModel="@RevJump.s:codon"/>
+		        <distribution id="BMT_RatesPrior2.s:codon" spec="bmodeltest.math.distributions.NucleotideRevJumpSubstModelRatePrior" modelIndicator="@BMT_ModelIndicator2.s:codon" x="@BMT_Rates2.s:codon"
+        		    priorType="onTransitionsAndTraversals" substModel="@RevJump2.s:codon"/>
+		        <distribution id="BMT_RatesPrior3.s:codon" spec="bmodeltest.math.distributions.NucleotideRevJumpSubstModelRatePrior" modelIndicator="@BMT_ModelIndicator3.s:codon" x="@BMT_Rates3.s:codon"
+        		    priorType="onTransitionsAndTraversals" substModel="@RevJump3.s:codon"/>
+
+                <prior id="OmegaPrior.s:codon" name="distribution" x="@M0.omega.s:codon">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <parameter id="RealParameter.0" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
+                        <parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="GammaShapePrior.s:codon" name="distribution" x="@gammaShape.s:codon">
+                    <Exponential id="Exponential.0" name="distr">
+                        <parameter id="RealParameter.4" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
+                    </Exponential>
+                </prior>
+                <prior id="PopSizePrior.t:codon" name="distribution" x="@popSize.t:codon">
+                    <LogNormal name="distr" meanInRealSpace="true" M="1.0" S="0.05"/>
+                </prior>
+                
+                <prior  id="BMT_freqsPrior1.s:codon"  name="distribution" x="@BMT_frequencies1.s:codon">
+                	<distr spec="beast.base.inference.distribution.Dirichlet" alpha="4.0 4.0 4.0 4.0"/>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+                <distribution id="treeLikelihood.codon" spec="ThreadedTreeLikelihood" data="@codon" tree="@Tree.t:codon" useAmbiguities="true">
+                    <siteModel id="SiteModel.s:codon" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:codon">
+                        <parameter id="mutationRate.s:codon" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                        <parameter id="proportionInvariant.s:codon" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                        
+                        <substModel id="GCS.s:codon" spec="codonmodels.GeneralCodonSubstitutionModel" omega="@M0.omega.s:codon"
+        	                substitutionRate="@substitutionRate.s:codon"
+                        	mnmPenalty="@mnmPenalty.s:codon">
+                        	<substModel id="RevJump.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="@BMT_ModelIndicator.s:codon" 
+        	                rates="@BMT_Rates.s:codon"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="BMTfreqs.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+                        	<substModel id="RevJump2.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="@BMT_ModelIndicator2.s:codon" 
+        	                rates="@BMT_Rates2.s:codon"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="BMTfreqs2.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+                        	<substModel id="RevJump3.s:codon" spec="bmodeltest.evolution.substitutionmodel.NucleotideRevJumpSubstModel" 
+        	                modelIndicator="@BMT_ModelIndicator3.s:codon" 
+        	                rates="@BMT_Rates3.s:codon"
+            	            modelSet="transitionTransversionSplit">
+                	    	    <frequencies id="BMTfreqs3.s:codon" spec="Frequencies" frequencies="0.25 0.25 0.25 0.25"/>
+		            	    </substModel>
+		            	    
+                            <frequencies id="codonFreqs.s:codon" spec="codonmodels.GeneralCodonFrequencies" estimate="false"> 
+                            	<freq id="BMT_frequencies1.s:codon" spec="beast.base.inference.parameter.RealParameter" lower="0.0" upper="1.0" dimension="4" value="0.25"/>
+                            </frequencies>
+                        </substModel>
+                    </siteModel>
+                    <branchRateModel id="StrictClock.c:codon" spec="beast.base.evolution.branchratemodel.StrictClockModel">
+                        <parameter id="clockRate.c:codon" spec="parameter.RealParameter" estimate="false" name="clock.rate">1.0</parameter>
+                    </branchRateModel>
+                </distribution>
+            </distribution>
+        </distribution>
+        
+        <operator id="OmegaScaler.s:codon" spec="ScaleOperator" parameter="@M0.omega.s:codon" scaleFactor="0.5" weight="1.0"/>
+        <operator id="gammaShapeScaler.s:codon" spec="ScaleOperator" parameter="@gammaShape.s:codon" scaleFactor="0.5" weight="0.1"/>
+        <operator id="CoalescentConstantBICEPSEpochTop.t:codon" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSEpochAll.t:codon" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSTreeFlex.t:codon" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantTreeRootScaler.t:codon" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:codon" upper="10.0" weight="3.0"/>
+        <operator id="CoalescentConstantUniformOperator.t:codon" spec="kernel.BactrianNodeOperator" tree="@Tree.t:codon" weight="30.0"/>
+        <operator id="CoalescentConstantSubtreeSlide.t:codon" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:codon" weight="15.0"/>
+        <operator id="CoalescentConstantNarrow.t:codon" spec="Exchange" tree="@Tree.t:codon" weight="15.0"/>
+        <operator id="CoalescentConstantWide.t:codon" spec="Exchange" isNarrow="false" tree="@Tree.t:codon" weight="3.0"/>
+        <operator id="CoalescentConstantWilsonBalding.t:codon" spec="WilsonBalding" tree="@Tree.t:codon" weight="3.0"/>
+        <operator id="PopSizeScaler.t:codon" spec="kernel.BactrianScaleOperator" parameter="@popSize.t:codon" upper="10.0" weight="3.0"/>
+        
+        <operator id="BMT_ModelTestOperator.s:codon" spec="bmodeltest.evolution.operators.BMTMergeSplitOperator" modelIndicator="@BMT_ModelIndicator.s:codon" rates="@BMT_Rates.s:codon" substModel="@RevJump.s:codon" weight="1.0"/>
+        <operator id="BMT_Ratescaler.s:codon" spec="bmodeltest.evolution.operators.BMTExchangeOperator" modelIndicator="@BMT_ModelIndicator.s:codon" rates="@BMT_Rates.s:codon" substModel="@RevJump.s:codon" delta="0.15" weight="1.0"/>
+
+        <operator id="BMT_ModelTestOperator2.s:codon" spec="bmodeltest.evolution.operators.BMTMergeSplitOperator" modelIndicator="@BMT_ModelIndicator2.s:codon" rates="@BMT_Rates2.s:codon" substModel="@RevJump2.s:codon" weight="1.0"/>
+        <operator id="BMT_Ratescaler2.s:codon" spec="bmodeltest.evolution.operators.BMTExchangeOperator" modelIndicator="@BMT_ModelIndicator2.s:codon" rates="@BMT_Rates2.s:codon" substModel="@RevJump2.s:codon" delta="0.15" weight="1.0"/>
+
+        <operator id="BMT_ModelTestOperator3.s:codon" spec="bmodeltest.evolution.operators.BMTMergeSplitOperator" modelIndicator="@BMT_ModelIndicator3.s:codon" rates="@BMT_Rates3.s:codon" substModel="@RevJump3.s:codon" weight="1.0"/>
+        <operator id="BMT_Ratescaler3.s:codon" spec="bmodeltest.evolution.operators.BMTExchangeOperator" modelIndicator="@BMT_ModelIndicator3.s:codon" rates="@BMT_Rates3.s:codon" substModel="@RevJump3.s:codon" delta="0.15" weight="1.0"/>
+
+        <operator id='BMT_FrequenciesExchanger1.s:codon' spec='kernel.BactrianDeltaExchangeOperator' delta="0.01" weight="0.2" parameter="@BMT_frequencies1.s:codon"/>
+        <operator id="BMT_mnmPenaltyScaler.s:codon" spec="ScaleOperator" parameter="@mnmPenalty.s:codon" scaleFactor="0.5" weight="1.0"/>
+
+        <operator id="updown.s:codon" spec="UpDownOperator" scaleFactor="0.5" weight="5.0">
+        	<up idref="Tree.t:codon"/>
+        	<down idref="M0.omega.s:codon"/>
+        </operator>
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log id="TreeHeight.t:codon" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:codon"/>
+            <log idref="M0.omega.s:codon"/>
+            <log idref="gammaShape.s:codon"/>
+            <log idref="popSize.t:codon"/>
+            <log idref="CoalescentConstant.t:codon"/>
+            <log idref="RevJump.s:codon"/>
+            <log idref="BMT_ModelIndicator.s:codon"/>
+            <log idref="BMT_frequencies1.s:codon"/>
+
+            <log idref="RevJump2.s:codon"/>
+            <log idref="BMT_ModelIndicator2.s:codon"/>
+
+            <log idref="RevJump3.s:codon"/>
+            <log idref="BMT_ModelIndicator3.s:codon"/>
+            <log idref="mnmPenalty.s:codon"/>
+            <log idref="substitutionRate.s:codon"/>            
+        </logger>
+        
+        <logger id="screenlog" spec="Logger" logEvery="1000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="M0.omega.s:codon"/>
+        </logger>
+        
+        <logger id="treelog.t:codon" spec="Logger" fileName="$(filebase).trees" logEvery="1000" mode="tree">
+            <log id="TreeWithMetaDataLogger.t:codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:codon"/>
+        </logger>
+    </run>
+
+</beast>
