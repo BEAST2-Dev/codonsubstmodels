@@ -1,4 +1,4 @@
-<package name='CodonSubstModels' version='2.0.0'>
+<package name='CodonSubstModels' version="2.0.0">
         <depends on='BEAST.base' atleast='2.7.2'/>
         <depends on='BEAST.app' atleast='2.7.2'/>
 
@@ -34,6 +34,7 @@
         <provider classname="codonmodels.GeneralCodonFrequencies"/>
         <provider classname="codonmodels.GeneralCodonSubstitutionModel"/>
         <provider classname="codonmodels.EmpiricalCodonModel"/>
+        <provider classname="codonmodels.EmpiricalAACodonModel"/>
     </service>
 
     <service type="beast.base.evolution.datatype.DataType">

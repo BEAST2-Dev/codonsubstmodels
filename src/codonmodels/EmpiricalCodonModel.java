@@ -129,20 +129,22 @@ public class EmpiricalCodonModel extends M0Model {
 		}
 	}
     	
-	// setup substitution matrix depending on model type
-	public void setupRelativeRates(double[] rates) {
+	
+	@Override
+	public void setupRelativeRates() {
+		// setup substitution matrix depending on model type
 		switch(modelType) {
 		case ECM_OMEGA:
-			setupRelativeRatesECMOmega(rates);
+			setupRelativeRatesECMOmega(relativeRates);
 			break;
 		case ECM_OMEGA_2K:
-			setupRelativeRatesECMOmega2k(rates);
+			setupRelativeRatesECMOmega2k(relativeRates);
 			break;
 		case ECM_OMEGA_9K:
-			setupRelativeRatesECMOmega9k(rates);
+			setupRelativeRatesECMOmega9k(relativeRates);
 			break;
 		case ECM_OMEGA_NU:
-			setupRelativeRatesECMOmegaNu(rates);
+			setupRelativeRatesECMOmegaNu(relativeRates);
 			break;
 		}
 	}

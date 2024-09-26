@@ -80,7 +80,7 @@ public class M0Model extends CodonSubstitutionModel {//implements Loggable {
 
     @Override
 	public void setupRelativeRates() {
-        double kappa = kappaInput.get().getValue();
+        double kappa = kappaInput.get() != null ? kappaInput.get().getValue() : 1.0;
         double omega = omegaInput.get().getValue();
 
 //        this.synonymousRate = getSynonymousRate(kappa, omega);//not here

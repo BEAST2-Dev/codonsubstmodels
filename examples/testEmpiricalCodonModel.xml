@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonSubstModels' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.4:CodonSubstModels v2.0.0" version="2.7">
+
+    <data
+id="codon0"
+spec="Alignment" dataType="nucleotide">
+    <sequence taxon="CAVPO08377" totalcount="4">
+GGAGACTCTACTGTAGTTGGAACAAGTAGACTCCGTGACCTGTATGATAAATTCGAGGAAGAGCTGGGGAGTCGGCAGGAAAAAGCCAAGGCTGCCCGGCCACCGTGGGAGCCTCCGAAGACGAAACTGGATGAAGATTTAATGAATGATGGACCACTCTGCAAATGCAGCGCAAAAGCAAGACGCACAGGAATTCGGCACAGCATTTATCCCGGAGAGGAGACTGACAGGCCAACTGTGATAGAGTATGATGATCACGAGTACATCTTTGAAGGATTCTCTATGTTTGCACATGCCCCCCTGACCAATATTCCACTGTGTAAGGTAATTAGATTCAACATAGACTACACAATTCATTTCATTGAAGAGATGATGCCCGAGCCTTTGTTTGAAGACAGCCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTGAGATTTCTTCCAGATGGAGGTAAGGAAGTGCTGTCCATGCACCAGATTCTTCTGTACCTGTTACGGTGTAGCAAAGCCCTGGTGCCGGAAGAGGAGATTGCTAATATGCTTCAGTGGGAGGAGCTGGAGTGGCAGAAGTATGCAGAAGAATGCAAAGGCATGATCGTTACCAACCCCGGAACGAAACCAAGTCGCATTGATCAACTGGATCGTGAGCAGTTCAATCCCGACGTGATTACTTACCAGAAACTATGGAAGAGTTACGTGAAACTCCGCCACCTCCTTGCAAACAGTCCCGTTAAACAAACTGACAAACAGAAGCTGCAGAGGGAGATTAATCACAATGAACGGTTGGAGTTTCTAGGTGATGCTGTTGTGGAGTTCCTGACCGGCCACAATCAGAGGATGGAATTTCTAGGTGATTCCATAATGCAACTGGTGGCTACAGAGTACCTGTTCATTCATTTCCCAGATCATCATGAAGGACACTTAACTATAGGTTGTGGGGGACCAAACTTTCCCCAGATGGCCCATCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCATCAAGAGAGAGAGCCAGATGAGACTGAAGACATAAAGAAG
+    </sequence>
+    <sequence taxon="PONAB00848" totalcount="4">
+GGAGATTCTACAGTGGTTGGAACAAGTAGGCTTCGTGACTTATATGACAAATTTGAGGAGGAGTTGGGGAGCAGGCAAGAAAAGGCCAAAGCTGCTCGGCCTCCGTGGGAACCTCCGAAGACGAAGCTTGATGAAGATTTAATGAATGATGGACCACTCTGCAAATGCAGCGCAAAGGCAAGACGCACGGGAATTAGGCACAGCATTTATCCTGGAGAAGAGACTGACAGGCCAACTGTTATAGAATACGATGATCACGAGTATATCTTTGAAGGATTTTCTATGTTTGCACATGCCCCCCTGACCAATATTCCACTGTGTAAAGTAATTAGATTCAACATCGACTACACGATTCATTTCATTGAAGAGATGATGCCGGAGCCTTTGTTTGAAGACAGTCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTAAGATTTCTTCCAGATGGAGGAAAGGAAGTGCTGTCCATGCACCAGATTCTCCTGTACTTGTTAAGGTGCAGCAAAGCCCTGGTGCCCGAGGAGGAGATTGCCAATATGCTTCAGTGGGAGGAGCTGGAGTGGCAGAAATATGCAGAAGAATGCAAAGGCATGATTGTTACCAACCCTGGGACGAAACCAAGCCGTATCGATCAACTGGATCGTGAACAGTTCAACCCCGATGTGATTACTTACCAAAAACTGTGGAAGAGTTATGTGAAACTTCGCCACCTCCTAGCAAATAGTCCCGTCAAACAAACTGACAAACAGAAGCTGCAGAGGGAGATTAACCACAATGAACGGTTGGAATTCCTGGGTGATGCTGTTGTTGAATTTCTGACCGGCCACAATCAGAGAATGGAATTCCTAGGTGACTCCATAATGCAACTGGTAGCCACAGAGTACTTATTCATTCATTTCCCAGATCATCATGAAGGACATTTAACTATAGGCTGTGGGGGACCAAATTTTCCCCAGATGGCCCATCAGAAGCGGTTCATCGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCATCAAGAGAGAGAGCCAGATGAGACTGAAGACATCAAGAAA
+    </sequence>
+    <sequence taxon="HORSE08417" totalcount="4">
+GGAGATTCTACTGTAGTTGGAACAAGTAGACTCCGTGACTTATATGACAAATTTGAGGAAGAGTTGGGGAGCAGGCAAGAAAAAGCCAAAGCTGCTAGACCTCCGTGGGAACCTCCCAAGACAAAGCTAGATGAAGATTTAATGAATGACGGACCACTCTGCAAATGCAGCGCAAAAGCGAGACGCACAGGAATTAGGCACAGCATTTATCCCGGAGAAGAGACTGACAGGCCAACCGTTATAGAATATGATGATCATGAGTATATCTTTGAAGGTTTTTCTATGTTTGCACACGCCCCCCTGACCAATATTCCACTGTGTAAAGTGATTAGATTCAACATAGACTACACGATTCATTTCATTGAAGAGATGATGCCTGAGCCTTTGTTTGAAGACAGTCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTACGATTTCTTCCAGATGGAGGGAAGGAAGTGCTTTCCATGCACCAGATTCTCCTTTATTTATTACGGTGCAGCAAAGCTCTGGTTCCCGAAGAGGAGATTGCCAATATGCTTCAGTGGGAAGAACTTGAGTGGCAGAAATACGCAGAAGAATGCAAAGGCATGATCGTCACCAACCCTGGCACGAAACCAAGCCGCATCGATCAACTGGATCGTGAACAGTTCAACCCCGATGTGATTACTTACCAGAAACTGTGGAAAAGTTATGTGAAGCTTCGCCACCTCCTAGCAAATAGTCCCGTCAAGCAAACTGACAAACAGAAGCTGCAGAGGGAGATTAATCACAACGAACGGTTGGAGTTTCTGGGTGATGCTGTTGTTGAATTTTTGACCGGCCACAATCAGAGGATGGAATTCCTAGGTGACTCCATAATGCAACTGGTAGCTACAGAGTACTTATTCATTCATTTCCCGGATCATCATGAAGGACACTTAACTATTGGCTGTGGGGGACCAAACTTTCCCCAGATGGCCCATCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCATCAAGAGAAAGAGCCAGACGAGACTGAAGACATAAAGAAA
+    </sequence>
+    <sequence taxon="LAMPA05747" totalcount="4">
+GGAGATTCTACTGTAGTTGGAACAAGTAGGCTCCGTGACTTATATGACAAATTTGAGGAAGAGCTGGGGAGCAGGCAAGAGAAGGCCAAAGCTGCTAGACCCCCGTGGGAGCCTCCCAAGACGAAGCTAGATGAAGATTTAATGAATGATGGCCCACTCTGCAAATGCAGCGCAAAGGCGAGACGCACAGGAATCAGGCACAGCATTTATCCCGGAGAAGAGACTGACAGGCCAACTGTTATAGAATATGATGATCATGAGTATATATTCGAAGGATTTTCTATGTTTGCACATGCCCCCCTGACCAATATTCCGCTGTGTAAAGTAATTCGATTCAACATAGACTACACGATTCATTTCATTGAAGAGATGATGCCTGAGCCTTTGTTTGAAGACAGTCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTAAGGTTTCTTCCAGATGGAGGAAAGGAAGTGCTGTCCATGCACCAGATTCTCCTGTACTTGTTACGATGTAGCAAAGCCCTGGTTCCAGAAGAGGAGATTGCCAATATGCTTCAGTGGGAGGAACTTGAGTGGCAGAAATATGCAGAAGAATGCAAGGGCATGATCGTCACCAACCCTGGAACGAAACCAAGCCGCATCGATCAACTGGATCGTGAACAGTTCAACCCCGATGTGATTACTTACCAGAAACTGTGGAAGAGTTATGTGAAGCTTCGCCACCTCCTAGCAAATAGTCCCGTCAAACAAACTGACAAGCAGAAGCTGCAGAGGGAGATTAATCACAATGAGCGGTTGGAGTTCCTGGGTGATGCTGTTGTTGAATTTCTGACCGGCCACAATCAGAGGATGGAATTCCTAGGTGACTCCATAATGCAGCTGGTAGCCACAGAATACTTATTCATTCATTTCCCAGATCATCATGAAGGACACCTAACAATCGGCTGTGGGGGACCAAACTTTCCCCAGATGGCCCATCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCATCAGGAGAAAGAGCCAGATGAGACTGAAGACATAAAGAAA
+    </sequence>
+    <sequence taxon="PROCA04268" totalcount="4">
+GGGGATTTTACTGTAGTTGGAACAAGTAGGCTCCGGGATTTATATGACAAATTTGAAGAAGAGTTGGGGAGCAGGCAAGAAAAGGCCAAAGCAGCCAGGCCACCATGGGAGCCCCCCAAGACGAAGCTAGATGAAGATTTAATGAATGACGGACCACTCTGCAAATGTAGCGCTAAAGCCCGACGTACAGGAATCAGGCACAGCATTTATCCCGGAGAAGAGACTGACAGGCCGACTGTGATAGAGTATGATGATCACGAATACATCTTTGAAGGGTTTTCTATGTTTGCACATGCTCCCCTGACCAATATTCCACTGTGCAAAGTAATTAGATTCAACATAGACTACACGATTCATTTCATTGAAGAGATGATGCCTGAGCCTTTGTTTGAAGACAATCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTAAGATTTCTTCCAGATGGAGGCAAGGAAGTGCTGTCCATGCACCAGATTCTTCTCTATCTGCTTCGGTGCAGCAAAGCCCTGGTCCCTGAGGAGGAGATTGCCAACATGCTTCAATGGGAAGAGCTTGAATGGCAGAAGTATGCAGAAGAATGCAAAGGCATGATCGTTACCAACCCTGGAACGAAAAGCTCTCGCATCGATCAACTGGATCGTGAGCAGTTCAACCCTGATGTGATTACTTACCAGAAGCTATGGAAAAGTTACGTGAAGCTTCGACACCTCCTAGCAAACAGTCCCGTTAAACAAACTGACAAACAGAAGCTGCAGAGGGAGATTAACCATAATGAACGGCTGGAGTTCCTGGGCGATGCTGTTGTTGAATTTCTGACCGGCCACAACCAGAGGATGGAATTCCTAGGAGACTCCATAATGCAACTGGTTGCAACAGAATACTTGTTCATTCATTTCCCCGATCACCATGAGGGGCACTTAACTATAGGCTGTGGGGGACCAAACTTTCCCCAGATGGCCCACCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAACATCAAGAGAGAGAACCAGATGAGACTGAAGATGTAAAGAAA
+    </sequence>
+    <sequence taxon="DIPOR12987" totalcount="4">
+GGAGATTCTACTGTAGTTGGAACAAGTAGGCTCCGAGACTTGTACGACAAATTTGAAGAAGAATTGGGGAGCAGACAAGAAAAGGCCAAGGCTGCTAGGCCTCCGTGGGAGCCTCCGAAGACGAAGCTAGATGAAGATTTAATGAATGATGGACCTCTGTGCAAATGCAGCGCCAAAGCGAGACGCACAGGAATTCGGCACAGCATTTATCCCGGAGAAGAGACCGACAGGCCAACTGTTATAGAATATGATGATCATGAATATATCTTTGAAGGATTTTCTATGTTTGCGCATGCCCCCCTAACCAATATTCCTCTGTGTAAAGTAATTAGATTCAACATAGACTACACCATTCATTTCATTGAAGAGATGATGCCTGAGCCTTTGTTTGAAGACAGCCCTCCATGCTGCCCAAGATTTCATTTCATGCCACGGTTTGTAAGATTTCTTCCAGATGGAGGCAAGGAAGTGTTGTCCATGCACCAGATTCTGCTCTATCTGTTACGGTGTAGCAAAGCACTGGTCCCAGAAGAGGAGATTGCCAATATGCTTCAGTGGGAGGAGCTTGAGTGGCAGAAATATGCAGAAGAGTGCAAAGGCATGATTGTCACCAACCCTGGGACGAAACCAAGCCGCATTGATCAACTGGATCGTGAACAGTTCAACCCTGAAGTGATTACTTACCAGAAACTATGGAAGAGTTATGTGAAACTTCGCCACCTCCTAGCAAACAGTCCCGTCAAACAAACGGACAAACAGAAGCTGCAGAGGGAGATTAATCACAATGAACGGTTGGAGTTCCTGGGTGATGCCGTTGTTGAGTTCCTGACCGGCCACAACCAGAGAATGGAGTTCCTAGGTGACTCCATTATGCAGCTGGTCGCCACGGAGTACTTATTCATTCATTTCCCGGATCATCACGAAGGCCACTTAACTATCGGCTGTGGGGGACCAAACTTTCCCCAGATGGCCCATCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCACCAGGAGAGAGAACCAGATGAGACTGAAGACAGAAAGAAG
+    </sequence>
+    <sequence taxon="TARSY03417" totalcount="4">
+GGAGATTCTACAGTGGTTGGAACAAGTAGGCTCCGTGACTTATATGACAAGTTTGAGGAGGAGTTGGGGAACAGGCAAGAAAAGGCCAAAGCTGCCCGGCCTCCATGGGAACCTCCGAAGACCAAGCTAGATGAAGATTTAATGAATGATGGACCACTCTGCAAATGCAGCGCGAAAGCGAGACGCACAGGAATCAGGCACAGCATTTATCCTGGAGAAGAGACTGATAGACCAACTGTTATAGAATATGATGATCATGAGTATATCTTTGAAGGATTTTCTATGTTTGCACACGCCCCCCTGACCAATATTCCACTGTGTAAAGTAATTAGATTCAACATAGACTACACGATTCATTTCATTGAAGAGATGATGCCGGAGCCTTTGTTTGAAGACAGTCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTAAGATTTCTTCCAGATGGAGGAAAGGAAGTGCTGTCCATGCACCAGATTCTCCTCTACTTGCTCCGGTGCAGCAAAGCTCTGGTGCCTGAGGAAGAGATTGCCAACATGCTTCAGTGGGAGGAGCTGGAGTGGCAGAAGTATGCAGAGGAATGCAAAGGCATGATTGTTACCAACCCCGGAACGAAACCAAGCCGTATCGATCAACTGGATCGTGAACAGTTCAACCCCGATGTGATTACTTACCAGAAACTGTGGAAGAGTTATGTGAAACTTCGCCACCTTCTAGCAAATAGTCCCGTTAAACAAACTGACAAACAGAAGCTGCAGAGGGAGATTAATCACAACGAACGGTTGGAGTTCCTGGGTGATGCTGTTGTTGAATTTCTGACCGGCCATAATCAGAGGATGGAATTCCTAGGTGACTCTATAATGCAACTGGTAGCCACAGAGTACTTATTCATTCATTTCCCAGATCATCATGAAGGACACTTAACTATAGGCTGTGGGGGGCCAAACTTTCCCCAGATGGCACATCAGAAGCGATTCATTGGACAAGATTTAAAAGAAATGAGGTGGGAAAGAGAGCACCAGGAGAGAGAGCCAGATGAGACTGAAGACGTAAAGAAA
+    </sequence>
+</data>
+
+    <data
+id="codon"
+spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCode="universal" data="@codon0">
+    </data>
+
+
+    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+    <map name="Normal" >beast.base.inference.distribution.Normal</map>
+    <map name="Beta" >beast.base.inference.distribution.Beta</map>
+    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
+    <map name="prior" >beast.base.inference.distribution.Prior</map>
+    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
+    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+
+    <run id="mcmc" spec="MCMC" chainLength="1000000">
+        <state id="state" spec="State" storeEvery="5000">
+            <tree id="Tree.t:codon" spec="beast.base.evolution.tree.Tree" name="stateNode">
+                <taxonset id="TaxonSet.codon" spec="TaxonSet" alignment="@codon">
+                </taxonset>
+            </tree>
+            <parameter id="omega.s:codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="gammaShape.s:codon" spec="parameter.RealParameter" lower="0.1" name="stateNode">1.0</parameter>
+            <parameter id="popSize.t:codon" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.3</parameter>
+        </state>
+        
+        <init id="UPGMA.t:codon" spec="beast.base.evolution.tree.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:codon" taxa="@codon">
+        </init>
+        
+        <distribution id="posterior" spec="CompoundDistribution">
+            <distribution id="prior" spec="CompoundDistribution">
+                <distribution id="CoalescentConstant.t:codon" spec="Coalescent">
+                    <populationModel id="ConstantPopulation.t:codon" spec="ConstantPopulation" popSize="@popSize.t:codon"/>
+                    <treeIntervals id="TreeIntervals.t:codon" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:codon"/>
+                </distribution>
+                
+                <prior id="OmegaPrior.s:codon" name="distribution" x="@omega.s:codon">
+                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                        <parameter id="RealParameter.0" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
+                        <parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>
+                </prior>
+                <prior id="GammaShapePrior.s:codon" name="distribution" x="@gammaShape.s:codon">
+                    <Exponential id="Exponential.0" name="distr">
+                        <parameter id="RealParameter.4" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
+                    </Exponential>
+                </prior>
+                <prior id="PopSizePrior.t:codon" name="distribution" x="@popSize.t:codon">
+                    <LogNormal name="distr" meanInRealSpace="true" M="1.0" S="0.05"/>
+                </prior>
+            </distribution>
+            <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
+                <distribution id="treeLikelihood.codon" spec="ThreadedTreeLikelihood" data="@codon" tree="@Tree.t:codon" useAmbiguities="true">
+                    <siteModel id="SiteModel.s:codon" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:codon">
+                        <parameter id="mutationRate.s:codon" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                        <parameter id="proportionInvariant.s:codon" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                        
+                        <substModel id="GCS.s:codon" spec="codonmodels.EmpiricalCodonModel" omega="@omega.s:codon"
+                            matrixDir="examples/data"
+                            rateFile="ecm-rates.csv" freqFile="ecm-freqs.csv">
+                            <frequencies spec="Frequencies">
+                                <frequencies spec="parameter.RealParameter" dimension="61" value="0.0163934426229508"/>
+                            </frequencies>
+                        </substModel>
+                    </siteModel>
+                    <branchRateModel id="StrictClock.c:codon" spec="beast.base.evolution.branchratemodel.StrictClockModel">
+                        <parameter id="clockRate.c:codon" spec="parameter.RealParameter" estimate="false" name="clock.rate">1.0</parameter>
+                    </branchRateModel>
+                </distribution>
+            </distribution>
+        </distribution>
+        
+        <operator id="OmegaScaler.s:codon" spec="ScaleOperator" parameter="@omega.s:codon" scaleFactor="0.5" weight="1.0"/>
+        <operator id="gammaShapeScaler.s:codon" spec="ScaleOperator" parameter="@gammaShape.s:codon" scaleFactor="0.5" weight="0.1"/>
+        <operator id="CoalescentConstantBICEPSEpochTop.t:codon" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSEpochAll.t:codon" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSTreeFlex.t:codon" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantTreeRootScaler.t:codon" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:codon" upper="10.0" weight="3.0"/>
+        <operator id="CoalescentConstantUniformOperator.t:codon" spec="kernel.BactrianNodeOperator" tree="@Tree.t:codon" weight="30.0"/>
+        <operator id="CoalescentConstantSubtreeSlide.t:codon" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:codon" weight="15.0"/>
+        <operator id="CoalescentConstantNarrow.t:codon" spec="Exchange" tree="@Tree.t:codon" weight="15.0"/>
+        <operator id="CoalescentConstantWide.t:codon" spec="Exchange" isNarrow="false" tree="@Tree.t:codon" weight="3.0"/>
+        <operator id="CoalescentConstantWilsonBalding.t:codon" spec="WilsonBalding" tree="@Tree.t:codon" weight="3.0"/>
+        <operator id="PopSizeScaler.t:codon" spec="kernel.BactrianScaleOperator" parameter="@popSize.t:codon" upper="10.0" weight="3.0"/>
+        
+        <operator id="updown.s:codon" spec="UpDownOperator" scaleFactor="0.5" weight="5.0">
+        	<up idref="Tree.t:codon"/>
+        	<down idref="omega.s:codon"/>
+        </operator>
+
+        <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log id="TreeHeight.t:codon" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:codon"/>
+            <log idref="omega.s:codon"/>
+            <log idref="gammaShape.s:codon"/>
+            <log idref="popSize.t:codon"/>
+            <log idref="CoalescentConstant.t:codon"/>
+        </logger>
+        
+        <logger id="screenlog" spec="Logger" logEvery="1000">
+            <log idref="posterior"/>
+            <log idref="likelihood"/>
+            <log idref="prior"/>
+            <log idref="omega.s:codon"/>
+        </logger>
+        
+        <logger id="treelog.t:codon" spec="Logger" fileName="$(filebase).trees" logEvery="1000" mode="tree">
+            <log id="TreeWithMetaDataLogger.t:codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:codon"/>
+        </logger>
+    </run>
+
+</beast>
