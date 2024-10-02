@@ -14,10 +14,6 @@
     <property name="sourceVersion" value="17"/>
     <property name="targetVersion" value="17"/>
 
-<!--
-    <property name="ZuluJDK" location="/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home/bin/javac" />
--->
-    <property name="ZuluJDK" location="/usr/bin/javac" />
 
     <!-- Directories necessary for all BEAST 2 packages -->
     <property name="doc" location="doc"/>
@@ -135,7 +131,7 @@
 
         <javac target="${targetVersion}" source="${sourceVersion}"
                srcdir="${beastFX}/src" destdir="${build-beast}"
-               executable="${ZuluJDK}" fork="true" includeantruntime="false">
+               fork="true" includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${build-lib}" includes="*.jar"/>
@@ -157,8 +153,8 @@
 
     <!-- Compile -->
     <target name="compile" depends="build-BeastFX">
-        <javac target="${targetVersion}" source="${sourceVersion}" srcdir="${src}" destdir="${build}"
-               executable="${ZuluJDK}" fork="true" includeantruntime="false">
+        <javac srcdir="${src}" destdir="${build}"
+               fork="true" includeantruntime="false">
             <classpath>
                 <pathelement path="${classpath}"/>
                 <fileset dir="${build-lib}" includes="*.jar"/>
