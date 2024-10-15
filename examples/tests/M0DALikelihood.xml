@@ -159,7 +159,7 @@
                  (Human_Arnason:0.0133,Human_Horai:0.01332):0.165):0.1256,
                  (Gorilla_Arnason:0.0046,Gorilla_Horai:0.0046):0.23);"/>
 
-    <nodesStates spec="NodeStatesArray" id="nodesStates" >
+    <nodesStates spec="codonmodels.evolution.tree.NodeStatesArray" id="nodesStates" >
         <data idref="codon.alignment"/>
     </nodesStates>
 

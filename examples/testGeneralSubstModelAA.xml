@@ -176,6 +176,11 @@ spec="Alignment" dataType="aminoacid">
         <operator id='BMT_SubstRateExchanger.s:aacodon' spec='kernel.BactrianDeltaExchangeOperator' delta="0.01" weight="0.2" parameter="@substitutionRate.s:aacodon"/>
         -->
 
+        <operator id="updown.s:aacodon" spec="UpDownOperator" scaleFactor="0.5" weight="5.0">
+        	<up idref="Tree.t:aacodon"/>
+        	<down idref="M0.omega.s:aacodon"/>
+        </operator>
+
         <logger id="tracelog" spec="Logger" fileName="$(filebase).log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
             <log idref="posterior"/>
             <log idref="likelihood"/>

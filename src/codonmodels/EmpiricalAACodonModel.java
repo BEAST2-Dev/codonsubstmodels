@@ -73,18 +73,28 @@ public class EmpiricalAACodonModel extends GeneralCodonSubstitutionModel {
 	}
 	
     @Override
-	public void setupRelativeRates() {
-    	super.setupRelativeRates();
-    	
+	public void setupRelativeRates() {    	
     	if (needsToConvertAArates) {
     		convertAAratesToCodonRates();
     	}
+
+    	super.setupRelativeRates();
     	
     	for (int i = 0; i < codonRates.length; i++) {
     		relativeRates[i] *= codonRates[i];
     	}
     }
-	
+    
+    @Override
+    public void store() {
+    	super.store();
+    }
+    
+    @Override
+    public void restore() {
+    	super.restore();
+    	needsToConvertAArates = true;
+    }
 	
 	@Override
 	protected boolean requiresRecalculation() {
