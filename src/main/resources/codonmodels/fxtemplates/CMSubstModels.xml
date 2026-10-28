@@ -2,8 +2,7 @@
      The 'Gamma Site Model' subtemplate is a verbatim copy of the one in the BEAST 2.8 beast-fx fxtemplates/SubstModels.xml;
      the codon template has its own mergepoint, so the core copy is not merged in. -->
 <beast version='2.8'
-       namespace='beastfx.app.beauti:beastfx.app.inputeditor:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.spec.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution:codonmodels:codonmodels.evolution.alignment:codonmodels.evolution.datatype:codonmodels.evolution.likelihood:codonmodels.evolution.operators:codonmodels.evolution.tree'
-       templateinfo='sub-template for codon substitution models'>
+       namespace='beastfx.app.beauti:beastfx.app.inputeditor:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.base.util:beast.base.math:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.spec.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution:codonmodels:codonmodels.evolution.alignment:codonmodels.evolution.datatype:codonmodels.evolution.likelihood:codonmodels.evolution.operators:codonmodels.evolution.tree'>
 
     <mergewith point='codonSubstModelTemplates'>
         <!-- gamma site model (copy of the core subtemplate) -->
