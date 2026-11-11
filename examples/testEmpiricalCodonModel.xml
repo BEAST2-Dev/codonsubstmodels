@@ -1,8 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='CodonSubstModels' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.base.evolution.alignment:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" required="BEAST.base v2.7.4:CodonSubstModels v2.0.0" version="2.7">
+<?xml version='1.0' encoding='UTF-8'?>
+<beast version="2.8"
+       namespace="beast.core:beast.core.util:beast.evolution.alignment:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.tree.coalescent:beast.base.core:beast.base.evolution.alignment:beast.base.evolution.likelihood:beast.base.evolution.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.tree:beast.base.evolution.tree.coalescent:beast.base.inference:beast.base.inference.operator:beast.base.inference.util:beast.pkgmgmt"
+       beautitemplate="CodonSubstModels"
+       beautistatus=""
+       required="BEAST.base v2.7.4:CodonSubstModels v2.0.0">
 
-    <data
-id="codon0"
-spec="Alignment" dataType="nucleotide">
+    <data id="codon0" spec="Alignment" dataType="nucleotide">
     <sequence taxon="CAVPO08377" totalcount="4">
 GGAGACTCTACTGTAGTTGGAACAAGTAGACTCCGTGACCTGTATGATAAATTCGAGGAAGAGCTGGGGAGTCGGCAGGAAAAAGCCAAGGCTGCCCGGCCACCGTGGGAGCCTCCGAAGACGAAACTGGATGAAGATTTAATGAATGATGGACCACTCTGCAAATGCAGCGCAAAAGCAAGACGCACAGGAATTCGGCACAGCATTTATCCCGGAGAGGAGACTGACAGGCCAACTGTGATAGAGTATGATGATCACGAGTACATCTTTGAAGGATTCTCTATGTTTGCACATGCCCCCCTGACCAATATTCCACTGTGTAAGGTAATTAGATTCAACATAGACTACACAATTCATTTCATTGAAGAGATGATGCCCGAGCCTTTGTTTGAAGACAGCCCTCCCTGCTGCCCAAGATTTCATTTCATGCCACGTTTTGTGAGATTTCTTCCAGATGGAGGTAAGGAAGTGCTGTCCATGCACCAGATTCTTCTGTACCTGTTACGGTGTAGCAAAGCCCTGGTGCCGGAAGAGGAGATTGCTAATATGCTTCAGTGGGAGGAGCTGGAGTGGCAGAAGTATGCAGAAGAATGCAAAGGCATGATCGTTACCAACCCCGGAACGAAACCAAGTCGCATTGATCAACTGGATCGTGAGCAGTTCAATCCCGACGTGATTACTTACCAGAAACTATGGAAGAGTTACGTGAAACTCCGCCACCTCCTTGCAAACAGTCCCGTTAAACAAACTGACAAACAGAAGCTGCAGAGGGAGATTAATCACAATGAACGGTTGGAGTTTCTAGGTGATGCTGTTGTGGAGTTCCTGACCGGCCACAATCAGAGGATGGAATTTCTAGGTGATTCCATAATGCAACTGGTGGCTACAGAGTACCTGTTCATTCATTTCCCAGATCATCATGAAGGACACTTAACTATAGGTTGTGGGGGACCAAACTTTCCCCAGATGGCCCATCAGAAGCGGTTCATTGAACAAGAGTTAAAAGAAATGAGGTGGGAAAGAGAGCATCAAGAGAGAGAGCCAGATGAGACTGAAGACATAAAGAAG
     </sequence>
@@ -26,22 +29,8 @@ GGAGATTCTACAGTGGTTGGAACAAGTAGGCTCCGTGACTTATATGACAAGTTTGAGGAGGAGTTGGGGAACAGGCAAGA
     </sequence>
 </data>
 
-    <data
-id="codon"
-spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCode="universal" data="@codon0">
+    <data id="codon" spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCode="universal" data="@codon0">
     </data>
-
-
-    <map name="Uniform" >beast.base.inference.distribution.Uniform</map>
-    <map name="Exponential" >beast.base.inference.distribution.Exponential</map>
-    <map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
-    <map name="Normal" >beast.base.inference.distribution.Normal</map>
-    <map name="Beta" >beast.base.inference.distribution.Beta</map>
-    <map name="Gamma" >beast.base.inference.distribution.Gamma</map>
-    <map name="LaplaceDistribution" >beast.base.inference.distribution.LaplaceDistribution</map>
-    <map name="prior" >beast.base.inference.distribution.Prior</map>
-    <map name="InverseGamma" >beast.base.inference.distribution.InverseGamma</map>
-    <map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
 
     <run id="mcmc" spec="MCMC" chainLength="1000000">
         <state id="state" spec="State" storeEvery="5000">
@@ -49,71 +38,60 @@ spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCo
                 <taxonset id="TaxonSet.codon" spec="TaxonSet" alignment="@codon">
                 </taxonset>
             </tree>
-            <parameter id="omega.s:codon" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
-            <parameter id="gammaShape.s:codon" spec="parameter.RealParameter" lower="0.1" name="stateNode">1.0</parameter>
-            <parameter id="popSize.t:codon" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.3</parameter>
+            <stateNode id="omega.s:codon" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="NonNegativeReal">1.0</stateNode>
+            <stateNode id="gammaShape.s:codon" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="PositiveReal">1.0</stateNode>
+            <stateNode id="popSize.t:codon" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="PositiveReal">0.3</stateNode>
         </state>
         
-        <init id="UPGMA.t:codon" spec="beast.base.evolution.tree.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:codon" taxa="@codon">
+        <init id="UPGMA.t:codon" spec="beast.base.spec.evolution.tree.ClusterTree" clusterType="upgma" estimate="false" initial="@Tree.t:codon" taxa="@codon">
         </init>
         
         <distribution id="posterior" spec="CompoundDistribution">
             <distribution id="prior" spec="CompoundDistribution">
                 <distribution id="CoalescentConstant.t:codon" spec="Coalescent">
-                    <populationModel id="ConstantPopulation.t:codon" spec="ConstantPopulation" popSize="@popSize.t:codon"/>
+                    <populationModel id="ConstantPopulation.t:codon" spec="beast.base.spec.evolution.tree.coalescent.ConstantPopulation" popSize="@popSize.t:codon"/>
                     <treeIntervals id="TreeIntervals.t:codon" spec="beast.base.evolution.tree.TreeIntervals" tree="@Tree.t:codon"/>
                 </distribution>
                 
-                <prior id="OmegaPrior.s:codon" name="distribution" x="@omega.s:codon">
-                    <LogNormal id="LogNormalDistributionModel.0" name="distr">
-                        <parameter id="RealParameter.0" spec="parameter.RealParameter" estimate="false" name="M">-3.0</parameter>
-                        <parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
-                    </LogNormal>
-                </prior>
-                <prior id="GammaShapePrior.s:codon" name="distribution" x="@gammaShape.s:codon">
-                    <Exponential id="Exponential.0" name="distr">
-                        <parameter id="RealParameter.4" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>
-                    </Exponential>
-                </prior>
-                <prior id="PopSizePrior.t:codon" name="distribution" x="@popSize.t:codon">
-                    <LogNormal name="distr" meanInRealSpace="true" M="1.0" S="0.05"/>
-                </prior>
+                <distribution id="LogNormalDistributionModel.0" spec="beast.base.spec.inference.distribution.LogNormal" param="@omega.s:codon">
+                        <M id="RealParameter.0" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="Real">-3.0</M>
+                        <S id="RealParameter.1" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="Real">1.25</S>
+                    </distribution>
+                <distribution id="Exponential.0" spec="beast.base.spec.inference.distribution.Exponential" param="@gammaShape.s:codon">
+                        <mean id="RealParameter.4" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="Real">1.0</mean>
+                    </distribution>
+                <distribution id="PopSizePrior.t:codon" spec="beast.base.spec.inference.distribution.LogNormal" param="@popSize.t:codon" meanInRealSpace="true" M="1.0" S="0.05"/>
             </distribution>
             <distribution id="likelihood" spec="CompoundDistribution" useThreads="true">
-                <distribution id="treeLikelihood.codon" spec="ThreadedTreeLikelihood" data="@codon" tree="@Tree.t:codon" useAmbiguities="true">
-                    <siteModel id="SiteModel.s:codon" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:codon">
-                        <parameter id="mutationRate.s:codon" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
-                        <parameter id="proportionInvariant.s:codon" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                <distribution id="treeLikelihood.codon" spec="beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood" data="@codon" tree="@Tree.t:codon" useAmbiguities="true">
+                    <siteModel id="SiteModel.s:codon" spec="beast.base.spec.evolution.sitemodel.SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:codon">
+                        <mutationRate id="mutationRate.s:codon" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="PositiveReal">1.0</mutationRate>
+                        <proportionInvariant id="proportionInvariant.s:codon" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="UnitInterval">0.0</proportionInvariant>
                         
-                        <substModel id="GCS.s:codon" spec="codonmodels.EmpiricalCodonModel" omega="@omega.s:codon"
-                            matrixDir="examples/data"
-                            rateFile="ecm-rates.csv" freqFile="ecm-freqs.csv">
-                            <frequencies spec="Frequencies">
-                                <frequencies spec="parameter.RealParameter" dimension="61" value="0.0163934426229508"/>
-                            </frequencies>
+                        <substModel id="GCS.s:codon" spec="codonmodels.EmpiricalCodonModel" omega="@omega.s:codon" matrixDir="examples/data" rateFile="ecm-rates.csv" freqFile="ecm-freqs.csv">
                         </substModel>
                     </siteModel>
-                    <branchRateModel id="StrictClock.c:codon" spec="beast.base.evolution.branchratemodel.StrictClockModel">
-                        <parameter id="clockRate.c:codon" spec="parameter.RealParameter" estimate="false" name="clock.rate">1.0</parameter>
+                    <branchRateModel id="StrictClock.c:codon" spec="beast.base.spec.evolution.branchratemodel.StrictClockModel">
+                        <clock.rate id="clockRate.c:codon" estimate="false" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="Real">1.0</clock.rate>
                     </branchRateModel>
                 </distribution>
             </distribution>
         </distribution>
         
-        <operator id="OmegaScaler.s:codon" spec="ScaleOperator" parameter="@omega.s:codon" scaleFactor="0.5" weight="1.0"/>
-        <operator id="gammaShapeScaler.s:codon" spec="ScaleOperator" parameter="@gammaShape.s:codon" scaleFactor="0.5" weight="0.1"/>
-        <operator id="CoalescentConstantBICEPSEpochTop.t:codon" spec="EpochFlexOperator" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
-        <operator id="CoalescentConstantBICEPSEpochAll.t:codon" spec="EpochFlexOperator" fromOldestTipOnly="false" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
-        <operator id="CoalescentConstantBICEPSTreeFlex.t:codon" spec="TreeStretchOperator" scaleFactor="0.01" tree="@Tree.t:codon" weight="2.0"/>
-        <operator id="CoalescentConstantTreeRootScaler.t:codon" spec="kernel.BactrianScaleOperator" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:codon" upper="10.0" weight="3.0"/>
+        <operator id="OmegaScaler.s:codon" parameter="@omega.s:codon" scaleFactor="0.5" weight="1.0" spec="beast.base.spec.inference.operator.ScaleOperator"/>
+        <operator id="gammaShapeScaler.s:codon" parameter="@gammaShape.s:codon" scaleFactor="0.5" weight="0.1" spec="beast.base.spec.inference.operator.ScaleOperator"/>
+        <operator id="CoalescentConstantBICEPSEpochTop.t:codon" spec="beast.base.spec.evolution.operator.IntervalScaleOperator" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSEpochAll.t:codon" spec="beast.base.spec.evolution.operator.IntervalScaleOperator" scaleFactor="0.1" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantBICEPSTreeFlex.t:codon" spec="beast.base.spec.evolution.operator.IntervalScaleOperator" scaleFactor="0.01" tree="@Tree.t:codon" weight="2.0"/>
+        <operator id="CoalescentConstantTreeRootScaler.t:codon" rootOnly="true" scaleFactor="0.1" tree="@Tree.t:codon" upper="10.0" weight="3.0" spec="beast.base.spec.evolution.operator.ScaleTreeOperator"/>
         <operator id="CoalescentConstantUniformOperator.t:codon" spec="kernel.BactrianNodeOperator" tree="@Tree.t:codon" weight="30.0"/>
         <operator id="CoalescentConstantSubtreeSlide.t:codon" spec="kernel.BactrianSubtreeSlide" tree="@Tree.t:codon" weight="15.0"/>
         <operator id="CoalescentConstantNarrow.t:codon" spec="Exchange" tree="@Tree.t:codon" weight="15.0"/>
         <operator id="CoalescentConstantWide.t:codon" spec="Exchange" isNarrow="false" tree="@Tree.t:codon" weight="3.0"/>
         <operator id="CoalescentConstantWilsonBalding.t:codon" spec="WilsonBalding" tree="@Tree.t:codon" weight="3.0"/>
-        <operator id="PopSizeScaler.t:codon" spec="kernel.BactrianScaleOperator" parameter="@popSize.t:codon" upper="10.0" weight="3.0"/>
+        <operator id="PopSizeScaler.t:codon" parameter="@popSize.t:codon" upper="10.0" weight="3.0" spec="beast.base.spec.inference.operator.ScaleOperator"/>
         
-        <operator id="updown.s:codon" spec="UpDownOperator" scaleFactor="0.5" weight="5.0">
+        <operator id="updown.s:codon" spec="beast.base.spec.evolution.operator.UpDownOperator" scaleFactor="0.5" weight="5.0">
         	<up idref="Tree.t:codon"/>
         	<down idref="omega.s:codon"/>
         </operator>
@@ -137,7 +115,7 @@ spec="codonmodels.evolution.alignment.CodonAlignment" dataType="codon" geneticCo
         </logger>
         
         <logger id="treelog.t:codon" spec="Logger" fileName="$(filebase).trees" logEvery="1000" mode="tree">
-            <log id="TreeWithMetaDataLogger.t:codon" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:codon"/>
+            <log id="TreeWithMetaDataLogger.t:codon" spec="beast.base.spec.evolution.TreeWithMetaDataLogger" tree="@Tree.t:codon"/>
         </logger>
     </run>
 

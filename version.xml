@@ -1,6 +1,6 @@
-<package name='CodonSubstModels' version="2.0.1">
-        <depends on='BEAST.base' atleast='2.7.2'/>
-        <depends on='BEAST.app' atleast='2.7.2'/>
+<package name='CodonSubstModels' version="2.1.0">
+        <depends on='BEAST.base' atleast='2.8.0'/>
+        <depends on='BEAST.app' atleast='2.8.0'/>
 
     <service type="beast.base.core.BEASTInterface">
         <provider classname="codonmodels.app.beauti.CodonAlignmentProvider"/>
@@ -24,12 +24,6 @@
         <provider classname="codonmodels.evolution.tree.NodeStatesArray"/>
         <provider classname="codonmodels.evolution.tree.NodeStatesLogger"/>
         <provider classname="codonmodels.util.Report"/>
-        <provider classname="codonmodels.ApproximateSubstModel"/>
-        <provider classname="codonmodels.ApproxP_dist_CubicSpline"/>
-        <provider classname="codonmodels.ApproxP_dist_Piecewise"/>
-        <provider classname="codonmodels.ApproxP_dist_Polynomial"/>
-        <provider classname="codonmodels.CodonFrequencies"/>
-        <provider classname="codonmodels.CodonSubstitutionModel"/>
         <provider classname="codonmodels.M0Model"/>
         <provider classname="codonmodels.GeneralCodonFrequencies"/>
         <provider classname="codonmodels.GeneralCodonSubstitutionModel"/>
@@ -39,10 +33,6 @@
 
     <service type="beast.base.evolution.datatype.DataType">
         <provider classname="codonmodels.evolution.datatype.Codon"/>
-    </service>
-
-    <service type="beastfx.app.inputeditor.InputEditor">
-        <provider classname="codonmodels.app.beauti.CodonFrequenciesInputEditor"/>
     </service>
 
 

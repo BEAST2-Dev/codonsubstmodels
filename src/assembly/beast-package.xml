@@ -1,0 +1,55 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
+    <id>beast-package</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <!-- version.xml from project root -->
+    <files>
+        <file>
+            <source>${project.basedir}/version.xml</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <!-- Source JAR at top level (BEAST convention: PKG_NAME.src.jar) -->
+        <file>
+            <source>${project.build.directory}/${project.build.finalName}-sources.jar</source>
+            <destName>${beast.pkg.name}.src.jar</destName>
+            <outputDirectory>/</outputDirectory>
+        </file>
+    </files>
+
+    <!-- Module JAR only (BEAST core, JavaFX and their transitive deps are provided by the runtime) -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <scope>runtime</scope>
+            <includes>
+                <include>io.github.beast2-dev:codonsubstmodels</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <!-- fxtemplates/ (module-namespaced resource path) -->
+        <fileSet>
+            <directory>${project.basedir}/src/main/resources/codonmodels/fxtemplates</directory>
+            <outputDirectory>/fxtemplates</outputDirectory>
+        </fileSet>
+        <!-- examples/ stays at the project root; ship the XMLs and data, not run output -->
+        <fileSet>
+            <directory>${project.basedir}/examples</directory>
+            <outputDirectory>/examples</outputDirectory>
+            <excludes>
+                <exclude>*.log</exclude>
+                <exclude>*.trees</exclude>
+                <exclude>*.screen.txt</exclude>
+                <exclude>*.state</exclude>
+                <exclude>todo/**</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+</assembly>

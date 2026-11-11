@@ -37,8 +37,11 @@ for example:
 
 ```xml
 <data id="codon.alignment" data="@alignment" dataType="codon" 
-      geneticCode="vertebrateMitochondrial" spec="CodonAlignment"/>
+      geneticCode="vertebrateMitochondrial" spec="codonmodels.evolution.alignment.CodonAlignment"/>
 ```
+
+The XML root element must declare `version="2.8"`, and parameters and core models use the
+BEAST 2.8 `beast.base.spec.*` classes, as in the snippets below and in `examples/`.
 
 The attribute _geneticCode_ includes "universal", "vertebrateMitochondrial", 
 "yeast", "moldProtozoanMitochondrial", "mycoplasma", "invertebrateMitochondrial", 
@@ -46,24 +49,16 @@ The attribute _geneticCode_ includes "universal", "vertebrateMitochondrial",
 "alternativeYeast", "ascidianMitochondrial", "flatwormMitochondrial", 
 "blepharismaNuclear", "noStops".
 
-If the sequences contain partial nucleotide ambiguities in the code, such as -TA,
-then turn off the flag _unknownCodeException_ to replace any unmapped triplets to ---.
-
-```xml
-<data id="codon.alignment" data="@alignment" dataType="codon" 
-      geneticCode="vertebrateMitochondrial" spec="CodonAlignment" unknownCodeException="false"/>
-```
-
 The xml to use __M0__ looks like:
 
 ```xml
-<parameter id="m0.omega" value="0.04484"/>
-<parameter id="m0.kappa" value="20.41545"/>
+<parameter id="m0.omega" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="NonNegativeReal" value="0.04484"/>
+<parameter id="m0.kappa" spec="beast.base.spec.inference.parameter.RealScalarParam" domain="PositiveReal" value="20.41545"/>
 
 <substModel spec="codonmodels.M0Model" id="m0" verbose="true">
     <omega idref="m0.omega"/>
     <kappa idref="m0.kappa"/>
-    <frequencies id="m0.freqs" spec="CodonFrequencies" pi="F3X4">
+    <frequencies id="m0.freqs" spec="codonmodels.CodonFrequencies" pi="F3X4">
         <data idref="codon.alignment"/>
     </frequencies>
 </substModel>
@@ -71,12 +66,12 @@ The xml to use __M0__ looks like:
 
 Note: the tree likelihood has to use the codon alignment not the nucleotide alignment.
 
-```xml   
-<distribution id="treeLikelihood" spec="ThreadedTreeLikelihood">
+```xml
+<distribution id="treeLikelihood" spec="beast.base.spec.evolution.likelihood.ThreadedTreeLikelihood">
      <data name="data" idref="codon.alignment"/>
      <tree name="tree" idref="tree"/>
      <siteModel name="siteModel" idref="siteModel"/>
-     <branchRateModel id="StrictClock.m0" spec="StrictClockModel" clock.rate="@clockRate"/>
+     <branchRateModel id="StrictClock.m0" spec="beast.base.spec.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
 </distribution>
 ```
 
